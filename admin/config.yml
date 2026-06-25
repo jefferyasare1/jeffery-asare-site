@@ -1,6 +1,5 @@
 backend:
-  name: github
-  repo: jefferyasare1/jeffery-asare-site
+  name: git-gateway
   branch: main
 
 media_folder: "images"
