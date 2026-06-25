@@ -1,0 +1,70 @@
+backend:
+  name: github
+  repo: jefferyasare1/jeffery-asare-site
+  branch: main
+
+media_folder: "images"
+public_folder: "images"
+
+media_library:
+  name: cloudinary
+  config:
+    cloud_name: dnayq60ze
+    api_key: "176594188333811"
+
+collections:
+  - name: "portfolio"
+    label: "Portfolio"
+    folder: "_data/portfolio"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Series", name: "series", widget: "select", options: ["random-stories", "portraits", "eclipse", "abstract"]}
+      - {label: "Location", name: "loc", widget: "string"}
+      - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
+      - {label: "Photo", name: "img", widget: "image"}
+      - {label: "Description", name: "desc", widget: "text"}
+      - {label: "Device", name: "device", widget: "string", default: "iPhone 15 Pro"}
+      - {label: "Lens", name: "lens", widget: "string", default: "Main Camera 24mm"}
+      - {label: "Aperture", name: "aperture", widget: "string", required: false}
+      - {label: "Shutter Speed", name: "shutter", widget: "string", required: false}
+      - {label: "ISO", name: "iso", widget: "string", required: false}
+      - {label: "Focal Length", name: "focal", widget: "string", required: false}
+
+  - name: "prints"
+    label: "Shop Prints"
+    folder: "_data/prints"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Series Label", name: "series", widget: "string", hint: "e.g. PORTRAITS OF PLACE"}
+      - {label: "Description", name: "desc", widget: "text"}
+      - {label: "Paper", name: "paper", widget: "string", default: "Hahnemuhle Photo Rag 308gsm"}
+      - {label: "Edition", name: "edition", widget: "string", default: "Edition of 20"}
+      - {label: "Price (GHC)", name: "price", widget: "number"}
+      - {label: "Print Photo", name: "img", widget: "image"}
+      - {label: "Sold Out", name: "soldOut", widget: "boolean", default: false}
+      - label: "Sizes"
+        name: "sizes"
+        widget: "list"
+        default: ["A3 (29.7 x 42 cm)", "A2 (42 x 59.4 cm)"]
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - label: "Hero & General"
+        name: "general"
+        file: "_data/settings/general.json"
+        fields:
+          - {label: "Hero Headline Line 1", name: "hero_line1", widget: "string", default: "Photography"}
+          - {label: "Hero Headline Line 2", name: "hero_line2", widget: "string", default: "is Poetry."}
+          - {label: "Hero Description", name: "hero_desc", widget: "string"}
+          - {label: "Hero Image 1", name: "hero1", widget: "image"}
+          - {label: "Hero Image 2", name: "hero2", widget: "image"}
+          - {label: "Hero Image 3", name: "hero3", widget: "image"}
+          - {label: "Hero Image 4", name: "hero4", widget: "image"}
+          - {label: "Hero Image 5", name: "hero5", widget: "image"}
+          - {label: "About Portrait Photo", name: "about_photo", widget: "image"}
+          - {label: "Contact Page Photo", name: "contact_photo", widget: "image"}
