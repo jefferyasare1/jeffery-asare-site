@@ -331,7 +331,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 }
 
 /* ── HERO HEADLINE SPLIT ANIMATION ── */
-.hero-headline-line{display:block;overflow:hidden;}
+.hero-headline-line{display:block;overflow:hidden;padding-bottom:0.15em;margin-bottom:-0.15em;}
 .hero-headline-line span{display:block;animation:heroLineSlidIn .85s cubic-bezier(.22,.61,.36,1) both;}
 .hero-headline-line:nth-child(1) span{animation-delay:.3s;}
 .hero-headline-line:nth-child(2) span{animation-delay:.52s;}
@@ -484,6 +484,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   .cert-modal-close,.cert-print-btn,.cert-print-hint,.inner-nav,.wa-float-tooltip{display:none!important;}
 }
 </style>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
 
@@ -1572,5 +1573,16 @@ if(_hsb){var _badge=document.createElement("span");_badge.className="shop-nav-ba
   </div>
 </div>
 
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", function(user) {
+    if (!user) {
+      window.netlifyIdentity.on("login", function() {
+        document.location.href = "/admin/";
+      });
+    }
+  });
+}
+</script>
 </body>
 </html>
