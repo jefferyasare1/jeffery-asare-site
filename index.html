@@ -821,18 +821,18 @@ document.addEventListener("DOMContentLoaded", function() {
 // TO ADD BEYOND 40: copy any block, give it a new id (rs41 etc)
 // ============================================================
 
-function P(id,series,title,loc,date,img,desc,dev,lens,ap,sh,iso,fl){
+function P(id,series,title,loc,date,img,desc,dev,fmt,ed){
   return {id:id,series:series,title:title,loc:loc,date:date,img:img,desc:desc,
-    tech:[["Device",dev],["Lens",lens],["Aperture",ap],["Shutter",sh],["ISO",iso],["Focal length",fl],["Format","ProRAW"],["Edited in","Lightroom Mobile"]]};
+    tech:[["Device",dev||''],["Format",fmt||'ProRAW'],["Edited in",ed||'Lightroom Mobile']]};
 }
 function PH(id,series,num){
-  return P(id,series,"Untitled","Accra, Ghana","2025.01",id+".jpg","Placeholder  -  update title, location, date and description.","iPhone","Main Camera","","","","");
+  return P(id,series,"Untitled","Accra, Ghana","2025.01",id+".jpg","Placeholder  -  update title, location, date and description.","iPhone");
 }
 
 var PHOTOS = [
   // RANDOM STORIES
-  P("rs1","random-stories","Golden Hour at Labadi","Labadi Beach, Accra","2026.04","rs1.jpg","The Atlantic was unusually still that evening. The fishing boats had returned early, their silhouettes cutting sharp against a sky shifting from gold to rose to deep amber.","iPhone 15 Pro","Main Camera 24mm","f/1.78","1/640s","ISO 80","24mm equiv."),
-  P("rs2","random-stories","Between Stalls","Kaneshie Market, Accra","2025.08","rs2.jpg","A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance. I had about two seconds before the moment was gone.","iPhone 14 Pro","Main Camera 24mm","f/1.78","1/2000s","ISO 50","24mm equiv."),
+  P("rs1","random-stories","Golden Hour at Labadi","Labadi Beach, Accra","2026.04","rs1.jpg","The Atlantic was unusually still that evening. The fishing boats had returned early, their silhouettes cutting sharp against a sky shifting from gold to rose to deep amber.","iPhone 15 Pro"),
+  P("rs2","random-stories","Between Stalls","Kaneshie Market, Accra","2025.08","rs2.jpg","A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance. I had about two seconds before the moment was gone.","iPhone 14 Pro"),
   PH("rs3","random-stories",3),PH("rs4","random-stories",4),PH("rs5","random-stories",5),PH("rs6","random-stories",6),
   PH("rs7","random-stories",7),PH("rs8","random-stories",8),PH("rs9","random-stories",9),PH("rs10","random-stories",10),
   PH("rs11","random-stories",11),PH("rs12","random-stories",12),PH("rs13","random-stories",13),PH("rs14","random-stories",14),
@@ -845,7 +845,7 @@ var PHOTOS = [
   PH("rs39","random-stories",39),PH("rs40","random-stories",40),
 
   // PORTRAITS
-  P("pt1","portraits","Stillness in Jamestown","Jamestown, Accra","2025.11","pt1.jpg","An intimate portrait from historic Jamestown. The light fell across the wall texture and the subject in a way that felt completely unposed.","iPhone 14 Pro","Main Camera 24mm","f/1.78","1/500s","ISO 80","24mm equiv."),
+  P("pt1","portraits","Stillness in Jamestown","Jamestown, Accra","2025.11","pt1.jpg","An intimate portrait from historic Jamestown. The light fell across the wall texture and the subject in a way that felt completely unposed.","iPhone 14 Pro"),
   PH("pt2","portraits",2),PH("pt3","portraits",3),PH("pt4","portraits",4),PH("pt5","portraits",5),
   PH("pt6","portraits",6),PH("pt7","portraits",7),PH("pt8","portraits",8),PH("pt9","portraits",9),PH("pt10","portraits",10),
   PH("pt11","portraits",11),PH("pt12","portraits",12),PH("pt13","portraits",13),PH("pt14","portraits",14),PH("pt15","portraits",15),
@@ -856,8 +856,8 @@ var PHOTOS = [
   PH("pt36","portraits",36),PH("pt37","portraits",37),PH("pt38","portraits",38),PH("pt39","portraits",39),PH("pt40","portraits",40),
 
   // ECLIPSE
-  P("ec1","eclipse","Eclipse I","Studio, Accra","2025.06","ec1.jpg","The first image in the Eclipse of the Self series. A study in the relationship between light, shadow, and the human form.","iPhone 15 Pro","Main Camera 24mm","f/1.78","1/250s","ISO 200","24mm equiv."),
-  P("ec2","eclipse","Eclipse II","Studio, Accra","2025.07","ec2.jpg","Placeholder  -  update description.","iPhone","Main Camera","","","",""),
+  P("ec1","eclipse","Eclipse I","Studio, Accra","2025.06","ec1.jpg","The first image in the Eclipse of the Self series. A study in the relationship between light, shadow, and the human form.","iPhone 15 Pro"),
+  P("ec2","eclipse","Eclipse II","Studio, Accra","2025.07","ec2.jpg","Placeholder  -  update description.","iPhone"),
   PH("ec3","eclipse",3),PH("ec4","eclipse",4),PH("ec5","eclipse",5),PH("ec6","eclipse",6),
   PH("ec7","eclipse",7),PH("ec8","eclipse",8),PH("ec9","eclipse",9),PH("ec10","eclipse",10),
   PH("ec11","eclipse",11),PH("ec12","eclipse",12),PH("ec13","eclipse",13),PH("ec14","eclipse",14),PH("ec15","eclipse",15),
@@ -868,8 +868,8 @@ var PHOTOS = [
   PH("ec36","eclipse",36),PH("ec37","eclipse",37),PH("ec38","eclipse",38),PH("ec39","eclipse",39),PH("ec40","eclipse",40),
 
   // ABSTRACT
-  P("ab1","abstract","Market Weave","Makola Market, Accra","2026.03","ab1.jpg","The overlapping fabrics at Makola create a tapestry of colour and texture. Chaos ordered by commerce.","iPhone 15 Pro","Main Camera 24mm","f/1.78","1/1250s","ISO 50","24mm equiv."),
-  P("ab2","abstract","Kente Geometry","Kumasi, Ashanti","2025.09","ab2.jpg","A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.","iPhone 14 Pro","Macro 13mm","f/1.78","1/320s","ISO 64","13mm equiv."),
+  P("ab1","abstract","Market Weave","Makola Market, Accra","2026.03","ab1.jpg","The overlapping fabrics at Makola create a tapestry of colour and texture. Chaos ordered by commerce.","iPhone 15 Pro"),
+  P("ab2","abstract","Kente Geometry","Kumasi, Ashanti","2025.09","ab2.jpg","A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.","iPhone 14 Pro"),
   PH("ab3","abstract",3),PH("ab4","abstract",4),PH("ab5","abstract",5),PH("ab6","abstract",6),
   PH("ab7","abstract",7),PH("ab8","abstract",8),PH("ab9","abstract",9),PH("ab10","abstract",10),
   PH("ab11","abstract",11),PH("ab12","abstract",12),PH("ab13","abstract",13),PH("ab14","abstract",14),PH("ab15","abstract",15),
@@ -1588,6 +1588,37 @@ fetch('/_data/settings/general.json')
     if(s.contact_photo){ var img=document.getElementById('contactPhotoImg'); if(img){ img.src=s.contact_photo; img.style.display='block'; } }
   })
   .catch(function(){});
+
+// Load portfolio photos from CMS
+fetch('/_data/portfolio.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(!d || !Array.isArray(d.photos) || !d.photos.length) return;
+    PHOTOS = d.photos.map(function(p){
+      var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('p'+Math.random().toString(36).slice(2));
+      return {
+        id: id, series: p.series, title: p.title, loc: p.loc||'', date: p.date||'',
+        img: p.img||'', desc: p.desc||'',
+        tech: [["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]
+      };
+    });
+  }).catch(function(){});
+
+// Load shop prints from CMS
+fetch('/_data/prints.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
+    PRINTS = d.prints.map(function(p){
+      var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('pr'+Math.random().toString(36).slice(2));
+      return {
+        id: id, series: p.series||'', title: p.title, desc: p.desc||'',
+        paper: p.paper||'', edition: p.edition||'', sizes: p.sizes||[],
+        priceGHC: Number(p.price)||0, img: p.img||'', soldOut: !!p.soldOut
+      };
+    });
+    updateShopBadge();
+  }).catch(function(){});
 </script>
 </body>
 </html>

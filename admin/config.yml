@@ -16,42 +16,53 @@ media_library:
 
 collections:
   - name: "portfolio"
-    label: "Portfolio"
-    folder: "_data/portfolio"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - {label: "Title", name: "title", widget: "string"}
-      - {label: "Series", name: "series", widget: "select", options: ["random-stories", "portraits", "eclipse", "abstract"]}
-      - {label: "Location", name: "loc", widget: "string"}
-      - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
-      - {label: "Photo", name: "img", widget: "image"}
-      - {label: "Description", name: "desc", widget: "text"}
-      - {label: "Device", name: "device", widget: "string", default: "iPhone 15 Pro"}
-      - {label: "Lens", name: "lens", widget: "string", default: "Main Camera 24mm"}
-      - {label: "Aperture", name: "aperture", widget: "string", required: false}
-      - {label: "Shutter Speed", name: "shutter", widget: "string", required: false}
-      - {label: "ISO", name: "iso", widget: "string", required: false}
-      - {label: "Focal Length", name: "focal", widget: "string", required: false}
+    label: "Portfolio Photos"
+    files:
+      - label: "All Photos"
+        name: "photos"
+        file: "_data/portfolio.json"
+        fields:
+          - name: photos
+            label: Photos
+            widget: list
+            label_singular: "Photo"
+            summary: "{{fields.title}} — {{fields.series}}"
+            fields:
+              - {label: "Title", name: "title", widget: "string"}
+              - {label: "Series", name: "series", widget: "select", options: ["random-stories", "portraits", "eclipse", "abstract"]}
+              - {label: "Location", name: "loc", widget: "string"}
+              - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
+              - {label: "Photo", name: "img", widget: "image"}
+              - {label: "Description", name: "desc", widget: "text"}
+              - {label: "Device", name: "device", widget: "string", default: "iPhone 15 Pro"}
+              - {label: "Format", name: "format", widget: "string", default: "ProRAW", required: false}
+              - {label: "Edited in", name: "edited_in", widget: "string", default: "Lightroom Mobile", required: false}
 
   - name: "prints"
     label: "Shop Prints"
-    folder: "_data/prints"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - {label: "Title", name: "title", widget: "string"}
-      - {label: "Series Label", name: "series", widget: "string", hint: "e.g. PORTRAITS OF PLACE"}
-      - {label: "Description", name: "desc", widget: "text"}
-      - {label: "Paper", name: "paper", widget: "string", default: "Hahnemuhle Photo Rag 308gsm"}
-      - {label: "Edition", name: "edition", widget: "string", default: "Edition of 20"}
-      - {label: "Price (GHC)", name: "price", widget: "number"}
-      - {label: "Print Photo", name: "img", widget: "image"}
-      - {label: "Sold Out", name: "soldOut", widget: "boolean", default: false}
-      - label: "Sizes"
-        name: "sizes"
-        widget: "list"
-        default: ["A3 (29.7 x 42 cm)", "A2 (42 x 59.4 cm)"]
+    files:
+      - label: "All Prints"
+        name: "prints"
+        file: "_data/prints.json"
+        fields:
+          - name: prints
+            label: Prints
+            widget: list
+            label_singular: "Print"
+            summary: "{{fields.title}} — {{fields.series}}"
+            fields:
+              - {label: "Title", name: "title", widget: "string"}
+              - {label: "Series Label", name: "series", widget: "string", hint: "e.g. PORTRAITS OF PLACE"}
+              - {label: "Description", name: "desc", widget: "text"}
+              - {label: "Paper", name: "paper", widget: "string", default: "Hahnemuhle Photo Rag 308gsm"}
+              - {label: "Edition", name: "edition", widget: "string", default: "Edition of 20"}
+              - {label: "Price (GHC)", name: "price", widget: "number"}
+              - {label: "Print Photo", name: "img", widget: "image"}
+              - {label: "Sold Out", name: "soldOut", widget: "boolean", default: false}
+              - label: "Sizes"
+                name: "sizes"
+                widget: "list"
+                default: ["A3 (29.7 x 42 cm)", "A2 (42 x 59.4 cm)"]
 
   - name: "settings"
     label: "Site Settings"
