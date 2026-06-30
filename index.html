@@ -585,6 +585,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
     <button class="filter-btn" data-filter="eclipse">Eclipse Of The Self</button>
     <button class="filter-btn" data-filter="abstract">Abstract</button>
   </div>
+  <!-- filter buttons are rebuilt from CMS series data on load -->
   <div class="photo-grid" id="photoGrid"></div>
   <div id="port-mini-footer"></div>
 </div>
@@ -917,7 +918,7 @@ function navigate(page) {
   if (t) t.classList.add("active");
   window.scrollTo(0,0);
   injectFooters();
-  if (page==="portfolio") renderPortfolio("all");
+  if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
   if (page==="shop") { renderShop(); updateShopBadge(); }
   setPageTitle(page);
   setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
@@ -971,6 +972,34 @@ function injectFooters(){
 // ============================================================
 var PH_C=["ph-warm","ph-cool","ph-mono","ph-red","ph-gold","ph-grn"];
 var MAX_DISPLAY=20;
+
+// Default series — replaced by CMS data when loaded
+var SERIES_LIST=[
+  {slug:"random-stories",label:"Random Stories"},
+  {slug:"portraits",label:"Portraits"},
+  {slug:"eclipse",label:"Eclipse Of The Self"},
+  {slug:"abstract",label:"Abstract"}
+];
+
+function buildFilterBar(){
+  var fb=document.getElementById("filterBar");
+  if(!fb) return;
+  var active=fb.querySelector(".filter-btn.active");
+  var currentFilter=active ? active.dataset.filter : "all";
+  fb.innerHTML="";
+  var allBtn=document.createElement("button");
+  allBtn.className="filter-btn"+(currentFilter==="all"?" active":"");
+  allBtn.dataset.filter="all";
+  allBtn.textContent="All";
+  fb.appendChild(allBtn);
+  SERIES_LIST.forEach(function(s){
+    var btn=document.createElement("button");
+    btn.className="filter-btn"+(currentFilter===s.slug?" active":"");
+    btn.dataset.filter=s.slug;
+    btn.textContent=s.label;
+    fb.appendChild(btn);
+  });
+}
 
 function renderPortfolio(filter, animate){
   var pool=filter==="all"?PHOTOS:PHOTOS.filter(function(p){ return p.series===filter; });
@@ -1588,6 +1617,16 @@ fetch('/_data/settings/general.json')
     if(s.contact_photo){ var img=document.getElementById('contactPhotoImg'); if(img){ img.src=s.contact_photo; img.style.display='block'; } }
   })
   .catch(function(){});
+
+// Load portfolio series from CMS
+fetch('/_data/settings/series.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(d && Array.isArray(d.series) && d.series.length){
+      SERIES_LIST=d.series;
+      buildFilterBar();
+    }
+  }).catch(function(){});
 
 // Load portfolio page text
 fetch('/_data/settings/portfolio-page.json')

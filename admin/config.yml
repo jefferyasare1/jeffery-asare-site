@@ -29,7 +29,7 @@ collections:
             summary: "{{fields.title}} — {{fields.series}}"
             fields:
               - {label: "Title", name: "title", widget: "string"}
-              - {label: "Series", name: "series", widget: "select", options: ["random-stories", "portraits", "eclipse", "abstract"]}
+              - {label: "Series", name: "series", widget: "string", hint: "Must match a series slug from Site Settings → Portfolio Series (e.g. random-stories)"}
               - {label: "Location", name: "loc", widget: "string"}
               - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
               - {label: "Photo", name: "img", widget: "image"}
@@ -113,6 +113,19 @@ collections:
         fields:
           - {label: "Shop Title", name: "shop_title", widget: "string"}
           - {label: "Shop Description", name: "shop_desc", widget: "text"}
+
+      - label: "Portfolio Series"
+        name: "series"
+        file: "_data/settings/series.json"
+        fields:
+          - name: series
+            label: Series
+            widget: list
+            label_singular: "Series"
+            summary: "{{fields.label}} ({{fields.slug}})"
+            fields:
+              - {label: "Display Name", name: "label", widget: "string", hint: "What visitors see, e.g. Random Stories"}
+              - {label: "Slug", name: "slug", widget: "string", hint: "Lowercase, dashes only, e.g. random-stories"}
 
       - label: "Contact Info"
         name: "contact-info"
