@@ -527,39 +527,39 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   </nav>
   <div class="hero">
     <div class="hero-slide active">
-      <img src="hero-1.jpg" alt="" onerror="this.style.display='none'">
+      <img id="heroImg1" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph"></div>
-      <div class="hero-slide-ph-label">Add hero-1.jpg via Netlify</div>
+      <div class="hero-slide-ph-label">Add Hero Image 1 via CMS</div>
     </div>
     <div class="hero-slide">
-      <img src="hero-2.jpg" alt="" onerror="this.style.display='none'">
+      <img id="heroImg2" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-2"></div>
-      <div class="hero-slide-ph-label">Add hero-2.jpg via Netlify</div>
+      <div class="hero-slide-ph-label">Add Hero Image 2 via CMS</div>
     </div>
     <div class="hero-slide">
-      <img src="hero-3.jpg" alt="" onerror="this.style.display='none'">
+      <img id="heroImg3" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-3"></div>
-      <div class="hero-slide-ph-label">Add hero-3.jpg via Netlify</div>
+      <div class="hero-slide-ph-label">Add Hero Image 3 via CMS</div>
     </div>
     <div class="hero-slide">
-      <img src="hero-4.jpg" alt="" onerror="this.style.display='none'">
+      <img id="heroImg4" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-4"></div>
-      <div class="hero-slide-ph-label">Add hero-4.jpg via Netlify</div>
+      <div class="hero-slide-ph-label">Add Hero Image 4 via CMS</div>
     </div>
     <div class="hero-slide">
-      <img src="hero-5.jpg" alt="" onerror="this.style.display='none'">
+      <img id="heroImg5" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-5"></div>
-      <div class="hero-slide-ph-label">Add hero-5.jpg via Netlify</div>
+      <div class="hero-slide-ph-label">Add Hero Image 5 via CMS</div>
     </div>
     <div class="hero-dots" id="heroDots"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <h1 class="hero-headline">
-        <span class="hero-headline-line"><span>Photography</span></span>
-        <span class="hero-headline-line"><span>is Poetry.</span></span>
+        <span class="hero-headline-line"><span id="heroLine1">Photography</span></span>
+        <span class="hero-headline-line"><span id="heroLine2">is Poetry.</span></span>
       </h1>
       <div class="hero-right">
-        <p class="hero-desc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
+        <p class="hero-desc" id="heroDesc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
         <button class="btn-pill" id="heroViewBtn">View the portfolio &#8594;</button>
       </div>
     </div>
@@ -633,7 +633,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
     </div>
     <div>
       <div style="position:relative;">
-        <img src="about-portrait.jpg" alt="Jeffery Asare" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);" onerror="this.style.display='none';document.getElementById('aboutPortraitPh').style.display='flex';">
+        <img id="aboutPortraitImg" src="" alt="Jeffery Asare" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);" onerror="this.style.display='none';document.getElementById('aboutPortraitPh').style.display='flex';">
         <div class="about-photo-ph" id="aboutPortraitPh" style="display:none;width:100%;aspect-ratio:3/4;background:var(--warm);"><span>Add images/about-portrait.jpg to your folder</span></div>
       </div>
       <p class="about-caption">Jeffery Asare, Accra, 2026.</p>
@@ -721,7 +721,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
       </form>
     </div>
     <div class="contact-right-inner">
-      <div><img src="contact-photo.jpg" alt="" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--warm);border-radius:4px;" onerror="this.style.display='none'"></div>
+      <div><img id="contactPhotoImg" src="" alt="" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--warm);border-radius:4px;" onerror="this.style.display='none'"></div>
       <div class="contact-details">
         <div><div class="contact-detail-label">Email</div><div class="contact-detail-val">hello@jefferyasare.com</div></div>
         <div><div class="contact-detail-label">Instagram</div><div class="contact-detail-val"><a href="https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh" target="_blank" style="color:inherit;text-decoration:none;">@jeffasare</a></div></div>
@@ -1573,15 +1573,21 @@ if(_hsb){var _badge=document.createElement("span");_badge.className="shop-nav-ba
 </div>
 
 <script>
-if (window.netlifyIdentity) {
-  window.netlifyIdentity.on("init", function(user) {
-    if (!user) {
-      window.netlifyIdentity.on("login", function() {
-        document.location.href = "/admin/";
-      });
-    }
-  });
-}
+// Load site settings from CMS
+fetch('/_data/settings/general.json')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    if(s.hero_line1){ var el=document.getElementById('heroLine1'); if(el) el.textContent=s.hero_line1; }
+    if(s.hero_line2){ var el=document.getElementById('heroLine2'); if(el) el.textContent=s.hero_line2; }
+    if(s.hero_desc){ var el=document.getElementById('heroDesc'); if(el) el.textContent=s.hero_desc; }
+    var imgs=[s.hero1,s.hero2,s.hero3,s.hero4,s.hero5];
+    imgs.forEach(function(url,i){
+      if(url){ var img=document.getElementById('heroImg'+(i+1)); if(img){ img.src=url; img.style.display='block'; } }
+    });
+    if(s.about_photo){ var img=document.getElementById('aboutPortraitImg'); if(img){ img.src=s.about_photo; img.style.display='block'; } }
+    if(s.contact_photo){ var img=document.getElementById('contactPhotoImg'); if(img){ img.src=s.contact_photo; img.style.display='block'; } }
+  })
+  .catch(function(){});
 </script>
 </body>
 </html>
