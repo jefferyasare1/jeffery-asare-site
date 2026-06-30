@@ -17,26 +17,28 @@ media_library:
 collections:
   - name: "portfolio"
     label: "Portfolio Photos"
-    files:
-      - label: "All Photos"
-        name: "photos"
-        file: "_data/portfolio.json"
+    folder: "_data/portfolio"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "label"
+    summary: "{{label}}"
+    fields:
+      - {label: "Series Name", name: "label", widget: "string", hint: "Display name, e.g. Random Stories"}
+      - {label: "Series Slug", name: "slug", widget: "string", hint: "Lowercase with dashes, e.g. random-stories — must also be added in Site Settings → Portfolio Series"}
+      - name: photos
+        label: Photos
+        widget: list
+        label_singular: "Photo"
+        summary: "{{fields.title}}"
         fields:
-          - name: photos
-            label: Photos
-            widget: list
-            label_singular: "Photo"
-            summary: "{{fields.title}} — {{fields.series}}"
-            fields:
-              - {label: "Title", name: "title", widget: "string"}
-              - {label: "Series", name: "series", widget: "string", hint: "Must match a series slug from Site Settings → Portfolio Series (e.g. random-stories)"}
-              - {label: "Location", name: "loc", widget: "string"}
-              - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
-              - {label: "Photo", name: "img", widget: "image"}
-              - {label: "Description", name: "desc", widget: "text"}
-              - {label: "Device", name: "device", widget: "string", default: "iPhone 15 Pro"}
-              - {label: "Format", name: "format", widget: "string", default: "ProRAW", required: false}
-              - {label: "Edited in", name: "edited_in", widget: "string", default: "Lightroom Mobile", required: false}
+          - {label: "Title", name: "title", widget: "string"}
+          - {label: "Location", name: "loc", widget: "string"}
+          - {label: "Date", name: "date", widget: "string", hint: "Format: 2026.06"}
+          - {label: "Photo", name: "img", widget: "image"}
+          - {label: "Description", name: "desc", widget: "text"}
+          - {label: "Device", name: "device", widget: "string", default: "iPhone 15 Pro"}
+          - {label: "Format", name: "format", widget: "string", default: "ProRAW", required: false}
+          - {label: "Edited in", name: "edited_in", widget: "string", default: "Lightroom Mobile", required: false}
 
   - name: "prints"
     label: "Shop Prints"
