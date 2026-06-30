@@ -576,7 +576,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   </div>
   <div class="page-header">
     <h1>Portfolio</h1>
-    <p>Every image in this portfolio was shot on an iPhone or a Google Pixel and edited entirely on a phone. Some are quiet observations. Others are deliberate reimaginings of a scene. All of them started with something that stopped me long enough to reach for my pocket.</p>
+    <p id="portfolioDesc">Every image in this portfolio was shot on an iPhone or a Google Pixel and edited entirely on a phone. Some are quiet observations. Others are deliberate reimaginings of a scene. All of them started with something that stopped me long enough to reach for my pocket.</p>
   </div>
   <div class="filter-bar" id="filterBar">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -624,11 +624,11 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
     <div>
       <h1 class="about-headline" id="aboutHeadline"><span class="word-reveal" id="wr1"><span>Something</span></span> <span class="word-reveal" id="wr2"><span>stops</span></span> <span class="word-reveal" id="wr3"><span>me.</span></span><br><span style="color:var(--muted)"><span class="word-reveal" id="wr4"><span>Every</span></span> <span class="word-reveal" id="wr5"><span>time.</span></span></span></h1>
       <div class="about-bio">
-        <p>My name is Jeffery Asare. I am a photographer based in Accra, Ghana — working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
-        <p>I do not shoot with intention the way most photographers describe it — with mood boards and pre-visualised frames. I shoot because something stops me. A face. A shadow. The way a wall holds colour at the end of the day.</p>
-        <p>My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I shoot on iPhone. I edit in Lightroom Mobile. I am not interested in what the camera cannot do — only in what I have not yet figured out how to see.</p>
-        <p>I want my photographs to slow people down — not to inspire in the broad, motivational sense, but to create a moment of pause. A second look. The feeling that something familiar has just revealed itself as strange, or something strange as deeply familiar.</p>
-        <p>My practice is built around the smartphone as a serious creative tool. I work with available light, ordinary scenes, and the kind of access that only comes from not carrying equipment. What I am after is not the extraordinary moment — it is the extraordinary quality hidden inside the everyday one.</p>
+        <p id="aboutBio1">My name is Jeffery Asare. I am a photographer based in Accra, Ghana — working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
+        <p id="aboutBio2">I do not shoot with intention the way most photographers describe it — with mood boards and pre-visualised frames. I shoot because something stops me. A face. A shadow. The way a wall holds colour at the end of the day.</p>
+        <p id="aboutBio3">My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I shoot on iPhone. I edit in Lightroom Mobile. I am not interested in what the camera cannot do — only in what I have not yet figured out how to see.</p>
+        <p id="aboutBio4">I want my photographs to slow people down — not to inspire in the broad, motivational sense, but to create a moment of pause. A second look. The feeling that something familiar has just revealed itself as strange, or something strange as deeply familiar.</p>
+        <p id="aboutBio5">My practice is built around the smartphone as a serious creative tool. I work with available light, ordinary scenes, and the kind of access that only comes from not carrying equipment. What I am after is not the extraordinary moment — it is the extraordinary quality hidden inside the everyday one.</p>
       </div>
     </div>
     <div>
@@ -636,26 +636,26 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
         <img id="aboutPortraitImg" src="" alt="Jeffery Asare" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);" onerror="this.style.display='none';document.getElementById('aboutPortraitPh').style.display='flex';">
         <div class="about-photo-ph" id="aboutPortraitPh" style="display:none;width:100%;aspect-ratio:3/4;background:var(--warm);"><span>Add images/about-portrait.jpg to your folder</span></div>
       </div>
-      <p class="about-caption">Jeffery Asare, Accra, 2026.</p>
+      <p class="about-caption" id="aboutCaption">Jeffery Asare, Accra, 2026.</p>
     </div>
   </div>
   <div class="about-cols">
     <div>
       <div class="about-col-label">Location</div>
-      <h2 class="about-col-heading">Accra holds<br>everything.</h2>
+      <h2 class="about-col-heading" id="aboutLocHeading">Accra holds<br>everything.</h2>
       <div class="about-col-body">
-        <p>Ghana does not ask to be photographed. It simply exists — loud and textured and completely indifferent to the lens. That is what makes it worth photographing.</p>
-        <p>The light in Accra is specific. Generous and golden in the early morning, then sharp and exposing by noon, then soft in the evening in a way that forgives everything. I have been shooting here for years and I am still learning what this city looks like.</p>
-        <p>I do not travel to exotic locations looking for striking images. The ordinary streets here contain more than I have managed to photograph. That is enough for a lifetime.</p>
+        <p id="aboutLocP1">Ghana does not ask to be photographed. It simply exists — loud and textured and completely indifferent to the lens. That is what makes it worth photographing.</p>
+        <p id="aboutLocP2">The light in Accra is specific. Generous and golden in the early morning, then sharp and exposing by noon, then soft in the evening in a way that forgives everything. I have been shooting here for years and I am still learning what this city looks like.</p>
+        <p id="aboutLocP3">I do not travel to exotic locations looking for striking images. The ordinary streets here contain more than I have managed to photograph. That is enough for a lifetime.</p>
       </div>
     </div>
     <div>
       <div class="about-col-label">Philosophy</div>
-      <h2 class="about-col-heading">The pause<br>is the work.</h2>
+      <h2 class="about-col-heading" id="aboutPhilHeading">The pause<br>is the work.</h2>
       <div class="about-col-body">
-        <p>Most people walk past things. I am interested in the moment just before that — the half-second where something registers but has not yet been named. That is where I try to make photographs. I use a phone because it removes the gap between noticing and capturing. There is no setup, no adjustment, no signal to the subject that something is being recorded. The tool disappears and what remains is just attention. This is not a workaround. I work professionally with full equipment. I choose the phone because I believe in what it makes possible — a closeness, an honesty, an invisibility that a camera bag cannot buy.</p>
-        <p>I edit intentionally, and entirely on my phone. Some images are lightly retouched — a small correction, nothing more. Others are taken somewhere else entirely: colours shifted, mood reconstructed, the scene reimagined into something truer to how it felt than how it looked. I do not think of this as manipulation. I think of it as finishing the sentence the moment started. The entire process — from capture to final image — never leaves my hands.</p>
-        <p>I shoot mostly in Ghana — in Accra, along the coast, in the north, in the markets and the side streets and the places that do not make it onto anyone's itinerary. Not because the rest of the world is less interesting, but because there is still so much here that has not been looked at slowly enough. That is the work. Looking slowly. Looking again. Trusting that the ordinary is never just ordinary — it is only under-observed.</p>
+        <p id="aboutPhilP1">Most people walk past things. I am interested in the moment just before that — the half-second where something registers but has not yet been named. That is where I try to make photographs. I use a phone because it removes the gap between noticing and capturing. There is no setup, no adjustment, no signal to the subject that something is being recorded. The tool disappears and what remains is just attention. This is not a workaround. I work professionally with full equipment. I choose the phone because I believe in what it makes possible — a closeness, an honesty, an invisibility that a camera bag cannot buy.</p>
+        <p id="aboutPhilP2">I edit intentionally, and entirely on my phone. Some images are lightly retouched — a small correction, nothing more. Others are taken somewhere else entirely: colours shifted, mood reconstructed, the scene reimagined into something truer to how it felt than how it looked. I do not think of this as manipulation. I think of it as finishing the sentence the moment started. The entire process — from capture to final image — never leaves my hands.</p>
+        <p id="aboutPhilP3">I shoot mostly in Ghana — in Accra, along the coast, in the north, in the markets and the side streets and the places that do not make it onto anyone's itinerary. Not because the rest of the world is less interesting, but because there is still so much here that has not been looked at slowly enough. That is the work. Looking slowly. Looking again. Trusting that the ordinary is never just ordinary — it is only under-observed.</p>
       </div>
     </div>
   </div>
@@ -680,8 +680,8 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
     <button class="ham-btn" id="shopHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="page-header">
-    <h1>Fine Art Prints</h1>
-    <p>Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
+    <h1 id="shopTitle">Fine Art Prints</h1>
+    <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
   </div>
   <div class="shop-list" id="shopList"></div>
   <div id="shop-mini-footer"></div>
@@ -697,7 +697,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   <div class="contact-body">
     <div>
       <h1>Get in touch</h1>
-      <p class="contact-sub">Inquiries about prints, commissions, exhibitions, or just to say hello. I read every message personally.</p>
+      <p class="contact-sub" id="contactSub">Inquiries about prints, commissions, exhibitions, or just to say hello. I read every message personally.</p>
       <form class="form" id="contactForm" action="#" method="post">
         <div class="field-row-2">
           <div><label class="field-label">Name</label><input class="field-input" type="text" name="name" placeholder="Your name" required></div>
@@ -723,10 +723,10 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
     <div class="contact-right-inner">
       <div><img id="contactPhotoImg" src="" alt="" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--warm);border-radius:4px;" onerror="this.style.display='none'"></div>
       <div class="contact-details">
-        <div><div class="contact-detail-label">Email</div><div class="contact-detail-val">hello@jefferyasare.com</div></div>
-        <div><div class="contact-detail-label">Instagram</div><div class="contact-detail-val"><a href="https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh" target="_blank" style="color:inherit;text-decoration:none;">@jeffasare</a></div></div>
+        <div><div class="contact-detail-label">Email</div><div class="contact-detail-val" id="contactEmail">hello@jefferyasare.com</div></div>
+        <div><div class="contact-detail-label">Instagram</div><div class="contact-detail-val"><a id="contactInstagram" href="https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh" target="_blank" style="color:inherit;text-decoration:none;">@jeffasare</a></div></div>
       </div>
-      <div class="contact-response">&#9200; Typically within 24 hours</div>
+      <div class="contact-response" id="contactResponse">&#9200; Typically within 24 hours</div>
     </div>
   </div>
   <div id="contact-mini-footer"></div>
@@ -1588,6 +1588,48 @@ fetch('/_data/settings/general.json')
     if(s.contact_photo){ var img=document.getElementById('contactPhotoImg'); if(img){ img.src=s.contact_photo; img.style.display='block'; } }
   })
   .catch(function(){});
+
+// Load portfolio page text
+fetch('/_data/settings/portfolio-page.json')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    if(s.portfolio_desc){ var el=document.getElementById('portfolioDesc'); if(el) el.textContent=s.portfolio_desc; }
+  }).catch(function(){});
+
+// Load about page text
+fetch('/_data/settings/about-page.json')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    var map={aboutBio1:'about_bio1',aboutBio2:'about_bio2',aboutBio3:'about_bio3',aboutBio4:'about_bio4',aboutBio5:'about_bio5',
+      aboutCaption:'about_caption',aboutLocHeading:'about_loc_heading',
+      aboutLocP1:'about_loc_p1',aboutLocP2:'about_loc_p2',aboutLocP3:'about_loc_p3',
+      aboutPhilHeading:'about_phil_heading',
+      aboutPhilP1:'about_phil_p1',aboutPhilP2:'about_phil_p2',aboutPhilP3:'about_phil_p3'};
+    Object.keys(map).forEach(function(id){
+      var val=s[map[id]]; if(val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+    });
+  }).catch(function(){});
+
+// Load shop page text
+fetch('/_data/settings/shop-page.json')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    if(s.shop_title){ var el=document.getElementById('shopTitle'); if(el) el.textContent=s.shop_title; }
+    if(s.shop_desc){ var el=document.getElementById('shopDesc'); if(el) el.textContent=s.shop_desc; }
+  }).catch(function(){});
+
+// Load contact info
+fetch('/_data/settings/contact-info.json')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    if(s.contact_sub){ var el=document.getElementById('contactSub'); if(el) el.textContent=s.contact_sub; }
+    if(s.contact_email){ var el=document.getElementById('contactEmail'); if(el) el.textContent=s.contact_email; }
+    if(s.contact_instagram_handle && s.contact_instagram_url){
+      var el=document.getElementById('contactInstagram');
+      if(el){ el.textContent=s.contact_instagram_handle; el.href=s.contact_instagram_url; }
+    }
+    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='⏰ '+s.contact_response; }
+  }).catch(function(){});
 
 // Load portfolio photos from CMS
 fetch('/_data/portfolio.json')

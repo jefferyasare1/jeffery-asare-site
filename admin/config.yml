@@ -81,3 +81,45 @@ collections:
           - {label: "Hero Image 5", name: "hero5", widget: "image"}
           - {label: "About Portrait Photo", name: "about_photo", widget: "image"}
           - {label: "Contact Page Photo", name: "contact_photo", widget: "image"}
+
+      - label: "Portfolio Page"
+        name: "portfolio-page"
+        file: "_data/settings/portfolio-page.json"
+        fields:
+          - {label: "Portfolio Description", name: "portfolio_desc", widget: "text"}
+
+      - label: "About Page"
+        name: "about-page"
+        file: "_data/settings/about-page.json"
+        fields:
+          - {label: "Bio — Paragraph 1", name: "about_bio1", widget: "text"}
+          - {label: "Bio — Paragraph 2", name: "about_bio2", widget: "text"}
+          - {label: "Bio — Paragraph 3", name: "about_bio3", widget: "text"}
+          - {label: "Bio — Paragraph 4", name: "about_bio4", widget: "text"}
+          - {label: "Bio — Paragraph 5", name: "about_bio5", widget: "text"}
+          - {label: "Photo Caption", name: "about_caption", widget: "string"}
+          - {label: "Location Section Heading", name: "about_loc_heading", widget: "string"}
+          - {label: "Location — Paragraph 1", name: "about_loc_p1", widget: "text"}
+          - {label: "Location — Paragraph 2", name: "about_loc_p2", widget: "text"}
+          - {label: "Location — Paragraph 3", name: "about_loc_p3", widget: "text"}
+          - {label: "Philosophy Section Heading", name: "about_phil_heading", widget: "string"}
+          - {label: "Philosophy — Paragraph 1", name: "about_phil_p1", widget: "text"}
+          - {label: "Philosophy — Paragraph 2", name: "about_phil_p2", widget: "text"}
+          - {label: "Philosophy — Paragraph 3", name: "about_phil_p3", widget: "text"}
+
+      - label: "Shop Page"
+        name: "shop-page"
+        file: "_data/settings/shop-page.json"
+        fields:
+          - {label: "Shop Title", name: "shop_title", widget: "string"}
+          - {label: "Shop Description", name: "shop_desc", widget: "text"}
+
+      - label: "Contact Info"
+        name: "contact-info"
+        file: "_data/settings/contact-info.json"
+        fields:
+          - {label: "Sub Text", name: "contact_sub", widget: "text"}
+          - {label: "Email Address", name: "contact_email", widget: "string"}
+          - {label: "Instagram Handle", name: "contact_instagram_handle", widget: "string", hint: "e.g. @jeffasare"}
+          - {label: "Instagram URL", name: "contact_instagram_url", widget: "string"}
+          - {label: "Response Time", name: "contact_response", widget: "string", hint: "e.g. Typically within 24 hours"}
