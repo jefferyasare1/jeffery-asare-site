@@ -105,6 +105,11 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .about-cta-left h2{font-family:var(--title);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:600;letter-spacing:-.02em;margin-bottom:.5rem;}
 .about-cta-left p{font-size:13px;color:var(--muted);max-width:380px;line-height:1.7;}
 .about-cta-btns{display:flex;gap:.8rem;flex-shrink:0;}
+.about-shop-strip{background:var(--ink);padding:2.5rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:2rem;}
+.about-shop-strip-text p:first-child{font-family:var(--title);font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:600;letter-spacing:-.02em;color:#fff;margin-bottom:.3rem;}
+.about-shop-strip-text p:last-child{font-size:12px;color:rgba(255,255,255,.45);letter-spacing:.01em;}
+.btn-white{display:inline-flex;align-items:center;gap:.5rem;background:#fff;color:var(--ink);border:none;border-radius:999px;padding:.65rem 1.4rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:opacity .2s;flex-shrink:0;}
+.btn-white:hover{opacity:.85;}
 .btn-dark{display:inline-flex;align-items:center;gap:.5rem;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:opacity .2s;}
 .btn-dark:hover{opacity:.8;}
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
@@ -184,6 +189,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   .shop-item{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .about-cta{flex-direction:column;align-items:flex-start;}
+  .about-shop-strip{flex-direction:column;align-items:flex-start;}
   .detail-body{grid-template-columns:1fr;}
   .hero-content{flex-direction:column;align-items:flex-start;}
   .hero-right{text-align:left;}
@@ -699,6 +705,13 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <button class="btn-outline" id="aboutGetInTouchBtn">Get in touch</button>
     </div>
   </div>
+  <div class="about-shop-strip">
+    <div class="about-shop-strip-text">
+      <p>Own a piece of the work.</p>
+      <p>Limited edition archival prints &middot; Signed &amp; numbered &middot; Ships worldwide</p>
+    </div>
+    <button class="btn-white" id="aboutShopPrintsBtn">Shop prints &#8594;</button>
+  </div>
   <div id="about-footer"></div>
 </div>
 
@@ -963,7 +976,7 @@ function bind(id,page){ var el=document.getElementById(id); if(el) el.addEventLi
 bind("homeLogoBtn","home");bind("homePortBtn","portfolio");bind("homeAboutBtn","about");bind("homeShopBtn","shop");bind("homeContactBtn","contact");bind("heroViewBtn","portfolio");
 bind("portLogoBtn","home");bind("portAboutBtn","about");bind("portShopBtn","shop");bind("portContactBtn","contact");
 bind("detailLogoBtn","home");bind("detailPortBtn","portfolio");bind("detailAboutBtn","about");bind("detailShopBtn","shop");bind("detailContactBtn","contact");bind("detailBackBtn","portfolio");bind("detailPrintBtn","shop");
-bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn","shop");bind("aboutContactBtn","contact");bind("aboutViewPortBtn","portfolio");bind("aboutGetInTouchBtn","contact");
+bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn","shop");bind("aboutContactBtn","contact");bind("aboutViewPortBtn","portfolio");bind("aboutGetInTouchBtn","contact");bind("aboutShopPrintsBtn","shop");
 bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","about");bind("shopContactBtn","contact");
 bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");
 bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
