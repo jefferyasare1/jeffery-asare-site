@@ -331,6 +331,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .mobile-menu a{font-size:clamp(1.6rem,5vw,2.2rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);text-decoration:none;cursor:pointer;transition:opacity .2s;}
 .mobile-menu a:hover{opacity:.45;}
 .mobile-menu-foot{font-size:12px;color:var(--muted);margin-top:1rem;}
+.mobile-menu-close{position:absolute;top:1rem;right:var(--pad);background:none;border:none;cursor:pointer;font-size:18px;color:var(--ink);padding:.6rem;line-height:1;opacity:.6;transition:opacity .2s;}
+.mobile-menu-close:hover{opacity:1;}
 @media(max-width:700px){
   .nav-links{display:none;}
   .ham-btn{display:flex;}
@@ -525,6 +527,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 
 <!-- MOBILE MENU OVERLAY -->
 <div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">&#10005;</button>
   <a id="mmPortBtn">Portfolio</a>
   <a id="mmAboutBtn">About</a>
   <a id="mmShopBtn">Shop</a>
@@ -1352,6 +1355,8 @@ function closeMobileMenu(){
   var el=document.getElementById(id);
   if(el) el.addEventListener("click",function(){ mobileMenu && mobileMenu.classList.contains("open")?closeMobileMenu():openMobileMenu(); });
 });
+var mmCloseBtn=document.getElementById("mobileMenuClose");
+if(mmCloseBtn) mmCloseBtn.addEventListener("click",closeMobileMenu);
 ["mmPortBtn","mmAboutBtn","mmShopBtn","mmContactBtn"].forEach(function(id){
   var el=document.getElementById(id);
   if(!el) return;
