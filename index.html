@@ -198,16 +198,34 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
    ANIMATIONS & TRANSITIONS
    ===================================================== */
 
-/* Page fade transitions */
-.page{display:none;opacity:0;}
-.page.active{display:block;animation:pageFadeIn .45s ease forwards;}
-@keyframes pageFadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+/* ── PAGE TRANSITION OVERLAY ── */
+#pageTransition{position:fixed;inset:0;background:#0d0c0b;z-index:9000;opacity:0;pointer-events:none;transition:opacity .22s ease;}
+#pageTransition.fade-in{opacity:.7;pointer-events:all;}
 
-/* Hero content entrance */
-.hero-headline{animation:heroSlideUp .9s cubic-bezier(.22,.61,.36,1) .3s both;}
-.hero-desc{animation:heroSlideUp .9s cubic-bezier(.22,.61,.36,1) .5s both;}
-.hero-right .btn-pill{animation:heroSlideUp .9s cubic-bezier(.22,.61,.36,1) .65s both;}
-@keyframes heroSlideUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+/* ── PAGE FADE IN ── */
+.page{display:none;opacity:0;}
+.page.active{display:block;animation:pageFadeIn .5s cubic-bezier(.22,.61,.36,1) forwards;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HERO ENTRANCE ── */
+.hero-headline-line{overflow:hidden;display:block;}
+.hero-headline-line span{display:block;animation:heroLineUp 1s cubic-bezier(.22,.61,.36,1) both;}
+.hero-headline-line:nth-child(1) span{animation-delay:.15s;}
+.hero-headline-line:nth-child(2) span{animation-delay:.32s;}
+.hero-desc{animation:heroFadeIn 1s ease .55s both;}
+.hero-right .btn-pill{animation:heroFadeIn 1s ease .75s both;}
+nav{animation:heroFadeIn .8s ease .1s both;}
+@keyframes heroLineUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+@keyframes heroFadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HERO DESCRIPTION ── */
+.hero-desc{font-size:12px;color:rgba(255,255,255,.72);text-shadow:0 1px 12px rgba(0,0,0,.5);max-width:200px;line-height:1.75;letter-spacing:.01em;}
+
+/* ── NAV SCROLL BEHAVIOUR ── */
+nav{transition:background .35s ease,backdrop-filter .35s ease,box-shadow .35s ease;}
+nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(255,255,255,.07);}
+.inner-nav{transition:box-shadow .3s ease,background .3s ease,backdrop-filter .3s ease;}
+.inner-nav.scrolled{background:rgba(252,250,248,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 28px rgba(0,0,0,.07);}
 
 /* Scroll reveal — applied via JS */
 .reveal{opacity:0;transform:translateY(32px);transition:opacity .7s cubic-bezier(.22,.61,.36,1),transform .7s cubic-bezier(.22,.61,.36,1);}
@@ -491,6 +509,9 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 </style>
 </head>
 <body>
+
+<!-- PAGE TRANSITION OVERLAY -->
+<div id="pageTransition"></div>
 
 <!-- LOADING SCREEN -->
 <div id="siteLoader">
@@ -918,15 +939,20 @@ var PRINTS = [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 function navigate(page) {
-  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
-  var t = document.getElementById("page-"+page);
-  if (t) t.classList.add("active");
-  window.scrollTo(0,0);
-  injectFooters();
-  if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
-  if (page==="shop") { renderShop(0); updateShopBadge(); }
-  setPageTitle(page);
-  setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
+  var overlay = document.getElementById("pageTransition");
+  if (overlay) overlay.classList.add("fade-in");
+  setTimeout(function(){
+    document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+    var t = document.getElementById("page-"+page);
+    if (t) t.classList.add("active");
+    window.scrollTo(0,0);
+    injectFooters();
+    if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
+    if (page==="shop") { renderShop(0); updateShopBadge(); }
+    setPageTitle(page);
+    setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
+    if (overlay) { overlay.classList.remove("fade-in"); }
+  }, 220);
 }
 
 function bind(id,page){ var el=document.getElementById(id); if(el) el.addEventListener("click",function(){ navigate(page); }); }
@@ -1567,7 +1593,24 @@ document.addEventListener("keydown",function(e){
 
 // ===========================================================
 // LOADING SCREEN
-// ===========================================================
+// ============================================================
+// NAV SCROLL BEHAVIOUR
+// ============================================================
+(function(){
+  // Hero nav — frosted glass on scroll
+  var heroNav=document.querySelector('#page-home nav');
+  window.addEventListener('scroll',function(){
+    if(heroNav) heroNav.classList.toggle('scrolled', window.scrollY > 60);
+    // Inner navs — elevated on scroll
+    document.querySelectorAll('.inner-nav').forEach(function(n){
+      n.classList.toggle('scrolled', window.scrollY > 10);
+    });
+  },{passive:true});
+})();
+
+// ============================================================
+// SITE LOADER
+// ============================================================
 (function(){
   var loader=document.getElementById("siteLoader");
   if(!loader) return;
