@@ -1514,7 +1514,8 @@ function openCert(print){
 
   // Populate ref line
   var certRef=document.getElementById("certRef");
-  if(certRef) certRef.textContent="COA-"+print.id.toUpperCase()+" / "+now.getFullYear();
+  var uniqueNum=String(Math.floor(1000+Math.random()*9000));
+  if(certRef) certRef.textContent="COA-"+uniqueNum+" / "+now.getFullYear();
 
   // Populate image
   var certImgWrap=document.getElementById("certImgWrap");
@@ -1660,7 +1661,7 @@ if(_hsb){var _badge=document.createElement("span");_badge.className="shop-nav-ba
   <div class="cert-modal" id="certModal">
     <button class="cert-modal-close" id="certModalCloseBtn">&#10005;</button>
     <div class="cert-header">
-      <span class="cert-brand">Jeffery Asare Photography</span>
+      <span class="cert-brand">Jeffery Asare</span>
       <span class="cert-ref" id="certRef">COA &middot; 2026</span>
     </div>
     <h1 class="cert-title">Certificate<br>of Authenticity</h1>
@@ -1692,7 +1693,7 @@ if(_hsb){var _badge=document.createElement("span");_badge.className="shop-nav-ba
         <div class="cert-sig-label">Buyer Name</div>
       </div>
     </div>
-    <p style="margin-top:1.8rem;font-size:10px;color:var(--muted);line-height:1.7;">Jeffery Asare Photography &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>
+    <p style="margin-top:1.8rem;font-size:10px;color:var(--muted);line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>
     <button class="cert-print-btn" id="certPrintBtn" disabled>Print / Save as PDF</button>
     <p class="cert-print-hint" id="certPrintHint">Enter your name above to unlock the PDF</p>
   </div>
