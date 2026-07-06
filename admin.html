@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Jeffery Asare</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#f5f5f2;color:#111;min-height:100vh;}
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .login-box{background:#fff;padding:2.5rem;border-radius:12px;width:360px;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+  .login-box h1{font-size:1.3rem;font-weight:600;margin-bottom:.4rem;}
+  .login-box p{font-size:13px;color:#888;margin-bottom:1.8rem;}
+  .login-box input{width:100%;border:1.5px solid #ddd;border-radius:8px;padding:.7rem 1rem;font-size:14px;outline:none;margin-bottom:1rem;transition:border .2s;}
+  .login-box input:focus{border-color:#111;}
+  .login-box button{width:100%;background:#111;color:#fff;border:none;border-radius:8px;padding:.8rem;font-size:14px;cursor:pointer;}
+  .login-box .err{color:#c00;font-size:12px;margin-top:.5rem;display:none;}
+  #adminScreen{display:none;max-width:860px;margin:0 auto;padding:2.5rem 1.5rem;}
+  .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+  .admin-header h1{font-size:1.4rem;font-weight:600;}
+  .admin-header a{font-size:13px;color:#888;text-decoration:none;}
+  .admin-header a:hover{color:#111;}
+  .section-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-bottom:1rem;margin-top:2rem;}
+  .rate-row{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.2rem;border-radius:10px;margin-bottom:.5rem;}
+  .rate-row label{font-size:13px;flex:1;}
+  .rate-row input{width:120px;border:1.5px solid #ddd;border-radius:6px;padding:.45rem .7rem;font-size:14px;outline:none;}
+  .rate-row input:focus{border-color:#111;}
+  .prints-grid{display:grid;gap:.75rem;}
+  .print-row{background:#fff;border-radius:10px;padding:1rem 1.2rem;display:grid;grid-template-columns:50px 1fr auto;gap:1rem;align-items:center;}
+  .print-thumb{width:50px;height:62px;object-fit:cover;border-radius:4px;}
+  .print-thumb-ph{width:50px;height:62px;background:#eee;border-radius:4px;}
+  .print-info{min-width:0;}
+  .print-info .ptitle{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .print-info .pseries{font-size:11px;color:#888;margin-top:.15rem;}
+  .price-input-wrap{display:flex;align-items:center;gap:.4rem;}
+  .price-input-wrap span{font-size:13px;color:#888;}
+  .price-input-wrap input{width:90px;border:1.5px solid #ddd;border-radius:6px;padding:.45rem .6rem;font-size:14px;text-align:right;outline:none;}
+  .price-input-wrap input:focus{border-color:#111;}
+  .save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #eee;padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-top:2rem;}
+  .save-bar .hint{font-size:12px;color:#888;}
+  .save-bar button{background:#111;color:#fff;border:none;border-radius:8px;padding:.75rem 2rem;font-size:14px;cursor:pointer;transition:opacity .2s;}
+  .save-bar button:hover{opacity:.8;}
+  .save-bar .saved{color:green;font-size:13px;display:none;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>Admin Panel</h1>
+    <p>Jeffery Asare Photography</p>
+    <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">Sign in</button>
+    <div class="err" id="loginErr">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminScreen">
+  <div class="admin-header">
+    <h1>Shop Settings</h1>
+    <a href="/">← Back to site</a>
+  </div>
+
+  <div class="section-title">USD Exchange Rate</div>
+  <div class="rate-row">
+    <label>GHS → USD rate &nbsp;<small style="color:#aaa">(1 GHS = ? USD)</small></label>
+    <input type="number" id="usdRate" step="0.001" min="0.001" placeholder="0.067">
+  </div>
+
+  <div class="section-title">Print Prices (GH₵)</div>
+  <div class="prints-grid" id="printsGrid"></div>
+
+  <div class="save-bar">
+    <span class="hint">Changes only apply on this device. To update for all visitors, rebuild the site.</span>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span class="saved" id="savedMsg">✓ Saved</span>
+      <button onclick="saveAll()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Password (change this to something private) ──
+var ADMIN_PASS = 'jeffery2026';
+
+function login(){
+  var pw = document.getElementById('pwInput').value;
+  if(pw === ADMIN_PASS){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminScreen').style.display='block';
+    loadAdmin();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+
+// ── Print data (mirrors index.html PRINTS) ──
+var PRINTS_DATA = [
+  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',img:'s1.jpg',defaultPrice:920},
+  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',img:'s2.jpg',defaultPrice:680},
+  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',img:'s3.jpg',defaultPrice:750},
+  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',img:'s4.jpg',defaultPrice:800},
+  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',img:'s5.jpg',defaultPrice:700},
+  {id:'s6',title:'Market Weave',series:'ABSTRACT',img:'s6.jpg',defaultPrice:650},
+];
+
+function loadAdmin(){
+  var saved = JSON.parse(localStorage.getItem('ja_prices') || '{}');
+  var savedRate = localStorage.getItem('ja_usd_rate') || '0.067';
+  document.getElementById('usdRate').value = savedRate;
+
+  var grid = document.getElementById('printsGrid');
+  grid.innerHTML = PRINTS_DATA.map(function(p){
+    var price = saved[p.id] !== undefined ? saved[p.id] : p.defaultPrice;
+    var imgEl = '<img class="print-thumb" src="'+p.img+'" onerror="this.className=\'print-thumb-ph\'">';
+    return '<div class="print-row">'
+      + imgEl
+      + '<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div></div>'
+      + '<div class="price-input-wrap"><span>GH&#8373;</span><input type="number" id="price_'+p.id+'" value="'+price+'" min="0" step="10"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function saveAll(){
+  var prices = {};
+  PRINTS_DATA.forEach(function(p){
+    var el = document.getElementById('price_'+p.id);
+    if(el) prices[p.id] = parseFloat(el.value) || p.defaultPrice;
+  });
+  var rate = parseFloat(document.getElementById('usdRate').value) || 0.067;
+  localStorage.setItem('ja_prices', JSON.stringify(prices));
+  localStorage.setItem('ja_usd_rate', rate.toString());
+  var msg = document.getElementById('savedMsg');
+  msg.style.display = 'inline';
+  setTimeout(function(){ msg.style.display='none'; }, 2500);
+}
+</script>
+</body>
+</html>

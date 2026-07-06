@@ -115,7 +115,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
 .btn-outline:hover{border-color:#999;}
 .shop-list{padding:0 var(--pad) 5rem;}
-.shop-item{display:grid;grid-template-columns:40% 1fr;gap:4rem;align-items:start;padding:4rem 0;border-bottom:1px solid var(--rule);}
+.shop-item{display:grid;grid-template-columns:30% 1fr;gap:3.5rem;align-items:start;padding:3.5rem 0;border-bottom:1px solid var(--rule);}
 .shop-item:first-child{padding-top:0;}
 .shop-img-ph{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:var(--warm);}
 .shop-img-ph span{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);opacity:.4;}
@@ -431,7 +431,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .sold-out-badge{display:inline-flex;align-items:center;gap:.4rem;background:#f5f0eb;color:#999;border-radius:999px;padding:.35rem .9rem;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:400;}
 .print-sold-out .shop-img{opacity:.5;filter:grayscale(.4);}
 /* SHOP BADGE */
-.shop-nav-badge{display:inline-flex;align-items:center;justify-content:center;background:#c8a870;color:#fff;border-radius:999px;font-size:9px;font-weight:600;letter-spacing:.04em;padding:.15rem .45rem;margin-left:.35rem;vertical-align:middle;line-height:1.2;}
+
 .shop-available-strip{background:var(--warm);border-bottom:1px solid var(--rule);padding:.6rem var(--pad);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:.6rem;}
 .shop-available-dot{width:6px;height:6px;border-radius:50%;background:#c8a870;display:inline-block;animation:dotPulseA 2s ease-in-out infinite;}
 @keyframes dotPulseA{0%,100%{opacity:1;}50%{opacity:.3;}}
@@ -514,6 +514,58 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   .cert-modal{max-height:none;overflow:visible;box-shadow:none;padding:1.5rem;}
   .cert-modal-close,.cert-print-btn,.cert-print-hint,.inner-nav,.wa-float-tooltip{display:none!important;}
 }
+
+/* ── SHOP ANIMATIONS ── */
+@keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.shop-item{animation:shopFadeUp .55s ease both;}
+/* ── IMAGE HOVER ── */
+.shop-img-wrap{position:relative;overflow:hidden;cursor:pointer;border-radius:2px;}
+.shop-img-wrap img,.shop-img-wrap .shop-img-ph{transition:transform .5s ease;width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+.shop-img-wrap:hover img{transform:scale(1.05);}
+.shop-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;padding:1.2rem;transition:background .35s;pointer-events:none;}
+.shop-img-wrap:hover .shop-img-overlay{background:rgba(0,0,0,.22);}
+.shop-img-overlay-label{color:#fff;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:all .3s;}
+.shop-img-wrap:hover .shop-img-overlay-label{opacity:1;transform:translateY(0);}
+/* ── BUTTONS ── */
+.btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
+.btn-cart:hover{background:var(--ink);color:#fff;}
+.btn-dark{transition:opacity .2s,transform .15s;}
+.btn-dark:hover{opacity:.85;transform:translateY(-1px);}
+.btn-inquire{transition:all .2s;}
+.btn-inquire:hover{opacity:.8;transform:translateY(-1px);}
+/* ── CART FLOAT ── */
+#cartFloat{position:fixed;bottom:2rem;right:2rem;z-index:200;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.75rem 1.4rem;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 24px rgba(0,0,0,.22);transition:transform .2s,opacity .25s;opacity:0;pointer-events:none;}
+#cartFloat.has-items{opacity:1;pointer-events:auto;}
+#cartFloat:hover{transform:scale(1.04);}
+/* ── CART SIDEBAR ── */
+#cartOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;}
+#cartSidebar{position:fixed;top:0;right:-440px;width:400px;max-width:96vw;height:100%;background:#fff;z-index:901;display:flex;flex-direction:column;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 32px rgba(0,0,0,.12);}
+#cartSidebar.open{right:0;}
+.cart-head{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.5rem 1rem;border-bottom:1px solid var(--rule);}
+.cart-head h3{font-family:var(--title);font-size:1.1rem;font-weight:600;letter-spacing:-.01em;margin:0;}
+.cart-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1;padding:.1rem .3rem;}
+.cart-items-wrap{flex:1;overflow-y:auto;padding:.5rem 1.5rem;}
+.cart-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--rule);}
+.cart-item-img{width:62px;height:78px;object-fit:cover;border-radius:2px;flex-shrink:0;}
+.cart-item-img-ph{width:62px;height:78px;background:var(--warm);border-radius:2px;flex-shrink:0;}
+.cart-item-info{flex:1;min-width:0;}
+.cart-item-title{font-size:13px;font-weight:600;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cart-item-sub{font-size:11px;color:var(--muted);margin-bottom:.4rem;}
+.cart-item-price{font-size:13px;font-weight:500;}
+.cart-item-remove{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:0;text-decoration:underline;margin-top:.35rem;display:inline-block;}
+.cart-empty{padding:3rem 0;text-align:center;color:var(--muted);font-size:13px;line-height:1.8;}
+.cart-foot{padding:1.4rem 1.5rem;border-top:1px solid var(--rule);}
+.cart-total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:.4rem;}
+.cart-note{font-size:11px;color:var(--muted);margin-bottom:1.1rem;line-height:1.6;}
+.cart-email-wrap{margin-bottom:.9rem;}
+.cart-email-input{width:100%;border:none;border-bottom:2px solid var(--ink);padding:.45rem 0;font-family:var(--sans);font-size:14px;font-weight:300;color:var(--ink);outline:none;background:transparent;}
+.btn-checkout{width:100%;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.9rem;font-size:14px;font-family:var(--sans);cursor:pointer;transition:opacity .2s;}
+.btn-checkout:hover{opacity:.8;}
+/* ── CURRENCY TOGGLE ── */
+.currency-toggle{display:inline-flex;align-items:center;background:var(--warm);border:1px solid var(--rule);border-radius:999px;overflow:hidden;}
+.currency-toggle button{background:none;border:none;padding:.35rem .9rem;font-size:11px;letter-spacing:.06em;font-family:var(--sans);cursor:pointer;color:var(--muted);transition:all .15s;}
+.currency-toggle button.cur-active{background:var(--ink);color:#fff;border-radius:999px;}
+.shop-controls{display:flex;align-items:center;justify-content:flex-end;padding:.5rem var(--pad) 1.5rem;}
 </style>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
@@ -727,6 +779,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <h1 id="shopTitle">Fine Art Prints</h1>
     <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
   </div>
+  <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" onclick="setCurrency('GHS')">GH&#8373;</button><button id="btnUSD" onclick="setCurrency('USD')">USD</button></div></div>
   <div class="shop-list" id="shopList"></div>
   <div id="shop-mini-footer"></div>
 </div>
@@ -949,6 +1002,15 @@ var PRINTS = [
   PRH("s36"),PRH("s37"),PRH("s38"),PRH("s39"),PRH("s40"),PRH("s41"),PRH("s42"),PRH("s43"),PRH("s44"),PRH("s45"),
   PRH("s46"),PRH("s47"),PRH("s48"),PRH("s49"),PRH("s50")
 ];
+// Apply admin price overrides from localStorage
+(function(){
+  try{
+    var ov=JSON.parse(localStorage.getItem('ja_prices')||'{}');
+    PRINTS.forEach(function(p){ if(ov[p.id]!==undefined) p.priceGHC=Number(ov[p.id]); });
+    var rate=localStorage.getItem('ja_usd_rate');
+    if(rate) USD_RATE=parseFloat(rate);
+  }catch(e){}
+})();
 
 // ============================================================
 // NAVIGATION  -  all via event listeners, no inline onclick
@@ -965,7 +1027,7 @@ function navigate(page) {
     window.scrollTo(0,0);
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
-    if (page==="shop") { renderShop(0); updateShopBadge(); }
+    if (page==="shop") { renderShop(0); }
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
@@ -1164,10 +1226,14 @@ function renderShop(page){
   visible.forEach(function(p){
     var item=document.createElement("div");
     item.className="shop-item" + (p.soldOut ? " print-sold-out" : "");
-    var imgHtml=p.img?"<img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\" style=\"cursor:pointer\">":"<div class=\"shop-img-ph\"><span>"+p.title+"</span></div>";
+    item.style.animationDelay = (visible.indexOf(p) * 0.08) + "s";
+    var imgHtml=p.img
+      ? "<div class=\"shop-img-wrap\"><img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"><div class=\"shop-img-overlay\"><span class=\"shop-img-overlay-label\">View print</span></div></div>"
+      : "<div class=\"shop-img-wrap\"><div class=\"shop-img-ph\"><span>"+p.title+"</span></div><div class=\"shop-img-overlay\"></div></div>";
     var sizePills=p.sizes.map(function(s,si){ return "<button class=\"size-pill"+(si===0?" active":"")+"\">" +s+"</button>"; }).join("");
-    var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : "From <strong>GH&#8373; "+p.priceGHC.toLocaleString()+"</strong><span class=\"ship\"> + shipping</span>";
+    var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.priceGHC);
     var inqLabel  = p.soldOut ? "Join waiting list" : "View print &#8594;";
+    var cartBtn   = p.soldOut ? "" : "<button class=\"btn-cart shop-cart-btn\">+ Add to Cart</button>";
     item.innerHTML="<div>"+imgHtml+"</div><div>"
       +"<div class=\"shop-series\">"+p.series+"</div>"
       +"<h2 class=\"shop-title\">"+p.title+"</h2>"
@@ -1179,13 +1245,21 @@ function renderShop(page){
       +"<div class=\"shop-sizes\">"+sizePills+"</div>"
       +"<div class=\"shop-footer-row\">"
       +"<div class=\"shop-price\">"+priceHtml+"</div>"
-      +"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button>"
+      +"<div style=\"display:flex;gap:.5rem;align-items:center;\">"+cartBtn+"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button></div>"
       +"</div></div>";
-    var imgEl = item.querySelector(".shop-img");
-    if(imgEl) imgEl.addEventListener("click",(function(print){ return function(){ openPrintDetail(print); }; })(p));
+    item.querySelector(".shop-img-wrap").addEventListener("click",(function(print){ return function(){ openPrintDetail(print); }; })(p));
     item.querySelectorAll(".size-pill").forEach(function(pill){
       pill.addEventListener("click",function(){ item.querySelectorAll(".size-pill").forEach(function(b){ b.classList.remove("active"); }); pill.classList.add("active"); });
     });
+    if(!p.soldOut){
+      item.querySelector(".shop-cart-btn").addEventListener("click",(function(print,item){ return function(e){
+        e.stopPropagation();
+        var activePill=item.querySelector(".size-pill.active");
+        var size=activePill?activePill.textContent:print.sizes[0];
+        addToCart(print,size);
+        openCart();
+      }; })(p,item));
+    }
     item.querySelector(".shop-inq").addEventListener("click",(function(print){
       return function(){
         if(print.soldOut){
@@ -1202,8 +1276,7 @@ function renderShop(page){
         }
       };
     })(p));
-    item.classList.add("reveal");
-    item.style.transitionDelay = (visible.indexOf(p) * 0.08) + "s";
+
     list.appendChild(item);
   });
 
@@ -1437,12 +1510,7 @@ var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery A
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================
-// SHOP BADGE + AVAILABLE COUNT
-// ===========================================================
-function updateShopBadge(){
-  var avail=PRINTS.filter(function(p){return p.title!=="Untitled Print"&&!p.soldOut;}).length;
-  document.querySelectorAll(".shop-nav-badge").forEach(function(b){b.textContent=avail;});
-}
+
 
 // ===========================================================
 // PRINT DETAIL PAGE
@@ -1473,7 +1541,7 @@ function openPrintDetail(print){
       pdSizes.appendChild(btn);
     });
   }
-  if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":"From <strong>GH&#8373; "+print.priceGHC.toLocaleString()+"</strong>";
+  if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":formatPrice(print.priceGHC);
   if(pdActions){
     if(print.soldOut){
       pdActions.innerHTML="<button class=\"btn-dark\" id=\"pdWaitBtn\" style=\"width:100%;justify-content:center;\">Join waiting list</button>";
@@ -1484,7 +1552,10 @@ function openPrintDetail(print){
       });
     } else {
       pdActions.innerHTML="<div style=\"margin-bottom:.75rem;\"><input type=\"email\" id=\"pdBuyerEmail\" placeholder=\"Your email address\" style=\"width:100%;border:none;border-bottom:2px solid var(--ink);padding:.5rem 0;font-family:var(--sans);font-size:14px;font-weight:300;color:var(--ink);outline:none;background:transparent;\" /></div>"
-        +"<button class=\"btn-dark\" id=\"pdBuyBtn\" style=\"width:100%;justify-content:center;\">Purchase this print &#8594;</button>";
+        +"<div style=\"display:flex;gap:.6rem;\">"
+        +"<button class=\"btn-cart\" id=\"pdCartBtn\" style=\"flex:1;justify-content:center;\">+ Add to Cart</button>"
+        +"<button class=\"btn-dark\" id=\"pdBuyBtn\" style=\"flex:2;justify-content:center;\">Buy Now &#8594;</button>"
+        +"</div>";
       var bb=document.getElementById("pdBuyBtn");
       if(bb) bb.addEventListener("click",function(){
         var emailEl=document.getElementById("pdBuyerEmail");
@@ -1492,10 +1563,121 @@ function openPrintDetail(print){
         if(!email||!email.includes("@")){if(emailEl){emailEl.focus();emailEl.style.borderBottomColor="#e00";}return;}
         payWithPaystack(print,email);
       });
+      var cb=document.getElementById("pdCartBtn");
+      if(cb) cb.addEventListener("click",function(){
+        var activePill=document.querySelector(".size-pill.active");
+        var size=activePill?activePill.textContent:print.sizes[0];
+        addToCart(print,size);
+        openCart();
+      });
     }
   }
   setPageTitle("print-detail",print.title);
   navigate("print-detail");
+}
+
+// ===========================================================
+// CURRENCY
+// ===========================================================
+var CURRENCY='GHS', USD_RATE=0.067;
+function setCurrency(c){
+  CURRENCY=c;
+  document.getElementById('btnGHS').classList.toggle('cur-active',c==='GHS');
+  document.getElementById('btnUSD').classList.toggle('cur-active',c==='USD');
+  renderShop(SHOP_PAGE);
+  var pdPrice=document.getElementById('pdPrice');
+  if(pdPrice&&currentPrint&&!currentPrint.soldOut) pdPrice.innerHTML=formatPrice(currentPrint.priceGHC);
+}
+function formatPrice(ghc){
+  if(CURRENCY==='USD') return 'From <strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> + shipping</span>';
+  return 'From <strong>GH&#8373; '+ghc.toLocaleString()+'</strong><span class="ship"> + shipping</span>';
+}
+
+// ===========================================================
+// CART
+// ===========================================================
+var CART=[];
+function addToCart(print,size){
+  var ex=CART.find(function(i){return i.print.id===print.id&&i.size===size;});
+  if(ex){ex.qty++;}else{CART.push({print:print,size:size,qty:1});}
+  updateCartBadge();
+  renderCartItems();
+}
+function removeFromCart(printId,size){
+  CART=CART.filter(function(i){return !(i.print.id===printId&&i.size===size);});
+  updateCartBadge();
+  renderCartItems();
+}
+function cartTotal(){
+  return CART.reduce(function(s,i){return s+i.print.priceGHC*i.qty;},0);
+}
+function updateCartBadge(){
+  var total=CART.reduce(function(s,i){return s+i.qty;},0);
+  var fl=document.getElementById('cartCountFloat');
+  if(fl) fl.textContent=total;
+  var floatBtn=document.getElementById('cartFloat');
+  if(floatBtn) floatBtn.classList.toggle('has-items',total>0);
+}
+function openCart(){ 
+  document.getElementById('cartOverlay').style.display='block';
+  document.getElementById('cartSidebar').classList.add('open');
+  renderCartItems();
+}
+function closeCart(){
+  document.getElementById('cartOverlay').style.display='none';
+  document.getElementById('cartSidebar').classList.remove('open');
+}
+function renderCartItems(){
+  var wrap=document.getElementById('cartItemsWrap');
+  var foot=document.getElementById('cartFoot');
+  if(!wrap||!foot) return;
+  if(!CART.length){
+    wrap.innerHTML='<div class="cart-empty">Your cart is empty.<br>Browse the shop to add prints.</div>';
+    foot.innerHTML='';
+    return;
+  }
+  wrap.innerHTML=CART.map(function(item,idx){
+    var imgEl=item.print.img?'<img class="cart-item-img" src="'+item.print.img+'" alt="'+item.print.title+'">'
+      :'<div class="cart-item-img-ph"></div>';
+    var priceStr=CURRENCY==='USD'?'$'+(item.print.priceGHC*USD_RATE*item.qty).toFixed(0)
+      :'GH&#8373; '+(item.print.priceGHC*item.qty).toLocaleString();
+    return '<div class="cart-item">'+imgEl
+      +'<div class="cart-item-info">'
+      +'<div class="cart-item-title">'+item.print.title+'</div>'
+      +'<div class="cart-item-sub">'+item.size+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
+      +'<div class="cart-item-price">'+priceStr+'</div>'
+      +'<button class="cart-item-remove" onclick="removeFromCart(''+item.print.id+'',''+item.size+'')">Remove</button>'
+      +'</div></div>';
+  }).join('');
+  var total=cartTotal();
+  var totalStr=CURRENCY==='USD'?'$'+(total*USD_RATE).toFixed(0):'GH&#8373; '+total.toLocaleString();
+  foot.innerHTML='<div class="cart-total-row"><span>Total</span><span>'+totalStr+'</span></div>'
+    +'<p class="cart-note">+ shipping &middot; Production 7-14 business days. Certificate of Authenticity included with each print.</p>'
+    +'<div class="cart-email-wrap"><input type="email" id="cartEmail" class="cart-email-input" placeholder="Your email address" /></div>'
+    +'<button class="btn-checkout" onclick="checkoutCart()">Checkout &rarr;</button>';
+}
+function checkoutCart(){
+  var emailEl=document.getElementById('cartEmail');
+  var email=emailEl?emailEl.value.trim():'';
+  if(!email||!email.includes('@')){if(emailEl){emailEl.focus();emailEl.style.borderBottomColor='#e00';}return;}
+  var total=cartTotal();
+  var handler=PaystackPop.setup({
+    key:'pk_test_651689f8101656b8ac3ba9b7bbc496720b454bf2',
+    email:email,
+    amount:total*100,
+    currency:'GHS',
+    ref:'JA-CART-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now(),
+    metadata:{custom_fields:CART.map(function(i){return {display_name:i.print.title,variable_name:'print',value:i.size+' x'+i.qty};})},
+    onClose:function(){},
+    callback:function(response){
+      var prints=CART.slice();
+      CART=[];
+      updateCartBadge();
+      closeCart();
+      if(prints.length) openCert(prints[0].print);
+    }
+  });
+  handler.openIframe();
 }
 
 // ===========================================================
@@ -1669,11 +1851,10 @@ document.addEventListener("keydown",function(e){
 injectFooters();
 renderPortfolio("all");
 renderShop();
-updateShopBadge();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Add badge to home nav Shop button
 var _hsb=document.getElementById("homeShopBtn");
-if(_hsb){var _badge=document.createElement("span");_badge.className="shop-nav-badge";_hsb.appendChild(_badge);updateShopBadge();}
+
 // Home print strip link
 
 
@@ -1842,8 +2023,25 @@ fetch('/_data/prints.json')
         priceGHC: Number(p.price)||0, img: p.img||'', soldOut: !!p.soldOut
       };
     });
-    updateShopBadge();
-  }).catch(function(){});
+      }).catch(function(){});
 </script>
+
+<!-- CART FLOAT -->
+<button id="cartFloat" onclick="openCart()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  Cart <span id="cartCountFloat">0</span>
+</button>
+
+<!-- CART SIDEBAR -->
+<div id="cartOverlay" onclick="closeCart()"></div>
+<div id="cartSidebar">
+  <div class="cart-head">
+    <h3>Your Cart</h3>
+    <button class="cart-close" onclick="closeCart()">&#10005;</button>
+  </div>
+  <div class="cart-items-wrap" id="cartItemsWrap"></div>
+  <div class="cart-foot" id="cartFoot"></div>
+</div>
+
 </body>
 </html>
