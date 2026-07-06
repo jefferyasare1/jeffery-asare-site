@@ -1646,7 +1646,7 @@ function renderCartItems(){
       +'<div class="cart-item-title">'+item.print.title+'</div>'
       +'<div class="cart-item-sub">'+item.size+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
       +'<div class="cart-item-price">'+priceStr+'</div>'
-      +'<button class="cart-item-remove" onclick="removeFromCart(''+item.print.id+'',''+item.size+'')">Remove</button>'
+      +'<button class="cart-item-remove" data-id="'+item.print.id+'" data-size="'+item.size+'" onclick="removeFromCart(this.dataset.id,this.dataset.size)">Remove</button>'
       +'</div></div>';
   }).join('');
   var total=cartTotal();
