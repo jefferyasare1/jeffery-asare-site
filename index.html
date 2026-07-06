@@ -515,6 +515,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   .cert-modal-close,.cert-print-btn,.cert-print-hint,.inner-nav,.wa-float-tooltip{display:none!important;}
 }
 </style>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
@@ -1482,12 +1483,14 @@ function openPrintDetail(print){
         setTimeout(function(){var msg=document.querySelector("#contactForm textarea[name=message]");if(msg&&!msg.value){msg.value="Hi Jeffery,\n\nI would like to join the waiting list for \u201c"+print.title+"\u201d.";var cc=document.getElementById("charCount");if(cc)cc.textContent=msg.value.length;}},150);
       });
     } else {
-      pdActions.innerHTML="<button class=\"btn-dark\" id=\"pdEmailBtn\" style=\"width:100%;justify-content:center;\">Inquire about this print &#8594;</button>"
-        ; // CERT BUTTON REMOVED — re-add when Paystack + Google Sheets is connected
-      var eb=document.getElementById("pdEmailBtn");
-      if(eb) eb.addEventListener("click",function(){
-        navigate("contact");
-        setTimeout(function(){var sel=document.querySelector("#contactForm select[name=subject]");if(sel){for(var o=0;o<sel.options.length;o++){if(sel.options[o].text==="Print inquiry"){sel.selectedIndex=o;break;}}}var msg=document.querySelector("#contactForm textarea[name=message]");if(msg&&!msg.value){msg.value="Hi Jeffery,\n\nI am interested in the print \u201c"+print.title+"\u201d. Could you share more details about availability and shipping?";var cc=document.getElementById("charCount");if(cc)cc.textContent=msg.value.length;}},150);
+      pdActions.innerHTML="<div style=\"margin-bottom:.75rem;\"><input type=\"email\" id=\"pdBuyerEmail\" placeholder=\"Your email address\" style=\"width:100%;border:none;border-bottom:2px solid var(--ink);padding:.5rem 0;font-family:var(--sans);font-size:14px;font-weight:300;color:var(--ink);outline:none;background:transparent;\" /></div>"
+        +"<button class=\"btn-dark\" id=\"pdBuyBtn\" style=\"width:100%;justify-content:center;\">Purchase this print &#8594;</button>";
+      var bb=document.getElementById("pdBuyBtn");
+      if(bb) bb.addEventListener("click",function(){
+        var emailEl=document.getElementById("pdBuyerEmail");
+        var email=emailEl?emailEl.value.trim():"";
+        if(!email||!email.includes("@")){if(emailEl){emailEl.focus();emailEl.style.borderBottomColor="#e00";}return;}
+        payWithPaystack(print,email);
       });
     }
   }
@@ -1496,10 +1499,31 @@ function openPrintDetail(print){
 }
 
 // ===========================================================
+// PAYSTACK PAYMENT
+// ===========================================================
+function payWithPaystack(print,email){
+  var selectedSize="";
+  var activePill=document.querySelector(".size-pill.active");
+  if(activePill) selectedSize=activePill.textContent;
+  var handler=PaystackPop.setup({
+    key:'pk_test_651689f8101656b8ac3ba9b7bbc496720b454bf2',
+    email:email,
+    amount:print.priceGHC*100,
+    currency:'GHS',
+    ref:'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now(),
+    metadata:{custom_fields:[
+      {display_name:"Print",variable_name:"print",value:print.title},
+      {display_name:"Size",variable_name:"size",value:selectedSize}
+    ]},
+    onClose:function(){},
+    callback:function(response){ openCert(print); }
+  });
+  handler.openIframe();
+}
+
+// ===========================================================
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
-// PAYSTACK INTEGRATION: call openCert(print) after payment confirmation
-// Google Sheets will log the sale and generate the serial number
 // Re-add the cert button in pdActions once that flow is live
 function openCert(print){
   // Auto-populate date
