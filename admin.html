@@ -157,31 +157,38 @@ var SERIES_DATA = [
   {
     slug:'random-stories', label:'Random Stories',
     active:[
-      {id:'rs1',title:'Golden Hour at Labadi',loc:'Labadi Beach, Accra',date:'2026.04',img:'rs1.jpg'},
-      {id:'rs2',title:'Between Stalls',loc:'Kaneshie Market, Accra',date:'2025.08',img:'rs2.jpg'}
+      {id:'rs1',title:'Golden Hour at Labadi',loc:'Labadi Beach, Accra',date:'2026.04',img:'rs1.jpg',
+       desc:'The Atlantic was unusually still that evening. The fishing boats had returned early, their silhouettes cutting sharp against a sky shifting from gold to rose to deep amber.'},
+      {id:'rs2',title:'Between Stalls',loc:'Kaneshie Market, Accra',date:'2025.08',img:'rs2.jpg',
+       desc:'A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance. I had about two seconds before the moment was gone.'}
     ],
     totalSlots:40, prefix:'rs'
   },
   {
     slug:'portraits', label:'Portraits',
     active:[
-      {id:'pt1',title:'Stillness in Jamestown',loc:'Jamestown, Accra',date:'2025.11',img:'pt1.jpg'}
+      {id:'pt1',title:'Stillness in Jamestown',loc:'Jamestown, Accra',date:'2025.11',img:'pt1.jpg',
+       desc:'An intimate portrait from historic Jamestown. The light fell across the wall texture and the subject in a way that felt completely unposed.'}
     ],
     totalSlots:40, prefix:'pt'
   },
   {
     slug:'eclipse', label:'Eclipse of the Self',
     active:[
-      {id:'ec1',title:'Eclipse I',loc:'Studio, Accra',date:'2025.06',img:'ec1.jpg'},
-      {id:'ec2',title:'Eclipse II',loc:'Studio, Accra',date:'2025.07',img:'ec2.jpg'}
+      {id:'ec1',title:'Eclipse I',loc:'Studio, Accra',date:'2025.06',img:'ec1.jpg',
+       desc:'The first image in the Eclipse of the Self series. A study in the relationship between light, shadow, and the human form.'},
+      {id:'ec2',title:'Eclipse II',loc:'Studio, Accra',date:'2025.07',img:'ec2.jpg',
+       desc:'Second image in the series. Update description when copy is ready.'}
     ],
     totalSlots:40, prefix:'ec'
   },
   {
     slug:'abstract', label:'Abstract',
     active:[
-      {id:'ab1',title:'Market Weave',loc:'Makola Market, Accra',date:'2026.03',img:'ab1.jpg'},
-      {id:'ab2',title:'Kente Geometry',loc:'Kumasi, Ashanti',date:'2025.09',img:'ab2.jpg'}
+      {id:'ab1',title:'Market Weave',loc:'Makola Market, Accra',date:'2026.03',img:'ab1.jpg',
+       desc:'The overlapping fabrics at Makola create a tapestry of colour and texture. Chaos ordered by commerce.'},
+      {id:'ab2',title:'Kente Geometry',loc:'Kumasi, Ashanti',date:'2025.09',img:'ab2.jpg',
+       desc:'A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.'}
     ],
     totalSlots:40, prefix:'ab'
   }
@@ -189,17 +196,35 @@ var SERIES_DATA = [
 
 // ── PRINTS DATA — active (s1–s6) ──
 var PRINTS_DATA = [
-  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',edition:'Edition of 15',img:'s1.jpg',
+  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',edition:'Edition of 15',
+   paper:'Hahnemühle Photo Rag Baryta 315gsm',
+   desc:'An intimate portrait from historic Jamestown. The baryta paper brings out the subtle highlights in the weathered wall texture. The most limited edition in the collection.',
+   img:'s1.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:920},{label:'A2 (42 × 59.4 cm)',defaultPrice:1200},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1650}]},
-  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',edition:'Edition of 30',img:'s2.jpg',
+  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',edition:'Edition of 30',
+   paper:'Hahnemühle Photo Rag 308gsm',
+   desc:'A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.',
+   img:'s2.jpg',
    sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:480},{label:'A3 (29.7 × 42 cm)',defaultPrice:680},{label:'A2 (42 × 59.4 cm)',defaultPrice:920}]},
-  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',edition:'Edition of 25',img:'s3.jpg',
+  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',edition:'Edition of 25',
+   paper:'Hahnemühle Photo Rag Baryta 315gsm',
+   desc:'Shot in Kaneshie at noon. A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance.',
+   img:'s3.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:750},{label:'A2 (42 × 59.4 cm)',defaultPrice:1050}]},
-  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',edition:'Edition of 20',img:'s4.jpg',
+  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',edition:'Edition of 20',
+   paper:'Hahnemühle Photo Rag 308gsm',
+   desc:'The first image in the Eclipse of the Self series. A study in light, shadow, and the human form. Signed and numbered.',
+   img:'s4.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:800},{label:'A2 (42 × 59.4 cm)',defaultPrice:1100},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1500}]},
-  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',edition:'Edition of 20',img:'s5.jpg',
+  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',edition:'Edition of 20',
+   paper:'Hahnemühle Photo Rag Baryta 315gsm',
+   desc:'The Atlantic unusually still. Fishing boats at rest. Sky shifting from gold to deep amber.',
+   img:'s5.jpg',
    sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:500},{label:'A3 (29.7 × 42 cm)',defaultPrice:700},{label:'A2 (42 × 59.4 cm)',defaultPrice:980}]},
-  {id:'s6',title:'Market Weave',series:'ABSTRACT',edition:'Edition of 30',img:'s6.jpg',
+  {id:'s6',title:'Market Weave',series:'ABSTRACT',edition:'Edition of 30',
+   paper:'Hahnemühle Photo Rag 308gsm',
+   desc:'The overlapping fabrics at Makola. Chaos ordered by commerce. Printed large, the texture becomes almost sculptural.',
+   img:'s6.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:650},{label:'A2 (42 × 59.4 cm)',defaultPrice:900},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1300}]},
 ];
 
@@ -234,6 +259,7 @@ function loadAdmin(){
         +'<div class="photo-info">'
         +'<div class="photo-title">'+ph.title+'</div>'
         +'<div class="photo-meta">'+ph.loc+' &nbsp;·&nbsp; '+ph.date+' &nbsp;·&nbsp; <code style="font-size:10px;color:#bbb;">'+ph.id+'</code></div>'
+        +(ph.desc?'<div style="font-size:11px;color:#aaa;margin-top:.25rem;line-height:1.55;max-width:520px;">'+ph.desc+'</div>':'')
         +'</div></div>';
     }).join('');
 
@@ -283,7 +309,9 @@ function loadAdmin(){
     var row=document.createElement('div');
     row.className='print-row';
     row.innerHTML='<div class="print-row-header">'+imgEl
-      +'<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div><div class="pedition">'+p.edition+'</div></div>'
+      +'<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div><div class="pedition">'+p.edition+(p.paper?' &nbsp;·&nbsp; '+p.paper:'')+'</div>'
+      +(p.desc?'<div style="font-size:11px;color:#aaa;margin-top:.3rem;line-height:1.55;">'+p.desc+'</div>':'')
+      +'</div>'
       +'</div>'
       +'<div class="size-tabs">'+sizeTabs+'</div>'
       +'<div class="price-edit-row"><label>GH&#8373;</label>'

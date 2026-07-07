@@ -114,9 +114,17 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .btn-dark:hover{opacity:.8;}
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
 .btn-outline:hover{border-color:#999;}
-.shop-list{padding:0 var(--pad) 5rem;}
-.shop-item{display:grid;grid-template-columns:30% 1fr;gap:3.5rem;align-items:start;padding:3.5rem 0;border-bottom:1px solid var(--rule);}
-.shop-item:first-child{padding-top:0;}
+.shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 3rem;}
+.shop-card{display:flex;flex-direction:column;}
+.shop-card-img-wrap{overflow:hidden;margin-bottom:1.2rem;}
+.shop-card-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.22,.61,.36,1);}
+.shop-card-img-ph{width:100%;aspect-ratio:3/4;background:var(--warm);}
+.shop-card:hover .shop-card-img{transform:scale(1.03);}
+.shop-card-body{display:flex;flex-direction:column;flex:1;}
+.shop-card-series{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+.shop-card-title{font-family:var(--title);font-size:1.35rem;font-weight:600;letter-spacing:-.02em;line-height:1.05;margin-bottom:.3rem;}
+.shop-card-edition{font-size:11px;color:var(--muted);margin-bottom:.9rem;}
+.shop-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--rule);}
 .shop-img-ph{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:var(--warm);}
 .shop-img-ph span{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);opacity:.4;}
 .shop-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
@@ -126,7 +134,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .shop-specs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem;margin-bottom:1.5rem;}
 .shop-spec-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
 .shop-spec-val{font-size:13px;color:var(--ink);}
-.shop-sizes{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem;}
+.shop-sizes{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
 .size-pill{padding:.4rem .9rem;border-radius:999px;border:1px solid var(--rule);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .2s;background:none;color:var(--muted);}
 .size-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .size-pill:hover:not(.active){border-color:#999;color:var(--ink);}
@@ -193,7 +201,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 @media(max-width:900px){
   .photo-grid{grid-template-columns:1fr 1fr;}
   .about-hero,.about-cols,.contact-body{grid-template-columns:1fr;}
-  .shop-item{grid-template-columns:1fr;}
+  .shop-list{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .about-cta{flex-direction:column;align-items:flex-start;}
   .about-shop-strip{flex-direction:column;align-items:flex-start;}
@@ -289,8 +297,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .lb-arrow{transition:background .2s ease,transform .2s ease;}
 .lb-arrow:hover{background:rgba(255,255,255,.15);transform:translateY(-50%) scale(1.1);}
 
-/* Shop item entrance */
-.shop-item{transition:opacity .5s ease,transform .5s ease;}
+/* Shop card entrance */
+.shop-card{transition:opacity .5s ease,transform .5s ease;}
 
 /* Size pill hover */
 .size-pill{transition:all .2s cubic-bezier(.22,.61,.36,1);}
@@ -517,9 +525,10 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .cert-print-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:.6rem;}
 @media(max-width:600px){.cert-modal{padding:2rem 1.5rem 2rem;}.cert-sig-grid{grid-template-columns:1fr;}}
 @media print{
-  .cert-modal-overlay{position:static;background:none;padding:0;display:block!important;}
-  .cert-modal{max-height:none;overflow:visible;box-shadow:none;padding:1.5rem;}
-  .cert-modal-close,.cert-print-btn,.cert-print-hint,.inner-nav,.wa-float-tooltip{display:none!important;}
+  body.printing-cert>*{display:none!important;}
+  body.printing-cert .cert-modal-overlay{display:flex!important;position:static!important;background:none!important;padding:0!important;}
+  body.printing-cert .cert-modal{max-height:none!important;overflow:visible!important;box-shadow:none!important;}
+  body.printing-cert .cert-modal-close,body.printing-cert .cert-print-btn,body.printing-cert .cert-print-hint{display:none!important;}
 }
 
 /* ── RELATED PRINTS ── */
@@ -534,7 +543,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 @media(max-width:700px){.pd-related-grid{grid-template-columns:repeat(2,1fr);}}
 /* ── SHOP ANIMATIONS ── */
 @keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-.shop-item{animation:shopFadeUp .55s ease both;}
+.shop-card{animation:shopFadeUp .55s ease both;}
 /* ── IMAGE HOVER ── */
 .shop-img-wrap{position:relative;overflow:hidden;cursor:pointer;border-radius:2px;}
 .shop-img-wrap img,.shop-img-wrap .shop-img-ph{transition:transform .5s ease;width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
@@ -1288,26 +1297,26 @@ function renderShop(page){
   var visible=allVisible.slice(page*SHOP_PER_PAGE,(page+1)*SHOP_PER_PAGE);
   visible.forEach(function(p){
     var item=document.createElement("div");
-    item.className="shop-item" + (p.soldOut ? " print-sold-out" : "");
+    item.className="shop-card" + (p.soldOut ? " print-sold-out" : "");
     item.style.animationDelay = (visible.indexOf(p) * 0.08) + "s";
     var imgHtml=p.img
-      ? "<div class=\"shop-img-wrap\"><img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"></div>"
-      : "<div class=\"shop-img-wrap\"><div class=\"shop-img-ph\"><span>"+p.title+"</span></div></div>";
-    var sizePills=p.sizes.map(function(s,si){ return "<button class=\"size-pill"+(si===0?" active":"")+"\" data-price=\""+s.price+"\">"+s.label+"</button>"; }).join("");
+      ? "<div class=\"shop-card-img-wrap\"><img class=\"shop-card-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"></div>"
+      : "<div class=\"shop-card-img-wrap\"><div class=\"shop-card-img-ph\"></div></div>";
+    var sizePills=p.sizes.map(function(s,si){
+      var shortLabel=s.label.split('(')[0].trim();
+      return "<button class=\"size-pill"+(si===0?" active":"")+"\" data-price=\""+s.price+"\" data-full-size=\""+s.label+"\" title=\""+s.label+"\">"+shortLabel+"</button>";
+    }).join("");
     var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.sizes[0].price);
     var inqLabel  = p.soldOut ? "Join waiting list" : "View print &#8594;";
     var cartBtn   = p.soldOut ? "" : "<button class=\"btn-cart shop-cart-btn\">+ Add to Cart</button>";
-    item.innerHTML="<div>"+imgHtml+"</div><div>"
-      +"<div class=\"shop-series\">"+p.series+"</div>"
-      +"<h2 class=\"shop-title\">"+p.title+"</h2>"
-      +"<p class=\"shop-desc\">"+p.desc+"</p>"
-      +"<div class=\"shop-specs\">"
-      +"<div><div class=\"shop-spec-label\">Paper</div><div class=\"shop-spec-val\">"+p.paper+"</div></div>"
-      +"<div><div class=\"shop-spec-label\">Edition</div><div class=\"shop-spec-val\">"+p.edition+"</div></div>"
-      +"</div><div class=\"shop-spec-label\">Size</div>"
+    item.innerHTML=imgHtml
+      +"<div class=\"shop-card-body\">"
+      +"<div class=\"shop-card-series\">"+p.series+"</div>"
+      +"<div class=\"shop-card-title\">"+p.title+"</div>"
+      +"<div class=\"shop-card-edition\">"+p.edition+"</div>"
       +"<div class=\"shop-sizes\">"+sizePills+"</div>"
       +(p.soldOut?"":"<div class=\"qty-row\"><span class=\"qty-label\">Qty</span><div class=\"qty-control\"><button class=\"qty-btn shop-qty-minus\">&#8722;</button><span class=\"qty-val shop-qty-val\">1</span><button class=\"qty-btn shop-qty-plus\">&#43;</button></div></div>")
-      +"<div class=\"shop-footer-row\">"
+      +"<div class=\"shop-card-footer\">"
       +"<div class=\"shop-price\">"+priceHtml+"</div>"
       +"<div style=\"display:flex;gap:.5rem;align-items:center;\">"+cartBtn+"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button></div>"
       +"</div></div>";
@@ -1338,7 +1347,7 @@ function renderShop(page){
       item.querySelector(".shop-cart-btn").addEventListener("click",(function(print,item){ return function(e){
         e.stopPropagation();
         var activePill=item.querySelector(".size-pill.active");
-        var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
+        var sizeLabel=activePill?(activePill.dataset.fullSize||activePill.textContent):print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=parseInt(item.querySelector(".shop-qty-val").textContent)||1;
         addToCart(print,sizeLabel,sizePrice,qty);
@@ -1369,6 +1378,7 @@ function renderShop(page){
   if(totalPages>1){
     var pag=document.createElement("div");
     pag.className="shop-pagination";
+    pag.style.gridColumn="1 / -1";
     var prevBtn=document.createElement("button");
     prevBtn.className="shop-page-btn";
     prevBtn.textContent="← Previous";
@@ -1994,7 +2004,15 @@ function openCert(items){
       if(printHint) printHint.style.display=filled?'none':'block';
     };
   }
-  if(printBtn) printBtn.onclick=function(){ if(!printBtn.disabled) window.print(); };
+  if(printBtn) printBtn.onclick=function(){
+    if(printBtn.disabled) return;
+    document.body.classList.add('printing-cert');
+    window.addEventListener('afterprint',function once(){
+      document.body.classList.remove('printing-cert');
+      window.removeEventListener('afterprint',once);
+    });
+    window.print();
+  };
 
   var overlay=document.getElementById('certModalOverlay');
   if(overlay){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
