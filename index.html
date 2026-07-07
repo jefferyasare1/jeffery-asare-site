@@ -468,13 +468,13 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .wa-float svg{width:20px;height:20px;fill:#fff;}
 .wa-float-tooltip{position:absolute;right:48px;background:#111;color:#fff;font-size:11px;white-space:nowrap;padding:.3rem .65rem;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s;font-family:var(--sans);}
 .wa-float:hover .wa-float-tooltip{opacity:1;}
-/* SHIPPING ESTIMATE */
-.shipping-est{background:var(--warm);border-radius:8px;padding:1.2rem 1.4rem;margin-top:.5rem;}
-.shipping-est-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;}
-.shipping-rows{display:flex;flex-direction:column;gap:.5rem;}
-.shipping-row{display:flex;justify-content:space-between;font-size:12px;}
-.shipping-dest{color:var(--muted);}
-.shipping-time{color:var(--ink);}
+/* DELIVERY / COUNTRY SELECTOR */
+.pd-country-row{margin:.9rem 0;}
+.pd-country-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;display:block;}
+.pd-country-select{width:100%;padding:.55rem .8rem;border:1px solid var(--rule);background:var(--bg);font-family:var(--sans);font-size:13px;color:var(--ink);border-radius:4px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .8rem center;cursor:pointer;}
+.pd-country-select:focus{outline:none;border-color:var(--ink);}
+.pd-delivery-note{font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.7;}
+.pd-delivery-note strong{color:var(--ink);}
 /* CERTIFICATE */
 #page-cert{background:var(--bg);}
 .cert-wrap{max-width:680px;margin:0 auto;padding:3rem var(--pad) 5rem;}
@@ -891,18 +891,22 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <p class="print-detail-desc" id="pdDesc"></p>
       <div class="print-detail-specs" id="pdSpecs"></div>
       <div><div class="print-detail-size-label">Select size</div><div class="print-detail-size-grid" id="pdSizes"></div></div>
-      <div class="shipping-est">
-        <div class="shipping-est-title">Shipping estimate</div>
-        <div class="shipping-rows">
-          <div class="shipping-row"><span class="shipping-dest">Ghana (Accra)</span><span class="shipping-time">3 - 5 business days</span></div>
-          <div class="shipping-row"><span class="shipping-dest">West Africa</span><span class="shipping-time">7 - 10 business days</span></div>
-          <div class="shipping-row"><span class="shipping-dest">Europe / North America</span><span class="shipping-time">10 - 16 business days</span></div>
-          <div class="shipping-row"><span class="shipping-dest">Rest of world</span><span class="shipping-time">12 - 20 business days</span></div>
-        </div>
+      <div class="pd-country-row" id="pdCountryRow" style="display:none;">
+        <label class="pd-country-label" for="pdCountry">Where are you buying from?</label>
+        <select class="pd-country-select" id="pdCountry">
+          <option value="">— Select your country / region —</option>
+          <option value="gh">Ghana</option>
+          <option value="wa">West Africa (excl. Ghana)</option>
+          <option value="eu">Europe</option>
+          <option value="na">North America</option>
+          <option value="row">Rest of World</option>
+        </select>
+        <div class="pd-delivery-note" id="pdDeliveryNote"></div>
       </div>
-      <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">+ shipping &middot; Production 7-14 business days</div></div>
+      <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">Production 7&ndash;14 business days after confirmation</div></div>
       <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
       <div class="print-detail-actions" id="pdActions"></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:1rem;line-height:1.6;">By purchasing you agree to our <button onclick="navigate('terms')" style="background:none;border:none;font-family:inherit;font-size:inherit;color:var(--ink);cursor:pointer;text-decoration:underline;padding:0;">Terms of Sale</button>.</p>
     </div>
   </div>
   <!-- RELATED PRINTS -->
@@ -1613,11 +1617,32 @@ function openPrintDetail(print){
   var pdQtyVal=document.getElementById("pdQtyVal");
   var pdQtyMinus=document.getElementById("pdQtyMinus");
   var pdQtyPlus=document.getElementById("pdQtyPlus");
+  var edMax=parseInt((print.edition||'').match(/\d+/)||[99])||99;
   if(pdQtyRow){
     pdQtyRow.style.display=print.soldOut?"none":"flex";
     if(pdQtyVal) pdQtyVal.textContent="1";
     if(pdQtyMinus) pdQtyMinus.onclick=function(){var v=parseInt(pdQtyVal.textContent)||1;if(v>1)pdQtyVal.textContent=v-1;};
-    if(pdQtyPlus)  pdQtyPlus.onclick=function(){var v=parseInt(pdQtyVal.textContent)||1;if(v<99)pdQtyVal.textContent=v+1;};
+    if(pdQtyPlus)  pdQtyPlus.onclick=function(){var v=parseInt(pdQtyVal.textContent)||1;if(v<edMax)pdQtyVal.textContent=v+1;};
+  }
+  // Country / delivery selector
+  var pdCountryRow=document.getElementById('pdCountryRow');
+  var pdCountry=document.getElementById('pdCountry');
+  var pdDeliveryNote=document.getElementById('pdDeliveryNote');
+  var DELIVERY_TIMES={gh:'3–5 business days',wa:'7–10 business days',eu:'10–16 business days',na:'10–16 business days',row:'12–20 business days'};
+  if(pdCountryRow) pdCountryRow.style.display=print.soldOut?'none':'block';
+  if(pdCountry){ pdCountry.value=''; }
+  if(pdDeliveryNote) pdDeliveryNote.innerHTML='';
+  if(pdCountry&&pdDeliveryNote){
+    pdCountry.onchange=function(){
+      var v=pdCountry.value;
+      if(!v){pdDeliveryNote.innerHTML='';return;}
+      if(v==='gh'){
+        var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH₵ '+DELIVERY_FEE_GHC.toLocaleString();
+        pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+DELIVERY_TIMES[v];
+      } else {
+        pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+DELIVERY_TIMES[v]+'<br>We\'ll reach out with a shipping quote before production begins.';
+      }
+    };
   }
   if(pdActions){
     if(print.soldOut){
@@ -1641,7 +1666,9 @@ function openPrintDetail(print){
         var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
-        payWithPaystack(print,email,sizePrice*qty,qty);
+        var selCountry=pdCountry?pdCountry.value:'';
+        var delivFee=selCountry==='gh'?DELIVERY_FEE_GHC:0;
+        payWithPaystack(print,email,sizePrice*qty+delivFee,qty);
       });
       var cb=document.getElementById("pdCartBtn");
       if(cb) cb.addEventListener("click",function(){
@@ -1702,6 +1729,7 @@ function openPrintDetail(print){
 // CURRENCY
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067;
+var DELIVERY_FEE_GHC=50; // Ghana local delivery flat fee — update here to change site-wide
 // Fetch live GHS→USD rate on load (free API, no key needed)
 (function fetchRate(){
   fetch('https://open.er-api.com/v6/latest/GHS')
@@ -1947,10 +1975,7 @@ function openCert(items){
     +'<p class="cert-subtitle">This document certifies the authenticity of '
     +(isSingle?'a limited edition fine art print':items.length+' limited edition fine art prints')+'.</p>'
     +'<div>'+printBlocks+'</div>'
-    +'<div class="cert-section-label" style="margin-top:2rem;">Terms</div>'
-    +'<p class="cert-clause">These prints are original, limited edition archival fine art prints produced by Jeffery Asare. Hand-signed and numbered by the artist.</p>'
-    +'<p class="cert-clause">All photographs are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase does not transfer any copyright or reproduction rights.</p>'
-    +'<p class="cert-clause">For personal, non-commercial display only. Reproducing or commercial use without prior written consent is strictly prohibited.</p>'
+    +'<p style="margin-top:1.5rem;font-size:10px;color:#aaa;line-height:1.7;">This certificate is issued subject to the Terms of Sale at jefferyasare.com &middot; Purchase does not transfer copyright or reproduction rights.</p>'
     +'<div class="cert-sig-grid">'
     +'<div class="cert-sig-block"><div class="cert-sig-img">'+sigHtml+'</div><div class="cert-sig-label">Signature of Artist</div></div>'
     +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+dateStr+'</div><div class="cert-sig-label">Date</div></div>'
