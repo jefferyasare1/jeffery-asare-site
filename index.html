@@ -448,10 +448,10 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .home-print-text{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.05em;}
 .home-print-link{font-size:11px;color:rgba(255,255,255,.85);cursor:pointer;text-decoration:underline;text-underline-offset:2px;background:none;border:none;font-family:var(--sans);padding:0;}
 /* WHATSAPP FLOAT */
-.wa-float{position:fixed;bottom:1.6rem;right:1.6rem;z-index:400;width:48px;height:48px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(37,211,102,.35);transition:transform .2s,box-shadow .2s;border:none;text-decoration:none;}
-.wa-float:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(37,211,102,.45);}
-.wa-float svg{width:24px;height:24px;fill:#fff;}
-.wa-float-tooltip{position:absolute;right:56px;background:#111;color:#fff;font-size:11px;white-space:nowrap;padding:.35rem .75rem;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s;font-family:var(--sans);}
+.wa-float{position:fixed;bottom:1.6rem;right:1.6rem;z-index:400;width:40px;height:40px;background:#25D366;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 12px rgba(37,211,102,.35);transition:transform .2s,box-shadow .2s;border:none;text-decoration:none;}
+.wa-float:hover{transform:scale(1.08);box-shadow:0 5px 18px rgba(37,211,102,.45);}
+.wa-float svg{width:20px;height:20px;fill:#fff;}
+.wa-float-tooltip{position:absolute;right:48px;background:#111;color:#fff;font-size:11px;white-space:nowrap;padding:.3rem .65rem;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s;font-family:var(--sans);}
 .wa-float:hover .wa-float-tooltip{opacity:1;}
 /* SHIPPING ESTIMATE */
 .shipping-est{background:var(--warm);border-radius:8px;padding:1.2rem 1.4rem;margin-top:.5rem;}
@@ -1084,6 +1084,9 @@ function navigate(page) {
     document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
     var t = document.getElementById("page-"+page);
     if (t) t.classList.add("active");
+    // Show WhatsApp float only on Contact page
+    var waFloatEl = document.getElementById('waFloat');
+    if(waFloatEl) waFloatEl.style.display = (page === 'contact') ? 'flex' : 'none';
     window.scrollTo(0,0);
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
@@ -1662,7 +1665,7 @@ function openPrintDetail(print){
         var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
-        payWithPaystack(print,email,sizePrice*qty);
+        payWithPaystack(print,email,sizePrice*qty,qty);
       });
       var cb=document.getElementById("pdCartBtn");
       if(cb) cb.addEventListener("click",function(){
@@ -1867,11 +1870,11 @@ function checkoutCart(){
     metadata:{custom_fields:CART.map(function(i){return {display_name:i.print.title,variable_name:'print',value:i.size+' x'+i.qty};})},
     onClose:function(){},
     callback:function(response){
-      var prints=CART.slice();
+      var cartItems=CART.slice();
       CART=[];
       updateCartBadge();
       closeCart();
-      if(prints.length) openCert(prints[0].print);
+      if(cartItems.length) openCert(cartItems);
     }
   });
   handler.openIframe();
@@ -1880,10 +1883,11 @@ function checkoutCart(){
 // ===========================================================
 // PAYSTACK PAYMENT
 // ===========================================================
-function payWithPaystack(print,email,priceGHC){
+function payWithPaystack(print,email,priceGHC,qty){
   var activePill=document.getElementById('pdSizes')?document.getElementById('pdSizes').querySelector('.size-pill.active'):null;
   var selectedSize=activePill?activePill.textContent:(print.sizes[0]?print.sizes[0].label:'');
   if(priceGHC===undefined) priceGHC=activePill?parseFloat(activePill.dataset.price):print.priceGHC;
+  qty=Math.max(1,parseInt(qty)||1);
   var handler=PaystackPop.setup({
     key:'pk_test_651689f8101656b8ac3ba9b7bbc496720b454bf2',
     email:email,
@@ -1892,10 +1896,11 @@ function payWithPaystack(print,email,priceGHC){
     ref:'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now(),
     metadata:{custom_fields:[
       {display_name:"Print",variable_name:"print",value:print.title},
-      {display_name:"Size",variable_name:"size",value:selectedSize}
+      {display_name:"Size",variable_name:"size",value:selectedSize},
+      {display_name:"Qty",variable_name:"qty",value:qty}
     ]},
     onClose:function(){},
-    callback:function(response){ openCert(print); }
+    callback:function(response){ openCert([{print:print,size:selectedSize,qty:qty}]); }
   });
   handler.openIframe();
 }
@@ -1903,70 +1908,96 @@ function payWithPaystack(print,email,priceGHC){
 // ===========================================================
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
-// Re-add the cert button in pdActions once that flow is live
-function openCert(print){
-  // Auto-populate date
+// openCert(items) — items = array of {print, size, qty}
+function openCert(items){
+  if(!items||!items.length) return;
+  // Normalise: accept a bare print object for backwards compat
+  if(items.print) items=[{print:items,size:items.sizes&&items.sizes[0]?items.sizes[0].label:'',qty:1}];
+
   var now=new Date();
   var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var dateStr=months[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();
-
-  // Auto-populate print number — derive edition count from edition string e.g. "Edition of 15"
-  var editionMatch=print.edition.match(/\d+/);
-  var edTotal=editionMatch?editionMatch[0]:"--";
-  var printNumStr=print.id.toUpperCase()+" / __ of "+edTotal;
-
-  // Populate ref line
-  var certRef=document.getElementById("certRef");
   var uniqueNum=String(Math.floor(1000+Math.random()*9000));
-  if(certRef) certRef.textContent="COA-"+uniqueNum+" / "+now.getFullYear();
+  var coaRef="COA-"+uniqueNum+" · "+now.getFullYear();
+  var isSingle=items.length===1;
 
-  // Populate image
-  var certImgWrap=document.getElementById("certImgWrap");
-  if(certImgWrap) certImgWrap.innerHTML=print.img?"<img class=\"cert-img\" src=\""+print.img+"\" alt=\""+print.title+"\">":"";
+  // Build one block per print
+  var printBlocks=items.map(function(item,idx){
+    var p=item.print;
+    var edTotal=parseInt((p.edition||'').replace(/\D/g,''))||20;
+    var printNum=Math.floor(1+Math.random()*edTotal);
+    var sizeStr=item.size||(p.sizes&&p.sizes[0]?p.sizes[0].label:'');
+    var qtyStr=(item.qty&&item.qty>1)?' × '+item.qty:'';
+    var imgHtml=p.img
+      ?'<img class="cert-img" src="'+p.img+'" alt="'+p.title+'">'
+      :'<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">No image</div>';
+    var rows=[
+      ["Title",p.title+qtyStr],
+      ["Series",p.series],
+      ["Size",sizeStr],
+      ["Paper",p.paper],
+      ["Edition",p.edition],
+      ["Print No.",printNum+" of "+edTotal],
+      ["Artist","Jeffery Asare"],
+      ["Country","Ghana"]
+    ].map(function(r){
+      return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
+    }).join('');
+    return (idx>0?'<div style="border-top:1px solid #e8e4df;margin:2rem 0 1.5rem;"></div>':'')
+      +'<div class="cert-img-wrap">'+imgHtml+'</div>'
+      +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
+      +rows;
+  }).join('');
 
-  // Populate print details table
-  var certDetails=document.getElementById("certDetails");
-  if(certDetails) certDetails.innerHTML=[
-    ["Title",print.title],["Series",print.series],
-    ["Paper",print.paper],["Edition",print.edition],
-    ["Artist","Jeffery Asare"],["Country of origin","Ghana"]
-  ].map(function(r){
-    return "<div class=\"cert-row\"><span class=\"cert-key\">"+r[0]+"</span><span class=\"cert-val\">"+r[1]+"</span></div>";
-  }).join("");
+  var sigHtml='<img src="signature.png" alt="Jeffery Asare" '
+    +'onerror="this.parentElement.innerHTML=\'<div style=&quot;font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;&quot;>Jeffery Asare<\\/div>\'">';
 
-  // Auto-fill date and print number fields
-  var certDate=document.getElementById("certDate");
-  if(certDate) certDate.textContent=dateStr;
-  var certPrintNum=document.getElementById("certPrintNum");
-  if(certPrintNum) certPrintNum.textContent=printNumStr;
+  var html=''
+    +'<button class="cert-modal-close" id="certModalCloseBtn">&#10005;</button>'
+    +'<div class="cert-header">'
+    +'<span class="cert-brand">Jeffery Asare</span>'
+    +'<span class="cert-ref">'+coaRef+'</span>'
+    +'</div>'
+    +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
+    +'<p class="cert-subtitle">This document certifies the authenticity of '
+    +(isSingle?'a limited edition fine art print':items.length+' limited edition fine art prints')+'.</p>'
+    +'<div>'+printBlocks+'</div>'
+    +'<div class="cert-section-label" style="margin-top:2rem;">Terms</div>'
+    +'<p class="cert-clause">These prints are original, limited edition archival fine art prints produced by Jeffery Asare. Hand-signed and numbered by the artist.</p>'
+    +'<p class="cert-clause">All photographs are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase does not transfer any copyright or reproduction rights.</p>'
+    +'<p class="cert-clause">For personal, non-commercial display only. Reproducing or commercial use without prior written consent is strictly prohibited.</p>'
+    +'<div class="cert-sig-grid">'
+    +'<div class="cert-sig-block"><div class="cert-sig-img">'+sigHtml+'</div><div class="cert-sig-label">Signature of Artist</div></div>'
+    +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+dateStr+'</div><div class="cert-sig-label">Date</div></div>'
+    +'<div class="cert-sig-block"><input class="cert-buyer-input" id="certBuyerName" type="text" placeholder="Enter your full name" autocomplete="name" maxlength="80"><div class="cert-sig-label">Buyer Name</div></div>'
+    +'</div>'
+    +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>'
+    +'<button class="cert-print-btn" id="certPrintBtn" disabled>Print / Save as PDF</button>'
+    +'<p class="cert-print-hint" id="certPrintHint">Enter your name above to unlock the PDF</p>';
 
-  // Reset buyer name and lock print button
-  var buyerInput=document.getElementById("certBuyerName");
-  var printBtn=document.getElementById("certPrintBtn");
-  var printHint=document.getElementById("certPrintHint");
-  if(buyerInput){ buyerInput.value=""; }
-  if(printBtn){ printBtn.disabled=true; }
-  if(printHint){ printHint.style.display="block"; }
+  var modal=document.getElementById('certModal');
+  if(!modal) return;
+  modal.innerHTML=html;
 
-  // Buyer name input — unlock print button when name entered
+  // Re-wire close button (replaced by innerHTML)
+  var closeBtn=document.getElementById('certModalCloseBtn');
+  if(closeBtn) closeBtn.addEventListener('click',closeCertModal);
+
+  // Buyer name unlocks PDF button
+  var buyerInput=document.getElementById('certBuyerName');
+  var printBtn=document.getElementById('certPrintBtn');
+  var printHint=document.getElementById('certPrintHint');
   if(buyerInput){
     buyerInput.oninput=function(){
       var filled=this.value.trim().length>1;
-      if(printBtn){ printBtn.disabled=!filled; }
-      if(printHint){ printHint.style.display=filled?"none":"block"; }
+      if(printBtn) printBtn.disabled=!filled;
+      if(printHint) printHint.style.display=filled?'none':'block';
     };
   }
+  if(printBtn) printBtn.onclick=function(){ if(!printBtn.disabled) window.print(); };
 
-  // Print button
-  if(printBtn){
-    printBtn.onclick=function(){
-      if(!printBtn.disabled) window.print();
-    };
-  }
-
-  // Open modal
-  var overlay=document.getElementById("certModalOverlay");
-  if(overlay){ overlay.classList.add("open"); document.body.style.overflow="hidden"; }
+  var overlay=document.getElementById('certModalOverlay');
+  if(overlay){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
 }
 
 function closeCertModal(){
@@ -2061,47 +2092,9 @@ window.checkoutCart=checkoutCart;
 }); // end DOMContentLoaded
 </script>
 
-<!-- CERTIFICATE OF AUTHENTICITY MODAL -->
+<!-- CERTIFICATE OF AUTHENTICITY MODAL — content injected by openCert() -->
 <div class="cert-modal-overlay" id="certModalOverlay">
-  <div class="cert-modal" id="certModal">
-    <button class="cert-modal-close" id="certModalCloseBtn">&#10005;</button>
-    <div class="cert-header">
-      <span class="cert-brand">Jeffery Asare</span>
-      <span class="cert-ref" id="certRef">COA &middot; 2026</span>
-    </div>
-    <h1 class="cert-title">Certificate<br>of Authenticity</h1>
-    <p class="cert-subtitle">This document certifies the authenticity of a limited edition fine art print.</p>
-    <div class="cert-img-wrap" id="certImgWrap"></div>
-    <div class="cert-section-label">Print Details</div>
-    <div id="certDetails" style="margin-bottom:1.5rem;"></div>
-    <div class="cert-section-label">Terms</div>
-    <p class="cert-clause">This print is an original, limited edition archival fine art print produced by Jeffery Asare. Hand-signed and numbered by the artist.</p>
-    <p class="cert-clause">All photographs are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase of this print does not transfer any copyright or reproduction rights.</p>
-    <p class="cert-clause">For personal, non-commercial display only. Scanning, reproducing, or commercial use without prior written consent is strictly prohibited.</p>
-    <div class="cert-sig-grid">
-      <div class="cert-sig-block">
-        <div class="cert-sig-img">
-          <img src="signature.png" alt="Jeffery Asare signature" onerror="this.parentElement.innerHTML='<div style=&quot;font-family:Georgia,serif;font-size:1.4rem;color:#111;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;&quot;>Jeffery Asare</div>'">
-        </div>
-        <div class="cert-sig-label">Signature of Artist</div>
-      </div>
-      <div class="cert-sig-block">
-        <div class="cert-sig-autoval" id="certDate"></div>
-        <div class="cert-sig-label">Date</div>
-      </div>
-      <div class="cert-sig-block">
-        <div class="cert-sig-autoval" id="certPrintNum"></div>
-        <div class="cert-sig-label">Print Number</div>
-      </div>
-      <div class="cert-sig-block">
-        <input class="cert-buyer-input" id="certBuyerName" type="text" placeholder="Enter your full name" autocomplete="name" maxlength="80">
-        <div class="cert-sig-label">Buyer Name</div>
-      </div>
-    </div>
-    <p style="margin-top:1.8rem;font-size:10px;color:var(--muted);line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>
-    <button class="cert-print-btn" id="certPrintBtn" disabled>Print / Save as PDF</button>
-    <p class="cert-print-hint" id="certPrintHint">Enter your name above to unlock the PDF</p>
-  </div>
+  <div class="cert-modal" id="certModal"></div>
 </div>
 
 <!-- WHATSAPP FLOAT BUTTON -->
