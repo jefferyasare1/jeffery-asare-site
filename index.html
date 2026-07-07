@@ -619,7 +619,6 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   <button class="lb-arrow lb-next" id="lbNextBtn">&#8250;</button>
   <div class="lb-bottom">
     <div class="lb-meta"><div class="lb-title" id="lbTitle"></div><div class="lb-sub" id="lbSub"></div></div>
-    <button class="lb-detail-link" id="lbDetailBtn">View details &#8594;</button>
   </div>
 </div>
 
@@ -930,7 +929,7 @@ var FORMSPREE_URL = "https://formspree.io/f/xwvdwaal";
 // ── WHATSAPP NUMBER ─────────────────────────────────────────────
 // Replace with your actual WhatsApp number (country code + number, no + or spaces)
 // Example: Ghana number +233 24 123 4567 → '233241234567'
-var WA_NUMBER = '233000000000';
+var WA_NUMBER = '233501361192';
 // ───────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1309,7 +1308,7 @@ function renderShop(page){
       +"<div class=\"shop-price\">"+priceHtml+"</div>"
       +"<div style=\"display:flex;gap:.5rem;align-items:center;\">"+cartBtn+"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button></div>"
       +"</div></div>";
-    item.querySelector(".shop-img-wrap").addEventListener("click",(function(print){ return function(){ openPrintDetail(print); }; })(p));
+    // Shop image is view-only — "View print" button opens detail
     item.querySelectorAll(".size-pill").forEach(function(pill){
       pill.addEventListener("click",function(e){
         e.stopPropagation();
