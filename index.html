@@ -116,17 +116,21 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .btn-dark:hover{opacity:.8;}
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
 .btn-outline:hover{border-color:#999;}
-.shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 3rem;}
-.shop-card{display:flex;flex-direction:column;}
-.shop-card-img-wrap{overflow:hidden;margin-bottom:1.2rem;}
-.shop-card-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.22,.61,.36,1);}
-.shop-card-img-ph{width:100%;aspect-ratio:3/4;background:var(--warm);}
-.shop-card:hover .shop-card-img{transform:scale(1.03);}
+.shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 2.5rem;}
+.shop-card{display:flex;flex-direction:column;cursor:pointer;}
+.shop-card-img-wrap{overflow:hidden;margin-bottom:1rem;}
+.shop-card-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.25,.46,.45,.94);}
+.shop-card-img-ph{width:100%;aspect-ratio:4/5;background:var(--warm);}
+.shop-card:hover .shop-card-img{transform:translateY(-10px);}
 .shop-card-body{display:flex;flex-direction:column;flex:1;}
-.shop-card-series{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
-.shop-card-title{font-family:var(--title);font-size:1.35rem;font-weight:600;letter-spacing:-.02em;line-height:1.05;margin-bottom:.3rem;}
-.shop-card-edition{font-size:11px;color:var(--muted);margin-bottom:.9rem;}
-.shop-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--rule);}
+.shop-card-series{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
+.shop-card-title{font-family:var(--title);font-size:.95rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-bottom:.2rem;}
+.shop-card-edition{font-size:10px;color:var(--muted);margin-bottom:.75rem;}
+.shop-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-top:auto;padding-top:.75rem;border-top:1px solid var(--rule);}
+.shop-card-price{font-size:12px;color:var(--ink);}
+.shop-view-btn{font-size:10px;letter-spacing:.08em;color:var(--ink);background:var(--warm);border:1px solid var(--rule);border-radius:999px;cursor:pointer;font-family:var(--sans);padding:.35rem .85rem;transition:all .18s;white-space:nowrap;font-weight:500;}
+.shop-view-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+.shop-sold-badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 .shop-img-ph{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:var(--warm);}
 .shop-img-ph span{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);opacity:.4;}
 .shop-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
@@ -215,6 +219,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
   .photo-grid{grid-template-columns:1fr;}
   .field-row-2{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr;}
+  .shop-list{grid-template-columns:1fr;}
 }
 
 /* =====================================================
@@ -546,14 +551,6 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* ── SHOP ANIMATIONS ── */
 @keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .shop-card{animation:shopFadeUp .55s ease both;}
-/* ── IMAGE HOVER ── */
-.shop-img-wrap{position:relative;overflow:hidden;cursor:pointer;border-radius:2px;}
-.shop-img-wrap img,.shop-img-wrap .shop-img-ph{transition:transform .5s ease;width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
-.shop-img-wrap:hover img{transform:scale(1.05);}
-.shop-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;padding:1.2rem;transition:background .35s;pointer-events:none;}
-.shop-img-wrap:hover .shop-img-overlay{background:rgba(0,0,0,.22);}
-.shop-img-overlay-label{color:#fff;font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:all .3s;}
-.shop-img-wrap:hover .shop-img-overlay-label{opacity:1;transform:translateY(0);}
 /* ── BUTTONS ── */
 .btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
 .btn-cart:hover{background:var(--ink);color:#fff;}
@@ -1304,75 +1301,42 @@ function renderShop(page){
     var imgHtml=p.img
       ? "<div class=\"shop-card-img-wrap\"><img class=\"shop-card-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"></div>"
       : "<div class=\"shop-card-img-wrap\"><div class=\"shop-card-img-ph\"></div></div>";
-    var sizePills=p.sizes.map(function(s,si){
-      var shortLabel=s.label.split('(')[0].trim();
-      return "<button class=\"size-pill"+(si===0?" active":"")+"\" data-price=\""+s.price+"\" data-full-size=\""+s.label+"\" title=\""+s.label+"\">"+shortLabel+"</button>";
-    }).join("");
-    var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.sizes[0].price);
-    var inqLabel  = p.soldOut ? "Join waiting list" : "View print &#8594;";
-    var cartBtn   = p.soldOut ? "" : "<button class=\"btn-cart shop-cart-btn\">+ Add to Cart</button>";
+    var basePrice=p.sizes[0].price;
+    var priceText=CURRENCY==='USD'
+      ? "From $"+Math.round(basePrice*USD_RATE)
+      : "From GH₵ "+Number(basePrice).toLocaleString();
+    var actionBtn=p.soldOut
+      ? "<span class=\"shop-sold-badge\">Sold out</span>"
+      : "<button class=\"shop-view-btn\">View print &#8594;</button>";
     item.innerHTML=imgHtml
       +"<div class=\"shop-card-body\">"
       +"<div class=\"shop-card-series\">"+p.series+"</div>"
       +"<div class=\"shop-card-title\">"+p.title+"</div>"
       +"<div class=\"shop-card-edition\">"+p.edition+"</div>"
-      +"<div class=\"shop-sizes\">"+sizePills+"</div>"
-      +(p.soldOut?"":"<div class=\"qty-row\"><span class=\"qty-label\">Qty</span><div class=\"qty-control\"><button class=\"qty-btn shop-qty-minus\">&#8722;</button><span class=\"qty-val shop-qty-val\">1</span><button class=\"qty-btn shop-qty-plus\">&#43;</button></div></div>")
       +"<div class=\"shop-card-footer\">"
-      +"<div class=\"shop-price\">"+priceHtml+"</div>"
-      +"<div style=\"display:flex;gap:.5rem;align-items:center;\">"+cartBtn+"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button></div>"
+      +"<span class=\"shop-card-price\">"+(p.soldOut?"Sold out":priceText)+"</span>"
+      +actionBtn
       +"</div></div>";
-    // Shop image is view-only — "View print" button opens detail
-    item.querySelectorAll(".size-pill").forEach(function(pill){
-      pill.addEventListener("click",function(e){
-        e.stopPropagation();
-        item.querySelectorAll(".size-pill").forEach(function(b){ b.classList.remove("active"); });
-        pill.classList.add("active");
-        var priceEl=item.querySelector(".shop-price");
-        if(priceEl&&!p.soldOut) priceEl.innerHTML=formatPrice(parseFloat(pill.dataset.price));
+    if(p.soldOut){
+      item.addEventListener("click",function(){
+        navigate("contact");
+        setTimeout(function(){
+          var msg=document.querySelector("#contactForm textarea[name=message]");
+          if(msg&&!msg.value){
+            msg.value="Hi Jeffery,\n\nI would like to join the waiting list for \u201c"+p.title+"\u201d.";
+            var cc=document.getElementById("charCount"); if(cc) cc.textContent=msg.value.length;
+          }
+        },150);
       });
-    });
-    if(!p.soldOut){
-      // Qty buttons
-      var qtyValEl=item.querySelector(".shop-qty-val");
-      item.querySelector(".shop-qty-minus").addEventListener("click",function(e){
-        e.stopPropagation();
-        var v=parseInt(qtyValEl.textContent)||1;
-        if(v>1){ qtyValEl.textContent=v-1; }
+    } else {
+      item.addEventListener("click",function(e){
+        if(!e.target.closest(".shop-view-btn")) openPrintDetail(p);
       });
-      item.querySelector(".shop-qty-plus").addEventListener("click",function(e){
+      item.querySelector(".shop-view-btn").addEventListener("click",function(e){
         e.stopPropagation();
-        var v=parseInt(qtyValEl.textContent)||1;
-        if(v<99){ qtyValEl.textContent=v+1; }
+        openPrintDetail(p);
       });
-      // Add to cart
-      item.querySelector(".shop-cart-btn").addEventListener("click",(function(print,item){ return function(e){
-        e.stopPropagation();
-        var activePill=item.querySelector(".size-pill.active");
-        var sizeLabel=activePill?(activePill.dataset.fullSize||activePill.textContent):print.sizes[0].label;
-        var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
-        var qty=parseInt(item.querySelector(".shop-qty-val").textContent)||1;
-        addToCart(print,sizeLabel,sizePrice,qty);
-        openCart();
-      }; })(p,item));
     }
-    item.querySelector(".shop-inq").addEventListener("click",(function(print){
-      return function(){
-        if(print.soldOut){
-          navigate("contact");
-          setTimeout(function(){
-            var msg=document.querySelector("#contactForm textarea[name=message]");
-            if(msg && !msg.value){
-              msg.value="Hi Jeffery,\n\nI would like to join the waiting list for \u201c"+print.title+"\u201d.";
-              var cc=document.getElementById("charCount"); if(cc) cc.textContent=msg.value.length;
-            }
-          },150);
-        } else {
-          openPrintDetail(print);
-        }
-      };
-    })(p));
-
     list.appendChild(item);
   });
 
