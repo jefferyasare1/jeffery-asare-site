@@ -1953,10 +1953,19 @@ function openCert(items){
     ].map(function(r){
       return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
     }).join('');
+    var printUrl=window.location.origin+'?print='+p.id;
+    var qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
     return (idx>0?'<div style="border-top:1px solid #e8e4df;margin:2rem 0 1.5rem;"></div>':'')
       +'<div class="cert-img-wrap">'+imgHtml+'</div>'
       +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
-      +rows;
+      +rows
+      +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
+      +'<img src="'+qrSrc+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;">'
+      +'<div>'
+      +'<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.3rem;">Verify Online</div>'
+      +'<div style="font-size:11px;color:#666;line-height:1.55;">Scan to view this print on the official Jeffery Asare website.</div>'
+      +'<div style="font-size:10px;color:#bbb;margin-top:.2rem;word-break:break-all;">'+printUrl+'</div>'
+      +'</div></div>';
   }).join('');
 
   var sigHtml='<img src="signature.png" alt="Jeffery Asare" '
@@ -2098,6 +2107,15 @@ injectFooters();
 renderPortfolio("all");
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
+// Deep link: ?print=s1 navigates to shop and opens that print detail
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var pid=params.get('print');
+  if(pid){
+    var matchPrint=PRINTS.find(function(p){ return p.id===pid; });
+    if(matchPrint){ navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400); }
+  }
+})();
 // Add badge to home nav Shop button
 var _hsb=document.getElementById("homeShopBtn");
 
