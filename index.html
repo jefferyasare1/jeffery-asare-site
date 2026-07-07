@@ -894,12 +894,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <div class="pd-country-row" id="pdCountryRow" style="display:none;">
         <label class="pd-country-label" for="pdCountry">Where are you buying from?</label>
         <select class="pd-country-select" id="pdCountry">
-          <option value="">— Select your country / region —</option>
-          <option value="gh">Ghana</option>
-          <option value="wa">West Africa (excl. Ghana)</option>
-          <option value="eu">Europe</option>
-          <option value="na">North America</option>
-          <option value="row">Rest of World</option>
+          <option value="">— Select your country —</option>
         </select>
         <div class="pd-delivery-note" id="pdDeliveryNote"></div>
       </div>
@@ -1628,19 +1623,19 @@ function openPrintDetail(print){
   var pdCountryRow=document.getElementById('pdCountryRow');
   var pdCountry=document.getElementById('pdCountry');
   var pdDeliveryNote=document.getElementById('pdDeliveryNote');
-  var DELIVERY_TIMES={gh:'3–5 business days',wa:'7–10 business days',eu:'10–16 business days',na:'10–16 business days',row:'12–20 business days'};
   if(pdCountryRow) pdCountryRow.style.display=print.soldOut?'none':'block';
   if(pdCountry){ pdCountry.value=''; }
   if(pdDeliveryNote) pdDeliveryNote.innerHTML='';
   if(pdCountry&&pdDeliveryNote){
     pdCountry.onchange=function(){
-      var v=pdCountry.value;
-      if(!v){pdDeliveryNote.innerHTML='';return;}
-      if(v==='gh'){
+      var code=pdCountry.value;
+      if(!code){pdDeliveryNote.innerHTML='';return;}
+      var country=COUNTRIES.find(function(c){return c.code===code;})||{time:'12–20 business days',region:'row'};
+      if(country.region==='gh'){
         var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH₵ '+DELIVERY_FEE_GHC.toLocaleString();
-        pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+DELIVERY_TIMES[v];
+        pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+country.time;
       } else {
-        pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+DELIVERY_TIMES[v]+'<br>We\'ll reach out with a shipping quote before production begins.';
+        pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
       }
     };
   }
@@ -1667,7 +1662,8 @@ function openPrintDetail(print){
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
         var selCountry=pdCountry?pdCountry.value:'';
-        var delivFee=selCountry==='gh'?DELIVERY_FEE_GHC:0;
+        var selCountryData=COUNTRIES.find(function(c){return c.code===selCountry;})||{};
+        var delivFee=selCountryData.region==='gh'?DELIVERY_FEE_GHC:0;
         payWithPaystack(print,email,sizePrice*qty+delivFee,qty);
       });
       var cb=document.getElementById("pdCartBtn");
@@ -1730,6 +1726,113 @@ function openPrintDetail(print){
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067;
 var DELIVERY_FEE_GHC=50; // Ghana local delivery flat fee — update here to change site-wide
+
+// Country list: {code, name, time, region}
+// region: 'gh'=Ghana, 'wa'=West Africa, 'af'=Africa, 'eu'=Europe, 'na'=North America, 'me'=Middle East, 'ap'=Asia Pacific, 'row'=Rest of World
+var COUNTRIES=[
+  {code:'GH',name:'Ghana',time:'3–5 business days',region:'gh'},
+  // West Africa
+  {code:'BJ',name:'Benin',time:'5–8 business days',region:'wa'},
+  {code:'BF',name:'Burkina Faso',time:'7–10 business days',region:'wa'},
+  {code:'CV',name:'Cape Verde',time:'7–10 business days',region:'wa'},
+  {code:'CI',name:'Côte d\'Ivoire',time:'7–10 business days',region:'wa'},
+  {code:'GM',name:'Gambia',time:'7–10 business days',region:'wa'},
+  {code:'GN',name:'Guinea',time:'7–10 business days',region:'wa'},
+  {code:'GW',name:'Guinea-Bissau',time:'7–10 business days',region:'wa'},
+  {code:'LR',name:'Liberia',time:'7–10 business days',region:'wa'},
+  {code:'ML',name:'Mali',time:'7–10 business days',region:'wa'},
+  {code:'MR',name:'Mauritania',time:'7–10 business days',region:'wa'},
+  {code:'NE',name:'Niger',time:'7–10 business days',region:'wa'},
+  {code:'NG',name:'Nigeria',time:'5–8 business days',region:'wa'},
+  {code:'SN',name:'Senegal',time:'7–10 business days',region:'wa'},
+  {code:'SL',name:'Sierra Leone',time:'7–10 business days',region:'wa'},
+  {code:'TG',name:'Togo',time:'5–7 business days',region:'wa'},
+  // Rest of Africa
+  {code:'DZ',name:'Algeria',time:'10–14 business days',region:'af'},
+  {code:'AO',name:'Angola',time:'10–14 business days',region:'af'},
+  {code:'CM',name:'Cameroon',time:'8–12 business days',region:'af'},
+  {code:'CD',name:'DR Congo',time:'10–14 business days',region:'af'},
+  {code:'EG',name:'Egypt',time:'8–12 business days',region:'af'},
+  {code:'ET',name:'Ethiopia',time:'10–14 business days',region:'af'},
+  {code:'KE',name:'Kenya',time:'8–12 business days',region:'af'},
+  {code:'MG',name:'Madagascar',time:'12–18 business days',region:'af'},
+  {code:'MW',name:'Malawi',time:'10–14 business days',region:'af'},
+  {code:'MA',name:'Morocco',time:'8–12 business days',region:'af'},
+  {code:'MZ',name:'Mozambique',time:'10–14 business days',region:'af'},
+  {code:'NA',name:'Namibia',time:'10–14 business days',region:'af'},
+  {code:'RW',name:'Rwanda',time:'8–12 business days',region:'af'},
+  {code:'ZA',name:'South Africa',time:'8–12 business days',region:'af'},
+  {code:'SD',name:'Sudan',time:'10–14 business days',region:'af'},
+  {code:'TZ',name:'Tanzania',time:'8–12 business days',region:'af'},
+  {code:'TN',name:'Tunisia',time:'8–12 business days',region:'af'},
+  {code:'UG',name:'Uganda',time:'8–12 business days',region:'af'},
+  {code:'ZM',name:'Zambia',time:'10–14 business days',region:'af'},
+  {code:'ZW',name:'Zimbabwe',time:'10–14 business days',region:'af'},
+  // Europe
+  {code:'AT',name:'Austria',time:'10–14 business days',region:'eu'},
+  {code:'BE',name:'Belgium',time:'10–14 business days',region:'eu'},
+  {code:'HR',name:'Croatia',time:'10–14 business days',region:'eu'},
+  {code:'CZ',name:'Czech Republic',time:'10–14 business days',region:'eu'},
+  {code:'DK',name:'Denmark',time:'10–14 business days',region:'eu'},
+  {code:'FI',name:'Finland',time:'10–14 business days',region:'eu'},
+  {code:'FR',name:'France',time:'10–14 business days',region:'eu'},
+  {code:'DE',name:'Germany',time:'10–14 business days',region:'eu'},
+  {code:'GR',name:'Greece',time:'10–14 business days',region:'eu'},
+  {code:'HU',name:'Hungary',time:'10–14 business days',region:'eu'},
+  {code:'IE',name:'Ireland',time:'10–14 business days',region:'eu'},
+  {code:'IT',name:'Italy',time:'10–14 business days',region:'eu'},
+  {code:'LU',name:'Luxembourg',time:'10–14 business days',region:'eu'},
+  {code:'NL',name:'Netherlands',time:'10–14 business days',region:'eu'},
+  {code:'NO',name:'Norway',time:'10–14 business days',region:'eu'},
+  {code:'PL',name:'Poland',time:'10–14 business days',region:'eu'},
+  {code:'PT',name:'Portugal',time:'10–14 business days',region:'eu'},
+  {code:'RO',name:'Romania',time:'10–14 business days',region:'eu'},
+  {code:'ES',name:'Spain',time:'10–14 business days',region:'eu'},
+  {code:'SE',name:'Sweden',time:'10–14 business days',region:'eu'},
+  {code:'CH',name:'Switzerland',time:'10–14 business days',region:'eu'},
+  {code:'GB',name:'United Kingdom',time:'10–14 business days',region:'eu'},
+  // North America
+  {code:'CA',name:'Canada',time:'10–14 business days',region:'na'},
+  {code:'MX',name:'Mexico',time:'12–18 business days',region:'na'},
+  {code:'US',name:'United States',time:'10–14 business days',region:'na'},
+  // Middle East
+  {code:'BH',name:'Bahrain',time:'10–14 business days',region:'me'},
+  {code:'KW',name:'Kuwait',time:'10–14 business days',region:'me'},
+  {code:'OM',name:'Oman',time:'10–14 business days',region:'me'},
+  {code:'QA',name:'Qatar',time:'10–14 business days',region:'me'},
+  {code:'SA',name:'Saudi Arabia',time:'10–14 business days',region:'me'},
+  {code:'AE',name:'United Arab Emirates',time:'10–14 business days',region:'me'},
+  // Asia Pacific
+  {code:'AU',name:'Australia',time:'12–18 business days',region:'ap'},
+  {code:'CN',name:'China',time:'12–18 business days',region:'ap'},
+  {code:'HK',name:'Hong Kong',time:'12–18 business days',region:'ap'},
+  {code:'IN',name:'India',time:'12–18 business days',region:'ap'},
+  {code:'ID',name:'Indonesia',time:'14–20 business days',region:'ap'},
+  {code:'JP',name:'Japan',time:'12–18 business days',region:'ap'},
+  {code:'MY',name:'Malaysia',time:'12–18 business days',region:'ap'},
+  {code:'NZ',name:'New Zealand',time:'12–18 business days',region:'ap'},
+  {code:'SG',name:'Singapore',time:'12–18 business days',region:'ap'},
+  {code:'KR',name:'South Korea',time:'12–18 business days',region:'ap'},
+  {code:'TH',name:'Thailand',time:'14–20 business days',region:'ap'},
+  // Rest of World
+  {code:'BR',name:'Brazil',time:'14–20 business days',region:'row'},
+  {code:'CL',name:'Chile',time:'14–20 business days',region:'row'},
+  {code:'CO',name:'Colombia',time:'14–20 business days',region:'row'},
+  {code:'IL',name:'Israel',time:'10–14 business days',region:'row'},
+  {code:'NZ',name:'New Zealand',time:'12–18 business days',region:'row'},
+  {code:'TR',name:'Turkey',time:'10–14 business days',region:'row'},
+  {code:'OTHER',name:'Other country',time:'12–20 business days',region:'row'}
+];
+(function(){
+  var sel=document.getElementById('pdCountry');
+  if(!sel) return;
+  COUNTRIES.forEach(function(c){
+    var opt=document.createElement('option');
+    opt.value=c.code;
+    opt.textContent=c.name;
+    sel.appendChild(opt);
+  });
+})();
 // Fetch live GHS→USD rate on load (free API, no key needed)
 (function fetchRate(){
   fetch('https://open.er-api.com/v6/latest/GHS')
