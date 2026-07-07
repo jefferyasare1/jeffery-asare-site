@@ -26,15 +26,24 @@
   .rate-row input{width:120px;border:1.5px solid #ddd;border-radius:6px;padding:.45rem .7rem;font-size:14px;outline:none;}
   .rate-row input:focus{border-color:#111;}
   .prints-grid{display:grid;gap:.75rem;}
-  .print-row{background:#fff;border-radius:10px;padding:1rem 1.2rem;display:grid;grid-template-columns:50px 1fr auto;gap:1rem;align-items:center;}
-  .print-thumb{width:50px;height:62px;object-fit:cover;border-radius:4px;}
-  .print-thumb-ph{width:50px;height:62px;background:#eee;border-radius:4px;}
+  .print-row{background:#fff;border-radius:10px;padding:1rem 1.2rem;}
+  .print-row-header{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem;}
+  .print-thumb{width:50px;height:62px;object-fit:cover;border-radius:4px;flex-shrink:0;}
+  .print-thumb-ph{width:50px;height:62px;background:#eee;border-radius:4px;flex-shrink:0;}
   .print-info{min-width:0;}
   .print-info .ptitle{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .print-info .pseries{font-size:11px;color:#888;margin-top:.15rem;}
+  /* Size selector */
+  .size-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem;}
+  .size-tab{padding:.35rem .85rem;border-radius:999px;border:1.5px solid #ddd;background:none;font-size:12px;cursor:pointer;transition:all .15s;color:#666;}
+  .size-tab.active{background:#111;color:#fff;border-color:#111;}
+  .size-tab:hover:not(.active){border-color:#999;color:#111;}
+  /* Price edit */
+  .price-edit-row{display:flex;align-items:center;gap:.6rem;}
+  .price-edit-row label{font-size:12px;color:#888;}
   .price-input-wrap{display:flex;align-items:center;gap:.4rem;}
   .price-input-wrap span{font-size:13px;color:#888;}
-  .price-input-wrap input{width:90px;border:1.5px solid #ddd;border-radius:6px;padding:.45rem .6rem;font-size:14px;text-align:right;outline:none;}
+  .price-input-wrap input{width:110px;border:1.5px solid #ddd;border-radius:8px;padding:.55rem .8rem;font-size:18px;font-weight:600;text-align:right;outline:none;transition:border .2s;}
   .price-input-wrap input:focus{border-color:#111;}
   .save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #eee;padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-top:2rem;}
   .save-bar .hint{font-size:12px;color:#888;}
@@ -118,25 +127,65 @@ function loadAdmin(){
   document.getElementById('usdRate').value = savedRate;
 
   var grid = document.getElementById('printsGrid');
-  grid.innerHTML = PRINTS_DATA.map(function(p){
+  grid.innerHTML = '';
+
+  PRINTS_DATA.forEach(function(p){
     var imgEl = '<img class="print-thumb" src="'+p.img+'" onerror="this.className=\'print-thumb-ph\'">';
-    var sizeRows = p.sizes.map(function(s){
+    // Build size tabs
+    var sizeTabs = p.sizes.map(function(s,si){
+      return '<button class="size-tab'+(si===0?' active':'')+'" data-pid="'+p.id+'" data-size="'+s.label+'">'
+        + s.label.split('(')[0].trim()+'</button>';
+    }).join('');
+    // Build hidden inputs for each size
+    var hiddenInputs = p.sizes.map(function(s){
       var key = s.label.replace(/[^a-zA-Z0-9]/g,'_');
       var savedPrice = (saved[p.id]&&saved[p.id][s.label]!==undefined) ? saved[p.id][s.label] : s.defaultPrice;
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #f5f5f5;">'
-        + '<span style="font-size:12px;color:#666;min-width:160px;">'+s.label+'</span>'
-        + '<div class="price-input-wrap"><span>GH&#8373;</span>'
-        + '<input type="number" id="price_'+p.id+'_'+key+'" value="'+savedPrice+'" min="0" step="10"></div>'
-        + '</div>';
+      return '<input type="number" id="price_'+p.id+'_'+key+'" value="'+savedPrice+'" min="0" step="10" data-pid="'+p.id+'" data-size="'+s.label+'" style="display:none;">';
     }).join('');
-    return '<div class="print-row" style="grid-template-columns:1fr;gap:.5rem;padding-bottom:.8rem;">'
-      + '<div style="display:flex;gap:1rem;align-items:center;">'
+    // First size's price for the visible input
+    var firstKey = p.sizes[0].label.replace(/[^a-zA-Z0-9]/g,'_');
+    var firstPrice = (saved[p.id]&&saved[p.id][p.sizes[0].label]!==undefined) ? saved[p.id][p.sizes[0].label] : p.sizes[0].defaultPrice;
+
+    var row = document.createElement('div');
+    row.className = 'print-row';
+    row.innerHTML = '<div class="print-row-header">'
       + imgEl
       + '<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div></div>'
       + '</div>'
-      + sizeRows
+      + '<div class="size-tabs">'+sizeTabs+'</div>'
+      + '<div class="price-edit-row">'
+      + '<label>GH&#8373;</label>'
+      + '<div class="price-input-wrap">'
+      + '<input type="number" id="priceVisible_'+p.id+'" value="'+firstPrice+'" min="0" step="10" style="font-size:22px;font-weight:700;">'
+      + '</div>'
+      + hiddenInputs
       + '</div>';
-  }).join('');
+
+    // Wire size tab clicks
+    row.querySelectorAll('.size-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        row.querySelectorAll('.size-tab').forEach(function(t){ t.classList.remove('active'); });
+        tab.classList.add('active');
+        var key = tab.dataset.size.replace(/[^a-zA-Z0-9]/g,'_');
+        var hiddenInput = row.querySelector('#price_'+tab.dataset.pid+'_'+key);
+        var visibleInput = row.querySelector('#priceVisible_'+tab.dataset.pid);
+        if(hiddenInput && visibleInput){
+          visibleInput.value = hiddenInput.value;
+          // Keep them in sync as user types
+          visibleInput.oninput = function(){ hiddenInput.value = visibleInput.value; };
+        }
+      });
+    });
+
+    // Sync first size on load
+    var firstVisible = row.querySelector('#priceVisible_'+p.id);
+    var firstHidden  = row.querySelector('#price_'+p.id+'_'+firstKey);
+    if(firstVisible && firstHidden){
+      firstVisible.oninput = function(){ firstHidden.value = firstVisible.value; };
+    }
+
+    grid.appendChild(row);
+  });
 }
 
 function saveAll(){

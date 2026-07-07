@@ -1170,7 +1170,7 @@ function renderPortfolio(filter, animate){
       var card=document.createElement("div");
       card.className="photo-card";
       var inner=p.img?"<img src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover;display:block;\">":"<div class=\""+PH_C[i%PH_C.length]+"\" style=\"width:100%;height:100%;\"></div>";
-      card.innerHTML=inner+"<div class=\"photo-card-info\"><div class=\"photo-card-title\">"+p.title+"</div><div class=\"photo-card-loc\">"+p.loc+" &middot; "+p.date+"</div></div>";
+      card.innerHTML=inner+"<div class=\"photo-card-info\"><div class=\"photo-card-title\">"+p.title+"</div><div class=\"photo-card-loc\">"+p.loc+"</div></div>";
       card.classList.add("card-in");
       card.style.animationDelay = (i * 0.055) + "s";
       card.addEventListener("click",(function(idx,list){ return function(){ openLightbox(idx,list); }; })(i,visible));
@@ -1271,8 +1271,8 @@ function renderShop(page){
     item.className="shop-item" + (p.soldOut ? " print-sold-out" : "");
     item.style.animationDelay = (visible.indexOf(p) * 0.08) + "s";
     var imgHtml=p.img
-      ? "<div class=\"shop-img-wrap\"><img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"><div class=\"shop-img-overlay\"><span class=\"shop-img-overlay-label\">View print</span></div></div>"
-      : "<div class=\"shop-img-wrap\"><div class=\"shop-img-ph\"><span>"+p.title+"</span></div><div class=\"shop-img-overlay\"></div></div>";
+      ? "<div class=\"shop-img-wrap\"><img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"></div>"
+      : "<div class=\"shop-img-wrap\"><div class=\"shop-img-ph\"><span>"+p.title+"</span></div></div>";
     var sizePills=p.sizes.map(function(s,si){ return "<button class=\"size-pill"+(si===0?" active":"")+"\" data-price=\""+s.price+"\">"+s.label+"</button>"; }).join("");
     var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.sizes[0].price);
     var inqLabel  = p.soldOut ? "Join waiting list" : "View print &#8594;";
