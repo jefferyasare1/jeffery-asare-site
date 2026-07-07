@@ -15,7 +15,7 @@
   .login-box input:focus{border-color:#111;}
   .login-box button{width:100%;background:#111;color:#fff;border:none;border-radius:8px;padding:.8rem;font-size:14px;cursor:pointer;}
   .login-box .err{color:#c00;font-size:12px;margin-top:.5rem;display:none;}
-  #adminScreen{display:none;max-width:900px;margin:0 auto;padding:2.5rem 1.5rem 6rem;}
+  #adminScreen{display:none;max-width:960px;margin:0 auto;padding:2.5rem 1.5rem 6rem;}
   .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
   .admin-header h1{font-size:1.4rem;font-weight:600;}
   .admin-header a{font-size:13px;color:#888;text-decoration:none;}
@@ -25,25 +25,41 @@
   .stat-card{background:#fff;border-radius:10px;padding:1.2rem 1.4rem;}
   .stat-num{font-size:2rem;font-weight:700;letter-spacing:-.04em;color:#111;line-height:1;}
   .stat-label{font-size:11px;color:#999;margin-top:.3rem;letter-spacing:.06em;text-transform:uppercase;}
-  /* Section header */
-  .section-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-bottom:1rem;margin-top:2.5rem;}
+  /* Section */
+  .section-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-bottom:.75rem;margin-top:2.5rem;}
+  .section-sub{font-size:12px;color:#bbb;margin-top:.25rem;margin-bottom:1rem;}
   /* Rate row */
   .rate-row{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.2rem;border-radius:10px;margin-bottom:.5rem;}
   .rate-row label{font-size:13px;flex:1;}
   .rate-row input{width:120px;border:1.5px solid #ddd;border-radius:6px;padding:.45rem .7rem;font-size:14px;outline:none;}
   .rate-row input:focus{border-color:#111;}
-  /* Portfolio grid */
-  .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;}
-  .portfolio-card{background:#fff;border-radius:10px;overflow:hidden;display:flex;gap:.9rem;padding:1rem 1.2rem;align-items:center;}
-  .port-thumb{width:48px;height:60px;object-fit:cover;border-radius:4px;flex-shrink:0;background:#eee;}
-  .port-thumb-ph{width:48px;height:60px;background:#eee;border-radius:4px;flex-shrink:0;}
-  .port-info{}
-  .port-title{font-size:13px;font-weight:600;line-height:1.25;margin-bottom:.2rem;}
-  .port-series{font-size:10px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.2rem;}
-  .port-loc{font-size:11px;color:#888;}
+  /* Series block */
+  .series-block{background:#fff;border-radius:10px;margin-bottom:.75rem;overflow:hidden;}
+  .series-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid #f0ede8;cursor:pointer;user-select:none;}
+  .series-head:hover{background:#faf9f7;}
+  .series-head-left{display:flex;align-items:center;gap:.8rem;}
+  .series-badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#888;font-weight:400;}
+  .series-count{font-size:12px;color:#bbb;}
+  .series-toggle{font-size:14px;color:#bbb;transition:transform .2s;}
+  .series-toggle.open{transform:rotate(180deg);}
+  .series-body{display:none;padding:.5rem;}
+  .series-body.open{display:block;}
+  /* Photo rows */
+  .photo-active{display:flex;align-items:center;gap:.9rem;padding:.75rem .7rem;border-radius:8px;background:#fafaf8;margin-bottom:.35rem;}
+  .photo-empty{display:flex;align-items:center;gap:.9rem;padding:.5rem .7rem;border-radius:6px;opacity:.45;margin-bottom:.2rem;}
+  .photo-thumb{width:40px;height:50px;object-fit:cover;border-radius:3px;flex-shrink:0;background:#eee;}
+  .photo-thumb-ph{width:40px;height:50px;background:#eee;border-radius:3px;flex-shrink:0;}
+  .photo-slot-id{font-size:10px;font-family:monospace;color:#bbb;width:40px;flex-shrink:0;}
+  .photo-info{}
+  .photo-title{font-size:13px;font-weight:600;line-height:1.25;}
+  .photo-meta{font-size:11px;color:#999;margin-top:.1rem;}
+  .photo-empty .photo-title{font-size:12px;color:#bbb;font-weight:400;}
+  .active-dot{width:6px;height:6px;border-radius:50%;background:#6dbf7e;flex-shrink:0;}
+  .empty-dot{width:6px;height:6px;border-radius:50%;background:#ddd;flex-shrink:0;}
   /* Prints grid */
   .prints-grid{display:grid;gap:.75rem;}
   .print-row{background:#fff;border-radius:10px;padding:1rem 1.2rem;}
+  .print-row-inactive{background:#fff;border-radius:10px;padding:.7rem 1.2rem;opacity:.4;display:flex;align-items:center;gap:.8rem;}
   .print-row-header{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem;}
   .print-thumb{width:50px;height:62px;object-fit:cover;border-radius:4px;flex-shrink:0;}
   .print-thumb-ph{width:50px;height:62px;background:#eee;border-radius:4px;flex-shrink:0;}
@@ -51,24 +67,27 @@
   .print-info .ptitle{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .print-info .pseries{font-size:11px;color:#888;margin-top:.15rem;}
   .print-info .pedition{font-size:11px;color:#bbb;margin-top:.1rem;}
+  .print-slot-id{font-size:11px;font-family:monospace;color:#bbb;}
   /* Size selector */
   .size-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem;}
   .size-tab{padding:.35rem .85rem;border-radius:999px;border:1.5px solid #ddd;background:none;font-size:12px;cursor:pointer;transition:all .15s;color:#666;}
   .size-tab.active{background:#111;color:#fff;border-color:#111;}
   .size-tab:hover:not(.active){border-color:#999;color:#111;}
-  /* Price edit */
   .price-edit-row{display:flex;align-items:center;gap:.6rem;}
   .price-edit-row label{font-size:12px;color:#888;}
-  .price-input-wrap{display:flex;align-items:center;gap:.4rem;}
-  .price-input-wrap span{font-size:13px;color:#888;}
   .price-input-wrap input{width:110px;border:1.5px solid #ddd;border-radius:8px;padding:.55rem .8rem;font-size:18px;font-weight:600;text-align:right;outline:none;transition:border .2s;}
   .price-input-wrap input:focus{border-color:#111;}
   /* Save bar */
   .save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #eee;padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-top:2rem;}
-  .save-bar .hint{font-size:12px;color:#888;}
-  .save-bar button{background:#111;color:#fff;border:none;border-radius:8px;padding:.75rem 2rem;font-size:14px;cursor:pointer;transition:opacity .2s;}
+  .save-bar .hint{font-size:12px;color:#888;max-width:420px;line-height:1.5;}
+  .save-bar button{background:#111;color:#fff;border:none;border-radius:8px;padding:.75rem 2rem;font-size:14px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
   .save-bar button:hover{opacity:.8;}
   .save-bar .saved{color:green;font-size:13px;display:none;}
+  /* Collapse all inactive prints */
+  .inactive-prints-toggle{font-size:12px;color:#bbb;cursor:pointer;padding:.5rem 0;display:flex;align-items:center;gap:.4rem;user-select:none;}
+  .inactive-prints-toggle:hover{color:#888;}
+  #inactivePrints{display:none;}
+  #inactivePrints.open{display:grid;gap:.4rem;margin-top:.4rem;}
 </style>
 </head>
 <body>
@@ -91,26 +110,28 @@
     <a href="/">← Back to site</a>
   </div>
 
-  <!-- Stats -->
   <div class="stats-row" id="statsRow"></div>
 
-  <!-- USD Rate -->
   <div class="section-title">USD Exchange Rate</div>
   <div class="rate-row">
-    <label>GHS → USD rate &nbsp;<small style="color:#aaa">(1 GHS = ? USD — updates automatically on the site)</small></label>
+    <label>GHS → USD rate &nbsp;<small style="color:#aaa">(1 GHS = ? USD — live rate fetched automatically)</small></label>
     <input type="number" id="usdRate" step="0.001" min="0.001" placeholder="0.067">
   </div>
 
-  <!-- Portfolio -->
-  <div class="section-title">Portfolio — Active Photos</div>
-  <div class="portfolio-grid" id="portfolioGrid"></div>
+  <div class="section-title">Portfolio</div>
+  <p class="section-sub">All series and photo slots. <span style="color:#6dbf7e;">●</span> Active &nbsp; <span style="color:#ddd;">●</span> Empty slot</p>
+  <div id="portfolioSection"></div>
 
-  <!-- Shop Prints -->
-  <div class="section-title">Shop — Print Prices (GH₵)</div>
+  <div class="section-title">Shop — Prints</div>
+  <p class="section-sub">Active prints with editable prices. Empty slots listed below.</p>
   <div class="prints-grid" id="printsGrid"></div>
+  <div class="inactive-prints-toggle" onclick="toggleInactive()">
+    <span id="inactiveToggleLabel">▸ Show empty slots (s7 – s50)</span>
+  </div>
+  <div id="inactivePrints"></div>
 
   <div class="save-bar">
-    <span class="hint">Price changes are stored locally. To update for all visitors, edit index.html and push to GitHub.</span>
+    <span class="hint">Price changes are stored in your browser. To update live prices for all visitors, edit index.html and push to GitHub.</span>
     <div style="display:flex;align-items:center;gap:1rem;">
       <span class="saved" id="savedMsg">✓ Saved</span>
       <button onclick="saveAll()">Save Price Changes</button>
@@ -122,8 +143,7 @@
 var ADMIN_PASS = 'jeffery2026';
 
 function login(){
-  var pw = document.getElementById('pwInput').value;
-  if(pw === ADMIN_PASS){
+  if(document.getElementById('pwInput').value===ADMIN_PASS){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('adminScreen').style.display='block';
     loadAdmin();
@@ -132,143 +152,208 @@ function login(){
   }
 }
 
-// ── Active portfolio photos (mirrors index.html PHOTOS, active entries only) ──
-var PORTFOLIO_DATA = [
-  {id:'rs1', series:'RANDOM STORIES',   title:'Golden Hour at Labadi',  loc:'Labadi Beach, Accra',    date:'2026.04', img:'rs1.jpg'},
-  {id:'rs2', series:'RANDOM STORIES',   title:'Between Stalls',          loc:'Kaneshie Market, Accra', date:'2025.08', img:'rs2.jpg'},
-  {id:'pt1', series:'PORTRAITS',         title:'Stillness in Jamestown',  loc:'Jamestown, Accra',       date:'2025.11', img:'pt1.jpg'},
-  {id:'ec1', series:'ECLIPSE',           title:'Eclipse I',               loc:'Studio, Accra',          date:'2025.06', img:'ec1.jpg'},
-  {id:'ec2', series:'ECLIPSE',           title:'Eclipse II',              loc:'Studio, Accra',          date:'2025.07', img:'ec2.jpg'},
-  {id:'ab1', series:'ABSTRACT',          title:'Market Weave',            loc:'Makola Market, Accra',   date:'2026.03', img:'ab1.jpg'},
-  {id:'ab2', series:'ABSTRACT',          title:'Kente Geometry',          loc:'Kumasi, Ashanti',        date:'2025.09', img:'ab2.jpg'},
+// ── PORTFOLIO DATA — full site state ──
+var SERIES_DATA = [
+  {
+    slug:'random-stories', label:'Random Stories',
+    active:[
+      {id:'rs1',title:'Golden Hour at Labadi',loc:'Labadi Beach, Accra',date:'2026.04',img:'rs1.jpg'},
+      {id:'rs2',title:'Between Stalls',loc:'Kaneshie Market, Accra',date:'2025.08',img:'rs2.jpg'}
+    ],
+    totalSlots:40, prefix:'rs'
+  },
+  {
+    slug:'portraits', label:'Portraits',
+    active:[
+      {id:'pt1',title:'Stillness in Jamestown',loc:'Jamestown, Accra',date:'2025.11',img:'pt1.jpg'}
+    ],
+    totalSlots:40, prefix:'pt'
+  },
+  {
+    slug:'eclipse', label:'Eclipse of the Self',
+    active:[
+      {id:'ec1',title:'Eclipse I',loc:'Studio, Accra',date:'2025.06',img:'ec1.jpg'},
+      {id:'ec2',title:'Eclipse II',loc:'Studio, Accra',date:'2025.07',img:'ec2.jpg'}
+    ],
+    totalSlots:40, prefix:'ec'
+  },
+  {
+    slug:'abstract', label:'Abstract',
+    active:[
+      {id:'ab1',title:'Market Weave',loc:'Makola Market, Accra',date:'2026.03',img:'ab1.jpg'},
+      {id:'ab2',title:'Kente Geometry',loc:'Kumasi, Ashanti',date:'2025.09',img:'ab2.jpg'}
+    ],
+    totalSlots:40, prefix:'ab'
+  }
 ];
 
-// ── Shop print data (mirrors index.html PRINTS, active entries only) ──
+// ── PRINTS DATA — active (s1–s6) ──
 var PRINTS_DATA = [
-  {id:'s1', title:'Stillness in Jamestown', series:'PORTRAITS OF PLACE', edition:'Edition of 15', img:'s1.jpg',
+  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',edition:'Edition of 15',img:'s1.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:920},{label:'A2 (42 × 59.4 cm)',defaultPrice:1200},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1650}]},
-  {id:'s2', title:'Kente Geometry', series:'TEXTURE STUDIES', edition:'Edition of 30', img:'s2.jpg',
+  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',edition:'Edition of 30',img:'s2.jpg',
    sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:480},{label:'A3 (29.7 × 42 cm)',defaultPrice:680},{label:'A2 (42 × 59.4 cm)',defaultPrice:920}]},
-  {id:'s3', title:'Between Stalls', series:'ACCRA STREETS', edition:'Edition of 25', img:'s3.jpg',
+  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',edition:'Edition of 25',img:'s3.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:750},{label:'A2 (42 × 59.4 cm)',defaultPrice:1050}]},
-  {id:'s4', title:'Eclipse I', series:'ECLIPSE OF THE SELF', edition:'Edition of 20', img:'s4.jpg',
+  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',edition:'Edition of 20',img:'s4.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:800},{label:'A2 (42 × 59.4 cm)',defaultPrice:1100},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1500}]},
-  {id:'s5', title:'Golden Hour at Labadi', series:'RANDOM STORIES', edition:'Edition of 20', img:'s5.jpg',
+  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',edition:'Edition of 20',img:'s5.jpg',
    sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:500},{label:'A3 (29.7 × 42 cm)',defaultPrice:700},{label:'A2 (42 × 59.4 cm)',defaultPrice:980}]},
-  {id:'s6', title:'Market Weave', series:'ABSTRACT', edition:'Edition of 30', img:'s6.jpg',
+  {id:'s6',title:'Market Weave',series:'ABSTRACT',edition:'Edition of 30',img:'s6.jpg',
    sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:650},{label:'A2 (42 × 59.4 cm)',defaultPrice:900},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1300}]},
 ];
 
 function loadAdmin(){
-  var saved = JSON.parse(localStorage.getItem('ja_prices') || '{}');
-  var savedRate = localStorage.getItem('ja_usd_rate') || '0.067';
+  var saved = JSON.parse(localStorage.getItem('ja_prices')||'{}');
+  var savedRate = localStorage.getItem('ja_usd_rate')||'0.067';
   document.getElementById('usdRate').value = savedRate;
 
-  // ── Stats ──
-  var totalEditions = PRINTS_DATA.reduce(function(sum,p){
-    var n = parseInt((p.edition||'').replace(/\D/g,'')) || 0;
-    return sum + n;
-  }, 0);
-  var statsEl = document.getElementById('statsRow');
-  statsEl.innerHTML =
-    statCard(PORTFOLIO_DATA.length, 'Portfolio Photos') +
-    statCard(PRINTS_DATA.length, 'Active Prints') +
-    statCard(totalEditions, 'Total Editions') +
-    statCard(PRINTS_DATA.reduce(function(s,p){return s+p.sizes.length;},0), 'Size Variants');
+  // Stats
+  var totalActive = SERIES_DATA.reduce(function(s,sr){ return s+sr.active.length; },0);
+  var totalEditions = PRINTS_DATA.reduce(function(s,p){ return s+(parseInt((p.edition||'').replace(/\D/g,''))||0); },0);
+  var totalSlots = SERIES_DATA.reduce(function(s,sr){ return s+sr.totalSlots; },0);
+  document.getElementById('statsRow').innerHTML =
+    sc(totalActive,'Active Photos') + sc(PRINTS_DATA.length,'Active Prints') +
+    sc(totalEditions,'Total Editions') + sc(totalSlots-totalActive,'Empty Portfolio Slots');
 
-  // ── Portfolio section ──
-  var portGrid = document.getElementById('portfolioGrid');
-  portGrid.innerHTML = '';
-  PORTFOLIO_DATA.forEach(function(ph){
-    var card = document.createElement('div');
-    card.className = 'portfolio-card';
-    card.innerHTML =
-      '<img class="port-thumb" src="'+ph.img+'" alt="'+ph.title+'" onerror="this.className=\'port-thumb-ph\'">' +
-      '<div class="port-info">' +
-        '<div class="port-series">'+ph.series+'</div>' +
-        '<div class="port-title">'+ph.title+'</div>' +
-        '<div class="port-loc">'+ph.loc+'</div>' +
-      '</div>';
-    portGrid.appendChild(card);
-  });
-
-  // ── Prints section ──
-  var grid = document.getElementById('printsGrid');
-  grid.innerHTML = '';
-
-  PRINTS_DATA.forEach(function(p){
-    var imgEl = '<img class="print-thumb" src="'+p.img+'" onerror="this.className=\'print-thumb-ph\'">';
-    var sizeTabs = p.sizes.map(function(s,si){
-      return '<button class="size-tab'+(si===0?' active':'')+'" data-pid="'+p.id+'" data-size="'+s.label+'">'
-        + s.label.split('(')[0].trim()+'</button>';
-    }).join('');
-    var hiddenInputs = p.sizes.map(function(s){
-      var key = s.label.replace(/[^a-zA-Z0-9]/g,'_');
-      var savedPrice = (saved[p.id]&&saved[p.id][s.label]!==undefined) ? saved[p.id][s.label] : s.defaultPrice;
-      return '<input type="number" id="price_'+p.id+'_'+key+'" value="'+savedPrice+'" min="0" step="10" data-pid="'+p.id+'" data-size="'+s.label+'" style="display:none;">';
-    }).join('');
-    var firstKey = p.sizes[0].label.replace(/[^a-zA-Z0-9]/g,'_');
-    var firstPrice = (saved[p.id]&&saved[p.id][p.sizes[0].label]!==undefined) ? saved[p.id][p.sizes[0].label] : p.sizes[0].defaultPrice;
-
-    var row = document.createElement('div');
-    row.className = 'print-row';
-    row.innerHTML = '<div class="print-row-header">'
-      + imgEl
-      + '<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div><div class="pedition">'+p.edition+'</div></div>'
-      + '</div>'
-      + '<div class="size-tabs">'+sizeTabs+'</div>'
-      + '<div class="price-edit-row">'
-      + '<label>GH&#8373;</label>'
-      + '<div class="price-input-wrap">'
-      + '<input type="number" id="priceVisible_'+p.id+'" value="'+firstPrice+'" min="0" step="10" style="font-size:22px;font-weight:700;">'
-      + '</div>'
-      + hiddenInputs
-      + '</div>';
-
-    row.querySelectorAll('.size-tab').forEach(function(tab){
-      tab.addEventListener('click', function(){
-        row.querySelectorAll('.size-tab').forEach(function(t){ t.classList.remove('active'); });
-        tab.classList.add('active');
-        var key = tab.dataset.size.replace(/[^a-zA-Z0-9]/g,'_');
-        var hiddenInput = row.querySelector('#price_'+tab.dataset.pid+'_'+key);
-        var visibleInput = row.querySelector('#priceVisible_'+tab.dataset.pid);
-        if(hiddenInput && visibleInput){
-          visibleInput.value = hiddenInput.value;
-          visibleInput.oninput = function(){ hiddenInput.value = visibleInput.value; };
-        }
-      });
-    });
-
-    var firstVisible = row.querySelector('#priceVisible_'+p.id);
-    var firstHidden  = row.querySelector('#price_'+p.id+'_'+firstKey);
-    if(firstVisible && firstHidden){
-      firstVisible.oninput = function(){ firstHidden.value = firstVisible.value; };
+  // Portfolio section — one collapsible block per series
+  var portSection = document.getElementById('portfolioSection');
+  portSection.innerHTML = '';
+  SERIES_DATA.forEach(function(sr, si){
+    var activeIds = sr.active.map(function(a){ return a.id; });
+    var emptySlots = [];
+    for(var n=1;n<=sr.totalSlots;n++){
+      var sid=sr.prefix+n;
+      if(activeIds.indexOf(sid)===-1) emptySlots.push(sid);
     }
 
+    var activeRows = sr.active.map(function(ph){
+      return '<div class="photo-active">'
+        +'<span class="active-dot"></span>'
+        +'<img class="photo-thumb" src="'+ph.img+'" alt="'+ph.title+'" onerror="this.className=\'photo-thumb-ph\'">'
+        +'<div class="photo-info">'
+        +'<div class="photo-title">'+ph.title+'</div>'
+        +'<div class="photo-meta">'+ph.loc+' &nbsp;·&nbsp; '+ph.date+' &nbsp;·&nbsp; <code style="font-size:10px;color:#bbb;">'+ph.id+'</code></div>'
+        +'</div></div>';
+    }).join('');
+
+    // Group empty slots into rows of 8 for compact display
+    var emptyHtml = '';
+    for(var i=0;i<emptySlots.length;i+=8){
+      var chunk=emptySlots.slice(i,i+8);
+      emptyHtml+='<div class="photo-empty">'
+        +'<span class="empty-dot"></span>'
+        +'<div style="font-size:11px;color:#ccc;font-family:monospace;">'+chunk.join(' · ')+'</div>'
+        +'</div>';
+    }
+
+    var blockId='series-body-'+si;
+    var toggleId='series-toggle-'+si;
+    var block=document.createElement('div');
+    block.className='series-block';
+    block.innerHTML='<div class="series-head" onclick="toggleSeries(\''+blockId+'\',\''+toggleId+'\')">'
+      +'<div class="series-head-left">'
+      +'<span class="series-badge">'+sr.label+'</span>'
+      +'<span class="series-count">'+sr.active.length+' active · '+emptySlots.length+' empty</span>'
+      +'</div>'
+      +'<span class="series-toggle" id="'+toggleId+'">▾</span>'
+      +'</div>'
+      +'<div class="series-body'+(si===0?' open':'')+'" id="'+blockId+'">'
+      +activeRows+emptyHtml
+      +'</div>';
+    portSection.appendChild(block);
+  });
+
+  // Active prints with price editing
+  var grid=document.getElementById('printsGrid');
+  grid.innerHTML='';
+  PRINTS_DATA.forEach(function(p){
+    var imgEl='<img class="print-thumb" src="'+p.img+'" onerror="this.className=\'print-thumb-ph\'">';
+    var sizeTabs=p.sizes.map(function(s,si){
+      return '<button class="size-tab'+(si===0?' active':'')+'" data-pid="'+p.id+'" data-size="'+s.label+'">'
+        +s.label.split('(')[0].trim()+'</button>';
+    }).join('');
+    var hiddenInputs=p.sizes.map(function(s){
+      var key=s.label.replace(/[^a-zA-Z0-9]/g,'_');
+      var sv=(saved[p.id]&&saved[p.id][s.label]!==undefined)?saved[p.id][s.label]:s.defaultPrice;
+      return '<input type="number" id="price_'+p.id+'_'+key+'" value="'+sv+'" min="0" step="10" data-pid="'+p.id+'" data-size="'+s.label+'" style="display:none;">';
+    }).join('');
+    var fk=p.sizes[0].label.replace(/[^a-zA-Z0-9]/g,'_');
+    var fp=(saved[p.id]&&saved[p.id][p.sizes[0].label]!==undefined)?saved[p.id][p.sizes[0].label]:p.sizes[0].defaultPrice;
+    var row=document.createElement('div');
+    row.className='print-row';
+    row.innerHTML='<div class="print-row-header">'+imgEl
+      +'<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div><div class="pedition">'+p.edition+'</div></div>'
+      +'</div>'
+      +'<div class="size-tabs">'+sizeTabs+'</div>'
+      +'<div class="price-edit-row"><label>GH&#8373;</label>'
+      +'<div class="price-input-wrap"><input type="number" id="priceVisible_'+p.id+'" value="'+fp+'" min="0" step="10" style="font-size:22px;font-weight:700;border:1.5px solid #ddd;border-radius:8px;padding:.55rem .8rem;text-align:right;outline:none;"></div>'
+      +hiddenInputs+'</div>';
+    row.querySelectorAll('.size-tab').forEach(function(tab){
+      tab.addEventListener('click',function(){
+        row.querySelectorAll('.size-tab').forEach(function(t){t.classList.remove('active');});
+        tab.classList.add('active');
+        var key=tab.dataset.size.replace(/[^a-zA-Z0-9]/g,'_');
+        var hi=row.querySelector('#price_'+tab.dataset.pid+'_'+key);
+        var vi=row.querySelector('#priceVisible_'+tab.dataset.pid);
+        if(hi&&vi){vi.value=hi.value;vi.oninput=function(){hi.value=vi.value;};}
+      });
+    });
+    var fv=row.querySelector('#priceVisible_'+p.id);
+    var fh=row.querySelector('#price_'+p.id+'_'+fk);
+    if(fv&&fh) fv.oninput=function(){fh.value=fv.value;};
     grid.appendChild(row);
   });
+
+  // Inactive print slots (s7–s50)
+  var inactivePrints=document.getElementById('inactivePrints');
+  inactivePrints.innerHTML='';
+  for(var n=7;n<=50;n++){
+    var sid='s'+n;
+    var div=document.createElement('div');
+    div.className='print-row-inactive';
+    div.innerHTML='<span class="empty-dot"></span>'
+      +'<span class="print-slot-id">'+sid+'</span>'
+      +'<span style="font-size:12px;color:#ccc;">Empty slot — not yet active</span>';
+    inactivePrints.appendChild(div);
+  }
 }
 
-function statCard(num, label){
+function sc(num,label){
   return '<div class="stat-card"><div class="stat-num">'+num+'</div><div class="stat-label">'+label+'</div></div>';
 }
 
+function toggleSeries(bodyId,toggleId){
+  var body=document.getElementById(bodyId);
+  var tog=document.getElementById(toggleId);
+  if(!body) return;
+  var open=body.classList.toggle('open');
+  if(tog) tog.classList.toggle('open',open);
+}
+
+function toggleInactive(){
+  var el=document.getElementById('inactivePrints');
+  var lbl=document.getElementById('inactiveToggleLabel');
+  var open=el.classList.toggle('open');
+  if(lbl) lbl.textContent=(open?'▾ Hide':'▸ Show')+' empty slots (s7 – s50)';
+}
+
 function saveAll(){
-  var prices = {};
+  var prices={};
   PRINTS_DATA.forEach(function(p){
-    prices[p.id] = {};
+    prices[p.id]={};
     p.sizes.forEach(function(s){
-      var key = s.label.replace(/[^a-zA-Z0-9]/g,'_');
-      var el = document.getElementById('price_'+p.id+'_'+key);
-      prices[p.id][s.label] = el ? (parseFloat(el.value)||s.defaultPrice) : s.defaultPrice;
+      var key=s.label.replace(/[^a-zA-Z0-9]/g,'_');
+      var el=document.getElementById('price_'+p.id+'_'+key);
+      prices[p.id][s.label]=el?(parseFloat(el.value)||s.defaultPrice):s.defaultPrice;
     });
   });
-  var rate = parseFloat(document.getElementById('usdRate').value) || 0.067;
-  localStorage.setItem('ja_prices', JSON.stringify(prices));
-  localStorage.setItem('ja_usd_rate', rate.toString());
-  var msg = document.getElementById('savedMsg');
-  msg.style.display = 'inline';
-  setTimeout(function(){ msg.style.display='none'; }, 2500);
+  var rate=parseFloat(document.getElementById('usdRate').value)||0.067;
+  localStorage.setItem('ja_prices',JSON.stringify(prices));
+  localStorage.setItem('ja_usd_rate',rate.toString());
+  var msg=document.getElementById('savedMsg');
+  msg.style.display='inline';
+  setTimeout(function(){msg.style.display='none';},2500);
 }
 </script>
 </body>
