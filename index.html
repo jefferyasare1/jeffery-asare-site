@@ -203,7 +203,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 @media(max-width:900px){
   .photo-grid{grid-template-columns:1fr 1fr;}
   .about-hero,.about-cols,.contact-body{grid-template-columns:1fr;}
-  .shop-list{grid-template-columns:1fr;}
+  .shop-list{grid-template-columns:1fr 1fr;}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .about-cta{flex-direction:column;align-items:flex-start;}
   .about-shop-strip{flex-direction:column;align-items:flex-start;}
@@ -1541,11 +1541,11 @@ function closeMobileMenu(){
 });
 var mmCloseBtn=document.getElementById("mobileMenuClose");
 if(mmCloseBtn) mmCloseBtn.addEventListener("click",closeMobileMenu);
-["mmPortBtn","mmAboutBtn","mmShopBtn","mmContactBtn"].forEach(function(id){
+var MM_NAV={mmPortBtn:"portfolio",mmAboutBtn:"about",mmShopBtn:"shop",mmContactBtn:"contact"};
+Object.keys(MM_NAV).forEach(function(id){
   var el=document.getElementById(id);
   if(!el) return;
-  var page=id.replace("mm","").replace("Btn","").toLowerCase();
-  el.addEventListener("click",function(){ closeMobileMenu(); navigate(page); });
+  el.addEventListener("click",function(){ closeMobileMenu(); navigate(MM_NAV[id]); });
 });
 
 // ============================================================
