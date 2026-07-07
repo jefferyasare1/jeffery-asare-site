@@ -982,20 +982,48 @@ var PHOTOS = [
 // are shown on the front end. Max 50 displayed.
 // TO ACTIVATE: change title, fill in all fields.
 // ============================================================
-function PR(id,series,title,desc,paper,edition,sizes,price,img,soldOut){
-  return {id:id,series:series,title:title,desc:desc,paper:paper,edition:edition,sizes:sizes,priceGHC:price,img:img,soldOut:!!soldOut};
+function PR(id,series,title,desc,paper,edition,sizes,img,soldOut){
+  // sizes = [{label, price}, ...] — price in GHC
+  var base=sizes&&sizes.length?sizes[0].price:0;
+  return {id:id,series:series,title:title,desc:desc,paper:paper,edition:edition,sizes:sizes,priceGHC:base,img:img,soldOut:!!soldOut};
 }
 function PRH(id){
-  return PR(id,"SERIES NAME","Untitled Print","Placeholder.","Hahnemuhle Photo Rag 308gsm","Edition of 20",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)"],700,id+".jpg");
+  return PR(id,"SERIES NAME","Untitled Print","Placeholder.","Hahnemuhle Photo Rag 308gsm","Edition of 20",[
+    {label:"A3 (29.7 × 42 cm)",price:700},
+    {label:"A2 (42 × 59.4 cm)",price:950}
+  ],id+".jpg");
 }
 
 var PRINTS = [
-  PR("s1","PORTRAITS OF PLACE","Stillness in Jamestown","An intimate portrait from historic Jamestown. The baryta paper brings out the subtle highlights in the weathered wall texture. The most limited edition in the collection.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 15",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)","A1 (59.4 x 84.1 cm)"],920,"s1.jpg"),
-  PR("s2","TEXTURE STUDIES","Kente Geometry","A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.","Hahnemuhle Photo Rag 308gsm","Edition of 30",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)"],680,"s2.jpg"),
-  PR("s3","ACCRA STREETS","Between Stalls","Shot in Kaneshie at noon. A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 25",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)"],750,"s3.jpg"),
-  PR("s4","ECLIPSE OF THE SELF","Eclipse I","The first image in the Eclipse of the Self series. A study in light, shadow, and the human form. Signed and numbered.","Hahnemuhle Photo Rag 308gsm","Edition of 20",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)"],800,"s4.jpg"),
-  PR("s5","RANDOM STORIES","Golden Hour at Labadi","The Atlantic unusually still. Fishing boats at rest. Sky shifting from gold to deep amber.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 20",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)"],700,"s5.jpg"),
-  PR("s6","ABSTRACT","Market Weave","The overlapping fabrics at Makola. Chaos ordered by commerce. Printed large, the texture becomes almost sculptural.","Hahnemuhle Photo Rag 308gsm","Edition of 30",["A3 (29.7 x 42 cm)","A2 (42 x 59.4 cm)","A1 (59.4 x 84.1 cm)"],650,"s6.jpg"),
+  PR("s1","PORTRAITS OF PLACE","Stillness in Jamestown","An intimate portrait from historic Jamestown. The baryta paper brings out the subtle highlights in the weathered wall texture. The most limited edition in the collection.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 15",[
+    {label:"A3 (29.7 × 42 cm)",price:920},
+    {label:"A2 (42 × 59.4 cm)",price:1200},
+    {label:"A1 (59.4 × 84.1 cm)",price:1650}
+  ],"s1.jpg"),
+  PR("s2","TEXTURE STUDIES","Kente Geometry","A close-up study of handwoven kente from Kumasi. The geometric patterns and warm gold-and-crimson threads create an almost abstract composition.","Hahnemuhle Photo Rag 308gsm","Edition of 30",[
+    {label:"A4 (21 × 29.7 cm)",price:480},
+    {label:"A3 (29.7 × 42 cm)",price:680},
+    {label:"A2 (42 × 59.4 cm)",price:920}
+  ],"s2.jpg"),
+  PR("s3","ACCRA STREETS","Between Stalls","Shot in Kaneshie at noon. A shaft of equatorial light cutting through market stalls, figures silhouetted in the distance.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 25",[
+    {label:"A3 (29.7 × 42 cm)",price:750},
+    {label:"A2 (42 × 59.4 cm)",price:1050}
+  ],"s3.jpg"),
+  PR("s4","ECLIPSE OF THE SELF","Eclipse I","The first image in the Eclipse of the Self series. A study in light, shadow, and the human form. Signed and numbered.","Hahnemuhle Photo Rag 308gsm","Edition of 20",[
+    {label:"A3 (29.7 × 42 cm)",price:800},
+    {label:"A2 (42 × 59.4 cm)",price:1100},
+    {label:"A1 (59.4 × 84.1 cm)",price:1500}
+  ],"s4.jpg"),
+  PR("s5","RANDOM STORIES","Golden Hour at Labadi","The Atlantic unusually still. Fishing boats at rest. Sky shifting from gold to deep amber.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 20",[
+    {label:"A4 (21 × 29.7 cm)",price:500},
+    {label:"A3 (29.7 × 42 cm)",price:700},
+    {label:"A2 (42 × 59.4 cm)",price:980}
+  ],"s5.jpg"),
+  PR("s6","ABSTRACT","Market Weave","The overlapping fabrics at Makola. Chaos ordered by commerce. Printed large, the texture becomes almost sculptural.","Hahnemuhle Photo Rag 308gsm","Edition of 30",[
+    {label:"A3 (29.7 × 42 cm)",price:650},
+    {label:"A2 (42 × 59.4 cm)",price:900},
+    {label:"A1 (59.4 × 84.1 cm)",price:1300}
+  ],"s6.jpg"),
   PRH("s7"),PRH("s8"),PRH("s9"),PRH("s10"),PRH("s11"),PRH("s12"),PRH("s13"),PRH("s14"),PRH("s15"),
   PRH("s16"),PRH("s17"),PRH("s18"),PRH("s19"),PRH("s20"),PRH("s21"),PRH("s22"),PRH("s23"),PRH("s24"),PRH("s25"),
   PRH("s26"),PRH("s27"),PRH("s28"),PRH("s29"),PRH("s30"),PRH("s31"),PRH("s32"),PRH("s33"),PRH("s34"),PRH("s35"),
@@ -1006,7 +1034,14 @@ var PRINTS = [
 (function(){
   try{
     var ov=JSON.parse(localStorage.getItem('ja_prices')||'{}');
-    PRINTS.forEach(function(p){ if(ov[p.id]!==undefined) p.priceGHC=Number(ov[p.id]); });
+    PRINTS.forEach(function(p){
+      if(ov[p.id]){
+        p.sizes.forEach(function(s){
+          if(ov[p.id][s.label]!==undefined) s.price=Number(ov[p.id][s.label]);
+        });
+        p.priceGHC=p.sizes[0].price; // keep base price in sync
+      }
+    });
     var rate=localStorage.getItem('ja_usd_rate');
     if(rate) USD_RATE=parseFloat(rate);
   }catch(e){}
@@ -1230,8 +1265,8 @@ function renderShop(page){
     var imgHtml=p.img
       ? "<div class=\"shop-img-wrap\"><img class=\"shop-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"><div class=\"shop-img-overlay\"><span class=\"shop-img-overlay-label\">View print</span></div></div>"
       : "<div class=\"shop-img-wrap\"><div class=\"shop-img-ph\"><span>"+p.title+"</span></div><div class=\"shop-img-overlay\"></div></div>";
-    var sizePills=p.sizes.map(function(s,si){ return "<button class=\"size-pill"+(si===0?" active":"")+"\">" +s+"</button>"; }).join("");
-    var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.priceGHC);
+    var sizePills=p.sizes.map(function(s,si){ return "<button class=\"size-pill"+(si===0?" active":"")+"\" data-price=\""+s.price+"\">"+s.label+"</button>"; }).join("");
+    var priceHtml = p.soldOut ? "<span class=\"sold-out-badge\">Sold out</span>" : formatPrice(p.sizes[0].price);
     var inqLabel  = p.soldOut ? "Join waiting list" : "View print &#8594;";
     var cartBtn   = p.soldOut ? "" : "<button class=\"btn-cart shop-cart-btn\">+ Add to Cart</button>";
     item.innerHTML="<div>"+imgHtml+"</div><div>"
@@ -1249,14 +1284,21 @@ function renderShop(page){
       +"</div></div>";
     item.querySelector(".shop-img-wrap").addEventListener("click",(function(print){ return function(){ openPrintDetail(print); }; })(p));
     item.querySelectorAll(".size-pill").forEach(function(pill){
-      pill.addEventListener("click",function(){ item.querySelectorAll(".size-pill").forEach(function(b){ b.classList.remove("active"); }); pill.classList.add("active"); });
+      pill.addEventListener("click",function(e){
+        e.stopPropagation();
+        item.querySelectorAll(".size-pill").forEach(function(b){ b.classList.remove("active"); });
+        pill.classList.add("active");
+        var priceEl=item.querySelector(".shop-price");
+        if(priceEl&&!p.soldOut) priceEl.innerHTML=formatPrice(parseFloat(pill.dataset.price));
+      });
     });
     if(!p.soldOut){
       item.querySelector(".shop-cart-btn").addEventListener("click",(function(print,item){ return function(e){
         e.stopPropagation();
         var activePill=item.querySelector(".size-pill.active");
-        var size=activePill?activePill.textContent:print.sizes[0];
-        addToCart(print,size);
+        var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
+        var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
+        addToCart(print,sizeLabel,sizePrice);
         openCart();
       }; })(p,item));
     }
@@ -1536,12 +1578,17 @@ function openPrintDetail(print){
     print.sizes.forEach(function(s,si){
       var btn=document.createElement("button");
       btn.className="size-pill"+(si===0?" active":"");
-      btn.textContent=s;
-      btn.addEventListener("click",function(){pdSizes.querySelectorAll(".size-pill").forEach(function(b){b.classList.remove("active");});btn.classList.add("active");});
+      btn.textContent=s.label;
+      btn.dataset.price=s.price;
+      btn.addEventListener("click",function(){
+        pdSizes.querySelectorAll(".size-pill").forEach(function(b){b.classList.remove("active");});
+        btn.classList.add("active");
+        if(pdPrice&&!print.soldOut) pdPrice.innerHTML=formatPrice(s.price);
+      });
       pdSizes.appendChild(btn);
     });
   }
-  if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":formatPrice(print.priceGHC);
+  if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":formatPrice(print.sizes[0].price);
   if(pdActions){
     if(print.soldOut){
       pdActions.innerHTML="<button class=\"btn-dark\" id=\"pdWaitBtn\" style=\"width:100%;justify-content:center;\">Join waiting list</button>";
@@ -1565,9 +1612,10 @@ function openPrintDetail(print){
       });
       var cb=document.getElementById("pdCartBtn");
       if(cb) cb.addEventListener("click",function(){
-        var activePill=document.querySelector(".size-pill.active");
-        var size=activePill?activePill.textContent:print.sizes[0];
-        addToCart(print,size);
+        var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
+        var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
+        var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
+        addToCart(print,sizeLabel,sizePrice);
         openCart();
       });
     }
@@ -1580,26 +1628,59 @@ function openPrintDetail(print){
 // CURRENCY
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067;
+// Fetch live GHS→USD rate on load (free API, no key needed)
+(function fetchRate(){
+  fetch('https://open.er-api.com/v6/latest/GHS')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.rates&&d.rates.USD){
+        USD_RATE=d.rates.USD;
+        // Refresh display if USD is active
+        if(CURRENCY==='USD') renderShop(SHOP_PAGE);
+      }
+    })
+    .catch(function(){/* keep fallback rate */});
+})();
 function setCurrency(c){
   CURRENCY=c;
-  document.getElementById('btnGHS').classList.toggle('cur-active',c==='GHS');
-  document.getElementById('btnUSD').classList.toggle('cur-active',c==='USD');
+  var ghsBtn=document.getElementById('btnGHS');
+  var usdBtn=document.getElementById('btnUSD');
+  if(ghsBtn) ghsBtn.classList.toggle('cur-active',c==='GHS');
+  if(usdBtn) usdBtn.classList.toggle('cur-active',c==='USD');
   renderShop(SHOP_PAGE);
+  // Update open print detail price
+  var pdSizes=document.getElementById('pdSizes');
   var pdPrice=document.getElementById('pdPrice');
-  if(pdPrice&&currentPrint&&!currentPrint.soldOut) pdPrice.innerHTML=formatPrice(currentPrint.priceGHC);
+  if(pdPrice&&currentPrint&&!currentPrint.soldOut){
+    var activePill=pdSizes?pdSizes.querySelector('.size-pill.active'):null;
+    var price=activePill?parseFloat(activePill.dataset.price):currentPrint.sizes[0].price;
+    pdPrice.innerHTML=formatPrice(price);
+  }
+  // Update open cart if visible
+  if(document.getElementById('cartSidebar')&&document.getElementById('cartSidebar').classList.contains('open')){
+    renderCartItems();
+  }
 }
 function formatPrice(ghc){
-  if(CURRENCY==='USD') return 'From <strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> + shipping</span>';
-  return 'From <strong>GH&#8373; '+ghc.toLocaleString()+'</strong><span class="ship"> + shipping</span>';
+  if(CURRENCY==='USD') return '<strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> + shipping</span>';
+  return '<strong>GH&#8373; '+Number(ghc).toLocaleString()+'</strong><span class="ship"> + shipping</span>';
 }
+// Wire currency toggle buttons via addEventListener (not inline onclick)
+(function(){
+  var ghsBtn=document.getElementById('btnGHS');
+  var usdBtn=document.getElementById('btnUSD');
+  if(ghsBtn){ ghsBtn.removeAttribute('onclick'); ghsBtn.addEventListener('click',function(){ setCurrency('GHS'); }); }
+  if(usdBtn){ usdBtn.removeAttribute('onclick'); usdBtn.addEventListener('click',function(){ setCurrency('USD'); }); }
+})();
 
 // ===========================================================
 // CART
 // ===========================================================
 var CART=[];
-function addToCart(print,size){
+function addToCart(print,size,price){
+  if(price===undefined) price=print.priceGHC;
   var ex=CART.find(function(i){return i.print.id===print.id&&i.size===size;});
-  if(ex){ex.qty++;}else{CART.push({print:print,size:size,qty:1});}
+  if(ex){ex.qty++;}else{CART.push({print:print,size:size,price:price,qty:1});}
   updateCartBadge();
   renderCartItems();
 }
@@ -1609,7 +1690,7 @@ function removeFromCart(printId,size){
   renderCartItems();
 }
 function cartTotal(){
-  return CART.reduce(function(s,i){return s+i.print.priceGHC*i.qty;},0);
+  return CART.reduce(function(s,i){return s+(i.price||i.print.priceGHC)*i.qty;},0);
 }
 function updateCartBadge(){
   var total=CART.reduce(function(s,i){return s+i.qty;},0);
@@ -1639,8 +1720,9 @@ function renderCartItems(){
   wrap.innerHTML=CART.map(function(item,idx){
     var imgEl=item.print.img?'<img class="cart-item-img" src="'+item.print.img+'" alt="'+item.print.title+'">'
       :'<div class="cart-item-img-ph"></div>';
-    var priceStr=CURRENCY==='USD'?'$'+(item.print.priceGHC*USD_RATE*item.qty).toFixed(0)
-      :'GH&#8373; '+(item.print.priceGHC*item.qty).toLocaleString();
+    var itemPrice=item.price||item.print.priceGHC;
+    var priceStr=CURRENCY==='USD'?'$'+(itemPrice*USD_RATE*item.qty).toFixed(0)
+      :'GH&#8373; '+(itemPrice*item.qty).toLocaleString();
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
@@ -1683,14 +1765,14 @@ function checkoutCart(){
 // ===========================================================
 // PAYSTACK PAYMENT
 // ===========================================================
-function payWithPaystack(print,email){
-  var selectedSize="";
-  var activePill=document.querySelector(".size-pill.active");
-  if(activePill) selectedSize=activePill.textContent;
+function payWithPaystack(print,email,priceGHC){
+  var activePill=document.getElementById('pdSizes')?document.getElementById('pdSizes').querySelector('.size-pill.active'):null;
+  var selectedSize=activePill?activePill.textContent:(print.sizes[0]?print.sizes[0].label:'');
+  if(priceGHC===undefined) priceGHC=activePill?parseFloat(activePill.dataset.price):print.priceGHC;
   var handler=PaystackPop.setup({
     key:'pk_test_651689f8101656b8ac3ba9b7bbc496720b454bf2',
     email:email,
-    amount:print.priceGHC*100,
+    amount:priceGHC*100,
     currency:'GHS',
     ref:'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now(),
     metadata:{custom_fields:[
@@ -1855,8 +1937,11 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Add badge to home nav Shop button
 var _hsb=document.getElementById("homeShopBtn");
 
-// Home print strip link
-
+// Expose cart/currency functions to global scope for inline onclick handlers
+window.openCart=openCart;
+window.closeCart=closeCart;
+window.removeFromCart=removeFromCart;
+window.checkoutCart=checkoutCart;
 
 }); // end DOMContentLoaded
 </script>

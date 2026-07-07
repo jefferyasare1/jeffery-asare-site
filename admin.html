@@ -96,14 +96,20 @@ function login(){
   }
 }
 
-// ── Print data (mirrors index.html PRINTS) ──
+// ── Print data (mirrors index.html PRINTS, sizes with per-size pricing) ──
 var PRINTS_DATA = [
-  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',img:'s1.jpg',defaultPrice:920},
-  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',img:'s2.jpg',defaultPrice:680},
-  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',img:'s3.jpg',defaultPrice:750},
-  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',img:'s4.jpg',defaultPrice:800},
-  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',img:'s5.jpg',defaultPrice:700},
-  {id:'s6',title:'Market Weave',series:'ABSTRACT',img:'s6.jpg',defaultPrice:650},
+  {id:'s1',title:'Stillness in Jamestown',series:'PORTRAITS OF PLACE',img:'s1.jpg',
+   sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:920},{label:'A2 (42 × 59.4 cm)',defaultPrice:1200},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1650}]},
+  {id:'s2',title:'Kente Geometry',series:'TEXTURE STUDIES',img:'s2.jpg',
+   sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:480},{label:'A3 (29.7 × 42 cm)',defaultPrice:680},{label:'A2 (42 × 59.4 cm)',defaultPrice:920}]},
+  {id:'s3',title:'Between Stalls',series:'ACCRA STREETS',img:'s3.jpg',
+   sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:750},{label:'A2 (42 × 59.4 cm)',defaultPrice:1050}]},
+  {id:'s4',title:'Eclipse I',series:'ECLIPSE OF THE SELF',img:'s4.jpg',
+   sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:800},{label:'A2 (42 × 59.4 cm)',defaultPrice:1100},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1500}]},
+  {id:'s5',title:'Golden Hour at Labadi',series:'RANDOM STORIES',img:'s5.jpg',
+   sizes:[{label:'A4 (21 × 29.7 cm)',defaultPrice:500},{label:'A3 (29.7 × 42 cm)',defaultPrice:700},{label:'A2 (42 × 59.4 cm)',defaultPrice:980}]},
+  {id:'s6',title:'Market Weave',series:'ABSTRACT',img:'s6.jpg',
+   sizes:[{label:'A3 (29.7 × 42 cm)',defaultPrice:650},{label:'A2 (42 × 59.4 cm)',defaultPrice:900},{label:'A1 (59.4 × 84.1 cm)',defaultPrice:1300}]},
 ];
 
 function loadAdmin(){
@@ -113,12 +119,22 @@ function loadAdmin(){
 
   var grid = document.getElementById('printsGrid');
   grid.innerHTML = PRINTS_DATA.map(function(p){
-    var price = saved[p.id] !== undefined ? saved[p.id] : p.defaultPrice;
     var imgEl = '<img class="print-thumb" src="'+p.img+'" onerror="this.className=\'print-thumb-ph\'">';
-    return '<div class="print-row">'
+    var sizeRows = p.sizes.map(function(s){
+      var key = s.label.replace(/[^a-zA-Z0-9]/g,'_');
+      var savedPrice = (saved[p.id]&&saved[p.id][s.label]!==undefined) ? saved[p.id][s.label] : s.defaultPrice;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #f5f5f5;">'
+        + '<span style="font-size:12px;color:#666;min-width:160px;">'+s.label+'</span>'
+        + '<div class="price-input-wrap"><span>GH&#8373;</span>'
+        + '<input type="number" id="price_'+p.id+'_'+key+'" value="'+savedPrice+'" min="0" step="10"></div>'
+        + '</div>';
+    }).join('');
+    return '<div class="print-row" style="grid-template-columns:1fr;gap:.5rem;padding-bottom:.8rem;">'
+      + '<div style="display:flex;gap:1rem;align-items:center;">'
       + imgEl
       + '<div class="print-info"><div class="ptitle">'+p.title+'</div><div class="pseries">'+p.series+'</div></div>'
-      + '<div class="price-input-wrap"><span>GH&#8373;</span><input type="number" id="price_'+p.id+'" value="'+price+'" min="0" step="10"></div>'
+      + '</div>'
+      + sizeRows
       + '</div>';
   }).join('');
 }
@@ -126,8 +142,12 @@ function loadAdmin(){
 function saveAll(){
   var prices = {};
   PRINTS_DATA.forEach(function(p){
-    var el = document.getElementById('price_'+p.id);
-    if(el) prices[p.id] = parseFloat(el.value) || p.defaultPrice;
+    prices[p.id] = {};
+    p.sizes.forEach(function(s){
+      var key = s.label.replace(/[^a-zA-Z0-9]/g,'_');
+      var el = document.getElementById('price_'+p.id+'_'+key);
+      prices[p.id][s.label] = el ? (parseFloat(el.value)||s.defaultPrice) : s.defaultPrice;
+    });
   });
   var rate = parseFloat(document.getElementById('usdRate').value) || 0.067;
   localStorage.setItem('ja_prices', JSON.stringify(prices));
