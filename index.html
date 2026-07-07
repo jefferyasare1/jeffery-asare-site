@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="pinterest" content="nopin" description="Images on this site may not be pinned.">
 <meta name="description" content="Fine art phone photography by Jeffery Asare. Limited edition archival prints from Accra, Ghana.">
 <meta name="author" content="Jeffery Asare">
 <meta property="og:title" content="Jeffery Asare - Photography is Poetry">
@@ -15,6 +16,7 @@
 :root{--ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;--title:'General Sans',system-ui,sans-serif;--sans:'General Sans',system-ui,sans-serif;--pad:clamp(1.5rem,5vw,4rem);}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+img{-webkit-user-drag:none;-khtml-user-drag:none;-moz-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select:none;}
 .page{display:none;}.page.active{display:block;}
 nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad);display:flex;align-items:center;justify-content:space-between;}
 .nav-logo{font-family:var(--title);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;color:inherit;cursor:pointer;}
@@ -2124,6 +2126,47 @@ window.openCart=openCart;
 window.closeCart=closeCart;
 window.removeFromCart=removeFromCart;
 window.checkoutCart=checkoutCart;
+
+// ============================================================
+// IMAGE PROTECTION
+// ============================================================
+// Block right-click on images and their wrappers
+document.addEventListener('contextmenu',function(e){
+  var el=e.target;
+  while(el){
+    if(el.tagName==='IMG'||
+       (el.classList&&(
+         el.classList.contains('shop-card-img-wrap')||
+         el.classList.contains('photo-card')||
+         el.classList.contains('lb-ph')||
+         el.classList.contains('print-detail-img-wrap')||
+         el.classList.contains('hero-slide')
+       ))){
+      e.preventDefault();
+      return;
+    }
+    el=el.parentElement;
+  }
+});
+// Block drag-to-desktop
+document.addEventListener('dragstart',function(e){
+  if(e.target.tagName==='IMG') e.preventDefault();
+});
+// Block Ctrl+S / Cmd+S (save page)
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')) e.preventDefault();
+});
+// Tag all current + future images with Pinterest nopin
+function protectImages(){
+  document.querySelectorAll('img').forEach(function(img){
+    img.setAttribute('draggable','false');
+    img.setAttribute('data-pin-nopin','true');
+    img.setAttribute('data-pin-description','© Jeffery Asare — All rights reserved');
+  });
+}
+protectImages();
+// Re-run whenever new images are added to the DOM (shop cards, lightbox etc.)
+new MutationObserver(protectImages).observe(document.body,{childList:true,subtree:true});
 
 }); // end DOMContentLoaded
 </script>
