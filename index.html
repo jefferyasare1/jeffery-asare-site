@@ -522,6 +522,16 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   .cert-modal-close,.cert-print-btn,.cert-print-hint,.inner-nav,.wa-float-tooltip{display:none!important;}
 }
 
+/* ── RELATED PRINTS ── */
+.pd-related{padding:3rem var(--pad) 4rem;border-top:1px solid var(--rule);}
+.pd-related-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;}
+.pd-related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.pd-related-card{cursor:pointer;}
+.pd-related-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);margin-bottom:.7rem;transition:opacity .2s,transform .35s;}
+.pd-related-card:hover .pd-related-img{opacity:.88;transform:scale(1.02);}
+.pd-related-series{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem;}
+.pd-related-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
+@media(max-width:700px){.pd-related-grid{grid-template-columns:repeat(2,1fr);}}
 /* ── SHOP ANIMATIONS ── */
 @keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .shop-item{animation:shopFadeUp .55s ease both;}
@@ -541,7 +551,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .btn-inquire{transition:all .2s;}
 .btn-inquire:hover{opacity:.8;transform:translateY(-1px);}
 /* ── CART FLOAT ── */
-#cartFloat{position:fixed;bottom:2rem;right:2rem;z-index:200;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.75rem 1.4rem;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 24px rgba(0,0,0,.22);transition:transform .2s,opacity .25s;opacity:0;pointer-events:none;}
+#cartFloat{position:fixed;bottom:2rem;right:5rem;z-index:200;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.75rem 1.4rem;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 24px rgba(0,0,0,.22);transition:transform .2s,opacity .25s;opacity:0;pointer-events:none;}
 #cartFloat.has-items{opacity:1;pointer-events:auto;}
 #cartFloat:hover{transform:scale(1.04);}
 /* ── CART SIDEBAR ── */
@@ -888,6 +898,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <div class="print-detail-actions" id="pdActions"></div>
     </div>
   </div>
+  <!-- RELATED PRINTS -->
+  <div id="pdRelated" class="pd-related" style="display:none;"></div>
   <div id="pd-mini-footer"></div>
 </div>
 
@@ -913,6 +925,12 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 // 2. Create a new form  -  copy the endpoint URL it gives you
 // 3. Paste it here, replacing the placeholder below
 var FORMSPREE_URL = "https://formspree.io/f/xwvdwaal";
+// ───────────────────────────────────────────────────────────────
+
+// ── WHATSAPP NUMBER ─────────────────────────────────────────────
+// Replace with your actual WhatsApp number (country code + number, no + or spaces)
+// Example: Ghana number +233 24 123 4567 → '233241234567'
+var WA_NUMBER = '233000000000';
 // ───────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1659,7 +1677,47 @@ function openPrintDetail(print){
     }
   }
   setPageTitle("print-detail",print.title);
+
+  // Update WhatsApp button to reference this specific print
+  var waBtn = document.getElementById('waFloat');
+  if(waBtn){
+    var waMsg = "Hi Jeffery, I’m interested in the “"+print.title+"” print. Could you tell me more?";
+    waBtn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(waMsg);
+  }
+
   navigate("print-detail");
+
+  // Render "You might also like" after navigation
+  setTimeout(function(){
+    var relDiv = document.getElementById('pdRelated');
+    if(!relDiv) return;
+    var active = PRINTS.filter(function(p){ return p.title !== 'Untitled Print' && p.id !== print.id; });
+    var sameSeries = active.filter(function(p){ return p.series === print.series; });
+    var others = active.filter(function(p){ return p.series !== print.series; });
+    var picks = sameSeries.concat(others).slice(0, 3);
+    if(!picks.length){ relDiv.style.display='none'; return; }
+    relDiv.style.display = 'block';
+    relDiv.innerHTML = '<div class="pd-related-title">You might also like</div>'
+      + '<div class="pd-related-grid">'
+      + picks.map(function(p){
+          var img = p.img
+            ? '<img class="pd-related-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
+            : '<div class="pd-related-img"></div>';
+          return '<div class="pd-related-card" data-pid="'+p.id+'">'
+            + img
+            + '<div class="pd-related-series">'+p.series+'</div>'
+            + '<div class="pd-related-name">'+p.title+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+    relDiv.querySelectorAll('.pd-related-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        var pid = card.dataset.pid;
+        var found = PRINTS.find(function(x){ return x.id === pid; });
+        if(found) openPrintDetail(found);
+      });
+    });
+  }, 250);
 }
 
 // ===========================================================
@@ -1678,6 +1736,25 @@ var CURRENCY='GHS', USD_RATE=0.067;
       }
     })
     .catch(function(){/* keep fallback rate */});
+})();
+// Auto-detect user's country and switch to USD if they are outside Ghana
+(function detectCurrency(){
+  fetch('https://ipapi.co/json/')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.country_code && d.country_code !== 'GH'){
+        setCurrency('USD');
+      }
+    })
+    .catch(function(){/* keep GHS default */});
+})();
+// Wire up WhatsApp float button with default inquiry message
+(function(){
+  var waBtn = document.getElementById('waFloat');
+  if(waBtn){
+    var msg = "Hi Jeffery, I’d like to enquire about your fine art prints.";
+    waBtn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
+  }
 })();
 function setCurrency(c){
   CURRENCY=c;
@@ -2027,6 +2104,12 @@ window.checkoutCart=checkoutCart;
     <p class="cert-print-hint" id="certPrintHint">Enter your name above to unlock the PDF</p>
   </div>
 </div>
+
+<!-- WHATSAPP FLOAT BUTTON -->
+<a class="wa-float" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <span class="wa-float-tooltip">Chat on WhatsApp</span>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
 
 <script>
 // Load site settings from CMS
