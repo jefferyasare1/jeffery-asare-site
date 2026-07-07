@@ -131,9 +131,16 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .size-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .size-pill:hover:not(.active){border-color:#999;color:var(--ink);}
 .shop-footer-row{display:flex;align-items:center;justify-content:space-between;}
-.shop-price{font-size:15px;color:var(--muted);}
-.shop-price strong{color:var(--ink);}
-.ship{font-size:12px;margin-left:.3rem;}
+.shop-price{font-size:13px;color:var(--muted);}
+.shop-price strong{color:var(--ink);font-size:22px;font-weight:700;letter-spacing:-.02em;}
+.ship{font-size:11px;margin-left:.3rem;}
+/* QTY CONTROL */
+.qty-row{display:flex;align-items:center;gap:.75rem;margin:.55rem 0 .35rem;}
+.qty-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.qty-control{display:inline-flex;align-items:center;border:1.5px solid var(--rule);border-radius:999px;overflow:hidden;background:#fff;}
+.qty-btn{width:30px;height:30px;background:none;border:none;font-size:17px;line-height:1;cursor:pointer;color:var(--ink);font-family:var(--sans);display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.qty-btn:hover{background:var(--warm);}
+.qty-val{min-width:26px;text-align:center;font-size:14px;font-weight:600;color:var(--ink);}
 .btn-inquire{display:inline-flex;align-items:center;gap:.5rem;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:opacity .2s;}
 .btn-inquire:hover{opacity:.8;}
 .shop-empty{padding:3rem;color:var(--muted);font-size:13px;}
@@ -422,8 +429,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .print-detail-spec-val{color:var(--ink);font-weight:400;}
 .print-detail-size-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
 .print-detail-size-grid{display:flex;gap:.5rem;flex-wrap:wrap;}
-.print-detail-price{font-size:18px;color:var(--muted);}
-.print-detail-price strong{color:var(--ink);font-size:22px;}
+.print-detail-price{font-size:13px;color:var(--muted);}
+.print-detail-price strong{color:var(--ink);font-size:28px;font-weight:700;letter-spacing:-.02em;}
 .print-detail-actions{display:flex;flex-direction:column;gap:.7rem;}
 .btn-wa{display:inline-flex;align-items:center;gap:.6rem;background:#25D366;color:#fff;border:none;border-radius:999px;padding:.75rem 1.6rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:opacity .2s;text-decoration:none;}
 .btn-wa:hover{opacity:.88;}
@@ -877,6 +884,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
         </div>
       </div>
       <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">+ shipping &middot; Production 7-14 business days</div></div>
+      <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
       <div class="print-detail-actions" id="pdActions"></div>
     </div>
   </div>
@@ -1278,6 +1286,7 @@ function renderShop(page){
       +"<div><div class=\"shop-spec-label\">Edition</div><div class=\"shop-spec-val\">"+p.edition+"</div></div>"
       +"</div><div class=\"shop-spec-label\">Size</div>"
       +"<div class=\"shop-sizes\">"+sizePills+"</div>"
+      +(p.soldOut?"":"<div class=\"qty-row\"><span class=\"qty-label\">Qty</span><div class=\"qty-control\"><button class=\"qty-btn shop-qty-minus\">&#8722;</button><span class=\"qty-val shop-qty-val\">1</span><button class=\"qty-btn shop-qty-plus\">&#43;</button></div></div>")
       +"<div class=\"shop-footer-row\">"
       +"<div class=\"shop-price\">"+priceHtml+"</div>"
       +"<div style=\"display:flex;gap:.5rem;align-items:center;\">"+cartBtn+"<button class=\"btn-inquire shop-inq\">"+inqLabel+"</button></div>"
@@ -1293,12 +1302,26 @@ function renderShop(page){
       });
     });
     if(!p.soldOut){
+      // Qty buttons
+      var qtyValEl=item.querySelector(".shop-qty-val");
+      item.querySelector(".shop-qty-minus").addEventListener("click",function(e){
+        e.stopPropagation();
+        var v=parseInt(qtyValEl.textContent)||1;
+        if(v>1){ qtyValEl.textContent=v-1; }
+      });
+      item.querySelector(".shop-qty-plus").addEventListener("click",function(e){
+        e.stopPropagation();
+        var v=parseInt(qtyValEl.textContent)||1;
+        if(v<99){ qtyValEl.textContent=v+1; }
+      });
+      // Add to cart
       item.querySelector(".shop-cart-btn").addEventListener("click",(function(print,item){ return function(e){
         e.stopPropagation();
         var activePill=item.querySelector(".size-pill.active");
         var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
-        addToCart(print,sizeLabel,sizePrice);
+        var qty=parseInt(item.querySelector(".shop-qty-val").textContent)||1;
+        addToCart(print,sizeLabel,sizePrice,qty);
         openCart();
       }; })(p,item));
     }
@@ -1589,6 +1612,17 @@ function openPrintDetail(print){
     });
   }
   if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":formatPrice(print.sizes[0].price);
+  // Qty controls in detail view
+  var pdQtyRow=document.getElementById("pdQtyRow");
+  var pdQtyVal=document.getElementById("pdQtyVal");
+  var pdQtyMinus=document.getElementById("pdQtyMinus");
+  var pdQtyPlus=document.getElementById("pdQtyPlus");
+  if(pdQtyRow){
+    pdQtyRow.style.display=print.soldOut?"none":"flex";
+    if(pdQtyVal) pdQtyVal.textContent="1";
+    if(pdQtyMinus) pdQtyMinus.onclick=function(){var v=parseInt(pdQtyVal.textContent)||1;if(v>1)pdQtyVal.textContent=v-1;};
+    if(pdQtyPlus)  pdQtyPlus.onclick=function(){var v=parseInt(pdQtyVal.textContent)||1;if(v<99)pdQtyVal.textContent=v+1;};
+  }
   if(pdActions){
     if(print.soldOut){
       pdActions.innerHTML="<button class=\"btn-dark\" id=\"pdWaitBtn\" style=\"width:100%;justify-content:center;\">Join waiting list</button>";
@@ -1608,14 +1642,18 @@ function openPrintDetail(print){
         var emailEl=document.getElementById("pdBuyerEmail");
         var email=emailEl?emailEl.value.trim():"";
         if(!email||!email.includes("@")){if(emailEl){emailEl.focus();emailEl.style.borderBottomColor="#e00";}return;}
-        payWithPaystack(print,email);
+        var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
+        var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
+        var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
+        payWithPaystack(print,email,sizePrice*qty);
       });
       var cb=document.getElementById("pdCartBtn");
       if(cb) cb.addEventListener("click",function(){
         var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
         var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
-        addToCart(print,sizeLabel,sizePrice);
+        var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
+        addToCart(print,sizeLabel,sizePrice,qty);
         openCart();
       });
     }
@@ -1677,10 +1715,11 @@ function formatPrice(ghc){
 // CART
 // ===========================================================
 var CART=[];
-function addToCart(print,size,price){
+function addToCart(print,size,price,qty){
   if(price===undefined) price=print.priceGHC;
+  qty=Math.max(1,parseInt(qty)||1);
   var ex=CART.find(function(i){return i.print.id===print.id&&i.size===size;});
-  if(ex){ex.qty++;}else{CART.push({print:print,size:size,price:price,qty:1});}
+  if(ex){ex.qty+=qty;}else{CART.push({print:print,size:size,price:price,qty:qty});}
   updateCartBadge();
   renderCartItems();
 }
