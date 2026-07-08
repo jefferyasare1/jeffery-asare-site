@@ -2083,6 +2083,7 @@ function openCert(items, buyerEmail){
   var uniqueNum=String(Math.floor(1000+Math.random()*9000));
   var coaRef="COA-"+uniqueNum+" · "+now.getFullYear();
   var isSingle=items.length===1;
+  var certDataArr=[]; // collects per-print data; email fires on Print click
 
   // Build one block per print
   var printBlocks=items.map(function(item,idx){
@@ -2107,22 +2108,20 @@ function openCert(items, buyerEmail){
       return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
     }).join('');
     var printUrl=window.location.origin+'?print='+p.id;
-    // COA email to buyer
-    if(buyerEmail){
-      emailjs.send('service_qf961dj','template_j198hyb',{
-        to_email:buyerEmail,
-        to_name:buyerEmail.split('@')[0],
-        print_title:p.title,
-        print_series:p.series||'—',
-        print_size:sizeStr,
-        print_paper:p.paper||'—',
-        print_edition:p.edition||'—',
-        print_num:String(printNum),
-        coa_ref:coaRef,
-        date:dateStr,
-        print_url:printUrl
-      }).catch(function(){});
-    }
+    var printImgUrl=p.img?(p.img.startsWith('http')?p.img:window.location.origin+(p.img.startsWith('/')?'':'/')+p.img):'';
+    // Store data; email fires when buyer clicks Print (so their name is captured)
+    certDataArr.push({
+      print_title:p.title,
+      print_series:p.series||'—',
+      print_size:sizeStr,
+      print_paper:p.paper||'—',
+      print_edition:p.edition||'—',
+      print_num:printNum+' of '+edTotal,
+      print_img:printImgUrl,
+      coa_ref:coaRef,
+      date:dateStr,
+      print_url:printUrl
+    });
     var qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
     return (idx>0?'<div style="border-top:1px solid #e8e4df;margin:2rem 0 1.5rem;"></div>':'')
       +'<div class="cert-img-wrap">'+imgHtml+'</div>'
@@ -2181,6 +2180,18 @@ function openCert(items, buyerEmail){
   }
   if(printBtn) printBtn.onclick=function(){
     if(printBtn.disabled) return;
+    // Send COA email(s) with buyer's actual typed name
+    if(buyerEmail){
+      var buyerName=buyerInput?buyerInput.value.trim():'';
+      var sigUrl=window.location.origin+'/signature.png';
+      certDataArr.forEach(function(data){
+        emailjs.send('service_qf961dj','template_hnd30nb',Object.assign({
+          to_email:buyerEmail,
+          to_name:buyerName,
+          signature_url:sigUrl
+        },data)).catch(function(){});
+      });
+    }
     document.body.classList.add('printing-cert');
     window.addEventListener('afterprint',function once(){
       document.body.classList.remove('printing-cert');
