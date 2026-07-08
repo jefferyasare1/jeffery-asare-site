@@ -1,0 +1,8 @@
+{
+  "series": [
+    {"slug": "random-stories", "label": "Random Stories"},
+    {"slug": "portraits", "label": "Portraits"},
+    {"slug": "eclipse", "label": "Eclipse Of The Self"},
+    {"slug": "abstract", "label": "Abstract"}
+  ]
+}
