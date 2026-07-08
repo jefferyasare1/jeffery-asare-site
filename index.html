@@ -2109,6 +2109,7 @@ function openCert(items, buyerEmail){
     }).join('');
     var printUrl=window.location.origin+'?print='+p.id;
     var printImgUrl=p.img?(p.img.startsWith('http')?p.img:window.location.origin+(p.img.startsWith('/')?'':'/')+p.img):'';
+    var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
     // Store data; email fires when buyer clicks Print (so their name is captured)
     certDataArr.push({
       print_title:p.title,
@@ -2118,6 +2119,7 @@ function openCert(items, buyerEmail){
       print_edition:p.edition||'—',
       print_num:printNum+' of '+edTotal,
       print_img:printImgUrl,
+      qr_url:qrUrl,
       coa_ref:coaRef,
       date:dateStr,
       print_url:printUrl
