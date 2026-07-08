@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Orders — Jeffery Asare</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;
+      --sans:'General Sans',system-ui,sans-serif;
+    }
+    @font-face{
+      font-family:'General Sans';
+      src:url('/fonts/GeneralSans-Variable.woff2') format('woff2');
+      font-weight:100 900;font-style:normal;font-display:swap;
+    }
+    body{
+      background:var(--warm);min-height:100vh;
+      font-family:var(--sans);color:var(--ink);
+    }
+    .page{max-width:580px;margin:0 auto;padding:48px 24px 80px;}
+    .brand{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+    .page-title{font-size:28px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:36px;}
+
+    /* Tabs */
+    .tabs{display:flex;border-bottom:1px solid var(--rule);margin-bottom:40px;overflow-x:auto;}
+    .tab{
+      flex-shrink:0;padding:12px 20px;font-size:13px;font-weight:500;
+      color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+      margin-bottom:-1px;white-space:nowrap;background:none;
+      border-top:none;border-left:none;border-right:none;
+      font-family:var(--sans);transition:color .15s;
+    }
+    .tab:hover{color:var(--ink);}
+    .tab.active{color:var(--ink);border-bottom-color:var(--ink);}
+
+    /* Panels */
+    .panel{display:none;}
+    .panel.active{display:block;}
+    .panel-title{font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px;}
+    .panel-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.55;}
+
+    /* Form */
+    label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+    .optional{font-size:10px;letter-spacing:0;text-transform:none;color:#bbb;margin-left:6px;}
+    input[type=text],input[type=email],input[type=url]{
+      display:block;width:100%;border:1px solid var(--rule);
+      padding:11px 13px;font-size:14px;font-family:var(--sans);
+      color:var(--ink);outline:none;margin-bottom:20px;
+      transition:border-color .15s;background:#fff;
+    }
+    input:focus{border-color:var(--ink);}
+    input::placeholder{color:#bbb;}
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .row-2-wrap{margin-bottom:20px;}
+    .row-2 input{margin-bottom:0;}
+    hr{border:none;border-top:1px solid var(--rule);margin:4px 0 24px;}
+
+    /* Note box */
+    .note{font-size:12px;color:var(--muted);line-height:1.6;background:var(--warm);padding:12px 14px;margin-bottom:24px;}
+
+    /* Button */
+    .btn-primary{
+      display:block;width:100%;background:var(--ink);color:#fff;
+      border:none;padding:14px;font-size:13px;font-weight:600;
+      letter-spacing:.08em;text-transform:uppercase;
+      cursor:pointer;font-family:var(--sans);transition:opacity .15s;
+    }
+    .btn-primary:hover{opacity:.85;}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+
+    /* Status */
+    .status{margin-top:16px;font-size:13px;text-align:center;min-height:20px;line-height:1.5;}
+    .status.ok{color:#2a7a2a;}
+    .status.err{color:#c00;}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="brand"><span style="text-transform:none;">Jeffery Asare</span> &nbsp;·&nbsp; <a href="/admin/#/collections/settings" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Content Manager &rarr;</a></div>
+    <h1 class="page-title">Admin</h1>
+    <p class="page-sub">Manage your order workflow in one place.</p>
+
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="ship">Ship Order</button>
+      <button type="button" class="tab" data-tab="coa">Send COA</button>
+      <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
+      <button type="button" class="tab" data-tab="followup">Follow-up</button>
+    </div>
+
+    <!-- SHIP ORDER -->
+    <div class="panel active" id="panel-ship">
+      <h2 class="panel-title">Ship an Order</h2>
+      <p class="panel-sub">Sends the buyer their DHL tracking number and a link to track their package.</p>
+      <label>Buyer Email</label>
+      <input id="sh-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label>
+      <input id="sh-name" type="text" placeholder="Full name">
+      <label>Print Title</label>
+      <input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
+      <hr>
+      <label>DHL Tracking Number</label>
+      <input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
+      <button class="btn-primary" id="sh-send">Send Tracking Email</button>
+      <div class="status" id="sh-status"></div>
+    </div>
+
+    <!-- SEND COA -->
+    <div class="panel" id="panel-coa">
+      <h2 class="panel-title">Send Certificate of Authenticity</h2>
+      <p class="panel-sub">Resend or manually issue a COA. Anything left blank will show a dash on the certificate.</p>
+      <div class="note">COA reference and today's date are auto-generated. Leave Print No. blank to pick randomly from the edition.</div>
+      <label>Buyer Email</label>
+      <input id="coa-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label>
+      <input id="coa-name" type="text" placeholder="Full name">
+      <hr>
+      <label>Print Title</label>
+      <input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
+      <div class="row-2-wrap">
+        <div class="row-2">
+          <div>
+            <label>Series <span class="optional">(optional)</span></label>
+            <input id="coa-series" type="text" placeholder="e.g. Dry Season">
+          </div>
+          <div>
+            <label>Size <span class="optional">(optional)</span></label>
+            <input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm">
+          </div>
+        </div>
+      </div>
+      <div class="row-2-wrap">
+        <div class="row-2">
+          <div>
+            <label>Paper <span class="optional">(optional)</span></label>
+            <input id="coa-paper" type="text" placeholder="e.g. Hahnemühle">
+          </div>
+          <div>
+            <label>Edition</label>
+            <input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
+          </div>
+        </div>
+      </div>
+      <div class="row-2-wrap">
+        <div class="row-2">
+          <div>
+            <label>Print No. <span class="optional">(optional)</span></label>
+            <input id="coa-printnum" type="text" placeholder="e.g. 7 of 20">
+          </div>
+          <div>
+            <label>Image URL <span class="optional">(optional)</span></label>
+            <input id="coa-img" type="url" placeholder="https://…">
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" id="coa-send">Send COA Email</button>
+      <div class="status" id="coa-status"></div>
+    </div>
+
+    <!-- WAITLIST -->
+    <div class="panel" id="panel-waitlist">
+      <h2 class="panel-title">Notify Waitlist</h2>
+      <p class="panel-sub">Let someone on the waitlist know a print is available — before opening it up publicly.</p>
+      <label>Buyer Email</label>
+      <input id="wl-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label>
+      <input id="wl-name" type="text" placeholder="Full name">
+      <hr>
+      <label>Print Title</label>
+      <input id="wl-title" type="text" placeholder="e.g. Golden Hour III">
+      <label>Link to Print</label>
+      <input id="wl-url" type="url" placeholder="https://jefferyasare.com/?print=…">
+      <button class="btn-primary" id="wl-send">Send Availability Email</button>
+      <div class="status" id="wl-status"></div>
+    </div>
+
+    <!-- POST-DELIVERY FOLLOW-UP -->
+    <div class="panel" id="panel-followup">
+      <h2 class="panel-title">Post-Delivery Follow-up</h2>
+      <p class="panel-sub">A warm check-in after the buyer has had time to receive their print — asking how they're enjoying it and inviting them to share a photo.</p>
+      <label>Buyer Email</label>
+      <input id="fu-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label>
+      <input id="fu-name" type="text" placeholder="Full name">
+      <hr>
+      <label>Print Title</label>
+      <input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
+      <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
+      <div class="status" id="fu-status"></div>
+    </div>
+
+  </div><!-- /page -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    emailjs.init('fTeaXZvU78Yu3TSVI');
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+        document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Helpers
+    function val(id){ return document.getElementById(id).value.trim(); }
+    function clearFields(ids){ ids.forEach(function(id){ document.getElementById(id).value=''; }); }
+    function setStatus(id, type, msg){
+      var el = document.getElementById(id);
+      el.className = 'status' + (type ? ' '+type : '');
+      el.textContent = msg;
+    }
+
+    function sendEmail(templateId, params, btnId, statusId, fieldIds){
+      var btn = document.getElementById(btnId);
+      setStatus(statusId, '', 'Sending…');
+      btn.disabled = true;
+      emailjs.send('service_qf961dj', templateId, params)
+        .then(function(){
+          setStatus(statusId, 'ok', 'Sent to ' + params.to_email + '.');
+          clearFields(fieldIds);
+          btn.disabled = false;
+        })
+        .catch(function(err){
+          setStatus(statusId, 'err', 'Send failed — check the browser console.');
+          console.error('EmailJS error:', err);
+          btn.disabled = false;
+        });
+    }
+
+    function requireFields(ids, statusId){
+      for(var i=0; i<ids.length; i++){
+        if(!val(ids[i])){ setStatus(statusId, 'err', 'Please fill in all required fields.'); return false; }
+      }
+      return true;
+    }
+
+    // COA helpers
+    function coaRef(){
+      var y = new Date().getFullYear();
+      return 'COA-' + String(Math.floor(1000+Math.random()*9000)) + ' · ' + y;
+    }
+    function todayStr(){
+      var m=['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var d=new Date();
+      return m[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+    }
+    function randPrintNum(editionStr){
+      var total=parseInt((editionStr||'').replace(/\D/g,''))||20;
+      return Math.floor(1+Math.random()*total)+' of '+total;
+    }
+
+    // SHIP ORDER
+    document.getElementById('sh-send').addEventListener('click', function(){
+      if(!requireFields(['sh-email','sh-name','sh-title','sh-tracking'],'sh-status')) return;
+      sendEmail('template_ufkb3dt',{
+        to_email:val('sh-email'), to_name:val('sh-name'),
+        print_title:val('sh-title'), tracking_number:val('sh-tracking')
+      },'sh-send','sh-status',['sh-email','sh-name','sh-title','sh-tracking']);
+    });
+
+    // SEND COA
+    document.getElementById('coa-send').addEventListener('click', function(){
+      if(!requireFields(['coa-email','coa-name','coa-title','coa-edition'],'coa-status')) return;
+      var edStr=val('coa-edition');
+      var pNum=val('coa-printnum')||randPrintNum(edStr);
+      var titleId=val('coa-title').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+      var printUrl='https://jefferyasare.com/?print='+titleId;
+      var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
+      sendEmail('template_hnd30nb',{
+        to_email:val('coa-email'), to_name:val('coa-name'),
+        print_title:val('coa-title'), print_series:val('coa-series')||'—',
+        print_size:val('coa-size')||'—', print_paper:val('coa-paper')||'—',
+        print_edition:edStr, print_num:pNum,
+        print_img:val('coa-img')||'', coa_ref:coaRef(),
+        date:todayStr(), qr_url:qrUrl, print_url:printUrl,
+        signature_url:'https://jefferyasare.com/signature.png'
+      },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-paper','coa-edition','coa-printnum','coa-img']);
+    });
+
+    // WAITLIST
+    document.getElementById('wl-send').addEventListener('click', function(){
+      if(!requireFields(['wl-email','wl-name','wl-title','wl-url'],'wl-status')) return;
+      sendEmail('template_waitlist01',{
+        to_email:val('wl-email'), to_name:val('wl-name'),
+        print_title:val('wl-title'), print_url:val('wl-url')
+      },'wl-send','wl-status',['wl-email','wl-name','wl-title','wl-url']);
+    });
+
+    // POST-DELIVERY FOLLOW-UP
+    document.getElementById('fu-send').addEventListener('click', function(){
+      if(!requireFields(['fu-email','fu-name','fu-title'],'fu-status')) return;
+      sendEmail('template_postdel01',{
+        to_email:val('fu-email'), to_name:val('fu-name'), print_title:val('fu-title')
+      },'fu-send','fu-status',['fu-email','fu-name','fu-title']);
+    });
+  </script>
+</body>
+</html>
