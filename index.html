@@ -1129,7 +1129,7 @@ function injectFooters(){
       a.addEventListener("click",function(){ navigate(a.getAttribute("data-nav")); });
     });
   }
-  ["home","port","detail","shop","contact","terms","pd"].forEach(function(id){
+  ["port","detail","shop","contact","terms","pd"].forEach(function(id){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
@@ -2172,7 +2172,7 @@ function openCert(items, buyerEmail){
     +'<div class="cert-sig-block"><input class="cert-buyer-input" id="certBuyerName" type="text" placeholder="Enter your full name" autocomplete="name" maxlength="80"><div class="cert-sig-label">Buyer Name</div></div>'
     +'</div>'
     +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>'
-    +'<button class="cert-print-btn" id="certPrintBtn" disabled>Print / Save as PDF</button>'
+    +'<button class="cert-print-btn" id="certPrintBtn" disabled>Save as PDF</button>'
     +'<p class="cert-print-hint" id="certPrintHint">&#128221; Enter your full name above — this is how it will appear on your certificate. Once saved, you can close this window.</p>';
 
   var modal=document.getElementById('certModal');
@@ -2203,25 +2203,50 @@ function openCert(items, buyerEmail){
   }
   if(printBtn) printBtn.onclick=function(){
     if(printBtn.disabled) return;
-    // Send COA email(s) with buyer's actual typed name
+    printBtn.disabled=true;
+    printBtn.textContent='Sending…';
+    var buyerName=buyerInput?buyerInput.value.trim():'';
+    var sigUrl=window.location.origin+'/signature.png';
+    var sends=[];
     if(buyerEmail){
-      var buyerName=buyerInput?buyerInput.value.trim():'';
-      var sigUrl=window.location.origin+'/signature.png';
       certDataArr.forEach(function(data){
-        emailjs.send('service_qf961dj','template_hnd30nb',Object.assign({
-          to_email:buyerEmail,
-          to_name:buyerName,
-          signature_url:sigUrl,
-          site_url:'www.jefferyasare.com'
-        },data)).catch(function(){});
+        sends.push(
+          emailjs.send('service_qf961dj','template_hnd30nb',Object.assign({
+            to_email:buyerEmail,
+            to_name:buyerName,
+            signature_url:sigUrl,
+            site_url:'www.jefferyasare.com'
+          },data))
+        );
       });
     }
-    document.body.classList.add('printing-cert');
-    window.addEventListener('afterprint',function once(){
-      document.body.classList.remove('printing-cert');
-      window.removeEventListener('afterprint',once);
+    // Alert Jeff via Formspree
+    var titles=certDataArr.map(function(d){ return d.print_title; }).join(', ');
+    fetch(FORMSPREE_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        buyer:buyerName,
+        buyer_email:buyerEmail||'',
+        items:titles,
+        action:'COA Sent',
+        _subject:'COA Sent – '+buyerName
+      })
+    }).catch(function(){});
+    Promise.all(sends).then(function(){
+      printBtn.textContent='✓ COA sent to your email';
+      printBtn.style.background='#2d6a4f';
+      var hint=document.getElementById('certPrintHint');
+      if(hint){
+        hint.textContent='Your Certificate of Authenticity has been sent to '+(buyerEmail||'your email')+'. You can now close this window.';
+        hint.style.display='block';
+      }
+    }).catch(function(){
+      printBtn.disabled=false;
+      printBtn.textContent='Save as PDF';
+      var hint=document.getElementById('certPrintHint');
+      if(hint){ hint.textContent='Something went wrong — please try again.'; hint.style.display='block'; }
     });
-    window.print();
   };
 
   var overlay=document.getElementById('certModalOverlay');

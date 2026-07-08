@@ -446,18 +446,46 @@ function syncFromSheet(){
   if(btn) btn.classList.add('spinning');
   if(info) info.textContent = 'Syncing…';
 
-  fetch(SHEET_URL + '?action=getOrders', { method:'GET' })
-    .then(function(r){ return r.json(); })
-    .then(function(rows){
-      if(Array.isArray(rows) && rows.length){
-        mergeSheetOrders(rows);
-      }
+  // Use gviz endpoint — CORS-safe, no auth needed if sheet is "Anyone with link can view"
+  var SHEET_ID = '1NrC5N_Uoe_C8o8R3_zGNP35xhr4mHmpW6_xfts21WHo';
+  var gvizUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=Orders';
+
+  fetch(gvizUrl)
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      // Strip the JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+      var json = text.replace(/^[^\{]*/, '').replace(/\);?\s*$/, '');
+      var resp = JSON.parse(json);
+      var table = resp.table;
+      if(!table || !table.rows) throw new Error('No table data');
+
+      // Map column labels → index
+      var cols = {};
+      (table.cols || []).forEach(function(c, i){ cols[c.label] = i; });
+
+      var fieldMap = {
+        'Date': 'Date', 'Action': 'Action',
+        'Buyer Name': 'Buyer Name', 'Buyer Email': 'Buyer Email',
+        'Print Title': 'Print Title', 'Notes': 'Notes', 'Order Ref': 'Order Ref'
+      };
+
+      var rows = (table.rows || []).map(function(row){
+        var obj = {};
+        Object.keys(fieldMap).forEach(function(label){
+          var idx = cols[label];
+          var cell = (idx !== undefined) ? row.c[idx] : null;
+          obj[label] = (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v) : '';
+        });
+        return obj;
+      }).filter(function(r){ return r['Buyer Email']; });
+
+      if(rows.length) mergeSheetOrders(rows);
       lastSyncTime = new Date();
       if(info) info.innerHTML = 'Synced at <strong>' + lastSyncTime.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</strong>';
       if(btn) btn.classList.remove('spinning');
       renderOrders();
     })
-    .catch(function(){
+    .catch(function(e){
       if(info) info.textContent = 'Could not reach Sheets — showing local data.';
       if(btn) btn.classList.remove('spinning');
     });
