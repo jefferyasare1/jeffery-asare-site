@@ -1995,6 +1995,7 @@ function checkoutCart(){
         order_ref:response.reference,
         next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
       });
+      sendOrderAlert({buyer:email,items:itemSummary,price:paidStr,country:'Ghana',ref:response.reference});
       CART=[];
       updateCartBadge();
       closeCart();
@@ -2002,6 +2003,27 @@ function checkoutCart(){
     }
   });
   handler.openIframe();
+}
+
+// ===========================================================
+// ORDER ALERT — POST to Formspree so Jeff gets an email
+// ===========================================================
+function sendOrderAlert(opts){
+  // opts: {buyer, items, price, country, ref}
+  var body=new URLSearchParams({
+    _subject: 'New sale: '+opts.items,
+    buyer:    opts.buyer,
+    items:    opts.items,
+    price:    opts.price,
+    country:  opts.country,
+    order_ref:opts.ref,
+    _replyto: opts.buyer
+  });
+  fetch(FORMSPREE_URL,{
+    method:'POST',
+    body:body,
+    headers:{'Accept':'application/json'}
+  }).catch(function(){}); // silent — don't interrupt the buyer flow
 }
 
 // ===========================================================
@@ -2039,6 +2061,7 @@ function payWithPaystack(print,email,priceGHC,qty){
         order_ref:response.reference,
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
       });
+      sendOrderAlert({buyer:email,items:print.title+' — '+selectedSize+' ×'+qty,price:paidStr,country:ctryName,ref:response.reference});
       openCert([{print:print,size:selectedSize,qty:qty}]);
     }
   });
