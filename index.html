@@ -2027,6 +2027,113 @@ function sendOrderAlert(opts){
 }
 
 // ===========================================================
+// ADMIN — SHIPPING NOTIFICATION  (trigger: Shift + A)
+// ===========================================================
+(function(){
+  // Inject CSS once
+  var style=document.createElement('style');
+  style.textContent=[
+    '#adminShipOverlay{display:none;position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:9000;align-items:center;justify-content:center;}',
+    '#adminShipOverlay.open{display:flex;}',
+    '#adminShipBox{background:#fff;width:min(520px,92vw);padding:40px 44px 36px;font-family:var(--sans);}',
+    '#adminShipBox h2{margin:0 0 6px;font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.02em;}',
+    '#adminShipBox p.admin-sub{margin:0 0 28px;font-size:12px;color:var(--muted);}',
+    '#adminShipBox label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}',
+    '#adminShipBox input[type=text],#adminShipBox input[type=email]{width:100%;box-sizing:border-box;border:1px solid var(--rule);padding:10px 12px;font-size:14px;font-family:var(--sans);color:var(--ink);margin-bottom:18px;outline:none;}',
+    '#adminShipBox input:focus{border-color:var(--ink);}',
+    '#adminShipBtns{display:flex;gap:12px;margin-top:8px;}',
+    '#adminShipSend{flex:1;background:var(--ink);color:#fff;border:none;padding:13px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}',
+    '#adminShipSend:disabled{opacity:.45;cursor:default;}',
+    '#adminShipCancel{background:none;border:1px solid var(--rule);padding:13px 20px;font-size:13px;cursor:pointer;color:var(--muted);}',
+    '#adminShipStatus{margin-top:14px;font-size:13px;min-height:20px;text-align:center;}'
+  ].join('');
+  document.head.appendChild(style);
+
+  // Inject HTML
+  var div=document.createElement('div');
+  div.id='adminShipOverlay';
+  div.innerHTML=[
+    '<div id="adminShipBox">',
+    '<h2>Ship an Order</h2>',
+    '<p class="admin-sub">Sends a DHL tracking email to the buyer via EmailJS.</p>',
+    '<label>Buyer Email</label>',
+    '<input id="asEmail" type="email" placeholder="buyer@example.com">',
+    '<label>Buyer Name</label>',
+    '<input id="asName" type="text" placeholder="Full name">',
+    '<label>Print Title</label>',
+    '<input id="asTitle" type="text" placeholder="e.g. Golden Hour III">',
+    '<label>DHL Tracking Number</label>',
+    '<input id="asTracking" type="text" placeholder="e.g. 1234567890">',
+    '<div id="adminShipBtns">',
+    '<button id="adminShipCancel">Cancel</button>',
+    '<button id="adminShipSend">Send Shipping Email</button>',
+    '</div>',
+    '<div id="adminShipStatus"></div>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(div);
+
+  function openAdmin(){
+    div.classList.add('open');
+    document.getElementById('asEmail').focus();
+    document.getElementById('adminShipStatus').textContent='';
+  }
+  function closeAdmin(){
+    div.classList.remove('open');
+  }
+
+  // Shift + A shortcut
+  document.addEventListener('keydown',function(e){
+    if(e.shiftKey && e.key==='A' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){
+      openAdmin();
+    }
+  });
+
+  div.addEventListener('click',function(e){ if(e.target===div) closeAdmin(); });
+  document.getElementById('adminShipCancel').addEventListener('click',closeAdmin);
+
+  document.getElementById('adminShipSend').addEventListener('click',function(){
+    var email=document.getElementById('asEmail').value.trim();
+    var name=document.getElementById('asName').value.trim();
+    var title=document.getElementById('asTitle').value.trim();
+    var tracking=document.getElementById('asTracking').value.trim();
+    var status=document.getElementById('adminShipStatus');
+    var btn=document.getElementById('adminShipSend');
+
+    if(!email||!name||!title||!tracking){
+      status.style.color='#c00';
+      status.textContent='Please fill in all fields.';
+      return;
+    }
+
+    btn.disabled=true;
+    status.style.color=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+    status.textContent='Sending…';
+
+    emailjs.send('service_qf961dj','template_ufkb3dt',{
+      to_email:email,
+      to_name:name,
+      print_title:title,
+      tracking_number:tracking
+    }).then(function(){
+      status.style.color='#2a7a2a';
+      status.textContent='Email sent to '+email+'.';
+      btn.disabled=false;
+      // Clear fields after success
+      document.getElementById('asEmail').value='';
+      document.getElementById('asName').value='';
+      document.getElementById('asTitle').value='';
+      document.getElementById('asTracking').value='';
+    }).catch(function(err){
+      status.style.color='#c00';
+      status.textContent='Failed to send. Check console.';
+      console.error('Ship email error:',err);
+      btn.disabled=false;
+    });
+  });
+})();
+
+// ===========================================================
 // PAYSTACK PAYMENT
 // ===========================================================
 function payWithPaystack(print,email,priceGHC,qty){
