@@ -304,7 +304,7 @@
 
     // ── Google Sheets logger ──────────────────────────────────────
     // Paste your Apps Script web app URL here after setup (see Workflow tab for instructions)
-    var SHEET_URL = '';
+    var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzCOMgsJfaoSReJPtDMhCWBa9hjPE4reUBo3DUgGOPX0kjCYz0VdGOxHdmc19_QUEia/exec';
     function logToSheet(data){
       if(!SHEET_URL) return; // no-op until URL is configured
       data.date = new Date().toLocaleString('en-GB',{timeZone:'Africa/Accra'});
