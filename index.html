@@ -1999,7 +1999,7 @@ function checkoutCart(){
       CART=[];
       updateCartBadge();
       closeCart();
-      if(cartItems.length) openCert(cartItems);
+      if(cartItems.length) openCert(cartItems,email);
     }
   });
   handler.openIframe();
@@ -2062,7 +2062,7 @@ function payWithPaystack(print,email,priceGHC,qty){
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
       });
       sendOrderAlert({buyer:email,items:print.title+' — '+selectedSize+' ×'+qty,price:paidStr,country:ctryName,ref:response.reference});
-      openCert([{print:print,size:selectedSize,qty:qty}]);
+      openCert([{print:print,size:selectedSize,qty:qty}],email);
     }
   });
   handler.openIframe();
@@ -2072,7 +2072,7 @@ function payWithPaystack(print,email,priceGHC,qty){
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
 // openCert(items) — items = array of {print, size, qty}
-function openCert(items){
+function openCert(items, buyerEmail){
   if(!items||!items.length) return;
   // Normalise: accept a bare print object for backwards compat
   if(items.print) items=[{print:items,size:items.sizes&&items.sizes[0]?items.sizes[0].label:'',qty:1}];
@@ -2107,6 +2107,22 @@ function openCert(items){
       return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
     }).join('');
     var printUrl=window.location.origin+'?print='+p.id;
+    // COA email to buyer
+    if(buyerEmail){
+      emailjs.send('service_qf961dj','template_j198hyb',{
+        to_email:buyerEmail,
+        to_name:buyerEmail.split('@')[0],
+        print_title:p.title,
+        print_series:p.series||'—',
+        print_size:sizeStr,
+        print_paper:p.paper||'—',
+        print_edition:p.edition||'—',
+        print_num:String(printNum),
+        coa_ref:coaRef,
+        date:dateStr,
+        print_url:printUrl
+      }).catch(function(){});
+    }
     var qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
     return (idx>0?'<div style="border-top:1px solid #e8e4df;margin:2rem 0 1.5rem;"></div>':'')
       +'<div class="cert-img-wrap">'+imgHtml+'</div>'
