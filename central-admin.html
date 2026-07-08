@@ -61,6 +61,16 @@
     /* Note box */
     .note{font-size:12px;color:var(--muted);line-height:1.6;background:var(--warm);padding:12px 14px;margin-bottom:24px;}
 
+    /* Workflow steps */
+    .wf-steps{display:flex;flex-direction:column;gap:0;}
+    .wf-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--rule);}
+    .wf-step:last-child{border-bottom:none;}
+    .wf-num{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+    .wf-body{flex:1;}
+    .wf-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+    .wf-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:4px;}
+    .wf-tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#999;}
+
     /* Button */
     .btn-primary{
       display:block;width:100%;background:var(--ink);color:#fff;
@@ -88,6 +98,7 @@
       <button type="button" class="tab" data-tab="coa">Send COA</button>
       <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
       <button type="button" class="tab" data-tab="followup">Follow-up</button>
+      <button type="button" class="tab" data-tab="workflow">Workflow</button>
     </div>
 
     <!-- SHIP ORDER -->
@@ -191,11 +202,119 @@
       <div class="status" id="fu-status"></div>
     </div>
 
+    <!-- WORKFLOW -->
+    <div class="panel" id="panel-workflow">
+      <h2 class="panel-title">Order Workflow</h2>
+      <p class="panel-sub">Every step from sale to retention — in order.</p>
+
+      <div class="wf-steps">
+
+        <div class="wf-step">
+          <div class="wf-num">1</div>
+          <div class="wf-body">
+            <div class="wf-title">Customer buys</div>
+            <p class="wf-desc">Buyer selects a print, pays via Paystack. Confirmation email fires automatically. You get an alert via Formspree. The COA dialog appears for the buyer to save or print.</p>
+            <p class="wf-tag">Automatic — no action needed</p>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-num">2</div>
+          <div class="wf-body">
+            <div class="wf-title">Print &amp; ship</div>
+            <p class="wf-desc">Print is produced (7–14 business days). Package and ship via DHL. Then use the <strong>Ship Order</strong> tab to send the buyer their tracking number.</p>
+            <p class="wf-tag">Action: Ship Order tab →</p>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-num">3</div>
+          <div class="wf-body">
+            <div class="wf-title">Send COA (if needed)</div>
+            <p class="wf-desc">The COA is usually sent automatically at purchase. Use the <strong>Send COA</strong> tab only to resend or issue one manually (e.g. for a gift or a print sold in person).</p>
+            <p class="wf-tag">Action: Send COA tab → (manual only)</p>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-num">4</div>
+          <div class="wf-body">
+            <div class="wf-title">Post-delivery follow-up</div>
+            <p class="wf-desc">7–10 days after shipping, send a warm check-in. Ask how the print arrived, invite them to share a photo. Builds loyalty and often leads to repeat buyers.</p>
+            <p class="wf-tag">Action: Follow-up tab →</p>
+          </div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-num">5</div>
+          <div class="wf-body">
+            <div class="wf-title">Waitlist (when sold out)</div>
+            <p class="wf-desc">When a print sells out, add interested buyers to your list. Use the <strong>Waitlist</strong> tab to notify them first when it restocks — before announcing publicly.</p>
+            <p class="wf-tag">Action: Waitlist tab →</p>
+          </div>
+        </div>
+
+      </div>
+
+      <hr style="margin:32px 0 28px;">
+      <h2 class="panel-title" style="font-size:16px;margin-bottom:6px;">Order Tracker — Google Sheets Setup</h2>
+      <p class="panel-sub" style="margin-bottom:20px;">Every Ship, COA, and Follow-up you send from this page can be automatically logged to a Google Sheet. One-time setup — takes about 5 minutes.</p>
+
+      <div class="note" style="line-height:1.8;">
+        <strong>Step 1 —</strong> Create a new Google Sheet. Name it <em>Jeffery Asare Orders</em>.<br>
+        <strong>Step 2 —</strong> Click <em>Extensions → Apps Script</em>.<br>
+        <strong>Step 3 —</strong> Delete the default code and paste the script below.<br>
+        <strong>Step 4 —</strong> Click <em>Deploy → New Deployment → Web App</em>. Set "Who has access" to <em>Anyone</em>. Click Deploy. Copy the web app URL.<br>
+        <strong>Step 5 —</strong> Open <code>central-admin.html</code> in a text editor, find <code>var SHEET_URL = '';</code> and paste your URL between the quotes. Commit and push.
+      </div>
+
+      <div style="margin-top:20px;">
+        <label>Apps Script to paste into your sheet</label>
+        <textarea id="appsScript" readonly style="width:100%;height:220px;font-family:monospace;font-size:11px;border:1px solid var(--rule);padding:12px;resize:vertical;background:#fafafa;color:#333;line-height:1.6;">function doPost(e){
+  try{
+    var data = JSON.parse(e.postData.contents);
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet= ss.getSheetByName('Orders') || ss.insertSheet('Orders');
+    if(sheet.getLastRow()===0){
+      sheet.appendRow(['Date','Action','Buyer Name','Buyer Email','Print Title','Notes']);
+      sheet.getRange(1,1,1,6).setFontWeight('bold');
+    }
+    sheet.appendRow([
+      data.date || new Date().toLocaleString(),
+      data.action || '',
+      data.buyer_name || '',
+      data.buyer_email || '',
+      data.print_title || '',
+      data.notes || ''
+    ]);
+    return ContentService.createTextOutput('OK');
+  }catch(err){
+    return ContentService.createTextOutput('Error: '+err.message);
+  }
+}</textarea>
+        <button class="btn-primary" style="width:auto;padding:10px 20px;margin-top:12px;font-size:11px;" onclick="navigator.clipboard.writeText(document.getElementById('appsScript').value).then(function(){this.textContent='Copied!';}.bind(this))">Copy Script</button>
+      </div>
+    </div>
+
   </div><!-- /page -->
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     emailjs.init('fTeaXZvU78Yu3TSVl');
+
+    // ── Google Sheets logger ──────────────────────────────────────
+    // Paste your Apps Script web app URL here after setup (see Workflow tab for instructions)
+    var SHEET_URL = '';
+    function logToSheet(data){
+      if(!SHEET_URL) return; // no-op until URL is configured
+      data.date = new Date().toLocaleString('en-GB',{timeZone:'Africa/Accra'});
+      fetch(SHEET_URL, {
+        method:'POST',
+        mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(data)
+      }).catch(function(){}); // silent fail — never interrupt email flow
+    }
 
     // Tab switching
     document.querySelectorAll('.tab').forEach(function(tab){
@@ -255,13 +374,18 @@
       return Math.floor(1+Math.random()*total)+' of '+total;
     }
 
+    var SITE_URL = 'www.jefferyasare.com';
+
     // SHIP ORDER
     document.getElementById('sh-send').addEventListener('click', function(){
       if(!requireFields(['sh-email','sh-name','sh-title','sh-tracking'],'sh-status')) return;
-      sendEmail('template_ufkb3dt',{
+      var params = {
         to_email:val('sh-email'), to_name:val('sh-name'),
-        print_title:val('sh-title'), tracking_number:val('sh-tracking')
-      },'sh-send','sh-status',['sh-email','sh-name','sh-title','sh-tracking']);
+        print_title:val('sh-title'), tracking_number:val('sh-tracking'),
+        site_url:SITE_URL
+      };
+      sendEmail('template_ufkb3dt', params,'sh-send','sh-status',['sh-email','sh-name','sh-title','sh-tracking']);
+      logToSheet({action:'Shipped', buyer_name:val('sh-name'), buyer_email:val('sh-email'), print_title:val('sh-title'), notes:'Tracking: '+val('sh-tracking')});
     });
 
     // SEND COA
@@ -279,8 +403,10 @@
         print_edition:edStr, print_num:pNum,
         print_img:val('coa-img')||'', coa_ref:coaRef(),
         date:todayStr(), qr_url:qrUrl, print_url:printUrl,
-        signature_url:'https://jefferyasare.com/signature.png'
+        signature_url:'https://jefferyasare.com/signature.png',
+        site_url:SITE_URL
       },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-paper','coa-edition','coa-printnum','coa-img']);
+      logToSheet({action:'COA Sent', buyer_name:val('coa-name'), buyer_email:val('coa-email'), print_title:val('coa-title'), notes:edStr});
     });
 
     // WAITLIST
@@ -288,16 +414,20 @@
       if(!requireFields(['wl-email','wl-name','wl-title','wl-url'],'wl-status')) return;
       sendEmail('template_waitlist01',{
         to_email:val('wl-email'), to_name:val('wl-name'),
-        print_title:val('wl-title'), print_url:val('wl-url')
+        print_title:val('wl-title'), print_url:val('wl-url'),
+        site_url:SITE_URL
       },'wl-send','wl-status',['wl-email','wl-name','wl-title','wl-url']);
+      logToSheet({action:'Waitlist Notified', buyer_name:val('wl-name'), buyer_email:val('wl-email'), print_title:val('wl-title'), notes:''});
     });
 
     // POST-DELIVERY FOLLOW-UP
     document.getElementById('fu-send').addEventListener('click', function(){
       if(!requireFields(['fu-email','fu-name','fu-title'],'fu-status')) return;
       sendEmail('template_postdel01',{
-        to_email:val('fu-email'), to_name:val('fu-name'), print_title:val('fu-title')
+        to_email:val('fu-email'), to_name:val('fu-name'),
+        print_title:val('fu-title'), site_url:SITE_URL
       },'fu-send','fu-status',['fu-email','fu-name','fu-title']);
+      logToSheet({action:'Follow-up Sent', buyer_name:val('fu-name'), buyer_email:val('fu-email'), print_title:val('fu-title'), notes:''});
     });
   </script>
 </body>

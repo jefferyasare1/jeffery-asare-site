@@ -1725,7 +1725,7 @@ function openPrintDetail(print){
 // ===========================================================
 // CURRENCY
 // ===========================================================
-var CURRENCY='GHS', USD_RATE=0.067;
+var CURRENCY='GHS', USD_RATE=0.067, IS_GHANA=true;
 var DELIVERY_FEE_GHC=50; // Ghana local delivery flat fee — update here to change site-wide
 // EmailJS — order confirmation emails
 emailjs.init('fTeaXZvU78Yu3TSVl');
@@ -1849,13 +1849,17 @@ var COUNTRIES=[
     })
     .catch(function(){/* keep fallback rate */});
 })();
-// Auto-detect user's country and switch to USD if they are outside Ghana
+// Auto-detect user's country — lock to USD and hide toggle for non-Ghana visitors
 (function detectCurrency(){
   fetch('https://ipapi.co/json/')
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(d && d.country_code && d.country_code !== 'GH'){
+        IS_GHANA = false;
         setCurrency('USD');
+        // Hide the currency toggle entirely for non-Ghana visitors
+        var toggle = document.querySelector('.currency-toggle');
+        if(toggle) toggle.style.display = 'none';
       }
     })
     .catch(function(){/* keep GHS default */});
@@ -1869,6 +1873,7 @@ var COUNTRIES=[
   }
 })();
 function setCurrency(c){
+  if(c==='GHS' && !IS_GHANA) return; // locked for non-Ghana visitors
   CURRENCY=c;
   var ghsBtn=document.getElementById('btnGHS');
   var usdBtn=document.getElementById('btnUSD');
@@ -1993,6 +1998,7 @@ function checkoutCart(){
         price_paid:paidStr,
         country:'Ghana',
         order_ref:response.reference,
+        site_url:'www.jefferyasare.com',
         next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
       });
       sendOrderAlert({buyer:email,items:itemSummary,price:paidStr,country:'Ghana',ref:response.reference});
@@ -2059,6 +2065,7 @@ function payWithPaystack(print,email,priceGHC,qty){
         price_paid:paidStr,
         country:ctryName,
         order_ref:response.reference,
+        site_url:'www.jefferyasare.com',
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
       });
       sendOrderAlert({buyer:email,items:print.title+' — '+selectedSize+' ×'+qty,price:paidStr,country:ctryName,ref:response.reference});
@@ -2190,7 +2197,8 @@ function openCert(items, buyerEmail){
         emailjs.send('service_qf961dj','template_hnd30nb',Object.assign({
           to_email:buyerEmail,
           to_name:buyerName,
-          signature_url:sigUrl
+          signature_url:sigUrl,
+          site_url:'www.jefferyasare.com'
         },data)).catch(function(){});
       });
     }
