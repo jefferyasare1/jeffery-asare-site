@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="refresh" content="0;url=/admin.html">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ship Order — Jeffery Asare</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;
+      --sans:'General Sans',system-ui,sans-serif;
+    }
+    @font-face{
+      font-family:'General Sans';
+      src:url('/fonts/GeneralSans-Variable.woff2') format('woff2');
+      font-weight:100 900;font-style:normal;font-display:swap;
+    }
+    body{
+      background:var(--warm);min-height:100vh;display:flex;
+      align-items:center;justify-content:center;
+      font-family:var(--sans);color:var(--ink);padding:24px;
+    }
+    .card{
+      background:#fff;width:100%;max-width:480px;
+      padding:44px 48px 40px;
+    }
+    .logo{
+      font-size:12px;font-weight:600;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:32px;
+    }
+    h1{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px;}
+    .sub{font-size:13px;color:var(--muted);margin-bottom:36px;line-height:1.5;}
+    label{
+      display:block;font-size:10px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:7px;
+    }
+    input{
+      display:block;width:100%;border:1px solid var(--rule);
+      padding:11px 13px;font-size:14px;font-family:var(--sans);
+      color:var(--ink);outline:none;margin-bottom:20px;
+      transition:border-color .15s;
+    }
+    input:focus{border-color:var(--ink);}
+    input::placeholder{color:#bbb;}
+    .divider{border:none;border-top:1px solid var(--rule);margin:8px 0 24px;}
+    button{
+      display:block;width:100%;background:var(--ink);color:#fff;
+      border:none;padding:14px;font-size:13px;font-weight:600;
+      letter-spacing:.08em;text-transform:uppercase;
+      cursor:pointer;font-family:var(--sans);
+      transition:opacity .15s;
+    }
+    button:hover{opacity:.85;}
+    button:disabled{opacity:.4;cursor:default;}
+    #status{
+      margin-top:16px;font-size:13px;text-align:center;
+      min-height:20px;line-height:1.5;
+    }
+    #status.ok{color:#2a7a2a;}
+    #status.err{color:#c00;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Jeffery Asare</div>
+    <h1>Ship an Order</h1>
+    <p class="sub">Fill in the details below to send the buyer their DHL tracking email.</p>
+
+    <label>Buyer Email</label>
+    <input id="f-email" type="email" placeholder="buyer@example.com">
+
+    <label>Buyer Name</label>
+    <input id="f-name" type="text" placeholder="Full name as on the order">
+
+    <label>Print Title</label>
+    <input id="f-title" type="text" placeholder="e.g. Golden Hour III">
+
+    <hr class="divider">
+
+    <label>DHL Tracking Number</label>
+    <input id="f-tracking" type="text" placeholder="e.g. 1234567890">
+
+    <button id="send-btn">Send Tracking Email</button>
+    <div id="status"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    emailjs.init('fTeaXZvU78Yu3TSVI');
+
+    document.getElementById('send-btn').addEventListener('click', function () {
+      var email    = document.getElementById('f-email').value.trim();
+      var name     = document.getElementById('f-name').value.trim();
+      var title    = document.getElementById('f-title').value.trim();
+      var tracking = document.getElementById('f-tracking').value.trim();
+      var status   = document.getElementById('status');
+      var btn      = document.getElementById('send-btn');
+
+      status.className = '';
+      status.textContent = '';
+
+      if (!email || !name || !title || !tracking) {
+        status.className = 'err';
+        status.textContent = 'Please fill in all four fields.';
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = 'Sending…';
+
+      emailjs.send('service_qf961dj', 'template_ufkb3dt', {
+        to_email:        email,
+        to_name:         name,
+        print_title:     title,
+        tracking_number: tracking
+      }).then(function () {
+        status.className = 'ok';
+        status.textContent = 'Sent! Tracking email delivered to ' + email + '.';
+        btn.disabled = false;
+        document.getElementById('f-email').value    = '';
+        document.getElementById('f-name').value     = '';
+        document.getElementById('f-title').value    = '';
+        document.getElementById('f-tracking').value = '';
+      }).catch(function (err) {
+        status.className = 'err';
+        status.textContent = 'Send failed — check the console for details.';
+        console.error('EmailJS error:', err);
+        btn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>
