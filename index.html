@@ -593,6 +593,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .shop-controls{display:flex;align-items:center;justify-content:flex-end;padding:.5rem var(--pad) 1.5rem;}
 </style>
 <script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -1726,6 +1727,8 @@ function openPrintDetail(print){
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067;
 var DELIVERY_FEE_GHC=50; // Ghana local delivery flat fee — update here to change site-wide
+// EmailJS — order confirmation emails
+emailjs.init('fTeaXZvU78Yu3TSVI');
 
 // Country list: {code, name, time, region}
 // region: 'gh'=Ghana, 'wa'=West Africa, 'af'=Africa, 'eu'=Europe, 'na'=North America, 'me'=Middle East, 'ap'=Asia Pacific, 'row'=Rest of World
@@ -1978,6 +1981,20 @@ function checkoutCart(){
     onClose:function(){},
     callback:function(response){
       var cartItems=CART.slice();
+      var itemSummary=cartItems.map(function(i){return i.print.title+' ('+i.size+' ×'+i.qty+')';}).join('; ');
+      var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
+      emailjs.send('service_qf961dj','template_9cuxcok',{
+        to_email:email,
+        to_name:email.split('@')[0],
+        print_title:itemSummary,
+        print_size:'See above',
+        qty:totalQty,
+        price_paid:paidStr,
+        country:'Ghana',
+        order_ref:response.reference,
+        next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
+      });
       CART=[];
       updateCartBadge();
       closeCart();
@@ -2007,7 +2024,23 @@ function payWithPaystack(print,email,priceGHC,qty){
       {display_name:"Qty",variable_name:"qty",value:qty}
     ]},
     onClose:function(){},
-    callback:function(response){ openCert([{print:print,size:selectedSize,qty:qty}]); }
+    callback:function(response){
+      var selCtry=document.getElementById('pdCountry');
+      var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH₵ '+priceGHC.toLocaleString();
+      emailjs.send('service_qf961dj','template_9cuxcok',{
+        to_email:email,
+        to_name:email.split('@')[0],
+        print_title:print.title,
+        print_size:selectedSize,
+        qty:qty,
+        price_paid:paidStr,
+        country:ctryName,
+        order_ref:response.reference,
+        next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
+      });
+      openCert([{print:print,size:selectedSize,qty:qty}]);
+    }
   });
   handler.openIframe();
 }
