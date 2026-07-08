@@ -587,7 +587,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .btn-checkout{width:100%;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.9rem;font-size:14px;font-family:var(--sans);cursor:pointer;transition:opacity .2s;}
 .btn-checkout:hover{opacity:.8;}
 /* ── CURRENCY TOGGLE ── */
-.currency-toggle{display:inline-flex;align-items:center;background:var(--warm);border:1px solid var(--rule);border-radius:999px;overflow:hidden;}
+.currency-toggle{display:none;align-items:center;background:var(--warm);border:1px solid var(--rule);border-radius:999px;overflow:hidden;}
 .currency-toggle button{background:none;border:none;padding:.35rem .9rem;font-size:11px;letter-spacing:.06em;font-family:var(--sans);cursor:pointer;color:var(--muted);transition:all .15s;}
 .currency-toggle button.cur-active{background:var(--ink);color:#fff;border-radius:999px;}
 .shop-controls{display:flex;align-items:center;justify-content:flex-end;padding:.5rem var(--pad) 1.5rem;}
@@ -1849,20 +1849,27 @@ var COUNTRIES=[
     })
     .catch(function(){/* keep fallback rate */});
 })();
-// Auto-detect user's country — lock to USD and hide toggle for non-Ghana visitors
+// Auto-detect user's country — show toggle only for Ghana visitors
 (function detectCurrency(){
   fetch('https://ipapi.co/json/')
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(d && d.country_code && d.country_code !== 'GH'){
+      var toggle = document.querySelector('.currency-toggle');
+      if(d && d.country_code && d.country_code === 'GH'){
+        // Ghana visitor — show the toggle
+        IS_GHANA = true;
+        if(toggle) toggle.style.display = 'inline-flex';
+      } else {
+        // Non-Ghana visitor — lock to USD, keep toggle hidden
         IS_GHANA = false;
         setCurrency('USD');
-        // Hide the currency toggle entirely for non-Ghana visitors
-        var toggle = document.querySelector('.currency-toggle');
-        if(toggle) toggle.style.display = 'none';
       }
     })
-    .catch(function(){/* keep GHS default */});
+    .catch(function(){
+      // On error, default: show toggle (assumes Ghana)
+      var toggle = document.querySelector('.currency-toggle');
+      if(toggle) toggle.style.display = 'inline-flex';
+    });
 })();
 // Wire up WhatsApp float button with default inquiry message
 (function(){
@@ -2149,7 +2156,7 @@ function openCert(items, buyerEmail){
     +'onerror="this.parentElement.innerHTML=\'<div style=&quot;font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;&quot;>Jeffery Asare<\\/div>\'">';
 
   var html=''
-    +'<button class="cert-modal-close" id="certModalCloseBtn">&#10005;</button>'
+    +'<button class="cert-modal-close" id="certModalCloseBtn" style="display:none;" aria-label="Close">&#10005;</button>'
     +'<div class="cert-header">'
     +'<span class="cert-brand">Jeffery Asare</span>'
     +'<span class="cert-ref">'+coaRef+'</span>'
@@ -2166,17 +2173,17 @@ function openCert(items, buyerEmail){
     +'</div>'
     +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>'
     +'<button class="cert-print-btn" id="certPrintBtn" disabled>Print / Save as PDF</button>'
-    +'<p class="cert-print-hint" id="certPrintHint">Enter your name above to unlock the PDF</p>';
+    +'<p class="cert-print-hint" id="certPrintHint">&#128221; Enter your full name above — this is how it will appear on your certificate. Once saved, you can close this window.</p>';
 
   var modal=document.getElementById('certModal');
   if(!modal) return;
   modal.innerHTML=html;
 
-  // Re-wire close button (replaced by innerHTML)
+  // Re-wire close button (replaced by innerHTML) — hidden until name is entered
   var closeBtn=document.getElementById('certModalCloseBtn');
   if(closeBtn) closeBtn.addEventListener('click',closeCertModal);
 
-  // Buyer name unlocks PDF button
+  // Buyer name unlocks PDF button AND the close/escape/overlay-click dismiss
   var buyerInput=document.getElementById('certBuyerName');
   var printBtn=document.getElementById('certPrintBtn');
   var printHint=document.getElementById('certPrintHint');
@@ -2185,7 +2192,14 @@ function openCert(items, buyerEmail){
       var filled=this.value.trim().length>1;
       if(printBtn) printBtn.disabled=!filled;
       if(printHint) printHint.style.display=filled?'none':'block';
+      // Show close button only once name is entered
+      if(closeBtn) closeBtn.style.display=filled?'':'none';
+      // Mark overlay as unlocked so escape/overlay-click can close
+      var overlay=document.getElementById('certModalOverlay');
+      if(overlay) overlay.dataset.unlocked=filled?'1':'';
     };
+    // Focus the name field immediately
+    setTimeout(function(){ buyerInput.focus(); }, 100);
   }
   if(printBtn) printBtn.onclick=function(){
     if(printBtn.disabled) return;
@@ -2216,7 +2230,12 @@ function openCert(items, buyerEmail){
 
 function closeCertModal(){
   var overlay=document.getElementById("certModalOverlay");
-  if(overlay){ overlay.classList.remove("open"); document.body.style.overflow=""; }
+  if(overlay){ overlay.classList.remove("open"); overlay.dataset.unlocked=''; document.body.style.overflow=""; }
+}
+function canCloseCert(){
+  // Allow close only if name has been entered (overlay.dataset.unlocked === '1')
+  var overlay=document.getElementById("certModalOverlay");
+  return overlay && overlay.dataset.unlocked==='1';
 }
 
 // ===========================================================
@@ -2225,10 +2244,12 @@ function closeCertModal(){
 var certOverlay=document.getElementById("certModalOverlay");
 var certCloseBtn=document.getElementById("certModalCloseBtn");
 if(certCloseBtn) certCloseBtn.addEventListener("click",closeCertModal);
-if(certOverlay) certOverlay.addEventListener("click",function(e){ if(e.target===certOverlay) closeCertModal(); });
-// Close cert on Escape
+if(certOverlay) certOverlay.addEventListener("click",function(e){
+  if(e.target===certOverlay && canCloseCert()) closeCertModal();
+});
+// Close cert on Escape — only if name has been entered
 document.addEventListener("keydown",function(e){
-  if(e.key==="Escape"&&certOverlay&&certOverlay.classList.contains("open")) closeCertModal();
+  if(e.key==="Escape"&&certOverlay&&certOverlay.classList.contains("open")&&canCloseCert()) closeCertModal();
 });
 
 // ===========================================================
