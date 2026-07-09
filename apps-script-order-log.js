@@ -163,6 +163,8 @@ function importOrdersFromGmail() {
   });
 
   labelSentEmails();
+  applyFormatting();
+  buildSummaryTab();
 }
 
 // ── Label sent emails by type ──────────────────────────────────
@@ -246,4 +248,110 @@ function getOrCreateLabel(name) {
   var label = GmailApp.getUserLabelByName(name);
   if (!label) label = GmailApp.createLabel(name);
   return label;
+}
+
+// ── Conditional formatting: colour rows by action ──────────────
+// Call this after importing to keep the sheet readable at a glance.
+function applyFormatting() {
+  var sheet = getSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  // Colour map: action → background hex
+  var colours = {
+    'Order Received':  '#FFF9DB',  // pale yellow
+    'Shipped':         '#DBF0FF',  // pale blue
+    'COA Sent':        '#E8F5E9',  // pale green
+    'Follow-up Sent':  '#F3E8FF',  // pale purple
+    'Waitlist Notified':'#FFE8CC'  // pale orange
+  };
+
+  var actionCol = sheet.getRange(2, 2, lastRow - 1, 1).getValues(); // Column B = Action
+  for (var i = 0; i < actionCol.length; i++) {
+    var action = String(actionCol[i][0]).trim();
+    var bg = colours[action] || '#FFFFFF';
+    sheet.getRange(i + 2, 1, 1, HEADERS.length).setBackground(bg);
+  }
+  // Freeze header row
+  sheet.setFrozenRows(1);
+  // Auto-resize columns
+  sheet.autoResizeColumns(1, HEADERS.length);
+}
+
+// ── Summary tab: totals by country, print, and month ──────────
+function buildSummaryTab() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var src = ss.getSheetByName(SHEET_NAME);
+  if (!src) return;
+
+  // Get or create Stats sheet
+  var stats = ss.getSheetByName('Stats');
+  if (!stats) stats = ss.insertSheet('Stats');
+  stats.clearContents();
+
+  var data = src.getDataRange().getValues();
+  if (data.length < 2) return;
+
+  var orders = data.slice(1).filter(function(r){ return r[1] === 'Order Received'; });
+
+  // By Country
+  var byCountry = {};
+  orders.forEach(function(r){
+    var c = String(r[6]||'Unknown').trim();
+    byCountry[c] = (byCountry[c]||0) + 1;
+  });
+
+  // By Print
+  var byPrint = {};
+  orders.forEach(function(r){
+    var t = String(r[4]||'Unknown').trim();
+    byPrint[t] = (byPrint[t]||0) + 1;
+  });
+
+  // By Month
+  var byMonth = {};
+  orders.forEach(function(r){
+    var d = String(r[0]||'');
+    // Date format: "July 9, 2026" — extract month+year
+    var m = d.match(/([A-Za-z]+)\s+\d+,\s+(\d{4})/);
+    var key = m ? m[1]+' '+m[2] : 'Unknown';
+    byMonth[key] = (byMonth[key]||0) + 1;
+  });
+
+  // Total revenue
+  var totalRevenue = 0;
+  orders.forEach(function(r){
+    var price = parseFloat(String(r[7]||'').replace(/[^0-9.]/g,''));
+    if (!isNaN(price)) totalRevenue += price;
+  });
+
+  // Write summary
+  var now = Utilities.formatDate(new Date(), 'Africa/Accra', 'MMMM d, yyyy HH:mm');
+  var rows = [
+    ['SUMMARY', 'Last updated: ' + now],
+    [],
+    ['Total Orders', orders.length],
+    ['Total Revenue (GHC)', totalRevenue],
+    [],
+    ['ORDERS BY COUNTRY', 'Count'],
+  ];
+  Object.keys(byCountry).sort().forEach(function(k){
+    rows.push([k, byCountry[k]]);
+  });
+  rows.push([]);
+  rows.push(['ORDERS BY PRINT', 'Count']);
+  Object.keys(byPrint).sort().forEach(function(k){
+    rows.push([k, byPrint[k]]);
+  });
+  rows.push([]);
+  rows.push(['ORDERS BY MONTH', 'Count']);
+  Object.keys(byMonth).sort().forEach(function(k){
+    rows.push([k, byMonth[k]]);
+  });
+
+  stats.getRange(1, 1, rows.length, 2).setValues(rows);
+  stats.getRange(1,1).setFontWeight('bold').setFontSize(14);
+  stats.getRange(6,1).setFontWeight('bold');
+  stats.autoResizeColumns(1, 2);
+  Logger.log('Stats tab updated: ' + orders.length + ' orders, GHC ' + totalRevenue + ' revenue.');
 }

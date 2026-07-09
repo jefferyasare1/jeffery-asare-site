@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Thank You | Jeffery Asare</title>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#111;--bg:#FAF9F7;--warm:#F5F2EE;--muted:#888;--rule:#E5E0DA;--sans:'General Sans',sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+  .card{max-width:480px;width:100%;text-align:center;}
+  .mark{font-size:2.5rem;margin-bottom:1.5rem;}
+  .title{font-size:1.6rem;font-weight:600;letter-spacing:-.03em;margin-bottom:.75rem;}
+  .sub{color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:2rem;}
+  .ref{font-size:11px;color:var(--muted);background:var(--warm);border:1px solid var(--rule);border-radius:6px;padding:.5rem 1rem;display:inline-block;letter-spacing:.05em;margin-bottom:2rem;font-family:monospace;}
+  .divider{height:1px;background:var(--rule);margin:2rem 0;}
+  .btn{display:inline-block;padding:.7rem 1.8rem;background:var(--ink);color:#fff;text-decoration:none;border-radius:4px;font-family:var(--sans);font-size:13px;font-weight:500;letter-spacing:.03em;margin:.3rem;}
+  .btn-out{background:var(--warm);color:var(--ink);border:1px solid var(--rule);}
+  .brand{margin-top:3rem;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="mark">&#10003;</div>
+  <h1 class="title">Thank you for your order</h1>
+  <p class="sub">Your payment was received successfully. You will get a confirmation email shortly, and your Certificate of Authenticity will follow once your print ships.</p>
+  <div id="orderRef"></div>
+  <div class="divider"></div>
+  <a href="/" class="btn btn-out">Back to Shop</a>
+  <a href="/#shop" class="btn">Browse More Prints</a>
+  <div class="brand">Jeffery Asare &middot; Fine Art Prints</div>
+</div>
+<script>
+  // Show order reference if passed in URL ?ref=JA-1234
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if(ref){
+    var el = document.getElementById('orderRef');
+    if(el) el.innerHTML = '<div class="ref">Order ref: '+ref+'</div>';
+  }
+</script>
+</body>
+</html>

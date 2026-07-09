@@ -59,8 +59,10 @@ collections:
               - {label: "Paper", name: "paper", widget: "string", default: "Hahnemuhle Photo Rag 308gsm"}
               - {label: "Edition", name: "edition", widget: "string", default: "Edition of 20"}
               - {label: "Price (GHC)", name: "price", widget: "number"}
+              - {label: "Edition Size (total prints)", name: "edition_size", widget: "number", required: false, hint: "e.g. 15 for 'Edition of 15'. Used to calculate remaining prints."}
+              - {label: "Prints Sold", name: "prints_sold", widget: "number", default: 0, hint: "Update this each time a print sells. Remaining = edition size minus prints sold."}
               - {label: "Print Photo", name: "img", widget: "image"}
-              - {label: "Sold Out", name: "soldOut", widget: "boolean", default: false}
+              - {label: "Sold Out", name: "soldOut", widget: "boolean", default: false, hint: "Tick this manually, or it will auto-trigger when prints_sold reaches edition_size."}
               - label: "Sizes"
                 name: "sizes"
                 widget: "list"

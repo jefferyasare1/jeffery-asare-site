@@ -183,7 +183,20 @@
   <div class="panel active" id="panel-orders">
     <div class="orders-header">
       <div class="orders-title">Orders</div>
-      <button class="btn-add" id="openAddOrder">+ New Order</button>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">&#8595; Export CSV</button>
+        <button class="btn-add" id="openAddOrder">+ New Order</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="statsBar" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;padding:.75rem 1rem;background:var(--warm);border-radius:8px;border:1px solid var(--rule);"></div>
+
+    <!-- Search -->
+    <div style="margin-bottom:1rem;">
+      <input id="searchInput" type="text" placeholder="Search by buyer, print, country, or ref…"
+        style="width:100%;border:1px solid var(--rule);border-radius:6px;padding:.5rem .75rem;font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;"
+        oninput="renderOrders()">
     </div>
 
     <!-- Action queue summary -->
@@ -433,12 +446,11 @@ function sendEmail(templateId, params, btnId, statusId, fieldIds, onSuccess){
     });
 }
 
-// ── Google Sheets log (POST) ────────────────────────────────────
+// ── Google Sheets log (POST via Cloudflare proxy — no CORS issues) ──
 function logToSheet(data){
-  if(!SHEET_URL) return;
   data.date = new Date().toLocaleString('en-GB', {timeZone:'Africa/Accra'});
-  fetch(SHEET_URL, {
-    method:'POST', mode:'no-cors',
+  fetch('/api/orders', {
+    method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
   }).catch(function(){});
@@ -647,6 +659,52 @@ function buildActionQueue(orders){
   return html;
 }
 
+// ── Revenue parser ───────────────────────────────────────────────
+function parsePrice(str){
+  if(!str) return 0;
+  var n = parseFloat(String(str).replace(/[^0-9.]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+// ── Stats bar ────────────────────────────────────────────────────
+function renderStats(orders){
+  var bar = document.getElementById('statsBar');
+  if(!bar) return;
+  var total = orders.length;
+  var revenue = orders.reduce(function(sum,o){ return sum + parsePrice(o.price); }, 0);
+  var pending = orders.filter(function(o){ return !o.shipped; }).length;
+  var countries = {};
+  orders.forEach(function(o){ if(o.country) countries[o.country]=true; });
+  var countryCount = Object.keys(countries).length;
+  bar.innerHTML = [
+    ['Total Orders', total],
+    ['Total Revenue', revenue ? 'GH&#8373; '+revenue.toLocaleString() : 'N/A'],
+    ['Pending Shipment', pending],
+    ['Countries', countryCount || 'N/A']
+  ].map(function(s){
+    return '<div style="flex:1;min-width:100px;text-align:center;">'
+      +'<div style="font-size:18px;font-weight:600;color:var(--ink);">'+s[1]+'</div>'
+      +'<div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;">'+s[0]+'</div>'
+      +'</div>';
+  }).join('<div style="width:1px;background:var(--rule);"></div>');
+}
+
+// ── Export CSV ───────────────────────────────────────────────────
+function exportCSV(){
+  var orders = loadOrders();
+  var cols = ['Date','Buyer Name','Buyer Email','Print Title','Size','Country','Price','Qty','Order Ref','Shipped','Ship Date','Tracking','COA Sent','Followed Up'];
+  var rows = orders.map(function(o){
+    return [o.dateAdded||'',o.buyerName||'',o.buyerEmail||'',o.printTitle||'',o.size||'',o.country||'',o.price||'',o.qty||'',o.orderRef||'',o.shipped?'Yes':'No',o.shipDate||'',o.trackingNum||'',o.coaSent?'Yes':'No',o.followedUp?'Yes':'No'];
+  });
+  var csv = [cols].concat(rows).map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'orders-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
 // ── Render ──────────────────────────────────────────────────────
 function renderOrders(){
   var orders = loadOrders();
@@ -661,10 +719,28 @@ function renderOrders(){
     return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
   });
 
+  // Update stats (always from full order list)
+  renderStats(orders);
+
   if(queue) queue.innerHTML = buildActionQueue(orders);
 
+  // Search filter
+  var q = (document.getElementById('searchInput')||{}).value;
+  if(q) q = q.toLowerCase().trim();
+  if(q){
+    orders = orders.filter(function(o){
+      return (o.buyerName||'').toLowerCase().includes(q)
+          || (o.buyerEmail||'').toLowerCase().includes(q)
+          || (o.printTitle||'').toLowerCase().includes(q)
+          || (o.country||'').toLowerCase().includes(q)
+          || (o.orderRef||'').toLowerCase().includes(q);
+    });
+  }
+
   if(!orders.length){
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet.<br>Click <strong>+ New Order</strong> when a buyer pays,<br>or sync to pull from Google Sheets.</p></div>';
+    list.innerHTML = q
+      ? '<div class="empty-state"><p>No orders match "'+escH(q)+'".</p></div>'
+      : '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet.<br>Click <strong>+ New Order</strong> when a buyer pays,<br>or sync to pull from Google Sheets.</p></div>';
     return;
   }
 
@@ -767,7 +843,26 @@ function openFollowUpInline(id){
 
 function openCOATab(id){
   var o = loadOrders().find(function(x){ return x.id===id; });
-  if(o){ setV('coa-email',o.buyerEmail); setV('coa-name',o.buyerName); setV('coa-title',o.printTitle); setV('coa-size',o.size); }
+  if(!o){ switchTab('coa'); return; }
+  setV('coa-email',o.buyerEmail);
+  setV('coa-name',o.buyerName);
+  setV('coa-title',o.printTitle);
+  setV('coa-size',o.size||'');
+  // Try to fill series, paper, edition from CMS prints data
+  fetch('/_data/prints.json')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d||!Array.isArray(d.prints)) return;
+      var match = d.prints.find(function(p){
+        return p.title && o.printTitle && p.title.toLowerCase()===o.printTitle.toLowerCase();
+      });
+      if(match){
+        if(match.series)  setV('coa-series',  match.series);
+        if(match.paper)   setV('coa-paper',   match.paper);
+        if(match.edition) setV('coa-edition', match.edition);
+        if(match.img)     setV('coa-img',     match.img);
+      }
+    }).catch(function(){});
   switchTab('coa');
 }
 

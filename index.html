@@ -1015,10 +1015,13 @@ var PHOTOS = [
 // are shown on the front end. Max 50 displayed.
 // TO ACTIVATE: change title, fill in all fields.
 // ============================================================
-function PR(id,series,title,desc,paper,edition,sizes,img,soldOut){
+function PR(id,series,title,desc,paper,edition,sizes,img,soldOut,printsSold){
   // sizes = [{label, price}, ...] — price in GHC
   var base=sizes&&sizes.length?sizes[0].price:0;
-  return {id:id,series:series,title:title,desc:desc,paper:paper,edition:edition,sizes:sizes,priceGHC:base,img:img,soldOut:!!soldOut};
+  var edTotal=parseInt((edition||'').replace(/\D/g,''))||0;
+  var sold=parseInt(printsSold)||0;
+  var remaining=edTotal>0?Math.max(0,edTotal-sold):null;
+  return {id:id,series:series,title:title,desc:desc,paper:paper,edition:edition,sizes:sizes,priceGHC:base,img:img,soldOut:!!(soldOut||(remaining!==null&&remaining===0)),editionSize:edTotal,printsSold:sold,remaining:remaining};
 }
 function PRH(id){
   return PR(id,"SERIES NAME","Untitled Print","Placeholder.","Hahnemuhle Photo Rag 308gsm","Edition of 20",[
@@ -1312,7 +1315,7 @@ function renderShop(page){
       +"<div class=\"shop-card-body\">"
       +"<div class=\"shop-card-series\">"+p.series+"</div>"
       +"<div class=\"shop-card-title\">"+p.title+"</div>"
-      +"<div class=\"shop-card-edition\">"+p.edition+"</div>"
+      +"<div class=\"shop-card-edition\">"+p.edition+(p.remaining!==null&&!p.soldOut?' &middot; <span style=\"color:'+(p.remaining<=3?'#c0392b':'var(--muted)')+';font-weight:'+(p.remaining<=3?'600':'400')+';\">'+p.remaining+' remaining</span>':'')+"</div>"
       +"<div class=\"shop-card-footer\">"
       +"<span class=\"shop-card-price\">"+(p.soldOut?"Sold out":priceText)+"</span>"
       +actionBtn
@@ -1588,7 +1591,8 @@ function openPrintDetail(print){
   if(pdDesc)   pdDesc.textContent=print.desc;
   if(pdImgWrap) pdImgWrap.innerHTML=print.img?'<img class="print-detail-img" src="'+print.img+'" alt="'+print.title+'">':"<div class=\"print-detail-img-ph\"></div>";
   if(pdSpecs){
-    pdSpecs.innerHTML=[["Paper",print.paper],["Edition",print.edition],["Finish","Archival, signed and numbered"],["Certificate","Included"]].map(function(r){
+    var specRows=[["Paper",print.paper],["Edition",print.edition+(print.remaining!==null&&!print.soldOut?' ('+print.remaining+' remaining)':'')],["Finish","Archival, signed and numbered"],["Certificate","Included"]];
+    pdSpecs.innerHTML=specRows.map(function(r){
       return "<div class=\"print-detail-spec-row\"><span class=\"print-detail-spec-key\">"+r[0]+"</span><span class=\"print-detail-spec-val\">"+r[1]+"</span></div>";
     }).join("");
   }
@@ -2533,10 +2537,15 @@ fetch('/_data/prints.json')
     if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
     PRINTS = d.prints.map(function(p){
       var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('pr'+Math.random().toString(36).slice(2));
+      var edTotal = parseInt((p.edition||'').replace(/\D/g,''))||0;
+      var sold = parseInt(p.prints_sold)||0;
+      var remaining = edTotal>0 ? Math.max(0,edTotal-sold) : null;
       return {
         id: id, series: p.series||'', title: p.title, desc: p.desc||'',
         paper: p.paper||'', edition: p.edition||'', sizes: p.sizes||[],
-        priceGHC: Number(p.price)||0, img: p.img||'', soldOut: !!p.soldOut
+        priceGHC: Number(p.price)||0, img: p.img||'',
+        soldOut: !!(p.soldOut||(remaining!==null&&remaining===0)),
+        editionSize: edTotal, printsSold: sold, remaining: remaining
       };
     });
       }).catch(function(){});
