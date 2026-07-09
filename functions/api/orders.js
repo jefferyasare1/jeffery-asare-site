@@ -1,7 +1,7 @@
 // Cloudflare Pages Function — proxies the Apps Script order log
 // Runs server-side so there's no CORS issue fetching from Google
 export async function onRequest(context) {
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzCOMgsJfaoSReJPtDMhCWBa9hjPE4reUBo3DUgGOPX0kjCYz0VdGOxHdmc19_QUEia/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyShJsvo8THYIXHqSqOvDxtCI4H2VfkVeoR32BZKF9i1shh2Kcdb4cX8cM1j1D2va51Zw/exec';
 
   const headers = {
     'Content-Type': 'application/json',
