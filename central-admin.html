@@ -333,6 +333,9 @@
     <label>Print Title</label><input id="ao-title" type="text" placeholder="e.g. Stillness in Jamestown">
     <div class="grid2">
       <div><label>Size <span class="opt">(optional)</span></label><input id="ao-size" type="text" placeholder="e.g. A3"></div>
+      <div><label>Country <span class="opt">(optional)</span></label><input id="ao-country" type="text" placeholder="e.g. United Kingdom"></div>
+    </div>
+    <div class="grid2">
       <div><label>Order Ref <span class="opt">(optional)</span></label><input id="ao-ref" type="text" placeholder="from Paystack"></div>
     </div>
     <button class="btn-primary" id="ao-save">Add to Dashboard</button>
@@ -467,7 +470,7 @@ function syncFromSheet(){
 
 // Reconstruct order objects from Sheet rows and merge with localStorage
 function mergeSheetOrders(rows){
-  // Rows shape: {Date, Action, "Buyer Name", "Buyer Email", "Print Title", Notes, "Order Ref"}
+  // Rows shape: {Date, Action, "Buyer Name", "Buyer Email", "Print Title", "Size", "Country", Notes, "Order Ref"}
   var map = {};
   rows.forEach(function(row){
     var email   = row['Buyer Email'] || row.buyer_email || '';
@@ -477,6 +480,8 @@ function mergeSheetOrders(rows){
     var ref     = row['Order Ref']   || row.order_ref || '';
     var date    = row['Date']        || row.date    || '';
     var name    = row['Buyer Name']  || row.buyer_name || '';
+    var size    = row['Size']        || row.size    || '';
+    var country = row['Country']     || row.country || '';
 
     var key = ref || (email + '||' + title);
     if(!key || !email) return;
@@ -485,7 +490,7 @@ function mergeSheetOrders(rows){
       map[key] = {
         id: 'sheet_' + key.replace(/[^a-z0-9]/gi,'_'),
         orderRef: ref, buyerName: name, buyerEmail: email,
-        printTitle: title, size: '', dateAdded: date,
+        printTitle: title, size: size, country: country, dateAdded: date,
         shipped: false, shipDate: '', trackingNum: '',
         coaSent: false, coaDate: '',
         followedUp: false, followDate: '',
@@ -521,6 +526,8 @@ function mergeSheetOrders(rows){
       if(sheetOrder.coaSent){ match.coaSent = true; match.coaDate = sheetOrder.coaDate; }
       if(sheetOrder.followedUp){ match.followedUp = true; match.followDate = sheetOrder.followDate; }
       if(sheetOrder.dateAdded && !match.dateAdded) match.dateAdded = sheetOrder.dateAdded;
+      if(sheetOrder.size && !match.size) match.size = sheetOrder.size;
+      if(sheetOrder.country && !match.country) match.country = sheetOrder.country;
     } else {
       // New order from sheet — add it
       local.unshift(sheetOrder);
@@ -546,6 +553,7 @@ function addOrder(data){
     buyerEmail: data.buyerEmail,
     printTitle: data.printTitle,
     size: data.size || '',
+    country: data.country || '',
     shipped: false, shipDate: '', trackingNum: '',
     coaSent: false, coaDate: '',
     followedUp: false, followDate: ''
@@ -686,7 +694,7 @@ function renderOrders(){
         '<div class="card-row1">' +
           '<div>' +
             '<div class="card-buyer">'+escH(o.buyerName)+'</div>' +
-            '<div class="card-print">'+escH(o.printTitle)+(o.size?' &middot; '+escH(o.size):'')+'</div>' +
+            '<div class="card-print">'+escH(o.printTitle)+(o.size?' &middot; '+escH(o.size):'')+(o.country?' &middot; '+escH(o.country):'')+'</div>' +
             '<div class="card-email">'+escH(o.buyerEmail)+'</div>' +
             meta +
           '</div>' +
@@ -766,7 +774,7 @@ function confirmShip(id){
     if(st){ st.className='inline-status ok'; st.textContent='Tracking email sent ✓'; }
     var today = new Date().toISOString().slice(0,10);
     updateOrder(id,{shipped:true, shipDate:today, trackingNum:tracking});
-    logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
+    logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
     setTimeout(function(){ closeInlines(id); },1600);
   }).catch(function(err){
     if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
@@ -787,7 +795,7 @@ function confirmFollowUp(id){
     if(st){ st.className='inline-status ok'; st.textContent='Follow-up sent ✓'; }
     var today = new Date().toISOString().slice(0,10);
     updateOrder(id,{followedUp:true, followDate:today});
-    logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,notes:'',order_ref:o.orderRef||''});
+    logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
     setTimeout(function(){ closeInlines(id); },1600);
   }).catch(function(err){
     if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
@@ -806,15 +814,15 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModa
 
 function closeModal(){
   document.getElementById('addOrderOverlay').classList.remove('open');
-  clrFields(['ao-name','ao-email','ao-title','ao-size','ao-ref']);
+  clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-ref']);
   setMsg('ao-status','','');
 }
 
 document.getElementById('ao-save').addEventListener('click', function(){
   if(!requireFields(['ao-name','ao-email','ao-title'],'ao-status')) return;
-  var data = { buyerName:v('ao-name'), buyerEmail:v('ao-email'), printTitle:v('ao-title'), size:v('ao-size'), orderRef:v('ao-ref') };
+  var data = { buyerName:v('ao-name'), buyerEmail:v('ao-email'), printTitle:v('ao-title'), size:v('ao-size'), country:v('ao-country'), orderRef:v('ao-ref') };
   addOrder(data);
-  logToSheet({ action:'Order Received', buyer_name:data.buyerName, buyer_email:data.buyerEmail, print_title:data.printTitle, notes:data.size, order_ref:data.orderRef });
+  logToSheet({ action:'Order Received', buyer_name:data.buyerName, buyer_email:data.buyerEmail, print_title:data.printTitle, size:data.size, country:data.country, notes:'', order_ref:data.orderRef });
   closeModal();
   switchTab('orders');
 });

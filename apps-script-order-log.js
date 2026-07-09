@@ -6,18 +6,29 @@
 //  Copy the new URL and update SHEET_URL in central-admin.html.
 // ══════════════════════════════════════════════════════════════════════
 
-var SHEET_NAME = 'Orders';
+var SHEET_NAME     = 'Orders';
+var SPREADSHEET_ID = '1NrC5N_Uoe_C8o8R3_zGNP35xhr4mHmpW6_xfts21WHo';
 
 // ── Column layout ──────────────────────────────────────────────
 // A: Date  B: Action  C: Buyer Name  D: Buyer Email
-// E: Print Title  F: Notes  G: Order Ref
-var HEADERS = ['Date','Action','Buyer Name','Buyer Email','Print Title','Notes','Order Ref'];
+// E: Print Title  F: Size  G: Country  H: Notes  I: Order Ref
+var HEADERS = ['Date','Action','Buyer Name','Buyer Email','Print Title','Size','Country','Notes','Order Ref'];
+
+// ── Gmail label names ──────────────────────────────────────────
+var LABELS = {
+  order:    'JA Shop/Order',
+  ship:     'JA Shop/Shipping',
+  coa:      'JA Shop/COA',
+  followup: 'JA Shop/Follow-up',
+  waitlist: 'JA Shop/Waitlist',
+  imported: 'ja-imported'
+};
 
 // ── GET — returns all orders as JSON (used by central-admin sync) ─
 function doGet(e) {
   try {
-    var sheet  = getSheet();
-    var data   = sheet.getDataRange().getValues();
+    var sheet = getSheet();
+    var data  = sheet.getDataRange().getValues();
     if (data.length <= 1) { return jsonResponse([]); }
 
     var rows = data.slice(1).map(function(row) {
@@ -27,8 +38,10 @@ function doGet(e) {
         'Buyer Name':  row[2],
         'Buyer Email': row[3],
         'Print Title': row[4],
-        'Notes':       row[5],
-        'Order Ref':   row[6] || ''
+        'Size':        row[5] || '',
+        'Country':     row[6] || '',
+        'Notes':       row[7],
+        'Order Ref':   row[8] || ''
       };
     });
 
@@ -41,7 +54,7 @@ function doGet(e) {
 // ── POST — log an action row ────────────────────────────────────
 function doPost(e) {
   try {
-    var data = JSON.parse(e.postData.contents);
+    var data  = JSON.parse(e.postData.contents);
     var sheet = getSheet();
     ensureHeaders(sheet);
     sheet.appendRow([
@@ -50,6 +63,8 @@ function doPost(e) {
       data.buyer_name  || '',
       data.buyer_email || '',
       data.print_title || '',
+      data.size        || '',
+      data.country     || '',
       data.notes       || '',
       data.order_ref   || ''
     ]);
@@ -59,51 +74,49 @@ function doPost(e) {
   }
 }
 
-// ── Gmail auto-import (run on a time trigger) ───────────────────
-// In Apps Script: click the clock icon → Add Trigger →
+// ── Gmail auto-import (runs every hour via time trigger) ────────
+// In Apps Script: clock icon → Add Trigger →
 //   Function: importOrdersFromGmail
 //   Event source: Time-driven → Hour timer → Every hour
 //
 function importOrdersFromGmail() {
+  setupLabels();
+
   var sheet = getSheet();
   ensureHeaders(sheet);
 
-  // Get all existing order refs and email+title pairs to avoid duplicates
+  // Get existing refs to avoid duplicates
   var existing = {};
   var data = sheet.getDataRange().getValues();
   data.slice(1).forEach(function(row) {
-    var ref   = String(row[6] || '').trim();
-    var key   = String(row[3] || '').trim() + '||' + String(row[4] || '').trim();
-    if (ref)  existing[ref] = true;
+    var ref  = String(row[8] || '').trim();   // col I = Order Ref
+    var key  = String(row[3] || '').trim() + '||' + String(row[4] || '').trim();
+    if (ref)          existing[ref] = true;
     if (key !== '||') existing[key] = true;
   });
 
-  // Search Gmail for Formspree order alert emails not yet imported
-  var threads = GmailApp.search('from:formspree subject:"New submission" -label:ja-imported', 0, 20);
+  // Search for Formspree order alert emails not yet imported
+  var threads = GmailApp.search(
+    'from:formspree subject:"New submission" -label:ja-imported', 0, 20
+  );
 
   threads.forEach(function(thread) {
-    var messages = thread.getMessages();
-    messages.forEach(function(msg) {
+    thread.getMessages().forEach(function(msg) {
       var body = msg.getPlainBody();
 
-      // Parse the key fields Formspree includes in the notification email
       var buyerEmail = extractField(body, 'buyer')      || extractField(body, '_replyto') || '';
       var items      = extractField(body, 'items')      || '';
       var price      = extractField(body, 'price')      || '';
+      var size       = extractField(body, 'size')       || '';
       var country    = extractField(body, 'country')    || '';
       var orderRef   = extractField(body, 'order_ref')  || extractField(body, 'order ref') || '';
-
-      // Best guess at buyer name — Formspree may include it, or we use email prefix
       var buyerName  = extractField(body, 'buyer_name') || extractField(body, 'name') ||
                        (buyerEmail ? buyerEmail.split('@')[0] : 'Unknown');
-
-      // Print title is the first part of the items field (before ' — ')
       var printTitle = items ? items.split('—')[0].split('–')[0].trim() : '';
 
-      if (!buyerEmail) return; // Skip if no email found
+      if (!buyerEmail) return;
 
-      // Deduplicate
-      var refKey = orderRef;
+      var refKey   = orderRef;
       var emailKey = buyerEmail + '||' + printTitle;
       if ((refKey && existing[refKey]) || existing[emailKey]) return;
 
@@ -112,22 +125,61 @@ function importOrdersFromGmail() {
 
       sheet.appendRow([
         dateStr, 'Order Received', buyerName, buyerEmail,
-        printTitle, [items, price, country].filter(Boolean).join(' · '), orderRef
+        printTitle, size, country, [items, price].filter(Boolean).join(' · '), orderRef
       ]);
 
-      if (refKey)   existing[refKey]   = true;
+      if (refKey) existing[refKey] = true;
       existing[emailKey] = true;
 
-      // Label the thread so we don't re-import it
-      ensureLabel('ja-imported');
-      thread.addLabel(GmailApp.getUserLabelByName('ja-imported'));
+      // Label: ja-imported + JA Shop/Order
+      thread.addLabel(getOrCreateLabel(LABELS.imported));
+      thread.addLabel(getOrCreateLabel(LABELS.order));
     });
   });
+
+  // Label sent emails too (COA, Shipping, Follow-up, Waitlist)
+  labelSentEmails();
+}
+
+// ── Label sent emails by type ────────────────────────────────────
+// Add this as a second hourly trigger OR call from importOrdersFromGmail
+function labelSentEmails() {
+  setupLabels();
+  var searches = [
+    {
+      query: 'in:sent (subject:"Certificate of Authenticity" OR subject:"COA")',
+      label: LABELS.coa
+    },
+    {
+      query: 'in:sent (subject:"shipped" OR subject:"on its way" OR subject:"tracking")',
+      label: LABELS.ship
+    },
+    {
+      query: 'in:sent (subject:"follow" OR subject:"how did everything arrive")',
+      label: LABELS.followup
+    },
+    {
+      query: 'in:sent (subject:"waitlist" OR subject:"on the list")',
+      label: LABELS.waitlist
+    }
+  ];
+
+  searches.forEach(function(s) {
+    var threads = GmailApp.search(s.query, 0, 20);
+    var lbl = getOrCreateLabel(s.label);
+    threads.forEach(function(t) { t.addLabel(lbl); });
+  });
+}
+
+// ── Run once to create all labels ───────────────────────────────
+function setupLabels() {
+  Object.keys(LABELS).forEach(function(k) { getOrCreateLabel(LABELS[k]); });
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
 function getSheet() {
-  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  // openById works for standalone scripts (getActiveSpreadsheet only works when bound)
+  var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
   return sheet;
@@ -155,13 +207,15 @@ function jsonResponse(data) {
 }
 
 function extractField(body, fieldName) {
-  // Matches "fieldname: value" or "fieldname = value" (case-insensitive)
-  var re = new RegExp(fieldName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\s*[=:]\\s*([^\\n\\r]+)', 'i');
-  var m  = body.match(re);
+  var re = new RegExp(
+    fieldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[=:]\\s*([^\\n\\r]+)', 'i'
+  );
+  var m = body.match(re);
   return m ? m[1].trim() : '';
 }
 
-function ensureLabel(name) {
+function getOrCreateLabel(name) {
   var label = GmailApp.getUserLabelByName(name);
-  if (!label) GmailApp.createLabel(name);
+  if (!label) label = GmailApp.createLabel(name);
+  return label;
 }
