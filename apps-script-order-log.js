@@ -1,9 +1,9 @@
 // ══════════════════════════════════════════════════════════════════════
 //  JEFFERY ASARE — Order Log  (Google Apps Script)
 //  Paste the entire contents of this file into your Apps Script project,
-//  replacing everything that's there. Then click Deploy → New Deployment
-//  → Web App → Execute as Me → Who has access: Anyone → Deploy.
-//  Copy the new URL and update SHEET_URL in central-admin.html.
+//  replacing everything that's there. Then:
+//  1. Run createTrigger() once to set up the hourly auto-import
+//  2. Deploy → Manage deployments → Edit → New version → Deploy
 // ══════════════════════════════════════════════════════════════════════
 
 var SHEET_NAME     = 'Orders';
@@ -75,10 +75,6 @@ function doPost(e) {
 }
 
 // ── Gmail auto-import (runs every hour via time trigger) ────────
-// In Apps Script: clock icon → Add Trigger →
-//   Function: importOrdersFromGmail
-//   Event source: Time-driven → Hour timer → Every hour
-//
 function importOrdersFromGmail() {
   setupLabels();
 
@@ -95,9 +91,10 @@ function importOrdersFromGmail() {
     if (key !== '||') existing[key] = true;
   });
 
-  // Search for Formspree order alert emails not yet imported
+  // FIX: Search for order alert emails — subject is "New sale: ..." (set by sendOrderAlert)
+  // Also catches "New submission" as fallback for any direct Formspree form submissions
   var threads = GmailApp.search(
-    'from:formspree subject:"New submission" -label:ja-imported', 0, 20
+    'from:formspree.io (subject:"New sale" OR subject:"New submission") -label:ja-imported', 0, 50
   );
 
   threads.forEach(function(thread) {
@@ -105,14 +102,27 @@ function importOrdersFromGmail() {
       var body = msg.getPlainBody();
 
       var buyerEmail = extractField(body, 'buyer')      || extractField(body, '_replyto') || '';
+      var buyerName  = extractField(body, 'buyer_name') || extractField(body, 'name')     || '';
       var items      = extractField(body, 'items')      || '';
       var price      = extractField(body, 'price')      || '';
-      var size       = extractField(body, 'size')       || '';
       var country    = extractField(body, 'country')    || '';
       var orderRef   = extractField(body, 'order_ref')  || extractField(body, 'order ref') || '';
-      var buyerName  = extractField(body, 'buyer_name') || extractField(body, 'name') ||
-                       (buyerEmail ? buyerEmail.split('@')[0] : 'Unknown');
-      var printTitle = items ? items.split('—')[0].split('–')[0].trim() : '';
+
+      // Extract size: use explicit field first, then parse from items string "Title — Size ×qty"
+      var size = extractField(body, 'size') || '';
+      if (!size && items) {
+        var parts = items.split(/[—–]/);
+        if (parts.length > 1) {
+          size = parts[1].replace(/\s*×\s*\d+.*$/, '').trim();
+        }
+      }
+
+      // Print title is everything before the dash in items
+      var printTitle = items ? items.split(/[—–]/)[0].trim() : '';
+
+      // Fall back to email prefix for name if not provided
+      if (!buyerName && buyerEmail) buyerName = buyerEmail.split('@')[0];
+      if (!buyerName) buyerName = 'Unknown';
 
       if (!buyerEmail) return;
 
@@ -137,38 +147,57 @@ function importOrdersFromGmail() {
     });
   });
 
-  // Label sent emails too (COA, Shipping, Follow-up, Waitlist)
+  // Label sent emails (COA, Shipping, Follow-up, Waitlist)
   labelSentEmails();
 }
 
 // ── Label sent emails by type ────────────────────────────────────
-// Add this as a second hourly trigger OR call from importOrdersFromGmail
 function labelSentEmails() {
   setupLabels();
   var searches = [
     {
-      query: 'in:sent (subject:"Certificate of Authenticity" OR subject:"COA")',
+      // COA emails sent from central admin or auto-sent from shop
+      query: 'in:sent (subject:"Certificate of Authenticity" OR subject:"COA" OR subject:"certificate")',
       label: LABELS.coa
     },
     {
-      query: 'in:sent (subject:"shipped" OR subject:"on its way" OR subject:"tracking")',
+      // Shipping / tracking emails
+      query: 'in:sent (subject:"shipped" OR subject:"on its way" OR subject:"tracking" OR subject:"dispatch" OR subject:"delivery")',
       label: LABELS.ship
     },
     {
-      query: 'in:sent (subject:"follow" OR subject:"how did everything arrive")',
+      // Follow-up emails
+      query: 'in:sent (subject:"follow" OR subject:"how did everything" OR subject:"arrived" OR subject:"enjoying")',
       label: LABELS.followup
     },
     {
-      query: 'in:sent (subject:"waitlist" OR subject:"on the list")',
+      // Waitlist emails
+      query: 'in:sent (subject:"waitlist" OR subject:"on the list" OR subject:"back in stock" OR subject:"available")',
       label: LABELS.waitlist
     }
   ];
 
   searches.forEach(function(s) {
-    var threads = GmailApp.search(s.query, 0, 20);
+    var threads = GmailApp.search(s.query, 0, 50);
     var lbl = getOrCreateLabel(s.label);
     threads.forEach(function(t) { t.addLabel(lbl); });
   });
+}
+
+// ── Create the hourly trigger (run this ONCE from the editor) ───
+function createTrigger() {
+  // Delete any existing importOrdersFromGmail triggers to avoid duplicates
+  ScriptApp.getProjectTriggers().forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === 'importOrdersFromGmail') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  // Create a new hourly trigger
+  ScriptApp.newTrigger('importOrdersFromGmail')
+    .timeBased()
+    .everyHours(1)
+    .create();
+  Logger.log('✓ Hourly trigger created for importOrdersFromGmail');
 }
 
 // ── Run once to create all labels ───────────────────────────────
@@ -178,7 +207,6 @@ function setupLabels() {
 
 // ── Helpers ─────────────────────────────────────────────────────
 function getSheet() {
-  // openById works for standalone scripts (getActiveSpreadsheet only works when bound)
   var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
@@ -186,6 +214,8 @@ function getSheet() {
 }
 
 function ensureHeaders(sheet) {
+  // Allow standalone call (no arg) from the function dropdown
+  if (!sheet) sheet = getSheet();
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');

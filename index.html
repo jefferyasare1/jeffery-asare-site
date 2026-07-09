@@ -2008,7 +2008,7 @@ function checkoutCart(){
         site_url:'www.jefferyasare.com',
         next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
       });
-      sendOrderAlert({buyer:email,items:itemSummary,price:paidStr,country:'Ghana',ref:response.reference});
+      sendOrderAlert({buyer:email,items:itemSummary,size:'Multiple',price:paidStr,country:'Ghana',ref:response.reference});
       CART=[];
       updateCartBadge();
       closeCart();
@@ -2022,15 +2022,17 @@ function checkoutCart(){
 // ORDER ALERT — POST to Formspree so Jeff gets an email
 // ===========================================================
 function sendOrderAlert(opts){
-  // opts: {buyer, items, price, country, ref}
+  // opts: {buyer, buyer_name, items, size, price, country, ref}
   var body=new URLSearchParams({
-    _subject: 'New sale: '+opts.items,
-    buyer:    opts.buyer,
-    items:    opts.items,
-    price:    opts.price,
-    country:  opts.country,
-    order_ref:opts.ref,
-    _replyto: opts.buyer
+    _subject:   'New sale: '+opts.items,
+    buyer:      opts.buyer,
+    buyer_name: opts.buyer_name || opts.buyer.split('@')[0],
+    items:      opts.items,
+    size:       opts.size || '',
+    price:      opts.price,
+    country:    opts.country,
+    order_ref:  opts.ref,
+    _replyto:   opts.buyer
   });
   fetch(FORMSPREE_URL,{
     method:'POST',
@@ -2075,7 +2077,7 @@ function payWithPaystack(print,email,priceGHC,qty){
         site_url:'www.jefferyasare.com',
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
       });
-      sendOrderAlert({buyer:email,items:print.title+' — '+selectedSize+' ×'+qty,price:paidStr,country:ctryName,ref:response.reference});
+      sendOrderAlert({buyer:email,items:print.title+' — '+selectedSize+' ×'+qty,size:selectedSize,price:paidStr,country:ctryName,ref:response.reference});
       openCert([{print:print,size:selectedSize,qty:qty}],email);
     }
   });
