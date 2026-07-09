@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Central Admin — Jeffery Asare</title>
+  <title>Central Admin | Jeffery Asare</title>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -158,7 +158,7 @@
 <body>
 <div class="page">
 
-  <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin &nbsp;·&nbsp; <a href="/admin/#/collections/settings" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Content Manager &rarr;</a></div>
+  <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin &nbsp;·&nbsp; <a href="/admin/#/collections/settings" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Content Manager &rarr;</a> &nbsp;·&nbsp; <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Email Templates &rarr;</a></div>
   <h1 class="page-title">Central Admin</h1>
 
   <!-- Sync bar -->
@@ -240,7 +240,7 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-followup">
     <h2 class="panel-title">Post-Delivery Follow-up</h2>
-    <p class="panel-sub">A warm check-in after the buyer has had time to receive their print — asking how they're enjoying it and inviting them to share a photo.</p>
+    <p class="panel-sub">A warm check-in after the buyer has had time to receive their print, asking how they're enjoying it and inviting them to share a photo.</p>
     <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
     <hr class="divider">
@@ -254,7 +254,7 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-waitlist">
     <h2 class="panel-title">Notify Waitlist</h2>
-    <p class="panel-sub">Let someone know a print is available — before it goes public.</p>
+    <p class="panel-sub">Let someone know a print is available, before it goes public.</p>
     <label>Buyer Email</label><input id="wl-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="wl-name" type="text" placeholder="Full name">
     <hr class="divider">
@@ -269,7 +269,7 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-workflow">
     <h2 class="panel-title">Order Workflow</h2>
-    <p class="panel-sub">Every step from sale to retention — in order.</p>
+    <p class="panel-sub">Every step from sale to retention, in order.</p>
 
     <div class="wf-step">
       <div class="wf-num">1</div>
@@ -283,9 +283,9 @@
     <div class="wf-step">
       <div class="wf-num">2</div>
       <div class="wf-body">
-        <div class="wf-title">Production — 7 to 14 business days</div>
+        <div class="wf-title">Production: 7 to 14 business days</div>
         <p class="wf-desc">Send file to printer. Inspect quality. Sign and number the print. Package in acid-free tissue with rigid backing.</p>
-        <p class="wf-tag">Your action — physical</p>
+        <p class="wf-tag">Your action: physical</p>
       </div>
     </div>
 
@@ -334,6 +334,10 @@
     <div class="grid2">
       <div><label>Size <span class="opt">(optional)</span></label><input id="ao-size" type="text" placeholder="e.g. A3"></div>
       <div><label>Country <span class="opt">(optional)</span></label><input id="ao-country" type="text" placeholder="e.g. United Kingdom"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Price <span class="opt">(optional)</span></label><input id="ao-price" type="text" placeholder="e.g. GH&#8373; 700"></div>
+      <div><label>Qty <span class="opt">(optional)</span></label><input id="ao-qty" type="text" placeholder="1"></div>
     </div>
     <div class="grid2">
       <div><label>Order Ref <span class="opt">(optional)</span></label><input id="ao-ref" type="text" placeholder="from Paystack"></div>
@@ -423,7 +427,7 @@ function sendEmail(templateId, params, btnId, statusId, fieldIds, onSuccess){
       if(onSuccess) onSuccess();
     })
     .catch(function(err){
-      setMsg(statusId, 'err', 'Send failed — check console.');
+      setMsg(statusId, 'err', 'Send failed. Check console.');
       console.error('EmailJS:', err);
       if(btn) btn.disabled = false;
     });
@@ -463,14 +467,14 @@ function syncFromSheet(){
       renderOrders();
     })
     .catch(function(){
-      if(info) info.textContent = 'Could not reach Sheets — showing local data.';
+      if(info) info.textContent = 'Could not reach Sheets. Showing local data.';
       if(btn) btn.classList.remove('spinning');
     });
 }
 
 // Reconstruct order objects from Sheet rows and merge with localStorage
 function mergeSheetOrders(rows){
-  // Rows shape: {Date, Action, "Buyer Name", "Buyer Email", "Print Title", "Size", "Country", Notes, "Order Ref"}
+  // Rows shape (11 cols): {Date, Action, "Buyer Name", "Buyer Email", "Print Title", "Size", "Country", "Price", "Qty", Notes, "Order Ref"}
   var map = {};
   rows.forEach(function(row){
     var email   = row['Buyer Email'] || row.buyer_email || '';
@@ -482,6 +486,8 @@ function mergeSheetOrders(rows){
     var name    = row['Buyer Name']  || row.buyer_name || '';
     var size    = row['Size']        || row.size    || '';
     var country = row['Country']     || row.country || '';
+    var price   = row['Price']       || row.price   || '';
+    var qty     = row['Qty']         || row.qty     || '';
 
     var key = ref || (email + '||' + title);
     if(!key || !email) return;
@@ -490,7 +496,7 @@ function mergeSheetOrders(rows){
       map[key] = {
         id: 'sheet_' + key.replace(/[^a-z0-9]/gi,'_'),
         orderRef: ref, buyerName: name, buyerEmail: email,
-        printTitle: title, size: size, country: country, dateAdded: date,
+        printTitle: title, size: size, country: country, price: price, qty: qty, dateAdded: date,
         shipped: false, shipDate: '', trackingNum: '',
         coaSent: false, coaDate: '',
         followedUp: false, followDate: '',
@@ -499,6 +505,8 @@ function mergeSheetOrders(rows){
     }
     var o = map[key];
     if(name && !o.buyerName) o.buyerName = name;
+    if(price && !o.price) o.price = price;
+    if(qty && !o.qty) o.qty = qty;
     switch(action){
       case 'Order Received': if(date) o.dateAdded = date; break;
       case 'Shipped':
@@ -528,6 +536,8 @@ function mergeSheetOrders(rows){
       if(sheetOrder.dateAdded && !match.dateAdded) match.dateAdded = sheetOrder.dateAdded;
       if(sheetOrder.size && !match.size) match.size = sheetOrder.size;
       if(sheetOrder.country && !match.country) match.country = sheetOrder.country;
+      if(sheetOrder.price && !match.price) match.price = sheetOrder.price;
+      if(sheetOrder.qty && !match.qty) match.qty = sheetOrder.qty;
     } else {
       // New order from sheet — add it
       local.unshift(sheetOrder);
@@ -554,6 +564,8 @@ function addOrder(data){
     printTitle: data.printTitle,
     size: data.size || '',
     country: data.country || '',
+    price: data.price || '',
+    qty: data.qty || '',
     shipped: false, shipDate: '', trackingNum: '',
     coaSent: false, coaDate: '',
     followedUp: false, followDate: ''
@@ -618,7 +630,7 @@ function buildActionQueue(orders){
 
   if(!overdue.length && !due.length){
     html += '<div class="queue-banner clear">' +
-      '<div class="queue-title clear">All good — nothing overdue</div>' +
+      '<div class="queue-title clear">All good. Nothing overdue</div>' +
       '<div class="queue-desc">Check back after your next shipment arrives.</div></div>';
   } else {
     if(overdue.length){
@@ -694,7 +706,7 @@ function renderOrders(){
         '<div class="card-row1">' +
           '<div>' +
             '<div class="card-buyer">'+escH(o.buyerName)+'</div>' +
-            '<div class="card-print">'+escH(o.printTitle)+(o.size?' &middot; '+escH(o.size):'')+(o.country?' &middot; '+escH(o.country):'')+'</div>' +
+            '<div class="card-print">'+escH(o.printTitle)+(o.size?' &middot; '+escH(o.size):'')+(o.country?' &middot; '+escH(o.country):'')+(o.price?' &middot; '+escH(o.price):'')+(o.qty?' &middot; '+escH(o.qty)+' pc':'')+'</div>' +
             '<div class="card-email">'+escH(o.buyerEmail)+'</div>' +
             meta +
           '</div>' +
@@ -774,7 +786,7 @@ function confirmShip(id){
     if(st){ st.className='inline-status ok'; st.textContent='Tracking email sent ✓'; }
     var today = new Date().toISOString().slice(0,10);
     updateOrder(id,{shipped:true, shipDate:today, trackingNum:tracking});
-    logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
+    logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
     setTimeout(function(){ closeInlines(id); },1600);
   }).catch(function(err){
     if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
@@ -795,7 +807,7 @@ function confirmFollowUp(id){
     if(st){ st.className='inline-status ok'; st.textContent='Follow-up sent ✓'; }
     var today = new Date().toISOString().slice(0,10);
     updateOrder(id,{followedUp:true, followDate:today});
-    logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
+    logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'',order_ref:o.orderRef||''});
     setTimeout(function(){ closeInlines(id); },1600);
   }).catch(function(err){
     if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
@@ -814,15 +826,15 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModa
 
 function closeModal(){
   document.getElementById('addOrderOverlay').classList.remove('open');
-  clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-ref']);
+  clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-price','ao-qty','ao-ref']);
   setMsg('ao-status','','');
 }
 
 document.getElementById('ao-save').addEventListener('click', function(){
   if(!requireFields(['ao-name','ao-email','ao-title'],'ao-status')) return;
-  var data = { buyerName:v('ao-name'), buyerEmail:v('ao-email'), printTitle:v('ao-title'), size:v('ao-size'), country:v('ao-country'), orderRef:v('ao-ref') };
+  var data = { buyerName:v('ao-name'), buyerEmail:v('ao-email'), printTitle:v('ao-title'), size:v('ao-size'), country:v('ao-country'), price:v('ao-price'), qty:v('ao-qty'), orderRef:v('ao-ref') };
   addOrder(data);
-  logToSheet({ action:'Order Received', buyer_name:data.buyerName, buyer_email:data.buyerEmail, print_title:data.printTitle, size:data.size, country:data.country, notes:'', order_ref:data.orderRef });
+  logToSheet({ action:'Order Received', buyer_name:data.buyerName, buyer_email:data.buyerEmail, print_title:data.printTitle, size:data.size, country:data.country, price:data.price, qty:data.qty, notes:'', order_ref:data.orderRef });
   closeModal();
   switchTab('orders');
 });
@@ -849,8 +861,8 @@ document.getElementById('coa-send').addEventListener('click', function(){
   var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent(pUrl) + '&color=111111&bgcolor=FFFFFF&margin=3';
   sendEmail('template_hnd30nb',{
     to_email:v('coa-email'), to_name:v('coa-name'), print_title:v('coa-title'),
-    print_series:v('coa-series')||'—', print_size:v('coa-size')||'—',
-    print_paper:v('coa-paper')||'—', print_edition:edStr, print_num:pNum,
+    print_series:v('coa-series')||'', print_size:v('coa-size')||'',
+    print_paper:v('coa-paper')||'', print_edition:edStr, print_num:pNum,
     print_img:v('coa-img')||'', coa_ref:coaRef(), date:todayStr(),
     qr_url:qrUrl, print_url:pUrl,
     signature_url:'https://jefferyasare.com/signature.png', site_url:SITE_URL
