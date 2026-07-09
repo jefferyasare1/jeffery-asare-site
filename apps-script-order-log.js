@@ -1,18 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════
 //  JEFFERY ASARE — Order Log  (Google Apps Script)
-//  Paste the entire contents of this file into your Apps Script project,
-//  replacing everything that's there. Then:
-//  1. Run createTrigger() once to set up the hourly auto-import
-//  2. Deploy → Manage deployments → Edit → New version → Deploy
+//  Paste entire file into Apps Script, replacing everything.
+//  Then: run createTrigger() once, then Deploy → Manage → Edit → New version → Deploy.
 // ══════════════════════════════════════════════════════════════════════
 
 var SHEET_NAME     = 'Orders';
 var SPREADSHEET_ID = '1NrC5N_Uoe_C8o8R3_zGNP35xhr4mHmpW6_xfts21WHo';
 
-// ── Column layout ──────────────────────────────────────────────
+// ── Column layout (11 columns) ─────────────────────────────────
 // A: Date  B: Action  C: Buyer Name  D: Buyer Email
-// E: Print Title  F: Size  G: Country  H: Notes  I: Order Ref
-var HEADERS = ['Date','Action','Buyer Name','Buyer Email','Print Title','Size','Country','Notes','Order Ref'];
+// E: Print Title  F: Size  G: Country  H: Price  I: Qty  J: Notes  K: Order Ref
+var HEADERS = ['Date','Action','Buyer Name','Buyer Email','Print Title','Size','Country','Price','Qty','Notes','Order Ref'];
 
 // ── Gmail label names ──────────────────────────────────────────
 var LABELS = {
@@ -24,7 +22,7 @@ var LABELS = {
   imported: 'ja-imported'
 };
 
-// ── GET — returns all orders as JSON (used by central-admin sync) ─
+// ── GET — returns all orders as JSON ───────────────────────────
 function doGet(e) {
   try {
     var sheet = getSheet();
@@ -33,15 +31,17 @@ function doGet(e) {
 
     var rows = data.slice(1).map(function(row) {
       return {
-        'Date':        formatDate(row[0]),
-        'Action':      row[1],
-        'Buyer Name':  row[2],
-        'Buyer Email': row[3],
-        'Print Title': row[4],
+        'Date':        row[0] ? String(row[0]) : '',
+        'Action':      row[1] || '',
+        'Buyer Name':  row[2] || '',
+        'Buyer Email': row[3] || '',
+        'Print Title': row[4] || '',
         'Size':        row[5] || '',
         'Country':     row[6] || '',
-        'Notes':       row[7],
-        'Order Ref':   row[8] || ''
+        'Price':       row[7] || '',
+        'Qty':         row[8] || '',
+        'Notes':       row[9] || '',
+        'Order Ref':   row[10] || ''
       };
     });
 
@@ -51,20 +51,22 @@ function doGet(e) {
   }
 }
 
-// ── POST — log an action row ────────────────────────────────────
+// ── POST — log an action row ───────────────────────────────────
 function doPost(e) {
   try {
     var data  = JSON.parse(e.postData.contents);
     var sheet = getSheet();
     ensureHeaders(sheet);
     sheet.appendRow([
-      data.date        || new Date().toLocaleString('en-GB', { timeZone: 'Africa/Accra' }),
+      formatNow(),
       data.action      || '',
       data.buyer_name  || '',
       data.buyer_email || '',
       data.print_title || '',
       data.size        || '',
       data.country     || '',
+      data.price       || '',
+      data.qty         || '',
       data.notes       || '',
       data.order_ref   || ''
     ]);
@@ -74,25 +76,25 @@ function doPost(e) {
   }
 }
 
-// ── Gmail auto-import (runs every hour via time trigger) ────────
+// ── Gmail auto-import (runs every hour via trigger) ────────────
 function importOrdersFromGmail() {
   setupLabels();
 
   var sheet = getSheet();
   ensureHeaders(sheet);
 
-  // Get existing refs to avoid duplicates
+  // Build duplicate index (Order Ref now col K = index 10)
   var existing = {};
   var data = sheet.getDataRange().getValues();
   data.slice(1).forEach(function(row) {
-    var ref  = String(row[8] || '').trim();   // col I = Order Ref
-    var key  = String(row[3] || '').trim() + '||' + String(row[4] || '').trim();
+    var ref = String(row[10] || '').trim();
+    var key = String(row[3]  || '').trim() + '||' + String(row[4] || '').trim();
     if (ref)          existing[ref] = true;
     if (key !== '||') existing[key] = true;
   });
 
-  // FIX: Search for order alert emails — subject is "New sale: ..." (set by sendOrderAlert)
-  // Also catches "New submission" as fallback for any direct Formspree form submissions
+  // Search for order alert emails — subject set to "New sale: ..." by sendOrderAlert()
+  // Also catches plain "New submission" Formspree emails as fallback
   var threads = GmailApp.search(
     'from:formspree.io (subject:"New sale" OR subject:"New submission") -label:ja-imported', 0, 50
   );
@@ -105,22 +107,36 @@ function importOrdersFromGmail() {
       var buyerName  = extractField(body, 'buyer_name') || extractField(body, 'name')     || '';
       var items      = extractField(body, 'items')      || '';
       var price      = extractField(body, 'price')      || '';
+      var qty        = extractField(body, 'qty')        || '';
       var country    = extractField(body, 'country')    || '';
       var orderRef   = extractField(body, 'order_ref')  || extractField(body, 'order ref') || '';
 
-      // Extract size: use explicit field first, then parse from items string "Title — Size ×qty"
+      // Size: explicit field first, then parse from items "Title | Size x qty"
       var size = extractField(body, 'size') || '';
       if (!size && items) {
-        var parts = items.split(/[—–]/);
-        if (parts.length > 1) {
-          size = parts[1].replace(/\s*×\s*\d+.*$/, '').trim();
+        var sep = items.indexOf(' | ');
+        if (sep !== -1) {
+          var afterSep = items.substring(sep + 3);
+          // strip trailing " x N" quantity
+          size = afterSep.replace(/\s*x\s*\d+\s*$/, '').trim();
         }
       }
 
-      // Print title is everything before the dash in items
-      var printTitle = items ? items.split(/[—–]/)[0].trim() : '';
+      // Print title: everything before the separator
+      var printTitle = '';
+      if (items) {
+        var pipeIdx = items.indexOf(' | ');
+        printTitle = pipeIdx !== -1 ? items.substring(0, pipeIdx).trim() : items.trim();
+      }
 
-      // Fall back to email prefix for name if not provided
+      // Qty: explicit field, or parse from items "... x N"
+      if (!qty && items) {
+        var qMatch = items.match(/x\s*(\d+)\s*$/i);
+        if (qMatch) qty = qMatch[1];
+      }
+      if (!qty) qty = '1';
+
+      // Name fallback to email prefix
       if (!buyerName && buyerEmail) buyerName = buyerEmail.split('@')[0];
       if (!buyerName) buyerName = 'Unknown';
 
@@ -130,48 +146,42 @@ function importOrdersFromGmail() {
       var emailKey = buyerEmail + '||' + printTitle;
       if ((refKey && existing[refKey]) || existing[emailKey]) return;
 
-      var sentDate = msg.getDate();
-      var dateStr  = Utilities.formatDate(sentDate, 'Africa/Accra', 'dd/MM/yyyy, HH:mm:ss');
+      var dateStr = Utilities.formatDate(msg.getDate(), 'Africa/Accra', 'MMMM d, yyyy');
 
       sheet.appendRow([
         dateStr, 'Order Received', buyerName, buyerEmail,
-        printTitle, size, country, [items, price].filter(Boolean).join(' · '), orderRef
+        printTitle, size, country, price, qty,
+        items, orderRef
       ]);
 
       if (refKey) existing[refKey] = true;
       existing[emailKey] = true;
 
-      // Label: ja-imported + JA Shop/Order
       thread.addLabel(getOrCreateLabel(LABELS.imported));
       thread.addLabel(getOrCreateLabel(LABELS.order));
     });
   });
 
-  // Label sent emails (COA, Shipping, Follow-up, Waitlist)
   labelSentEmails();
 }
 
-// ── Label sent emails by type ────────────────────────────────────
+// ── Label sent emails by type ──────────────────────────────────
 function labelSentEmails() {
   setupLabels();
   var searches = [
     {
-      // COA emails sent from central admin or auto-sent from shop
       query: 'in:sent (subject:"Certificate of Authenticity" OR subject:"COA" OR subject:"certificate")',
       label: LABELS.coa
     },
     {
-      // Shipping / tracking emails
       query: 'in:sent (subject:"shipped" OR subject:"on its way" OR subject:"tracking" OR subject:"dispatch" OR subject:"delivery")',
       label: LABELS.ship
     },
     {
-      // Follow-up emails
       query: 'in:sent (subject:"follow" OR subject:"how did everything" OR subject:"arrived" OR subject:"enjoying")',
       label: LABELS.followup
     },
     {
-      // Waitlist emails
       query: 'in:sent (subject:"waitlist" OR subject:"on the list" OR subject:"back in stock" OR subject:"available")',
       label: LABELS.waitlist
     }
@@ -184,28 +194,21 @@ function labelSentEmails() {
   });
 }
 
-// ── Create the hourly trigger (run this ONCE from the editor) ───
+// ── Run once to create hourly trigger ─────────────────────────
 function createTrigger() {
-  // Delete any existing importOrdersFromGmail triggers to avoid duplicates
-  ScriptApp.getProjectTriggers().forEach(function(trigger) {
-    if (trigger.getHandlerFunction() === 'importOrdersFromGmail') {
-      ScriptApp.deleteTrigger(trigger);
-    }
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'importOrdersFromGmail') ScriptApp.deleteTrigger(t);
   });
-  // Create a new hourly trigger
-  ScriptApp.newTrigger('importOrdersFromGmail')
-    .timeBased()
-    .everyHours(1)
-    .create();
-  Logger.log('✓ Hourly trigger created for importOrdersFromGmail');
+  ScriptApp.newTrigger('importOrdersFromGmail').timeBased().everyHours(1).create();
+  Logger.log('Hourly trigger created for importOrdersFromGmail');
 }
 
-// ── Run once to create all labels ───────────────────────────────
+// ── Run once to create all Gmail labels ───────────────────────
 function setupLabels() {
   Object.keys(LABELS).forEach(function(k) { getOrCreateLabel(LABELS[k]); });
 }
 
-// ── Helpers ─────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────
 function getSheet() {
   var ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(SHEET_NAME);
@@ -214,7 +217,6 @@ function getSheet() {
 }
 
 function ensureHeaders(sheet) {
-  // Allow standalone call (no arg) from the function dropdown
   if (!sheet) sheet = getSheet();
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
@@ -222,12 +224,8 @@ function ensureHeaders(sheet) {
   }
 }
 
-function formatDate(val) {
-  if (!val) return '';
-  if (val instanceof Date) {
-    return Utilities.formatDate(val, 'Africa/Accra', 'dd/MM/yyyy, HH:mm:ss');
-  }
-  return String(val);
+function formatNow() {
+  return Utilities.formatDate(new Date(), 'Africa/Accra', 'MMMM d, yyyy');
 }
 
 function jsonResponse(data) {
