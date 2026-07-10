@@ -4,7 +4,7 @@
   <meta http-equiv="refresh" content="0;url=/central-admin.html">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ship Order — Jeffery Asare</title>
+  <title>Ship Order | Jeffery Asare</title>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -124,7 +124,7 @@
         document.getElementById('f-tracking').value = '';
       }).catch(function (err) {
         status.className = 'err';
-        status.textContent = 'Send failed — check the console for details.';
+        status.textContent = 'Send failed. Check the console for details.';
         console.error('EmailJS error:', err);
         btn.disabled = false;
       });

@@ -250,6 +250,74 @@ function getOrCreateLabel(name) {
   return label;
 }
 
+// ── Size lookup table for repair ──────────────────────────────
+var SIZE_FIXES = {
+  'A4 (21':  'A4 (21 x 29.7 cm)',
+  'A3 (29':  'A3 (29.7 x 42 cm)',
+  'A2 (42':  'A2 (42 x 59.4 cm)',
+  'A1 (59':  'A1 (59.4 x 84.1 cm)',
+  'A0 (84':  'A0 (84.1 x 118.9 cm)'
+};
+
+// ── Run once to fix existing Sheet rows with bad data ─────────
+// Fixes: old JS date format, truncated sizes, em dash in Notes
+function repairSheet() {
+  var sheet = getSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) { Logger.log('Nothing to repair.'); return; }
+
+  var data = sheet.getDataRange().getValues();
+  var repaired = 0;
+
+  for (var i = 1; i < data.length; i++) {
+    var row    = data[i];
+    var date   = String(row[0] || '');
+    var size   = String(row[5] || '');
+    var notes  = String(row[9] || '');
+    var changed = false;
+
+    // Fix date: "9/7/2026 5:04:38" → "July 9, 2026"
+    // Matches M/D/YYYY H:mm:ss or M/D/YYYY
+    var dateMatch = date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dateMatch) {
+      var d = new Date(parseInt(dateMatch[3]), parseInt(dateMatch[2])-1, parseInt(dateMatch[1]));
+      var fixed = Utilities.formatDate(d, 'Africa/Accra', 'MMMM d, yyyy');
+      sheet.getRange(i + 1, 1).setValue(fixed);
+      changed = true;
+    }
+
+    // Fix truncated size
+    for (var key in SIZE_FIXES) {
+      if (size.indexOf(key) === 0 && size !== SIZE_FIXES[key]) {
+        sheet.getRange(i + 1, 6).setValue(SIZE_FIXES[key]);
+        changed = true;
+        break;
+      }
+    }
+
+    // Fix em dash separator in Notes field
+    if (notes.indexOf(' — ') !== -1) {
+      sheet.getRange(i + 1, 10).setValue(notes.replace(/ — /g, ' | '));
+      changed = true;
+    }
+
+    if (changed) repaired++;
+  }
+
+  Logger.log('repairSheet complete. ' + repaired + ' rows updated.');
+}
+
+// ── Remove ja-imported label so Gmail threads can be re-imported ──
+// Run this, then delete the bad rows from the Sheet manually,
+// then run importOrdersFromGmail to pull them in fresh.
+function removeImportedLabels() {
+  var label = GmailApp.getUserLabelByName(LABELS.imported);
+  if (!label) { Logger.log('Label not found: ' + LABELS.imported); return; }
+  var threads = GmailApp.search('label:' + LABELS.imported, 0, 100);
+  threads.forEach(function(t) { t.removeLabel(label); });
+  Logger.log('Removed ja-imported label from ' + threads.length + ' threads. Now delete the bad rows in the Sheet and run importOrdersFromGmail.');
+}
+
 // ── Conditional formatting: colour rows by action ──────────────
 // Call this after importing to keep the sheet readable at a glance.
 function applyFormatting() {
@@ -329,21 +397,21 @@ function buildSummaryTab() {
   var now = Utilities.formatDate(new Date(), 'Africa/Accra', 'MMMM d, yyyy HH:mm');
   var rows = [
     ['SUMMARY', 'Last updated: ' + now],
-    [],
+    ['', ''],
     ['Total Orders', orders.length],
     ['Total Revenue (GHC)', totalRevenue],
-    [],
+    ['', ''],
     ['ORDERS BY COUNTRY', 'Count'],
   ];
   Object.keys(byCountry).sort().forEach(function(k){
     rows.push([k, byCountry[k]]);
   });
-  rows.push([]);
+  rows.push(['', '']);
   rows.push(['ORDERS BY PRINT', 'Count']);
   Object.keys(byPrint).sort().forEach(function(k){
     rows.push([k, byPrint[k]]);
   });
-  rows.push([]);
+  rows.push(['', '']);
   rows.push(['ORDERS BY MONTH', 'Count']);
   Object.keys(byMonth).sort().forEach(function(k){
     rows.push([k, byMonth[k]]);

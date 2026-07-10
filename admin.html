@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin — Jeffery Asare</title>
+  <title>Admin | Jeffery Asare</title>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -162,7 +162,7 @@
     <!-- WAITLIST -->
     <div class="panel" id="panel-waitlist">
       <h2 class="panel-title">Notify Waitlist</h2>
-      <p class="panel-sub">Let someone on the waitlist know a print is available — before opening it up publicly.</p>
+      <p class="panel-sub">Let someone on the waitlist know a print is available, before opening it up publicly.</p>
       <label>Buyer Email</label>
       <input id="wl-email" type="email" placeholder="buyer@example.com">
       <label>Buyer Name</label>
@@ -179,7 +179,7 @@
     <!-- POST-DELIVERY FOLLOW-UP -->
     <div class="panel" id="panel-followup">
       <h2 class="panel-title">Post-Delivery Follow-up</h2>
-      <p class="panel-sub">A warm check-in after the buyer has had time to receive their print — asking how they're enjoying it and inviting them to share a photo.</p>
+      <p class="panel-sub">A warm check-in after the buyer has had time to receive their print, asking how they are enjoying it and inviting them to share a photo.</p>
       <label>Buyer Email</label>
       <input id="fu-email" type="email" placeholder="buyer@example.com">
       <label>Buyer Name</label>
@@ -227,7 +227,7 @@
           btn.disabled = false;
         })
         .catch(function(err){
-          setStatus(statusId, 'err', 'Send failed — check the browser console.');
+          setStatus(statusId, 'err', 'Send failed. Check the browser console.');
           console.error('EmailJS error:', err);
           btn.disabled = false;
         });
@@ -274,8 +274,8 @@
       var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
       sendEmail('template_hnd30nb',{
         to_email:val('coa-email'), to_name:val('coa-name'),
-        print_title:val('coa-title'), print_series:val('coa-series')||'—',
-        print_size:val('coa-size')||'—', print_paper:val('coa-paper')||'—',
+        print_title:val('coa-title'), print_series:val('coa-series')||'',
+        print_size:val('coa-size')||'', print_paper:val('coa-paper')||'',
         print_edition:edStr, print_num:pNum,
         print_img:val('coa-img')||'', coa_ref:coaRef(),
         date:todayStr(), qr_url:qrUrl, print_url:printUrl,

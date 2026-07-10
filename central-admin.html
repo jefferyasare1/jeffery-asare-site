@@ -678,7 +678,7 @@ function renderStats(orders){
   var countryCount = Object.keys(countries).length;
   bar.innerHTML = [
     ['Total Orders', total],
-    ['Total Revenue', revenue ? 'GH&#8373; '+revenue.toLocaleString() : 'N/A'],
+    ['Revenue Collected', revenue ? 'GH&#8373; '+revenue.toLocaleString() : 'N/A'],
     ['Pending Shipment', pending],
     ['Countries', countryCount || 'N/A']
   ].map(function(s){

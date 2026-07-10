@@ -24,7 +24,7 @@ collections:
     summary: "{{label}}"
     fields:
       - {label: "Series Name", name: "label", widget: "string", hint: "Display name, e.g. Random Stories"}
-      - {label: "Series Slug", name: "slug", widget: "string", hint: "Lowercase with dashes, e.g. random-stories — must also be added in Site Settings → Portfolio Series"}
+      - {label: "Series Slug", name: "slug", widget: "string", hint: "Lowercase with dashes, e.g. random-stories. Must also be added in Site Settings, Portfolio Series."}
       - name: photos
         label: Photos
         widget: list
@@ -51,7 +51,7 @@ collections:
             label: Prints
             widget: list
             label_singular: "Print"
-            summary: "{{fields.title}} — {{fields.series}}"
+            summary: "{{fields.title}} | {{fields.series}}"
             fields:
               - {label: "Title", name: "title", widget: "string"}
               - {label: "Series Label", name: "series", widget: "string", hint: "e.g. PORTRAITS OF PLACE"}
@@ -96,20 +96,20 @@ collections:
         name: "about-page"
         file: "_data/settings/about-page.json"
         fields:
-          - {label: "Bio — Paragraph 1", name: "about_bio1", widget: "text"}
-          - {label: "Bio — Paragraph 2", name: "about_bio2", widget: "text"}
-          - {label: "Bio — Paragraph 3", name: "about_bio3", widget: "text"}
-          - {label: "Bio — Paragraph 4", name: "about_bio4", widget: "text"}
-          - {label: "Bio — Paragraph 5", name: "about_bio5", widget: "text"}
+          - {label: "Bio: Paragraph 1", name: "about_bio1", widget: "text"}
+          - {label: "Bio: Paragraph 2", name: "about_bio2", widget: "text"}
+          - {label: "Bio: Paragraph 3", name: "about_bio3", widget: "text"}
+          - {label: "Bio: Paragraph 4", name: "about_bio4", widget: "text"}
+          - {label: "Bio: Paragraph 5", name: "about_bio5", widget: "text"}
           - {label: "Photo Caption", name: "about_caption", widget: "string"}
           - {label: "Location Section Heading", name: "about_loc_heading", widget: "string"}
-          - {label: "Location — Paragraph 1", name: "about_loc_p1", widget: "text"}
-          - {label: "Location — Paragraph 2", name: "about_loc_p2", widget: "text"}
-          - {label: "Location — Paragraph 3", name: "about_loc_p3", widget: "text"}
+          - {label: "Location: Paragraph 1", name: "about_loc_p1", widget: "text"}
+          - {label: "Location: Paragraph 2", name: "about_loc_p2", widget: "text"}
+          - {label: "Location: Paragraph 3", name: "about_loc_p3", widget: "text"}
           - {label: "Philosophy Section Heading", name: "about_phil_heading", widget: "string"}
-          - {label: "Philosophy — Paragraph 1", name: "about_phil_p1", widget: "text"}
-          - {label: "Philosophy — Paragraph 2", name: "about_phil_p2", widget: "text"}
-          - {label: "Philosophy — Paragraph 3", name: "about_phil_p3", widget: "text"}
+          - {label: "Philosophy: Paragraph 1", name: "about_phil_p1", widget: "text"}
+          - {label: "Philosophy: Paragraph 2", name: "about_phil_p2", widget: "text"}
+          - {label: "Philosophy: Paragraph 3", name: "about_phil_p3", widget: "text"}
 
       - label: "Shop Page"
         name: "shop-page"
