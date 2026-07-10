@@ -51,12 +51,25 @@ function doGet(e) {
   }
 }
 
-// ── POST — log an action row ───────────────────────────────────
+// ── POST — log an action row or update buyer name ──────────────
 function doPost(e) {
   try {
     var data  = JSON.parse(e.postData.contents);
     var sheet = getSheet();
     ensureHeaders(sheet);
+
+    // Special case: update buyer name on existing row by order_ref
+    if (data.action === 'Update Buyer' && data.order_ref && data.buyer_name) {
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][10]).trim() === String(data.order_ref).trim()) {
+          sheet.getRange(i + 1, 3).setValue(data.buyer_name); // Column C = Buyer Name
+          return jsonResponse({ status: 'updated', row: i + 1 });
+        }
+      }
+      return jsonResponse({ status: 'not_found', order_ref: data.order_ref });
+    }
+
     sheet.appendRow([
       formatNow(),
       data.action      || '',

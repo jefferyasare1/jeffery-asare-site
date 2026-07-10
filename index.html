@@ -2028,7 +2028,7 @@ function checkoutCart(){
       CART=[];
       updateCartBadge();
       closeCart();
-      if(cartItems.length) openCert(cartItems,email);
+      if(cartItems.length) openCert(cartItems,email,response.reference);
     }
   });
   handler.openIframe();
@@ -2101,7 +2101,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         print_title:print.title,size:selectedSize,country:ctryName,
         price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
-      openCert([{print:print,size:selectedSize,qty:qty}],email);
+      openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference);
     }
   });
   handler.openIframe();
@@ -2110,8 +2110,8 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
 // ===========================================================
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
-// openCert(items) — items = array of {print, size, qty}
-function openCert(items, buyerEmail){
+// openCert(items, buyerEmail, orderRef) — items = array of {print, size, qty}
+function openCert(items, buyerEmail, orderRef){
   if(!items||!items.length) return;
   // Normalise: accept a bare print object for backwards compat
   if(items.print) items=[{print:items,size:items.sizes&&items.sizes[0]?items.sizes[0].label:'',qty:1}];
@@ -2258,6 +2258,12 @@ function openCert(items, buyerEmail){
         _subject:'COA Sent: '+buyerName
       })
     }).catch(function(){});
+    // Update buyer name in Sheet now that we have the real name from the COA
+    if(orderRef && buyerName) {
+      fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        action:'Update Buyer',buyer_name:buyerName,order_ref:orderRef
+      })}).catch(function(){});
+    }
     Promise.all(sends).then(function(){
       printBtn.textContent='✓ COA sent to your email';
       printBtn.style.background='#2d6a4f';

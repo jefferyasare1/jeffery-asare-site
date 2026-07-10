@@ -345,6 +345,12 @@ function setupBuyBtn(p){
   btn.onclick = function(){
     var email = (document.getElementById('buyEmail').value||'').trim();
     var name  = (document.getElementById('buyName').value||'').trim();
+    if(!name){
+      document.getElementById('buyName').focus();
+      document.getElementById('buyName').style.borderBottomColor='#e00';
+      document.getElementById('buyName').placeholder='Please enter your full name';
+      return;
+    }
     if(!email||!email.includes('@')){
       document.getElementById('buyEmail').focus();
       document.getElementById('buyEmail').style.borderBottomColor='#e00';
