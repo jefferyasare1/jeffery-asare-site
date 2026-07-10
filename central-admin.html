@@ -529,29 +529,37 @@ function mergeSheetOrders(rows){
     }
   });
 
-  // Merge with local orders — sheet wins on stage flags, local wins on manual additions
+  // Merge with local orders — sheet is always authoritative
   var local = loadOrders();
-  var localMap = {};
-  local.forEach(function(o){ localMap[o.id] = o; });
+
+  // Collect current sheet order refs so we can prune stale local orders
+  var sheetRefs = {};
+  Object.values(map).forEach(function(o){ if(o.orderRef) sheetRefs[o.orderRef] = true; });
+
+  // Remove old sheet-sourced orders that no longer exist in the sheet (clears test data)
+  local = local.filter(function(o){
+    if(!o.fromSheet) return true; // Always keep manually-added orders
+    if(!o.orderRef) return false; // No ref = old test noise, remove
+    return sheetRefs[o.orderRef] === true; // Keep only if sheet still has it
+  });
 
   Object.values(map).forEach(function(sheetOrder){
-    // Find a matching local order by email+title or orderRef
     var match = local.find(function(l){
       return (sheetOrder.orderRef && l.orderRef === sheetOrder.orderRef) ||
              (l.buyerEmail === sheetOrder.buyerEmail && l.printTitle === sheetOrder.printTitle);
     });
     if(match){
-      // Update stage flags from sheet (sheet is always more authoritative)
+      // Sheet is authoritative on everything
       if(sheetOrder.shipped){ match.shipped = true; match.shipDate = sheetOrder.shipDate; match.trackingNum = match.trackingNum || sheetOrder.trackingNum; }
       if(sheetOrder.coaSent){ match.coaSent = true; match.coaDate = sheetOrder.coaDate; }
       if(sheetOrder.followedUp){ match.followedUp = true; match.followDate = sheetOrder.followDate; }
-      if(sheetOrder.dateAdded && !match.dateAdded) match.dateAdded = sheetOrder.dateAdded;
-      if(sheetOrder.size && !match.size) match.size = sheetOrder.size;
-      if(sheetOrder.country && !match.country) match.country = sheetOrder.country;
-      if(sheetOrder.price && !match.price) match.price = sheetOrder.price;
-      if(sheetOrder.qty && !match.qty) match.qty = sheetOrder.qty;
+      if(sheetOrder.dateAdded) match.dateAdded = sheetOrder.dateAdded;
+      if(sheetOrder.size) match.size = sheetOrder.size;
+      if(sheetOrder.country) match.country = sheetOrder.country;
+      if(sheetOrder.price) match.price = sheetOrder.price; // Always overwrite — sheet is truth
+      if(sheetOrder.qty) match.qty = sheetOrder.qty;
+      if(sheetOrder.buyerName && !match.buyerName) match.buyerName = sheetOrder.buyerName;
     } else {
-      // New order from sheet — add it
       local.unshift(sheetOrder);
     }
   });
@@ -662,8 +670,14 @@ function buildActionQueue(orders){
 // ── Revenue parser ───────────────────────────────────────────────
 function parsePrice(str){
   if(!str) return 0;
-  var n = parseFloat(String(str).replace(/[^0-9.]/g,''));
-  return isNaN(n) ? 0 : n;
+  str = String(str).trim();
+  if(!/[0-9]/.test(str)) return 0; // Reject pure text like "Ghana"
+  var isUSD = str.indexOf('$') !== -1;
+  var numStr = str.replace(/[^0-9.,]/g,'').replace(/,/g,'');
+  var n = parseFloat(numStr) || 0;
+  // Sanity cap: ignore pesewa amounts, test noise, or absurd values
+  if(isUSD) return (n >= 1 && n <= 2000) ? n : 0;
+  return (n >= 1 && n <= 20000) ? n : 0;
 }
 
 // ── Stats bar ────────────────────────────────────────────────────
@@ -671,14 +685,26 @@ function renderStats(orders){
   var bar = document.getElementById('statsBar');
   if(!bar) return;
   var total = orders.length;
-  var revenue = orders.reduce(function(sum,o){ return sum + parsePrice(o.price); }, 0);
+  var usdRev = 0, ghsRev = 0;
+  orders.forEach(function(o){
+    var s = String(o.price||'').trim();
+    var amt = parsePrice(s);
+    if(!amt) return;
+    if(s.indexOf('$') !== -1) usdRev += amt;
+    else ghsRev += amt;
+  });
+  var revDisplay = '';
+  if(usdRev > 0 && ghsRev > 0) revDisplay = '$'+usdRev.toFixed(0)+' + GH&#8373;'+ghsRev.toLocaleString();
+  else if(usdRev > 0) revDisplay = '$'+usdRev.toFixed(0);
+  else if(ghsRev > 0) revDisplay = 'GH&#8373;'+ghsRev.toLocaleString();
+  else revDisplay = 'N/A';
   var pending = orders.filter(function(o){ return !o.shipped; }).length;
   var countries = {};
   orders.forEach(function(o){ if(o.country) countries[o.country]=true; });
   var countryCount = Object.keys(countries).length;
   bar.innerHTML = [
     ['Total Orders', total],
-    ['Revenue Collected', revenue ? 'GH&#8373; '+revenue.toLocaleString() : 'N/A'],
+    ['Revenue Collected', revDisplay],
     ['Pending Shipment', pending],
     ['Countries', countryCount || 'N/A']
   ].map(function(s){
