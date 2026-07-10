@@ -213,6 +213,15 @@ function getSlug(){ return window.location.pathname.split('/').filter(Boolean).p
 // ── Price formatter ────────────────────────────────────────────
 function fmt(priceGHC){ return 'GH&#8373; '+Number(priceGHC).toLocaleString(); }
 
+// ── Live GHS→USD exchange rate ─────────────────────────────────
+var USD_RATE = 0.065;
+(function(){
+  fetch('https://open.er-api.com/v6/latest/GHS')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d&&d.rates&&d.rates.USD) USD_RATE=d.rates.USD; })
+    .catch(function(){});
+})();
+
 // ── Current print state ───────────────────────────────────────
 var PRINT = null;
 var selectedSize = null;
@@ -360,14 +369,16 @@ function setupBuyBtn(p){
     var ctryData = DELIVERY[ctryCode]||{region:'intl',name:'International'};
     var delivFee = ctryData.region==='gh' ? DELIVERY_FEE_GHC : 0;
     var total = selectedPrice + delivFee;
+    var isIntl = ctryData.region !== 'gh';
+    var totalUSD = isIntl ? Math.round(total * USD_RATE) : 0;
     var ref = 'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now();
     var displayName = name || email.split('@')[0];
 
     var handler = PaystackPop.setup({
       key: PAYSTACK_KEY,
       email: email,
-      amount: total * 100,
-      currency: 'GHS',
+      amount: isIntl ? totalUSD * 100 : total * 100,
+      currency: isIntl ? 'USD' : 'GHS',
       ref: ref,
       metadata:{custom_fields:[
         {display_name:'Print',variable_name:'print',value:p.title},
@@ -375,8 +386,7 @@ function setupBuyBtn(p){
       ]},
       onClose: function(){},
       callback: function(response){
-        var paidStr = 'GH&#8373; '+total.toLocaleString();
-        var paidPlain = 'GH₵ '+total.toLocaleString();
+        var paidPlain = isIntl ? '$'+totalUSD : 'GH₵ '+total.toLocaleString();
         // Confirmation email to buyer
         emailjs.send('service_qf961dj','template_hhpdh27',{
           to_email:email, to_name:displayName,

@@ -399,11 +399,14 @@ function buildSummaryTab() {
     byMonth[key] = (byMonth[key]||0) + 1;
   });
 
-  // Total revenue
-  var totalRevenue = 0;
+  // Revenue split by currency (USD for international, GHS for Ghana)
+  var usdRevenue = 0, ghsRevenue = 0;
   orders.forEach(function(r){
-    var price = parseFloat(String(r[7]||'').replace(/[^0-9.]/g,''));
-    if (!isNaN(price)) totalRevenue += price;
+    var priceStr = String(r[7]||'').trim();
+    var amount = parseFloat(priceStr.replace(/[^0-9.]/g,'')) || 0;
+    if (amount <= 0) return;
+    if (priceStr.indexOf('$') !== -1) { usdRevenue += amount; }
+    else { ghsRevenue += amount; }
   });
 
   // Write summary
@@ -411,8 +414,9 @@ function buildSummaryTab() {
   var rows = [
     ['SUMMARY', 'Last updated: ' + now],
     ['', ''],
-    ['Total Orders', orders.length],
-    ['Total Revenue (GHC)', totalRevenue],
+    ['Total Orders Sold', orders.length],
+    ['Revenue Collected (USD)', '$' + usdRevenue.toFixed(2)],
+    ['Revenue Collected (GHS)', 'GH₵ ' + ghsRevenue.toFixed(2)],
     ['', ''],
     ['ORDERS BY COUNTRY', 'Count'],
   ];
@@ -434,5 +438,5 @@ function buildSummaryTab() {
   stats.getRange(1,1).setFontWeight('bold').setFontSize(14);
   stats.getRange(6,1).setFontWeight('bold');
   stats.autoResizeColumns(1, 2);
-  Logger.log('Stats tab updated: ' + orders.length + ' orders, GHC ' + totalRevenue + ' revenue.');
+  Logger.log('Stats tab updated: ' + orders.length + ' orders sold. USD: $' + usdRevenue.toFixed(2) + ' | GHS: GH₵ ' + ghsRevenue.toFixed(2));
 }
