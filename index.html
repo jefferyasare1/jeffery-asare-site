@@ -2028,7 +2028,7 @@ function checkoutCart(){
       CART=[];
       updateCartBadge();
       closeCart();
-      if(cartItems.length) openCert(cartItems,email,response.reference);
+      if(cartItems.length) openCert(cartItems,email,response.reference,cartBuyerDisplayName);
     }
   });
   handler.openIframe();
@@ -2101,7 +2101,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         print_title:print.title,size:selectedSize,country:ctryName,
         price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
-      openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference);
+      openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName);
     }
   });
   handler.openIframe();
@@ -2110,8 +2110,8 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
 // ===========================================================
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
-// openCert(items, buyerEmail, orderRef) — items = array of {print, size, qty}
-function openCert(items, buyerEmail, orderRef){
+// openCert(items, buyerEmail, orderRef, buyerName) — items = array of {print, size, qty}
+function openCert(items, buyerEmail, orderRef, buyerName){
   if(!items||!items.length) return;
   // Normalise: accept a bare print object for backwards compat
   if(items.print) items=[{print:items,size:items.sizes&&items.sizes[0]?items.sizes[0].label:'',qty:1}];
@@ -2223,8 +2223,14 @@ function openCert(items, buyerEmail, orderRef){
       var overlay=document.getElementById('certModalOverlay');
       if(overlay) overlay.dataset.unlocked=filled?'1':'';
     };
-    // Focus the name field immediately
-    setTimeout(function(){ buyerInput.focus(); }, 100);
+    // Pre-fill name from checkout (buyer entered it already)
+    if(buyerName && buyerName.trim().length>1){
+      buyerInput.value=buyerName.trim();
+      buyerInput.dispatchEvent(new Event('input'));
+    } else {
+      // Focus the name field if not pre-filled
+      setTimeout(function(){ buyerInput.focus(); }, 100);
+    }
   }
   if(printBtn) printBtn.onclick=function(){
     if(printBtn.disabled) return;

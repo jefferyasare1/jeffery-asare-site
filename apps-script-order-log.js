@@ -400,13 +400,19 @@ function buildSummaryTab() {
   });
 
   // Revenue split by currency (USD for international, GHS for Ghana)
+  // Smart parsing: commas = thousands separator, not decimal
   var usdRevenue = 0, ghsRevenue = 0;
   orders.forEach(function(r){
     var priceStr = String(r[7]||'').trim();
-    var amount = parseFloat(priceStr.replace(/[^0-9.]/g,'')) || 0;
-    if (amount <= 0) return;
-    if (priceStr.indexOf('$') !== -1) { usdRevenue += amount; }
-    else { ghsRevenue += amount; }
+    if (!priceStr) return;
+    var isUSD = priceStr.indexOf('$') !== -1;
+    // Strip currency symbols, then remove commas (thousands sep), parse
+    var numStr = priceStr.replace(/[^0-9.,]/g,'').replace(/,/g,'');
+    var amount = parseFloat(numStr) || 0;
+    // Sanity check: skip obviously wrong values (test data, pesewa amounts, etc.)
+    // USD: expect $1–$2000, GHS: expect GH₵1–GH₵20000
+    if (isUSD && amount >= 1 && amount <= 2000) { usdRevenue += amount; }
+    else if (!isUSD && amount >= 1 && amount <= 20000) { ghsRevenue += amount; }
   });
 
   // Write summary
