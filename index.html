@@ -116,7 +116,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .btn-dark:hover{opacity:.8;}
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
 .btn-outline:hover{border-color:#999;}
-.shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem 2.5rem;}
+.shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem 1.5rem;}
 .shop-card{display:flex;flex-direction:column;cursor:pointer;}
 .shop-card-img-wrap{overflow:hidden;margin-bottom:1rem;}
 .shop-card-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.25,.46,.45,.94);}
@@ -127,7 +127,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .shop-card-title{font-family:var(--title);font-size:.95rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-bottom:.2rem;}
 .shop-card-edition{font-size:10px;color:var(--muted);margin-bottom:.75rem;}
 .shop-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-top:auto;padding-top:.75rem;border-top:1px solid var(--rule);}
-.shop-card-price{font-size:12px;color:var(--ink);}
+.shop-card-price{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
 .shop-view-btn{font-size:10px;letter-spacing:.08em;color:var(--ink);background:var(--warm);border:1px solid var(--rule);border-radius:999px;cursor:pointer;font-family:var(--sans);padding:.35rem .85rem;transition:all .18s;white-space:nowrap;font-weight:500;}
 .shop-view-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
 .shop-sold-badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -2004,7 +2004,7 @@ function checkoutCart(){
       var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+' x'+i.qty;}).join('; ');
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
       var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
-      emailjs.send('service_qf961dj','template_9cuxcok',{
+      emailjs.send('service_qf961dj','template_hhpdh27',{
         to_email:email,
         to_name:cartBuyerName||email.split('@')[0],
         print_title:itemSummary,
@@ -2074,7 +2074,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
       var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
       var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH₵ '+priceGHC.toLocaleString();
       var displayName=buyerFullName||email.split('@')[0];
-      emailjs.send('service_qf961dj','template_9cuxcok',{
+      emailjs.send('service_qf961dj','template_hhpdh27',{
         to_email:email,
         to_name:displayName,
         print_title:print.title,

@@ -372,11 +372,17 @@ function setupBuyBtn(p){
         var paidStr = 'GH&#8373; '+total.toLocaleString();
         var paidPlain = 'GH₵ '+total.toLocaleString();
         // Confirmation email to buyer
-        emailjs.send('service_qf961dj','template_9cuxcok',{
+        emailjs.send('service_qf961dj','template_hhpdh27',{
           to_email:email, to_name:displayName,
-          print_title:p.title, size:selectedSize, qty:'1',
-          price:paidPlain, order_ref:response.reference, site_url:'https://jefferyasare.com'
-        }).catch(function(){});
+          print_title:p.title, print_size:selectedSize, qty:'1',
+          price:paidPlain, country:ctryData.name, order_ref:response.reference,
+          site_url:'https://jefferyasare.com',
+          next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
+        }).then(function(){
+          console.log('Confirmation email sent to '+email);
+        }).catch(function(err){
+          console.error('EmailJS confirmation failed:', err);
+        });
         // Alert to Jeff via Formspree
         var body=new URLSearchParams({
           _subject:'New sale: '+p.title,
