@@ -509,8 +509,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .cert-ref{font-size:11px;color:var(--muted);letter-spacing:.06em;}
 .cert-title{font-family:var(--title);font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:600;letter-spacing:-.02em;margin-bottom:.3rem;line-height:1.05;}
 .cert-subtitle{font-size:12px;color:var(--muted);margin-bottom:1.8rem;}
-.cert-img-wrap{width:100%;aspect-ratio:16/9;background:var(--warm);margin-bottom:1.8rem;overflow:hidden;}
-.cert-img{width:100%;height:100%;object-fit:cover;display:block;}
+.cert-img-wrap{width:25%;aspect-ratio:4/5;background:var(--warm);margin-bottom:1.8rem;overflow:hidden;position:relative;flex-shrink:0;}
+.cert-img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+.cert-img-shield{position:absolute;inset:0;z-index:2;user-select:none;-webkit-user-select:none;}
 .cert-section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
 .cert-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid var(--rule);font-size:12px;}
 .cert-key{color:var(--muted);}
@@ -2004,19 +2005,26 @@ function checkoutCart(){
       var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+' x'+i.qty;}).join('; ');
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
       var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
+      var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
       emailjs.send('service_qf961dj','template_hhpdh27',{
         to_email:email,
-        to_name:cartBuyerName||email.split('@')[0],
+        to_name:cartBuyerDisplayName,
         print_title:itemSummary,
         print_size:'See above',
         qty:totalQty,
-        price_paid:paidStr,
+        price:paidStr,
         country:'Ghana',
         order_ref:response.reference,
         site_url:'www.jefferyasare.com',
         next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
-      });
-      sendOrderAlert({buyer:email,buyer_name:cartBuyerName||email.split('@')[0],items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
+      }).catch(function(err){ console.error('EmailJS error:', err); });
+      sendOrderAlert({buyer:email,buyer_name:cartBuyerDisplayName,items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
+      // Log to Sheet
+      fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        action:'Order Received',buyer_name:cartBuyerDisplayName,buyer_email:email,
+        print_title:itemSummary,size:'Multiple',country:'Ghana',
+        price:paidStr,qty:String(totalQty),notes:itemSummary,order_ref:response.reference
+      })}).catch(function(err){ console.error('Sheet log error:', err); });
       CART=[];
       updateCartBadge();
       closeCart();
@@ -2080,13 +2088,19 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         print_title:print.title,
         print_size:selectedSize,
         qty:qty,
-        price_paid:paidStr,
+        price:paidStr,
         country:ctryName,
         order_ref:response.reference,
         site_url:'www.jefferyasare.com',
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-      });
+      }).catch(function(err){ console.error('EmailJS error:', err); });
       sendOrderAlert({buyer:email,buyer_name:displayName,items:print.title+' | '+selectedSize+' x'+qty,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
+      // Log to Sheet
+      fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        action:'Order Received',buyer_name:displayName,buyer_email:email,
+        print_title:print.title,size:selectedSize,country:ctryName,
+        price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
+      })}).catch(function(err){ console.error('Sheet log error:', err); });
       openCert([{print:print,size:selectedSize,qty:qty}],email);
     }
   });
@@ -2118,7 +2132,7 @@ function openCert(items, buyerEmail){
     var sizeStr=item.size||(p.sizes&&p.sizes[0]?p.sizes[0].label:'');
     var qtyStr=(item.qty&&item.qty>1)?' x '+item.qty:'';
     var imgHtml=p.img
-      ?'<img class="cert-img" src="'+p.img+'" alt="'+p.title+'">'
+      ?'<img class="cert-img" src="'+p.img+'" alt="'+p.title+'" draggable="false" oncontextmenu="return false;"><div class="cert-img-shield"></div>'
       :'<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">No image</div>';
     var rows=[
       ["Title",p.title+qtyStr],
