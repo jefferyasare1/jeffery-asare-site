@@ -1,3 +1,6 @@
 # Cloudflare Pages redirects
 # Serve /prints/index.html for any /prints/<slug> URL
 /prints/*  /prints/index.html  200
+
+# Redirect old admin URLs to the unified admin
+/central-admin  /admin  301

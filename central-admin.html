@@ -3,8 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Central Admin | Jeffery Asare</title>
+  <title>Admin | Jeffery Asare</title>
   <style>
+    /* ── Password gate ── */
+    #pw-gate{position:fixed;inset:0;z-index:9999;background:var(--warm);display:flex;align-items:center;justify-content:center;}
+    #pw-gate.hidden{display:none;}
+    .pw-box{width:100%;max-width:340px;padding:40px 32px;background:#fff;border:1px solid var(--rule);}
+    .pw-logo{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;}
+    .pw-title{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
+    .pw-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+    #pw-input{display:block;width:100%;border:1px solid var(--rule);padding:11px 13px;font-size:14px;font-family:var(--sans);color:var(--ink);outline:none;margin-bottom:12px;}
+    #pw-input:focus{border-color:var(--ink);}
+    #pw-btn{display:block;width:100%;background:var(--ink);color:#fff;border:none;padding:13px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);}
+    #pw-error{font-size:12px;color:#c00;margin-top:10px;min-height:16px;text-align:center;}
+  </style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;
@@ -156,10 +168,23 @@
   </style>
 </head>
 <body>
+
+<!-- ── Password gate ─────────────────────────────────────── -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logo">Jeffery Asare &nbsp;·&nbsp; Admin</div>
+    <div class="pw-title">Sign in</div>
+    <div class="pw-sub">This area is private.</div>
+    <input id="pw-input" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="pw-btn">Enter</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+
 <div class="page">
 
   <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin &nbsp;·&nbsp; <a href="/admin/#/collections/settings" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Content Manager &rarr;</a> &nbsp;·&nbsp; <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Email Templates &rarr;</a></div>
-  <h1 class="page-title">Central Admin</h1>
+  <h1 class="page-title">Admin</h1>
 
   <!-- Sync bar -->
   <div class="sync-bar">
@@ -1014,6 +1039,42 @@ document.getElementById('wl-send').addEventListener('click', function(){
 // ── Init ─────────────────────────────────────────────────────────
 renderOrders();
 syncFromSheet();
+
+// ── Password gate ─────────────────────────────────────────────────
+(function(){
+  var HASH = '68b603d5efa0f07e15dac40c0380db98d5c500935472da317b7f8f60de9a5786';
+  var AUTH_KEY = 'ja_admin_auth';
+
+  function unlock(){
+    document.getElementById('pw-gate').classList.add('hidden');
+  }
+
+  // Already authenticated this session?
+  if(sessionStorage.getItem(AUTH_KEY) === '1'){ unlock(); return; }
+
+  async function checkPassword(){
+    var input = document.getElementById('pw-input').value;
+    var errEl = document.getElementById('pw-error');
+    if(!input){ errEl.textContent = 'Enter your password.'; return; }
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    var hash = Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+    if(hash === HASH){
+      sessionStorage.setItem(AUTH_KEY, '1');
+      unlock();
+    } else {
+      errEl.textContent = 'Incorrect password.';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  document.getElementById('pw-btn').addEventListener('click', checkPassword);
+  document.getElementById('pw-input').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') checkPassword();
+  });
+  // Focus password input on load
+  document.getElementById('pw-input').focus();
+})();
 </script>
 </body>
 </html>
