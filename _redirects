@@ -2,5 +2,5 @@
 # Serve /prints/index.html for any /prints/<slug> URL
 /prints/*  /prints/index.html  200
 
-# Redirect old admin URLs to the unified admin
-/central-admin  /admin  301
+# Redirect old admin URLs to the unified dashboard
+/central-admin  /dashboard  301

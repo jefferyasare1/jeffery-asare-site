@@ -2006,18 +2006,6 @@ function checkoutCart(){
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
       var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
       var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
-      emailjs.send('service_qf961dj','template_hhpdh27',{
-        to_email:email,
-        to_name:cartBuyerDisplayName,
-        print_title:itemSummary,
-        print_size:'See above',
-        qty:totalQty,
-        price:paidStr,
-        country:'Ghana',
-        order_ref:response.reference,
-        site_url:'www.jefferyasare.com',
-        next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
-      }).catch(function(err){ console.error('EmailJS error:', err); });
       sendOrderAlert({buyer:email,buyer_name:cartBuyerDisplayName,items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
       // Log to Sheet
       fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
@@ -2028,7 +2016,7 @@ function checkoutCart(){
       CART=[];
       updateCartBadge();
       closeCart();
-      if(cartItems.length) openCert(cartItems,email,response.reference,cartBuyerDisplayName);
+      if(cartItems.length) openCert(cartItems,email,response.reference,cartBuyerDisplayName,{price:paidStr,country:'Ghana',qty:totalQty,next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'});
     }
   });
   handler.openIframe();
@@ -2082,18 +2070,6 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
       var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
       var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH₵ '+priceGHC.toLocaleString();
       var displayName=buyerFullName||email.split('@')[0];
-      emailjs.send('service_qf961dj','template_hhpdh27',{
-        to_email:email,
-        to_name:displayName,
-        print_title:print.title,
-        print_size:selectedSize,
-        qty:qty,
-        price:paidStr,
-        country:ctryName,
-        order_ref:response.reference,
-        site_url:'www.jefferyasare.com',
-        next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-      }).catch(function(err){ console.error('EmailJS error:', err); });
       sendOrderAlert({buyer:email,buyer_name:displayName,items:print.title+' | '+selectedSize+' x'+qty,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
       // Log to Sheet
       fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
@@ -2101,7 +2077,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         print_title:print.title,size:selectedSize,country:ctryName,
         price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
-      openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName);
+      openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName,{price:paidStr,country:ctryName,qty:qty,next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'});
     }
   });
   handler.openIframe();
@@ -2110,8 +2086,9 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
 // ===========================================================
 // CERTIFICATE OF AUTHENTICITY
 // ===========================================================
-// openCert(items, buyerEmail, orderRef, buyerName) — items = array of {print, size, qty}
-function openCert(items, buyerEmail, orderRef, buyerName){
+// openCert(items, buyerEmail, orderRef, buyerName, meta) — items = array of {print, size, qty}
+// meta: {price, country, qty, next_steps} — injected into the single COA+thank-you email
+function openCert(items, buyerEmail, orderRef, buyerName, meta){
   if(!items||!items.length) return;
   // Normalise: accept a bare print object for backwards compat
   if(items.print) items=[{print:items,size:items.sizes&&items.sizes[0]?items.sizes[0].label:'',qty:1}];
@@ -2245,8 +2222,14 @@ function openCert(items, buyerEmail, orderRef, buyerName){
           emailjs.send('service_qf961dj','template_hnd30nb',Object.assign({
             to_email:buyerEmail,
             to_name:buyerName,
+            reply_to:'hello@jefferyasare.com',
             signature_url:sigUrl,
-            site_url:'www.jefferyasare.com'
+            site_url:'www.jefferyasare.com',
+            order_ref:orderRef||'',
+            price:meta&&meta.price?meta.price:'',
+            country:meta&&meta.country?meta.country:'',
+            qty:meta&&meta.qty?String(meta.qty):'',
+            next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
           },data))
         );
       });
