@@ -457,7 +457,7 @@ function sendEmail(templateId, params, btnId, statusId, fieldIds, onSuccess){
   var btn = document.getElementById(btnId);
   setMsg(statusId, '', 'Sending…');
   if(btn) btn.disabled = true;
-  emailjs.send('service_qf961dj', templateId, params)
+  emailjs.send('service_50jojio', templateId, params)
     .then(function(){
       setMsg(statusId, 'ok', 'Sent to ' + params.to_email + '.');
       if(fieldIds) clrFields(fieldIds);
@@ -925,7 +925,7 @@ function confirmShip(id){
   if(!tracking){ if(st){ st.className='inline-status err'; st.textContent='Enter a tracking number first.'; } return; }
   if(st){ st.className='inline-status'; st.textContent='Sending…'; }
 
-  emailjs.send('service_qf961dj','template_ufkb3dt',{
+  emailjs.send('service_50jojio','template_ufkb3dt',{
     to_email:o.buyerEmail, to_name:o.buyerName,
     print_title:o.printTitle, tracking_number:tracking, site_url:SITE_URL
   }).then(function(){
@@ -946,7 +946,7 @@ function confirmFollowUp(id){
   var st = document.getElementById('fu-st-'+id);
   if(st){ st.className='inline-status'; st.textContent='Sending…'; }
 
-  emailjs.send('service_qf961dj','template_postdel01',{
+  emailjs.send('service_50jojio','template_postdel01',{
     to_email:o.buyerEmail, to_name:o.buyerName,
     print_title:o.printTitle, site_url:SITE_URL
   }).then(function(){
