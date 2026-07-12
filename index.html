@@ -595,6 +595,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 </style>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -2174,8 +2176,8 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
     +'<div class="cert-sig-block"><input class="cert-buyer-input" id="certBuyerName" type="text" placeholder="Enter your full name" autocomplete="name" maxlength="80"><div class="cert-sig-label">Buyer Name</div></div>'
     +'</div>'
     +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>'
-    +'<button class="cert-print-btn" id="certPrintBtn" disabled>Save as PDF</button>'
-    +'<p class="cert-print-hint" id="certPrintHint">&#128221; Enter your full name above, this is how it will appear on your certificate. Once saved, you can close this window.</p>';
+    +'<button class="cert-print-btn" id="certPrintBtn" disabled>Download Certificate</button>'
+    +'<p class="cert-print-hint" id="certPrintHint">Enter your full name above — it will appear on your certificate.</p>';
 
   var modal=document.getElementById('certModal');
   if(!modal) return;
@@ -2212,60 +2214,102 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
   if(printBtn) printBtn.onclick=function(){
     if(printBtn.disabled) return;
     printBtn.disabled=true;
-    printBtn.textContent='Sending…';
     var buyerName=buyerInput?buyerInput.value.trim():'';
-    var sigUrl=window.location.origin+'/signature.png';
-    var sends=[];
-    if(buyerEmail){
-      certDataArr.forEach(function(data){
-        sends.push(
-          emailjs.send('service_50jojio','template_hnd30nb',Object.assign({
-            to_email:buyerEmail,
-            to_name:buyerName,
-            reply_to:'hello@jefferyasare.com',
-            signature_url:sigUrl,
-            site_url:'www.jefferyasare.com',
-            order_ref:orderRef||'',
-            price:meta&&meta.price?meta.price:'',
-            country:meta&&meta.country?meta.country:'',
-            qty:meta&&meta.qty?String(meta.qty):'',
-            next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-          },data))
-        );
-      });
+    printBtn.textContent='Generating PDF…';
+
+    // ── Prepare modal for clean capture ──
+    var certModal=document.getElementById('certModal');
+    var closeBtn2=document.getElementById('certModalCloseBtn');
+    var hint=document.getElementById('certPrintHint');
+    var buyerInputEl=document.getElementById('certBuyerName');
+    var buyerBlock=buyerInputEl?buyerInputEl.closest('.cert-sig-block'):null;
+    // Hide interactive UI elements
+    if(closeBtn2) closeBtn2.style.visibility='hidden';
+    printBtn.style.visibility='hidden';
+    if(hint) hint.style.display='none';
+    // Replace name input with a static display div
+    var tempNameEl=null;
+    if(buyerInputEl&&buyerBlock){
+      tempNameEl=document.createElement('div');
+      tempNameEl.className='cert-sig-autoval';
+      tempNameEl.textContent=buyerName;
+      buyerBlock.replaceChild(tempNameEl,buyerInputEl);
     }
-    // Alert Jeff via Formspree
-    var titles=certDataArr.map(function(d){ return d.print_title; }).join(', ');
-    fetch(FORMSPREE_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({
-        buyer:buyerName,
-        buyer_email:buyerEmail||'',
-        items:titles,
-        action:'COA Sent',
-        _subject:'COA Sent: '+buyerName
-      })
-    }).catch(function(){});
-    // Update buyer name in Sheet now that we have the real name from the COA
-    if(orderRef && buyerName) {
-      fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        action:'Update Buyer',buyer_name:buyerName,order_ref:orderRef
-      })}).catch(function(){});
-    }
-    Promise.all(sends).then(function(){
-      printBtn.textContent='✓ COA sent to your email';
-      printBtn.style.background='#2d6a4f';
-      var hint=document.getElementById('certPrintHint');
-      if(hint){
-        hint.textContent='Your Certificate of Authenticity has been sent to '+(buyerEmail||'your email')+'. You can now close this window.';
-        hint.style.display='block';
+
+    // ── Capture & generate PDF ──
+    html2canvas(certModal,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false}).then(function(canvas){
+      // Restore UI immediately after capture
+      if(closeBtn2) closeBtn2.style.visibility='';
+      printBtn.style.visibility='';
+      if(hint) hint.style.display='';
+      if(tempNameEl&&buyerInputEl&&buyerBlock) buyerBlock.replaceChild(buyerInputEl,tempNameEl);
+
+      // Build PDF
+      var jsPDF=window.jspdf.jsPDF;
+      var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      var margin=12;
+      var usableW=210-margin*2;
+      var ratio=usableW/canvas.width;
+      var imgH=canvas.height*ratio;
+      pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,imgH);
+      var safeName=(buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
+      pdf.save('COA-'+safeName+'.pdf');
+
+      // ── Send thank-you + order summary email ──
+      printBtn.textContent='Sending confirmation…';
+      var sigUrl=window.location.origin+'/signature.png';
+      var sends=[];
+      if(buyerEmail){
+        certDataArr.forEach(function(data){
+          sends.push(
+            emailjs.send('service_50jojio','template_hnd30nb',Object.assign({
+              to_email:buyerEmail,
+              to_name:buyerName,
+              reply_to:'hello@jefferyasare.com',
+              signature_url:sigUrl,
+              site_url:'www.jefferyasare.com',
+              order_ref:orderRef||'',
+              price:meta&&meta.price?meta.price:'',
+              country:meta&&meta.country?meta.country:'',
+              qty:meta&&meta.qty?String(meta.qty):'',
+              next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
+            },data))
+          );
+        });
       }
-    }).catch(function(){
+      // Alert Jeff via Formspree
+      var titles=certDataArr.map(function(d){return d.print_title;}).join(', ');
+      fetch(FORMSPREE_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({buyer:buyerName,buyer_email:buyerEmail||'',items:titles,action:'COA Downloaded',_subject:'COA Downloaded: '+buyerName})
+      }).catch(function(){});
+      // Update buyer name in Sheet
+      if(orderRef&&buyerName){
+        fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'Update Buyer',buyer_name:buyerName,order_ref:orderRef})
+        }).catch(function(){});
+      }
+      Promise.all(sends).then(function(){
+        printBtn.textContent='✓ Certificate downloaded';
+        printBtn.style.background='#2d6a4f';
+        if(hint){
+          hint.textContent='Your Certificate of Authenticity has been saved to your device'+(buyerEmail?' and a confirmation sent to '+buyerEmail:'')+'. You can now close this window.';
+          hint.style.display='block';
+        }
+      }).catch(function(){
+        // PDF was downloaded even if email failed
+        printBtn.textContent='✓ Certificate downloaded';
+        printBtn.style.background='#2d6a4f';
+        if(hint){hint.textContent='Your Certificate has been saved to your device.';hint.style.display='block';}
+      });
+    }).catch(function(err){
+      // Restore UI on capture failure
+      if(closeBtn2) closeBtn2.style.visibility='';
+      printBtn.style.visibility='';
+      if(hint) hint.style.display='';
+      if(tempNameEl&&buyerInputEl&&buyerBlock) buyerBlock.replaceChild(buyerInputEl,tempNameEl);
       printBtn.disabled=false;
-      printBtn.textContent='Save as PDF';
-      var hint=document.getElementById('certPrintHint');
-      if(hint){ hint.textContent='Something went wrong. Please try again.'; hint.style.display='block'; }
+      printBtn.textContent='Download Certificate';
+      if(hint){hint.textContent='Something went wrong generating the PDF. Please try again.';hint.style.display='block';}
     });
   };
 
