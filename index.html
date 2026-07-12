@@ -2255,25 +2255,51 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
       var safeName=(buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
       pdf.save('COA-'+safeName+'.pdf');
 
-      // ── Send thank-you + order summary email ──
+      // ── Send thank-you email with PDF attached ──
       printBtn.textContent='Sending confirmation…';
-      var sigUrl=window.location.origin+'/signature.png';
+      var pdfBlob=pdf.output('blob');
+      var pdfFile=new File([pdfBlob],'Certificate-of-Authenticity-'+safeName+'.pdf',{type:'application/pdf'});
       var sends=[];
       if(buyerEmail){
         certDataArr.forEach(function(data){
+          var allParams=Object.assign({
+            to_email:buyerEmail,
+            to_name:buyerName,
+            reply_to:'hello@jefferyasare.com',
+            site_url:'www.jefferyasare.com',
+            order_ref:orderRef||'',
+            price:meta&&meta.price?meta.price:'',
+            country:meta&&meta.country?meta.country:'',
+            qty:meta&&meta.qty?String(meta.qty):'',
+            next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
+          },data);
+          // Build a hidden form — sendForm supports file attachments unlike send()
+          var form=document.createElement('form');
+          form.style.display='none';
+          Object.keys(allParams).forEach(function(key){
+            var inp=document.createElement('input');
+            inp.type='hidden';
+            inp.name=key;
+            inp.value=String(allParams[key]||'');
+            form.appendChild(inp);
+          });
+          // Attach the PDF using DataTransfer
+          try{
+            var dt=new DataTransfer();
+            dt.items.add(pdfFile);
+            var fileInp=document.createElement('input');
+            fileInp.type='file';
+            fileInp.name='files[]';
+            fileInp.files=dt.files;
+            form.appendChild(fileInp);
+          }catch(e){ console.warn('File attach skipped:',e); }
+          document.body.appendChild(form);
           sends.push(
-            emailjs.send('service_50jojio','template_hnd30nb',Object.assign({
-              to_email:buyerEmail,
-              to_name:buyerName,
-              reply_to:'hello@jefferyasare.com',
-              signature_url:sigUrl,
-              site_url:'www.jefferyasare.com',
-              order_ref:orderRef||'',
-              price:meta&&meta.price?meta.price:'',
-              country:meta&&meta.country?meta.country:'',
-              qty:meta&&meta.qty?String(meta.qty):'',
-              next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-            },data))
+            emailjs.sendForm('service_50jojio','template_hnd30nb',form).then(function(r){
+              form.remove(); return r;
+            }).catch(function(e){
+              form.remove(); throw e;
+            })
           );
         });
       }
