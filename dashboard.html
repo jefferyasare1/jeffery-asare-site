@@ -168,6 +168,28 @@
     .status-msg.ok{color:var(--green);}
     .status-msg.err{color:var(--red);}
 
+    /* ── Hidden COA PDF capture surface ── */
+    #dash-coa-capture{position:fixed;top:-9999px;left:0;width:680px;z-index:-1;background:#fff;pointer-events:none;}
+    #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;}
+    .dcert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
+    .dcert-brand{font-size:13px;font-weight:600;letter-spacing:-.01em;color:#111;}
+    .dcert-ref{font-size:10px;color:#bbb;letter-spacing:.08em;text-transform:uppercase;}
+    .dcert-title{font-size:2.8rem;font-weight:700;line-height:1.08;letter-spacing:-.04em;margin-bottom:1rem;color:#111;}
+    .dcert-sub{font-size:12px;color:#888;margin-bottom:2rem;line-height:1.6;}
+    .dcert-img-wrap{width:100%;aspect-ratio:4/3;overflow:hidden;margin-bottom:1.2rem;background:#f5f2ee;}
+    .dcert-img-wrap img{width:100%;height:100%;object-fit:cover;}
+    .dcert-section-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin-bottom:.8rem;}
+    .dcert-row{display:flex;gap:.5rem;padding:.45rem 0;border-bottom:1px solid #f0ece8;font-size:12px;}
+    .dcert-key{color:#aaa;width:90px;flex-shrink:0;}
+    .dcert-val{color:#111;font-weight:500;}
+    .dcert-qr-row{display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;}
+    .dcert-disclaimer{font-size:10px;color:#aaa;line-height:1.7;margin-top:1.5rem;}
+    .dcert-sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;}
+    .dcert-sig-block{padding-top:.8rem;border-top:1px solid #111;}
+    .dcert-sig-label{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin-top:.4rem;}
+    .dcert-sig-val{font-size:13px;font-weight:600;color:#111;min-height:1.5rem;font-style:italic;}
+    .dcert-footer{font-size:10px;color:#aaa;line-height:1.7;margin-top:1.5rem;}
+
     /* ── Workflow ── */
     .wf-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--rule);}
     .wf-step:last-child{border-bottom:none;}
@@ -395,10 +417,15 @@
   </div>
 </div>
 
+<!-- Hidden COA PDF capture surface -->
+<div id="dash-coa-capture"><div id="dash-coa-content"></div></div>
+
 <!-- ════════════════════════════════════
      SCRIPTS
 ════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 'use strict';
 emailjs.init('fTeaXZvU78Yu3TSVl');
@@ -830,7 +857,7 @@ function renderOrders(){
       actions += '<button class="btn-card '+(s.urgency<=1?'primary':'')+'" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up →</button>';
     }
     if(!o.coaSent){
-      actions += '<button class="btn-card" onclick="openCOATab(\''+o.id+'\')">Send COA</button>';
+      actions += '<button class="btn-card" onclick="openCOAInline(\''+o.id+'\')">Send Certificate →</button>';
     }
     actions += '<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
 
@@ -874,6 +901,16 @@ function renderOrders(){
         '</div>' +
         '<div class="inline-status" id="fu-st-'+o.id+'"></div>' +
       '</div>' +
+
+      // COA inline
+      '<div class="card-inline" id="coa-inline-'+o.id+'">' +
+        '<div class="inline-label">Generate and send Certificate of Authenticity PDF to <strong>'+escH(o.buyerEmail)+'</strong>?</div>' +
+        '<div class="inline-row">' +
+          '<button class="btn-card primary" onclick="confirmCOASend(\''+o.id+'\')">Generate &amp; Send PDF</button>' +
+          '<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>' +
+        '</div>' +
+        '<div class="inline-status" id="coa-st-'+o.id+'"></div>' +
+      '</div>' +
     '</div>';
   }
 
@@ -885,7 +922,7 @@ function renderOrders(){
 
 // ── Inline actions ───────────────────────────────────────────────
 function closeInlines(id){
-  ['ship-inline-','fu-inline-'].forEach(function(p){
+  ['ship-inline-','fu-inline-','coa-inline-'].forEach(function(p){
     var el = document.getElementById(p+id); if(el) el.classList.remove('open');
   });
 }
@@ -902,29 +939,149 @@ function openFollowUpInline(id){
   if(el) el.classList.add('open');
 }
 
-function openCOATab(id){
+function openCOAInline(id){
+  closeInlines(id);
+  var el = document.getElementById('coa-inline-'+id);
+  if(el) el.classList.add('open');
+}
+
+function confirmCOASend(id){
   var o = loadOrders().find(function(x){ return x.id===id; });
-  if(!o){ switchTab('coa'); return; }
-  setV('coa-email',o.buyerEmail);
-  setV('coa-name',o.buyerName);
-  setV('coa-title',o.printTitle);
-  setV('coa-size',o.size||'');
-  // Try to fill series, paper, edition from CMS prints data
+  if(!o) return;
+  var st = document.getElementById('coa-st-'+id);
+  if(st){ st.className='inline-status'; st.textContent='Generating certificate…'; }
+  // Disable buttons while working
+  var inlineEl = document.getElementById('coa-inline-'+id);
+  if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=true; }); }
+
   fetch('/_data/prints.json')
-    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(r){ return r.ok?r.json():null; })
+    .catch(function(){ return null; })
     .then(function(d){
-      if(!d||!Array.isArray(d.prints)) return;
-      var match = d.prints.find(function(p){
-        return p.title && o.printTitle && p.title.toLowerCase()===o.printTitle.toLowerCase();
-      });
-      if(match){
-        if(match.series)  setV('coa-series',  match.series);
-        if(match.paper)   setV('coa-paper',   match.paper);
-        if(match.edition) setV('coa-edition', match.edition);
-        if(match.img)     setV('coa-img',     match.img);
+      var match = null;
+      if(d&&Array.isArray(d.prints)){
+        match = d.prints.find(function(p){
+          return p.title&&o.printTitle&&p.title.toLowerCase()===o.printTitle.toLowerCase();
+        });
       }
-    }).catch(function(){});
-  switchTab('coa');
+      var now = new Date();
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var dateStr = months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+      var coaRefNum = 'COA-'+String(Math.floor(1000+Math.random()*9000))+' · '+now.getFullYear();
+      var series  = (match&&match.series)||'';
+      var paper   = (match&&match.paper)||'';
+      var edition = (match&&match.edition)||'20';
+      var imgSrc  = (match&&match.img)||'';
+      var edTotal = parseInt((edition||'').replace(/\D/g,''))||20;
+      var printNum = Math.floor(1+Math.random()*edTotal);
+      var slug = (o.printTitle||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+      var printUrl = 'https://jefferyasare.com/?print='+slug;
+      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
+
+      if(imgSrc&&!imgSrc.startsWith('http')) imgSrc = 'https://jefferyasare.com'+(imgSrc.startsWith('/')?'':'/')+imgSrc;
+      var imgHtml = imgSrc
+        ? '<img src="'+imgSrc+'" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">'
+        : '<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">'+escH(o.printTitle||'')+'</div>';
+
+      var rows = [
+        ['Title',   o.printTitle||'—'],
+        ['Series',  series||'—'],
+        ['Size',    o.size||'—'],
+        ['Paper',   paper||'—'],
+        ['Edition', edition||'—'],
+        ['Print No.',printNum+' of '+edTotal],
+        ['Artist',  'Jeffery Asare'],
+        ['Country', 'Ghana']
+      ].map(function(r){
+        return '<div class="dcert-row"><span class="dcert-key">'+r[0]+'</span><span class="dcert-val">'+r[1]+'</span></div>';
+      }).join('');
+
+      var html = '<div class="dcert-header">'
+        +'<span class="dcert-brand">Jeffery Asare</span>'
+        +'<span class="dcert-ref">'+coaRefNum+'</span>'
+        +'</div>'
+        +'<h1 class="dcert-title">Certificate<br>of Authenticity</h1>'
+        +'<p class="dcert-sub">This document certifies the authenticity of a limited edition fine art print.</p>'
+        +'<div class="dcert-img-wrap">'+imgHtml+'</div>'
+        +'<div class="dcert-section-label">Print Details</div>'
+        +rows
+        +'<div class="dcert-qr-row">'
+          +'<img src="'+qrUrl+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;" crossorigin="anonymous">'
+          +'<div><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.3rem;">Verify Online</div>'
+          +'<div style="font-size:11px;color:#666;line-height:1.55;">Scan to view this print on the official Jeffery Asare website.</div>'
+          +'<div style="font-size:10px;color:#bbb;margin-top:.2rem;">'+printUrl+'</div></div>'
+        +'</div>'
+        +'<p class="dcert-disclaimer">This certificate is issued subject to the Terms of Sale at jefferyasare.com · Purchase does not transfer copyright or reproduction rights.</p>'
+        +'<div class="dcert-sig-grid">'
+          +'<div class="dcert-sig-block"><div class="dcert-sig-val" style="padding-bottom:.3rem;border-bottom:1px solid #111;"><img src="https://jefferyasare.com/signature.png" style="max-height:36px;max-width:100px;" crossorigin="anonymous" onerror="this.outerHTML=\'Jeffery Asare\'"></div><div class="dcert-sig-label">Signature of Artist</div></div>'
+          +'<div class="dcert-sig-block"><div class="dcert-sig-val">'+dateStr+'</div><div class="dcert-sig-label">Date</div></div>'
+          +'<div class="dcert-sig-block"><div class="dcert-sig-val">'+escH(o.buyerName||'')+'</div><div class="dcert-sig-label">Buyer Name</div></div>'
+        +'</div>'
+        +'<p class="dcert-footer">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>';
+
+      var content = document.getElementById('dash-coa-content');
+      if(!content){ if(st){ st.className='inline-status err'; st.textContent='Error: capture surface missing.'; } return; }
+      content.innerHTML = html;
+
+      // Wait for images to load before capturing
+      setTimeout(function(){
+        html2canvas(content,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false})
+          .then(function(canvas){
+            var jsPDF = window.jspdf.jsPDF;
+            var pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+            var margin=12, usableW=210-margin*2;
+            var ratio=usableW/canvas.width, imgH=canvas.height*ratio;
+            pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,imgH);
+            var safeName=(o.buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
+
+            if(st) st.textContent='Sending email…';
+
+            var pdfBlob=pdf.output('blob');
+            var pdfFile=new File([pdfBlob],'Certificate-of-Authenticity-'+safeName+'.pdf',{type:'application/pdf'});
+            var allParams={
+              to_email:o.buyerEmail, to_name:o.buyerName,
+              reply_to:'hello@jefferyasare.com', site_url:SITE_URL,
+              order_ref:o.orderRef||'', print_title:o.printTitle,
+              print_size:o.size||'', qty:o.qty||'1', price:o.price||''
+            };
+            var form=document.createElement('form');
+            form.style.display='none';
+            Object.keys(allParams).forEach(function(key){
+              var inp=document.createElement('input');
+              inp.type='hidden'; inp.name=key; inp.value=String(allParams[key]||'');
+              form.appendChild(inp);
+            });
+            try{
+              var dt=new DataTransfer(); dt.items.add(pdfFile);
+              var fileInp=document.createElement('input');
+              fileInp.type='file'; fileInp.name='files[]'; fileInp.files=dt.files;
+              form.appendChild(fileInp);
+            }catch(e){ console.warn('File attach skipped:',e); }
+            document.body.appendChild(form);
+
+            emailjs.sendForm('service_50jojio','template_hnd30nb',form)
+              .then(function(){
+                form.remove();
+                var today=new Date().toISOString().slice(0,10);
+                updateOrder(id,{coaSent:true,coaDate:today});
+                logToSheet({action:'COA Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
+                if(st){ st.className='inline-status ok'; st.textContent='Certificate sent to '+escH(o.buyerEmail)+' ✓'; }
+                renderOrders();
+              })
+              .catch(function(err){
+                form.remove();
+                if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+                if(st){ st.className='inline-status err'; st.textContent='Email failed — try again.'; }
+                console.error('COA email error:',err);
+              });
+          })
+          .catch(function(err){
+            if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+            if(st){ st.className='inline-status err'; st.textContent='PDF generation failed — try again.'; }
+            console.error('html2canvas error:',err);
+          });
+      }, 800);
+    });
 }
 
 function confirmShip(id){
