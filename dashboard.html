@@ -103,12 +103,29 @@
     .card-status.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
     .card-status.grey{background:var(--warm);color:#999;border:1px solid var(--rule);}
 
-    .card-journey{display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
-    .journey-step{font-size:11px;color:var(--muted);}
-    .journey-step.done{color:var(--green);}
-    .journey-step.active{color:var(--amber);font-weight:600;}
-    .journey-step.future{color:#ccc;}
-    .journey-arrow{font-size:10px;color:#ccc;}
+    /* ── Journey track (5 steps) ── */
+    .jtrack{display:flex;align-items:flex-start;margin:14px 0 12px;}
+    .jstep{flex:1;position:relative;text-align:center;}
+    .jstep:not(:last-child)::after{content:'';position:absolute;top:5px;left:calc(50% + 7px);right:calc(-50% + 7px);height:2px;background:#e8e4df;z-index:0;}
+    .jstep.jdone:not(:last-child)::after{background:var(--green);}
+    .jdot{width:12px;height:12px;border-radius:50%;margin:0 auto 5px;position:relative;z-index:1;background:#e0dbd5;border:2px solid #e0dbd5;box-sizing:border-box;}
+    .jstep.jdone .jdot{background:var(--green);border-color:var(--green);}
+    .jstep.jactive .jdot{background:#fff;border:2px solid #111;box-shadow:0 0 0 3px rgba(17,17,17,.1);}
+    .jstep.joverdue .jdot{background:#fff;border:2px solid var(--red);}
+    .jname{font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:#ccc;line-height:1.3;}
+    .jstep.jdone .jname{color:var(--green);}
+    .jstep.jactive .jname{color:#111;font-weight:700;}
+    .jstep.joverdue .jname{color:var(--red);font-weight:700;}
+    .jdate{font-size:8.5px;color:#ccc;margin-top:1px;line-height:1.3;}
+    .jstep.jdone .jdate{color:#999;}
+    .jstep.jactive .jdate{color:#555;}
+    .jstep.joverdue .jdate{color:var(--red);}
+    /* Deadline chip */
+    .deadline-chip{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.03em;padding:3px 8px;margin-bottom:10px;}
+    .deadline-chip.red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+    .deadline-chip.amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+    .deadline-chip.blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
+    .deadline-chip.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
 
     .card-actions{display:flex;gap:7px;flex-wrap:wrap;}
     .btn-card{font-size:11px;font-weight:600;letter-spacing:.04em;padding:7px 13px;border:1px solid var(--rule);background:#fff;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:all .15s;}
@@ -490,6 +507,37 @@ function setMsg(id, type, msg){ var el=document.getElementById(id); if(!el) retu
 function daysBetween(a, b){
   return Math.floor((new Date(b||Date.now()) - new Date(a)) / 86400000);
 }
+function addDays(iso, n){
+  var d = new Date(iso); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+}
+function fmtDateShort(iso){
+  if(!iso) return '—';
+  var d = new Date(iso);
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getDate();
+}
+function daysUntil(iso){
+  return daysBetween(new Date().toISOString().slice(0,10), iso);
+}
+// Returns {text, chip} for a step that hasn't been completed yet
+function stepDeadline(o, stepKey){
+  var today = new Date().toISOString().slice(0,10);
+  if(stepKey==='coa' && !o.coaSent && o.dateAdded){
+    var d = daysUntil(addDays(o.dateAdded,1));
+    return d<0 ? 'Send now' : (d===0 ? 'Due today' : 'Send soon');
+  }
+  if(stepKey==='shipped' && !o.shipped && o.dateAdded){
+    var due = addDays(o.dateAdded,14), d2 = daysUntil(due);
+    return d2<0 ? 'Overdue' : ('By '+fmtDateShort(due));
+  }
+  if(stepKey==='delivered' && !o.delivered && o.shipDate){
+    return 'Est. '+fmtDateShort(addDays(o.shipDate,10));
+  }
+  if(stepKey==='followup' && !o.followedUp){
+    var base = o.deliveredDate||o.shipDate;
+    if(base){ var d3=daysUntil(addDays(base,7)); return d3<0?'Overdue':('By '+fmtDateShort(addDays(base,7))); }
+  }
+  return '—';
+}
 
 function fmtDate(iso){
   if(!iso) return '';
@@ -603,6 +651,7 @@ function mergeSheetOrders(rows){
         printTitle: title, size: size, country: country, price: price, qty: qty, dateAdded: date,
         shipped: false, shipDate: '', trackingNum: '',
         coaSent: false, coaDate: '',
+        delivered: false, deliveredDate: '',
         followedUp: false, followDate: '',
         fromSheet: true
       };
@@ -617,6 +666,7 @@ function mergeSheetOrders(rows){
         o.shipped = true; o.shipDate = date;
         if(notes) o.trackingNum = notes.replace('Tracking: ',''); break;
       case 'COA Sent': o.coaSent = true; o.coaDate = date; break;
+      case 'Delivered': o.delivered = true; o.deliveredDate = date; break;
       case 'Follow-up Sent': o.followedUp = true; o.followDate = date; break;
     }
   });
@@ -644,6 +694,7 @@ function mergeSheetOrders(rows){
       // Sheet is authoritative on everything
       if(sheetOrder.shipped){ match.shipped = true; match.shipDate = sheetOrder.shipDate; match.trackingNum = match.trackingNum || sheetOrder.trackingNum; }
       if(sheetOrder.coaSent){ match.coaSent = true; match.coaDate = sheetOrder.coaDate; }
+      if(sheetOrder.delivered){ match.delivered = true; match.deliveredDate = sheetOrder.deliveredDate; }
       if(sheetOrder.followedUp){ match.followedUp = true; match.followDate = sheetOrder.followDate; }
       if(sheetOrder.dateAdded) match.dateAdded = sheetOrder.dateAdded;
       if(sheetOrder.size) match.size = sheetOrder.size;
@@ -680,6 +731,7 @@ function addOrder(data){
     qty: data.qty || '',
     shipped: false, shipDate: '', trackingNum: '',
     coaSent: false, coaDate: '',
+    delivered: false, deliveredDate: '',
     followedUp: false, followDate: ''
   };
   orders.unshift(newOrder);
@@ -701,59 +753,77 @@ function deleteOrder(id){
 }
 
 // ════════════════════════════════════════════════════════════════
-// INTELLIGENCE ENGINE — What's next for each order
+// INTELLIGENCE ENGINE — Full 5-stage journey tracking
 // ════════════════════════════════════════════════════════════════
 function getStatus(o){
-  var now = new Date().toISOString().slice(0,10);
-  var daysOrdered = o.dateAdded ? daysBetween(o.dateAdded, now) : 0;
-  var daysShipped = (o.shipped && o.shipDate) ? daysBetween(o.shipDate, now) : null;
+  var today = new Date().toISOString().slice(0,10);
+  var daysOrdered   = o.dateAdded       ? daysBetween(o.dateAdded,       today) : 0;
+  var daysShipped   = o.shipped && o.shipDate     ? daysBetween(o.shipDate,      today) : null;
+  var daysDelivered = o.delivered && o.deliveredDate ? daysBetween(o.deliveredDate, today) : null;
 
+  // ── Stage 5: Complete ──────────────────────────────────────────
   if(o.followedUp){
-    return { label:'Journey complete', color:'grey', urgency:4, next:null,
-             journey:'ordered → shipped → followed up' };
+    return { label:'Complete ✓', color:'green', urgency:5, stage:'done', next:null, chip:'green' };
   }
+
+  // ── Stage 4: Delivered — needs follow-up ──────────────────────
+  if(o.delivered){
+    var fuDue = addDays(o.deliveredDate, 7);
+    if(daysDelivered >= 10) return { label:'Follow-up overdue · '+daysDelivered+'d since delivery', color:'red',   urgency:0, stage:'delivered', next:'followup', chip:'red',   deadline: fuDue };
+    if(daysDelivered >= 7)  return { label:'Follow-up due now · delivered '+daysDelivered+'d ago',  color:'amber', urgency:1, stage:'delivered', next:'followup', chip:'amber', deadline: fuDue };
+    var d2fu = 7 - daysDelivered;
+    return { label:'Delivered · follow-up in '+d2fu+'d', color:'blue', urgency:3, stage:'delivered', next:'followup', chip:'blue', deadline: fuDue };
+  }
+
+  // ── Stage 3: Shipped — awaiting delivery ──────────────────────
   if(o.shipped){
-    if(daysShipped >= 14){
-      return { label:'Follow-up overdue · ' + daysShipped + ' days since ship', color:'red', urgency:0, next:'followup',
-               cta:'Send Follow-up →', journey:'ordered → shipped (' + fmtDate(o.shipDate) + ') → ⚠️ follow-up overdue' };
-    }
-    if(daysShipped >= 7){
-      return { label:'Follow-up due', color:'amber', urgency:1, next:'followup',
-               cta:'Send Follow-up →', journey:'ordered → shipped (' + fmtDate(o.shipDate) + ') → send follow-up now' };
-    }
-    return { label:'Shipped · waiting for delivery', color:'blue', urgency:3, next:null,
-             journey:'ordered → shipped ' + fmtDate(o.shipDate) + ' → follow-up in ~' + Math.max(0,7-daysShipped) + ' days' };
+    var estArr = addDays(o.shipDate, 10);
+    if(daysShipped >= 21) return { label:'Check delivery status · '+daysShipped+'d in transit', color:'amber', urgency:1, stage:'shipped', next:'deliver', chip:'amber', deadline: estArr };
+    return { label:'In transit · est. arrival '+fmtDateShort(estArr), color:'blue', urgency:3, stage:'shipped', next:'deliver', chip:'blue', deadline: estArr };
   }
-  if(daysOrdered >= 14){
-    return { label:'Ship overdue · ' + daysOrdered + ' days since order', color:'red', urgency:0, next:'ship',
-             cta:'Send Tracking →', journey:'ordered ' + daysOrdered + ' days ago → ⚠️ ship now' };
+
+  // ── Stage 2: COA sent — needs shipping ────────────────────────
+  var shipDue = o.dateAdded ? addDays(o.dateAdded, 14) : today;
+  if(o.coaSent){
+    if(daysOrdered >= 14){ var ov = daysOrdered-14; return { label:'Ship overdue · '+ov+'d past deadline', color:'red',   urgency:0, stage:'coa', next:'ship', chip:'red',   deadline: shipDue }; }
+    var d2s = 14 - daysOrdered;
+    if(d2s <= 3)           return { label:'Ship soon · '+d2s+'d left',                             color:'amber', urgency:1, stage:'coa', next:'ship', chip:'amber', deadline: shipDue };
+    return                        { label:'In production · ship by '+fmtDateShort(shipDue),        color:'blue',  urgency:3, stage:'coa', next:'ship', chip:'blue',  deadline: shipDue };
   }
-  var daysLeft = 14 - daysOrdered;
-  return { label:'In production · ' + daysLeft + ' days to ship', color:'blue', urgency:3, next:'ship',
-           cta:'Send Tracking when ready', journey:'ordered ' + fmtDate(o.dateAdded) + ' → ship by day 14' };
+
+  // ── Stage 1: Ordered — needs COA ──────────────────────────────
+  if(daysOrdered >= 3) return { label:'COA not sent · '+daysOrdered+'d since order', color:'amber', urgency:1, stage:'ordered', next:'coa', chip:'amber', deadline: shipDue };
+  return                      { label:'New order · send certificate',                 color:'blue',  urgency:2, stage:'ordered', next:'coa', chip:'blue',  deadline: shipDue };
 }
 
 function buildActionQueue(orders){
-  var overdue = orders.filter(function(o){ return getStatus(o).urgency === 0; });
-  var due     = orders.filter(function(o){ return getStatus(o).urgency === 1; });
+  if(!orders.length) return '';
+  var statuses = orders.map(function(o){ return { o:o, s:getStatus(o) }; });
+  var overdue  = statuses.filter(function(x){ return x.s.urgency===0; });
+  var due      = statuses.filter(function(x){ return x.s.urgency===1; });
+  var active   = statuses.filter(function(x){ return x.s.urgency>=2 && x.s.urgency<5; });
+  var complete = statuses.filter(function(x){ return x.s.urgency===5; });
   var html = '';
 
-  if(!orders.length){ return ''; }
-
   if(!overdue.length && !due.length){
-    html += '<div class="queue-banner clear">' +
-      '<div class="queue-title clear">All good. Nothing overdue</div>' +
-      '<div class="queue-desc">Check back after your next shipment arrives.</div></div>';
+    html += '<div class="queue-banner clear">'
+      +'<div class="queue-title clear">All on track</div>'
+      +'<div class="queue-desc">'+active.length+' active order'+(active.length!==1?'s':'')+' · '+complete.length+' complete</div>'
+      +'</div>';
   } else {
     if(overdue.length){
-      html += '<div class="queue-banner red">' +
-        '<div class="queue-title red">⚠ ' + overdue.length + ' order' + (overdue.length>1?'s':'')+' overdue</div>' +
-        '<div class="queue-desc">' + overdue.map(function(o){ return escH(o.buyerName) + ' · ' + escH(o.printTitle); }).join(' &nbsp;·&nbsp; ') + '</div></div>';
+      html += '<div class="queue-banner red">'
+        +'<div class="queue-title red">⚠ '+overdue.length+' overdue</div>'
+        +'<div class="queue-desc">'+overdue.map(function(x){
+            return '<strong>'+escH(x.o.buyerName)+'</strong> · '+escH(x.s.label);
+          }).join(' &nbsp;&nbsp; ')+'</div></div>';
     }
     if(due.length){
-      html += '<div class="queue-banner amber">' +
-        '<div class="queue-title amber">' + due.length + ' follow-up' + (due.length>1?'s':'')+' due</div>' +
-        '<div class="queue-desc">' + due.map(function(o){ return escH(o.buyerName); }).join(', ') + '</div></div>';
+      html += '<div class="queue-banner amber">'
+        +'<div class="queue-title amber">'+due.length+' need attention</div>'
+        +'<div class="queue-desc">'+due.map(function(x){
+            return '<strong>'+escH(x.o.buyerName)+'</strong> · '+escH(x.s.label);
+          }).join(' &nbsp;&nbsp; ')+'</div></div>';
     }
   }
   return html;
@@ -866,83 +936,127 @@ function renderOrders(){
   var active   = orders.filter(function(o){ return !o.followedUp; });
   var complete = orders.filter(function(o){ return  o.followedUp; });
 
-  function cardColor(s){ return s.urgency===0?'urgent': s.urgency===1?'due': s.urgency===4?'done':'inprog'; }
+  function cardBorder(s){
+    if(s.urgency===0) return 'urgent';
+    if(s.urgency===1) return 'due';
+    if(s.urgency===5) return 'done';
+    return 'inprog';
+  }
 
   function cardHTML(o){
     var s = getStatus(o);
-    var color = cardColor(s);
 
-    // Journey steps
-    var j = '<span class="journey-step done">Ordered</span>' +
-      '<span class="journey-arrow">→</span>' +
-      '<span class="journey-step '+(o.shipped?'done':(s.urgency===0?'active':'future'))+'">Shipped</span>' +
-      '<span class="journey-arrow">→</span>' +
-      '<span class="journey-step '+(o.followedUp?'done':(s.urgency<=1&&o.shipped?'active':'future'))+'">Followed up</span>';
+    // ── 5-step visual journey track ──────────────────────────────
+    var steps = [
+      { key:'ordered',   label:'Ordered',   done:true,        active:false,                        date: o.dateAdded },
+      { key:'coa',       label:'COA',       done:o.coaSent,   active:!o.coaSent,                   date: o.coaDate },
+      { key:'shipped',   label:'Shipped',   done:o.shipped,   active:o.coaSent&&!o.shipped,        date: o.shipDate },
+      { key:'delivered', label:'Delivered', done:o.delivered, active:o.shipped&&!o.delivered,      date: o.deliveredDate },
+      { key:'follow-up', label:'Follow-up', done:o.followedUp,active:o.delivered&&!o.followedUp,  date: o.followDate }
+    ];
+    // Determine which active step is overdue
+    var overdueStage = s.urgency===0 ? s.stage : null;
 
-    // Action buttons (only what's relevant NOW)
+    var jHtml = '<div class="jtrack">' + steps.map(function(step){
+      var cls = step.done ? 'jdone'
+              : (overdueStage && overdueStage===step.key) ? 'joverdue'
+              : step.active ? 'jactive' : '';
+      var dateLabel = step.done && step.date ? fmtDateShort(step.date)
+                    : step.active            ? stepDeadline(o, step.key)
+                    : '—';
+      return '<div class="jstep '+cls+'">'
+        +'<div class="jdot"></div>'
+        +'<div class="jname">'+step.label+'</div>'
+        +'<div class="jdate">'+dateLabel+'</div>'
+        +'</div>';
+    }).join('') + '</div>';
+
+    // ── Status chip ───────────────────────────────────────────────
+    var chip = '<span class="deadline-chip '+s.chip+'">'+escH(s.label)+'</span>';
+
+    // ── Action buttons — primary = what's needed right now ────────
     var actions = '';
-    if(!o.shipped){
-      actions += '<button class="btn-card primary" onclick="openShipInline(\''+o.id+'\')">Send Tracking →</button>';
-    }
-    if(o.shipped && !o.followedUp){
-      actions += '<button class="btn-card '+(s.urgency<=1?'primary':'')+'" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up →</button>';
-    }
     if(!o.coaSent){
-      actions += '<button class="btn-card" onclick="openCOAInline(\''+o.id+'\')">Send Certificate →</button>';
+      actions += '<button class="btn-card'+(s.next==='coa'?' primary':'')+'" onclick="openCOAInline(\''+o.id+'\')">Send Certificate</button>';
     }
-    actions += '<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
+    if(!o.shipped){
+      actions += '<button class="btn-card'+(s.next==='ship'?' primary':'')+'" onclick="openShipInline(\''+o.id+'\')">Send Tracking →</button>';
+    }
+    if(o.shipped && !o.delivered){
+      actions += '<button class="btn-card'+(s.next==='deliver'?' primary':'')+'" onclick="openDeliveredInline(\''+o.id+'\')">Mark Delivered</button>';
+    }
+    if(o.delivered && !o.followedUp){
+      actions += '<button class="btn-card'+(s.next==='followup'?' primary':'')+'" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up →</button>';
+    }
+    actions += '<button class="btn-card" style="color:#bbb;border-color:#eee;" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
 
+    // ── Meta row ──────────────────────────────────────────────────
     var meta = '';
-    if(o.orderRef) meta += '<div class="card-ref">Ref: '+escH(o.orderRef)+'</div>';
-    if(o.trackingNum) meta += '<div class="card-ref">DHL: '+escH(o.trackingNum)+'</div>';
+    if(o.orderRef)   meta += '<span style="font-size:10px;color:#bbb;margin-right:10px;">Ref: '+escH(o.orderRef)+'</span>';
+    if(o.trackingNum)meta += '<span style="font-size:10px;color:#bbb;">DHL: '+escH(o.trackingNum)+'</span>';
 
-    return '<div class="order-card '+color+'" id="card-'+o.id+'">' +
-      '<div class="card-main">' +
-        '<div class="card-row1">' +
-          '<div>' +
-            '<div class="card-buyer">'+escH(o.buyerName)+'</div>' +
-            '<div class="card-print">'+escH(o.printTitle)+(o.size?' &middot; '+escH(o.size):'')+(o.country?' &middot; '+escH(o.country):'')+(o.price?' &middot; '+escH(o.price):'')+(o.qty?' &middot; '+escH(o.qty)+' pc':'')+'</div>' +
-            '<div class="card-email">'+escH(o.buyerEmail)+'</div>' +
-            meta +
-          '</div>' +
-          '<div class="card-date">'+fmtDate(o.dateAdded)+'</div>' +
-        '</div>' +
-        '<div class="card-status '+s.color+'">'+escH(s.label)+'</div>' +
-        '<div class="card-journey">'+j+'</div>' +
-        '<div class="card-actions">'+actions+'</div>' +
-      '</div>' +
+    return '<div class="order-card '+cardBorder(s)+'" id="card-'+o.id+'">'
+      +'<div class="card-main">'
+        +'<div class="card-row1">'
+          +'<div>'
+            +'<div class="card-buyer">'+escH(o.buyerName)+'</div>'
+            +'<div class="card-print">'+escH(o.printTitle)
+              +(o.size?' &middot; '+escH(o.size):'')
+              +(o.country?' &middot; '+escH(o.country):'')
+              +(o.price?' &middot; '+escH(o.price):'')
+              +(o.qty&&o.qty!=='1'?' &middot; '+escH(o.qty)+' pcs':'')
+            +'</div>'
+            +'<div class="card-email">'+escH(o.buyerEmail)+(meta?'&nbsp;&nbsp;'+meta:'')+'</div>'
+          +'</div>'
+          +'<div class="card-date">'+fmtDate(o.dateAdded)+'</div>'
+        +'</div>'
+        + jHtml
+        + chip
+        +'<div class="card-actions" style="margin-top:10px;">'+actions+'</div>'
+      +'</div>'
 
       // Tracking inline
-      '<div class="card-inline" id="ship-inline-'+o.id+'">' +
-        '<div class="inline-label">DHL Tracking Number</div>' +
-        '<input class="inline-field" id="tracking-'+o.id+'" placeholder="e.g. 1234567890">' +
-        '<div class="inline-row">' +
-          '<button class="btn-card primary" onclick="confirmShip(\''+o.id+'\')">Send &amp; Mark Shipped</button>' +
-          '<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>' +
-        '</div>' +
-        '<div class="inline-status" id="ship-st-'+o.id+'"></div>' +
-      '</div>' +
+      +'<div class="card-inline" id="ship-inline-'+o.id+'">'
+        +'<div class="inline-label">DHL Tracking Number</div>'
+        +'<input class="inline-field" id="tracking-'+o.id+'" placeholder="e.g. 1234567890">'
+        +'<div class="inline-row">'
+          +'<button class="btn-card primary" onclick="confirmShip(\''+o.id+'\')">Send &amp; Mark Shipped</button>'
+          +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
+        +'</div>'
+        +'<div class="inline-status" id="ship-st-'+o.id+'"></div>'
+      +'</div>'
+
+      // Mark Delivered inline
+      +'<div class="card-inline" id="del-inline-'+o.id+'">'
+        +'<div class="inline-label">Confirm delivery for <strong>'+escH(o.buyerName)+'</strong>? This will start the 7-day follow-up countdown.</div>'
+        +'<div class="inline-row">'
+          +'<button class="btn-card primary" onclick="confirmDelivered(\''+o.id+'\')">Confirm Delivered</button>'
+          +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
+        +'</div>'
+        +'<div class="inline-status" id="del-st-'+o.id+'"></div>'
+      +'</div>'
 
       // Follow-up inline
-      '<div class="card-inline" id="fu-inline-'+o.id+'">' +
-        '<div class="inline-label">Send post-delivery follow-up to '+escH(o.buyerEmail)+'?</div>' +
-        '<div class="inline-row">' +
-          '<button class="btn-card primary" onclick="confirmFollowUp(\''+o.id+'\')">Confirm &amp; Send</button>' +
-          '<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>' +
-        '</div>' +
-        '<div class="inline-status" id="fu-st-'+o.id+'"></div>' +
-      '</div>' +
+      +'<div class="card-inline" id="fu-inline-'+o.id+'">'
+        +'<div class="inline-label">Send post-delivery follow-up to '+escH(o.buyerEmail)+'?</div>'
+        +'<div class="inline-row">'
+          +'<button class="btn-card primary" onclick="confirmFollowUp(\''+o.id+'\')">Confirm &amp; Send</button>'
+          +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
+        +'</div>'
+        +'<div class="inline-status" id="fu-st-'+o.id+'"></div>'
+      +'</div>'
 
       // COA inline
-      '<div class="card-inline" id="coa-inline-'+o.id+'">' +
-        '<div class="inline-label">Generate and send Certificate of Authenticity PDF to <strong>'+escH(o.buyerEmail)+'</strong>?</div>' +
-        '<div class="inline-row">' +
-          '<button class="btn-card primary" onclick="confirmCOASend(\''+o.id+'\')">Generate &amp; Send PDF</button>' +
-          '<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>' +
-        '</div>' +
-        '<div class="inline-status" id="coa-st-'+o.id+'"></div>' +
-      '</div>' +
-    '</div>';
+      +'<div class="card-inline" id="coa-inline-'+o.id+'">'
+        +'<div class="inline-label">Generate and send Certificate of Authenticity PDF to <strong>'+escH(o.buyerEmail)+'</strong>?</div>'
+        +'<div class="inline-row">'
+          +'<button class="btn-card primary" onclick="confirmCOASend(\''+o.id+'\')">Generate &amp; Send PDF</button>'
+          +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
+        +'</div>'
+        +'<div class="inline-status" id="coa-st-'+o.id+'"></div>'
+      +'</div>'
+
+    +'</div>';
   }
 
   var html = '';
@@ -1019,7 +1133,7 @@ function fillFromClient(prefix, orderId){
 
 // ── Inline actions ───────────────────────────────────────────────
 function closeInlines(id){
-  ['ship-inline-','fu-inline-','coa-inline-'].forEach(function(p){
+  ['ship-inline-','del-inline-','fu-inline-','coa-inline-'].forEach(function(p){
     var el = document.getElementById(p+id); if(el) el.classList.remove('open');
   });
 }
@@ -1028,6 +1142,24 @@ function openShipInline(id){
   closeInlines(id);
   var el = document.getElementById('ship-inline-'+id);
   if(el){ el.classList.add('open'); var inp=document.getElementById('tracking-'+id); if(inp) inp.focus(); }
+}
+
+function openDeliveredInline(id){
+  closeInlines(id);
+  var el = document.getElementById('del-inline-'+id);
+  if(el) el.classList.add('open');
+}
+
+function confirmDelivered(id){
+  var o = loadOrders().find(function(x){ return x.id===id; });
+  if(!o) return;
+  var st = document.getElementById('del-st-'+id);
+  var today = new Date().toISOString().slice(0,10);
+  updateOrder(id, { delivered:true, deliveredDate:today });
+  logToSheet({ action:'Delivered', buyer_name:o.buyerName, buyer_email:o.buyerEmail,
+               print_title:o.printTitle, size:o.size||'', country:o.country||'',
+               notes:'', order_ref:o.orderRef||'' });
+  if(st){ st.className='inline-status ok'; st.textContent='Marked as delivered ✓ — follow-up countdown started.'; }
 }
 
 function openFollowUpInline(id){
