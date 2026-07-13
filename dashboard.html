@@ -160,6 +160,12 @@
     .form-note{font-size:12px;color:var(--muted);background:var(--warm);padding:11px 13px;margin-bottom:20px;line-height:1.55;}
     hr.divider{border:none;border-top:1px solid var(--rule);margin:2px 0 20px;}
 
+    /* ── Client selector ── */
+    .client-sel-wrap{margin-bottom:20px;}
+    .client-sel-label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+    .client-sel{display:block;width:100%;border:1px solid var(--ink);padding:10px 32px 10px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23111' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+    .client-sel:focus{border-color:var(--ink);outline:2px solid rgba(17,17,17,.12);}
+
     /* ── Buttons ── */
     .btn-primary{display:block;width:100%;background:var(--ink);color:#fff;border:none;padding:13px;font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);}
     .btn-primary:hover{opacity:.85;}
@@ -269,6 +275,12 @@
   <div class="panel" id="panel-ship">
     <h2 class="panel-title">Ship an Order</h2>
     <p class="panel-sub">Sends the buyer their DHL tracking number the day you drop off the package.</p>
+    <div class="client-sel-wrap">
+      <span class="client-sel-label">Select client</span>
+      <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
+        <option value="">— choose to auto-fill —</option>
+      </select>
+    </div>
     <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
     <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
@@ -284,6 +296,12 @@
   <div class="panel" id="panel-coa">
     <h2 class="panel-title">Send Certificate of Authenticity</h2>
     <p class="panel-sub">Resend or manually issue a COA. Blanks show a dash on the certificate.</p>
+    <div class="client-sel-wrap">
+      <span class="client-sel-label">Select client</span>
+      <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
+        <option value="">— choose to auto-fill —</option>
+      </select>
+    </div>
     <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
     <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
@@ -311,6 +329,12 @@
   <div class="panel" id="panel-followup">
     <h2 class="panel-title">Post-Delivery Follow-up</h2>
     <p class="panel-sub">A warm check-in after the buyer has had time to receive their print, asking how they're enjoying it and inviting them to share a photo.</p>
+    <div class="client-sel-wrap">
+      <span class="client-sel-label">Select client</span>
+      <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
+        <option value="">— choose to auto-fill —</option>
+      </select>
+    </div>
     <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
     <hr class="divider">
@@ -325,6 +349,12 @@
   <div class="panel" id="panel-waitlist">
     <h2 class="panel-title">Notify Waitlist</h2>
     <p class="panel-sub">Let someone know a print is available, before it goes public.</p>
+    <div class="client-sel-wrap">
+      <span class="client-sel-label">Select client</span>
+      <select class="client-sel" id="wl-client-sel" onchange="fillFromClient('wl',this.value)">
+        <option value="">— choose to auto-fill —</option>
+      </select>
+    </div>
     <label>Buyer Email</label><input id="wl-email" type="email" placeholder="buyer@example.com">
     <label>Buyer Name</label><input id="wl-name" type="text" placeholder="Full name">
     <hr class="divider">
@@ -809,6 +839,7 @@ function renderOrders(){
 
   // Update stats (always from full order list)
   renderStats(orders);
+  populateClientSelectors();
 
   if(queue) queue.innerHTML = buildActionQueue(orders);
 
@@ -918,6 +949,72 @@ function renderOrders(){
   if(active.length)   html += active.map(cardHTML).join('');
   if(complete.length) html += '<div class="section-label">Completed</div>' + complete.map(cardHTML).join('');
   list.innerHTML = html;
+}
+
+// ── Client selector ─────────────────────────────────────────────
+function populateClientSelectors(){
+  var orders = loadOrders();
+  ['sh-client-sel','coa-client-sel','fu-client-sel','wl-client-sel'].forEach(function(selId){
+    var sel = document.getElementById(selId);
+    if(!sel) return;
+    var prev = sel.value;
+    sel.innerHTML = '<option value="">— choose to auto-fill —</option>';
+    orders.forEach(function(o){
+      var label = (o.buyerName||'Unknown')
+        + (o.printTitle ? ' · ' + o.printTitle : '')
+        + (o.dateAdded  ? ' (' + fmtDate(o.dateAdded) + ')' : '');
+      var opt = document.createElement('option');
+      opt.value = o.id;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+    if(prev) sel.value = prev;
+  });
+}
+
+function fillFromClient(prefix, orderId){
+  if(!orderId) return;
+  var o = loadOrders().find(function(x){ return x.id===orderId; });
+  if(!o) return;
+
+  if(prefix==='sh'){
+    setV('sh-email',  o.buyerEmail);
+    setV('sh-name',   o.buyerName);
+    setV('sh-title',  o.printTitle);
+    if(o.trackingNum) setV('sh-tracking', o.trackingNum);
+
+  } else if(prefix==='coa'){
+    setV('coa-email', o.buyerEmail);
+    setV('coa-name',  o.buyerName);
+    setV('coa-title', o.printTitle);
+    setV('coa-size',  o.size||'');
+    // Enrich from prints.json
+    fetch('/_data/prints.json')
+      .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+      .then(function(d){
+        if(!d||!Array.isArray(d.prints)) return;
+        var match = d.prints.find(function(p){
+          return p.title&&o.printTitle&&p.title.toLowerCase()===o.printTitle.toLowerCase();
+        });
+        if(!match) return;
+        if(match.series)  setV('coa-series',  match.series);
+        if(match.paper)   setV('coa-paper',   match.paper);
+        if(match.edition) setV('coa-edition', match.edition);
+        if(match.img)     setV('coa-img',     match.img);
+      });
+
+  } else if(prefix==='fu'){
+    setV('fu-email', o.buyerEmail);
+    setV('fu-name',  o.buyerName);
+    setV('fu-title', o.printTitle);
+
+  } else if(prefix==='wl'){
+    setV('wl-email', o.buyerEmail);
+    setV('wl-name',  o.buyerName);
+    setV('wl-title', o.printTitle);
+    var slug = (o.printTitle||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    setV('wl-url', 'https://jefferyasare.com/?print='+slug);
+  }
 }
 
 // ── Inline actions ───────────────────────────────────────────────
