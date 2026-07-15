@@ -1285,29 +1285,44 @@ function confirmCOASend(id){
             pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,imgH);
             var safeName=(o.buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
 
-            // PDF downloaded to Jeff's machine
+            // Download PDF to Jeff's machine
             pdf.save('COA-'+safeName+'.pdf');
-            if(st) st.textContent='Sending email to buyer…';
+            if(st) st.textContent='Sending COA to buyer…';
 
-            // Send thank-you email via emailjs.send() — reliable, no attachment needed
-            emailjs.send('service_50jojio','template_hnd30nb',{
-              to_email:o.buyerEmail, to_name:o.buyerName,
-              reply_to:'hello@jefferyasare.com', site_url:SITE_URL,
-              order_ref:o.orderRef||'', print_title:o.printTitle,
-              print_size:o.size||'', qty:o.qty||'1', price:o.price||'',
-              next_steps:'Your Certificate of Authenticity has been issued. Your print is being prepared and we will send tracking details once it ships.'
-            }).then(function(){
-                var today=new Date().toISOString().slice(0,10);
+            // Get PDF as base64 to attach to the buyer's email
+            var pdfDataUri = pdf.output('datauristring');
+            var pdfBase64 = pdfDataUri.split(',')[1]; // strip "data:application/pdf;base64,"
+
+            // POST to Cloudflare Function → Brevo REST API (supports attachments)
+            var today=new Date().toISOString().slice(0,10);
+            fetch('/api/send-coa',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({
+                to_email:o.buyerEmail,
+                to_name:o.buyerName,
+                print_title:o.printTitle,
+                size:o.size||'',
+                order_ref:o.orderRef||'',
+                pdf_base64:pdfBase64
+              })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(result){
+              if(result.ok){
                 updateOrder(id,{coaSent:true,coaDate:today});
                 logToSheet({action:'COA Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
-                if(st){ st.className='inline-status ok'; st.textContent='Email sent to '+escH(o.buyerEmail)+' ✓ · PDF saved to your device'; }
+                if(st){ st.className='inline-status ok'; st.textContent='COA emailed to '+escH(o.buyerEmail)+' ✓ (PDF attached) · also saved to your device'; }
                 setTimeout(function(){ renderOrders(); }, 1500);
-              })
-              .catch(function(err){
-                if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
-                if(st){ st.className='inline-status err'; st.textContent='Email failed — try again. PDF was saved to your device.'; }
-                console.error('COA email error:',err);
-              });
+              } else {
+                throw new Error(result.error||'Send failed');
+              }
+            })
+            .catch(function(err){
+              if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+              if(st){ st.className='inline-status err'; st.textContent='Email failed — '+escH(String(err.message||err))+'. PDF was still saved to your device.'; }
+              console.error('COA email error:',err);
+            });
           })
           .catch(function(err){
             if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
