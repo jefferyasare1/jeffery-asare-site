@@ -2018,6 +2018,14 @@ function checkoutCart(){
       CART=[];
       updateCartBadge();
       closeCart();
+      // ── Auto-send thank-you email immediately on payment ──
+      emailjs.send('service_50jojio','template_hnd30nb',{
+        to_email:email, to_name:cartBuyerDisplayName,
+        reply_to:'hello@jefferyasare.com', site_url:'www.jefferyasare.com',
+        order_ref:response.reference||'', print_title:itemSummary,
+        print_size:'Multiple', qty:String(totalQty), price:paidStr,
+        next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
+      }).catch(function(e){ console.error('Thank-you email failed:',e); });
       if(cartItems.length) openCert(cartItems,email,response.reference,cartBuyerDisplayName,{price:paidStr,country:'Ghana',qty:totalQty,next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'});
     }
   });
@@ -2079,6 +2087,14 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         print_title:print.title,size:selectedSize,country:ctryName,
         price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
+      // ── Auto-send thank-you email immediately on payment ──
+      emailjs.send('service_50jojio','template_hnd30nb',{
+        to_email:email, to_name:displayName,
+        reply_to:'hello@jefferyasare.com', site_url:'www.jefferyasare.com',
+        order_ref:response.reference||'', print_title:print.title,
+        print_size:selectedSize, qty:String(qty), price:paidStr,
+        next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
+      }).catch(function(e){ console.error('Thank-you email failed:',e); });
       openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName,{price:paidStr,country:ctryName,qty:qty,next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'});
     }
   });
@@ -2255,54 +2271,6 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
       var safeName=(buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
       pdf.save('COA-'+safeName+'.pdf');
 
-      // ── Send thank-you email with PDF attached ──
-      printBtn.textContent='Sending confirmation…';
-      var pdfBlob=pdf.output('blob');
-      var pdfFile=new File([pdfBlob],'Certificate-of-Authenticity-'+safeName+'.pdf',{type:'application/pdf'});
-      var sends=[];
-      if(buyerEmail){
-        certDataArr.forEach(function(data){
-          var allParams=Object.assign({
-            to_email:buyerEmail,
-            to_name:buyerName,
-            reply_to:'hello@jefferyasare.com',
-            site_url:'www.jefferyasare.com',
-            order_ref:orderRef||'',
-            price:meta&&meta.price?meta.price:'',
-            country:meta&&meta.country?meta.country:'',
-            qty:meta&&meta.qty?String(meta.qty):'',
-            next_steps:meta&&meta.next_steps?meta.next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-          },data);
-          // Build a hidden form — sendForm supports file attachments unlike send()
-          var form=document.createElement('form');
-          form.style.display='none';
-          Object.keys(allParams).forEach(function(key){
-            var inp=document.createElement('input');
-            inp.type='hidden';
-            inp.name=key;
-            inp.value=String(allParams[key]||'');
-            form.appendChild(inp);
-          });
-          // Attach the PDF using DataTransfer
-          try{
-            var dt=new DataTransfer();
-            dt.items.add(pdfFile);
-            var fileInp=document.createElement('input');
-            fileInp.type='file';
-            fileInp.name='files[]';
-            fileInp.files=dt.files;
-            form.appendChild(fileInp);
-          }catch(e){ console.warn('File attach skipped:',e); }
-          document.body.appendChild(form);
-          sends.push(
-            emailjs.sendForm('service_50jojio','template_hnd30nb',form).then(function(r){
-              form.remove(); return r;
-            }).catch(function(e){
-              form.remove(); throw e;
-            })
-          );
-        });
-      }
       // Alert Jeff via Formspree
       var titles=certDataArr.map(function(d){return d.print_title;}).join(', ');
       fetch(FORMSPREE_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -2314,19 +2282,13 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
           body:JSON.stringify({action:'Update Buyer',buyer_name:buyerName,order_ref:orderRef})
         }).catch(function(){});
       }
-      Promise.all(sends).then(function(){
-        printBtn.textContent='✓ Certificate downloaded';
-        printBtn.style.background='#2d6a4f';
-        if(hint){
-          hint.textContent='Your Certificate of Authenticity has been saved to your device'+(buyerEmail?' and a confirmation sent to '+buyerEmail:'')+'. You can now close this window.';
-          hint.style.display='block';
-        }
-      }).catch(function(){
-        // PDF was downloaded even if email failed
-        printBtn.textContent='✓ Certificate downloaded';
-        printBtn.style.background='#2d6a4f';
-        if(hint){hint.textContent='Your Certificate has been saved to your device.';hint.style.display='block';}
-      });
+      // Thank-you email was already sent automatically on payment — just update UI
+      printBtn.textContent='✓ Certificate downloaded';
+      printBtn.style.background='#2d6a4f';
+      if(hint){
+        hint.textContent='Your Certificate of Authenticity has been saved to your device. You can now close this window.';
+        hint.style.display='block';
+      }
     }).catch(function(err){
       // Restore UI on capture failure
       if(closeBtn2) closeBtn2.style.visibility='';

@@ -532,7 +532,7 @@ function stepDeadline(o, stepKey){
   if(stepKey==='delivered' && !o.delivered && o.shipDate){
     return 'Est. '+fmtDateShort(addDays(o.shipDate,10));
   }
-  if(stepKey==='followup' && !o.followedUp){
+  if((stepKey==='followup') && !o.followedUp){
     var base = o.deliveredDate||o.shipDate;
     if(base){ var d3=daysUntil(addDays(base,7)); return d3<0?'Overdue':('By '+fmtDateShort(addDays(base,7))); }
   }
@@ -947,22 +947,25 @@ function renderOrders(){
     var s = getStatus(o);
 
     // ── 5-step visual journey track ──────────────────────────────
+    // Map s.next → step key so the correct dot is highlighted
+    var nextToKey = { coa:'coa', ship:'shipped', deliver:'delivered', followup:'followup' };
+    var activeKey = nextToKey[s.next] || null;
+
     var steps = [
-      { key:'ordered',   label:'Ordered',   done:true,        active:false,                        date: o.dateAdded },
-      { key:'coa',       label:'COA',       done:o.coaSent,   active:!o.coaSent,                   date: o.coaDate },
-      { key:'shipped',   label:'Shipped',   done:o.shipped,   active:o.coaSent&&!o.shipped,        date: o.shipDate },
-      { key:'delivered', label:'Delivered', done:o.delivered, active:o.shipped&&!o.delivered,      date: o.deliveredDate },
-      { key:'follow-up', label:'Follow-up', done:o.followedUp,active:o.delivered&&!o.followedUp,  date: o.followDate }
+      { key:'ordered',   label:'Ordered',   done:true,         date: o.dateAdded },
+      { key:'coa',       label:'COA',        done:o.coaSent,   date: o.coaDate },
+      { key:'shipped',   label:'Shipped',    done:o.shipped,   date: o.shipDate },
+      { key:'delivered', label:'Delivered',  done:o.delivered, date: o.deliveredDate },
+      { key:'followup',  label:'Follow-up',  done:o.followedUp,date: o.followDate }
     ];
-    // Determine which active step is overdue
-    var overdueStage = s.urgency===0 ? s.stage : null;
 
     var jHtml = '<div class="jtrack">' + steps.map(function(step){
-      var cls = step.done ? 'jdone'
-              : (overdueStage && overdueStage===step.key) ? 'joverdue'
-              : step.active ? 'jactive' : '';
+      var isActive = !step.done && step.key === activeKey;
+      var cls = step.done  ? 'jdone'
+              : (isActive && s.urgency===0) ? 'joverdue'
+              : isActive   ? 'jactive' : '';
       var dateLabel = step.done && step.date ? fmtDateShort(step.date)
-                    : step.active            ? stepDeadline(o, step.key)
+                    : isActive               ? stepDeadline(o, step.key)
                     : '—';
       return '<div class="jstep '+cls+'">'
         +'<div class="jdot"></div>'
@@ -970,6 +973,11 @@ function renderOrders(){
         +'<div class="jdate">'+dateLabel+'</div>'
         +'</div>';
     }).join('') + '</div>';
+
+    // ── "New today" badge ─────────────────────────────────────────
+    var today = new Date().toISOString().slice(0,10);
+    var isToday = o.dateAdded && o.dateAdded.slice(0,10) === today;
+    var newBadge = isToday ? '<span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#fff;padding:2px 7px;margin-left:8px;vertical-align:middle;">NEW</span>' : '';
 
     // ── Status chip ───────────────────────────────────────────────
     var chip = '<span class="deadline-chip '+s.chip+'">'+escH(s.label)+'</span>';
@@ -999,7 +1007,7 @@ function renderOrders(){
       +'<div class="card-main">'
         +'<div class="card-row1">'
           +'<div>'
-            +'<div class="card-buyer">'+escH(o.buyerName)+'</div>'
+            +'<div class="card-buyer">'+escH(o.buyerName)+newBadge+'</div>'
             +'<div class="card-print">'+escH(o.printTitle)
               +(o.size?' &middot; '+escH(o.size):'')
               +(o.country?' &middot; '+escH(o.country):'')
@@ -1263,44 +1271,27 @@ function confirmCOASend(id){
             pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,imgH);
             var safeName=(o.buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
 
-            if(st) st.textContent='Sending email…';
+            // PDF downloaded to Jeff's machine
+            pdf.save('COA-'+safeName+'.pdf');
+            if(st) st.textContent='Sending email to buyer…';
 
-            var pdfBlob=pdf.output('blob');
-            var pdfFile=new File([pdfBlob],'Certificate-of-Authenticity-'+safeName+'.pdf',{type:'application/pdf'});
-            var allParams={
+            // Send thank-you email via emailjs.send() — reliable, no attachment needed
+            emailjs.send('service_50jojio','template_hnd30nb',{
               to_email:o.buyerEmail, to_name:o.buyerName,
               reply_to:'hello@jefferyasare.com', site_url:SITE_URL,
               order_ref:o.orderRef||'', print_title:o.printTitle,
-              print_size:o.size||'', qty:o.qty||'1', price:o.price||''
-            };
-            var form=document.createElement('form');
-            form.style.display='none';
-            Object.keys(allParams).forEach(function(key){
-              var inp=document.createElement('input');
-              inp.type='hidden'; inp.name=key; inp.value=String(allParams[key]||'');
-              form.appendChild(inp);
-            });
-            try{
-              var dt=new DataTransfer(); dt.items.add(pdfFile);
-              var fileInp=document.createElement('input');
-              fileInp.type='file'; fileInp.name='files[]'; fileInp.files=dt.files;
-              form.appendChild(fileInp);
-            }catch(e){ console.warn('File attach skipped:',e); }
-            document.body.appendChild(form);
-
-            emailjs.sendForm('service_50jojio','template_hnd30nb',form)
-              .then(function(){
-                form.remove();
+              print_size:o.size||'', qty:o.qty||'1', price:o.price||'',
+              next_steps:'Your Certificate of Authenticity has been issued. Your print is being prepared and we will send tracking details once it ships.'
+            }).then(function(){
                 var today=new Date().toISOString().slice(0,10);
                 updateOrder(id,{coaSent:true,coaDate:today});
                 logToSheet({action:'COA Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
-                if(st){ st.className='inline-status ok'; st.textContent='Certificate sent to '+escH(o.buyerEmail)+' ✓'; }
-                renderOrders();
+                if(st){ st.className='inline-status ok'; st.textContent='Email sent to '+escH(o.buyerEmail)+' ✓ · PDF saved to your device'; }
+                setTimeout(function(){ renderOrders(); }, 1500);
               })
               .catch(function(err){
-                form.remove();
                 if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
-                if(st){ st.className='inline-status err'; st.textContent='Email failed — try again.'; }
+                if(st){ st.className='inline-status err'; st.textContent='Email failed — try again. PDF was saved to your device.'; }
                 console.error('COA email error:',err);
               });
           })
