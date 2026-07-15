@@ -191,27 +191,27 @@
     .status-msg.ok{color:var(--green);}
     .status-msg.err{color:var(--red);}
 
-    /* ── Hidden COA PDF capture surface ── */
-    #dash-coa-capture{position:fixed;top:-9999px;left:0;width:680px;z-index:-1;background:#fff;pointer-events:none;}
-    #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;}
-    .dcert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
-    .dcert-brand{font-size:13px;font-weight:600;letter-spacing:-.01em;color:#111;}
-    .dcert-ref{font-size:10px;color:#bbb;letter-spacing:.08em;text-transform:uppercase;}
-    .dcert-title{font-size:2.8rem;font-weight:700;line-height:1.08;letter-spacing:-.04em;margin-bottom:1rem;color:#111;}
-    .dcert-sub{font-size:12px;color:#888;margin-bottom:2rem;line-height:1.6;}
-    .dcert-img-wrap{width:100%;aspect-ratio:4/3;overflow:hidden;margin-bottom:1.2rem;background:#f5f2ee;}
-    .dcert-img-wrap img{width:100%;height:100%;object-fit:cover;}
-    .dcert-section-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin-bottom:.8rem;}
-    .dcert-row{display:flex;gap:.5rem;padding:.45rem 0;border-bottom:1px solid #f0ece8;font-size:12px;}
-    .dcert-key{color:#aaa;width:90px;flex-shrink:0;}
-    .dcert-val{color:#111;font-weight:500;}
-    .dcert-qr-row{display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;}
-    .dcert-disclaimer{font-size:10px;color:#aaa;line-height:1.7;margin-top:1.5rem;}
-    .dcert-sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;}
-    .dcert-sig-block{padding-top:.8rem;border-top:1px solid #111;}
-    .dcert-sig-label{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin-top:.4rem;}
-    .dcert-sig-val{font-size:13px;font-weight:600;color:#111;min-height:1.5rem;font-style:italic;}
-    .dcert-footer{font-size:10px;color:#aaa;line-height:1.7;margin-top:1.5rem;}
+    /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
+    #dash-coa-capture{position:fixed;top:-9999px;left:0;width:640px;z-index:-1;background:#fff;pointer-events:none;overflow:hidden;}
+    #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;background:#fff;}
+    #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
+    #dash-coa-content .cert-brand{font-size:13px;font-weight:600;letter-spacing:-.01em;color:#111;}
+    #dash-coa-content .cert-ref{font-size:11px;color:#888;letter-spacing:.06em;}
+    #dash-coa-content .cert-title{font-size:2.4rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.3rem;line-height:1.05;color:#111;}
+    #dash-coa-content .cert-subtitle{font-size:12px;color:#888;margin-bottom:1.8rem;}
+    /* Centred artwork image — full-width, centred block */
+    #dash-coa-content .cert-img-wrap{width:72%;margin:0 auto 1.8rem;aspect-ratio:4/3;background:#f5f2ee;overflow:hidden;position:relative;display:block;}
+    #dash-coa-content .cert-img{width:100%;height:100%;object-fit:cover;display:block;}
+    #dash-coa-content .cert-section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.7rem;}
+    #dash-coa-content .cert-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #e8e4df;font-size:12px;}
+    #dash-coa-content .cert-key{color:#888;}
+    #dash-coa-content .cert-val{font-weight:500;color:#111;}
+    #dash-coa-content .cert-sig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-top:2rem;}
+    #dash-coa-content .cert-sig-block{display:flex;flex-direction:column;gap:.4rem;}
+    #dash-coa-content .cert-sig-img{height:90px;display:flex;align-items:flex-end;}
+    #dash-coa-content .cert-sig-img img{max-height:80px;max-width:220px;object-fit:contain;display:block;}
+    #dash-coa-content .cert-sig-autoval{font-size:13px;color:#111;padding-bottom:.3rem;min-height:44px;display:flex;align-items:flex-end;border-bottom:1px solid #111;}
+    #dash-coa-content .cert-sig-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-top:.3rem;}
 
     /* ── Workflow ── */
     .wf-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--rule);}
@@ -1217,7 +1217,7 @@ function confirmCOASend(id){
 
       if(imgSrc&&!imgSrc.startsWith('http')) imgSrc = 'https://jefferyasare.com'+(imgSrc.startsWith('/')?'':'/')+imgSrc;
       var imgHtml = imgSrc
-        ? '<img src="'+imgSrc+'" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">'
+        ? '<img class="cert-img" src="'+imgSrc+'" alt="'+escH(o.printTitle||'')+'">'
         : '<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">'+escH(o.printTitle||'')+'</div>';
 
       var rows = [
@@ -1230,39 +1230,53 @@ function confirmCOASend(id){
         ['Artist',  'Jeffery Asare'],
         ['Country', 'Ghana']
       ].map(function(r){
-        return '<div class="dcert-row"><span class="dcert-key">'+r[0]+'</span><span class="dcert-val">'+r[1]+'</span></div>';
+        return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
       }).join('');
 
-      var html = '<div class="dcert-header">'
-        +'<span class="dcert-brand">Jeffery Asare</span>'
-        +'<span class="dcert-ref">'+coaRefNum+'</span>'
+      var sigHtml = '<img src="https://jefferyasare.com/signature.png" alt="Jeffery Asare"'
+        +' onerror="this.parentElement.innerHTML=\'<div style=&quot;font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;&quot;>Jeffery Asare<\\/div>\'">';
+
+      var html = '<div class="cert-header">'
+        +'<span class="cert-brand">Jeffery Asare</span>'
+        +'<span class="cert-ref">'+coaRefNum+'</span>'
         +'</div>'
-        +'<h1 class="dcert-title">Certificate<br>of Authenticity</h1>'
-        +'<p class="dcert-sub">This document certifies the authenticity of a limited edition fine art print.</p>'
-        +'<div class="dcert-img-wrap">'+imgHtml+'</div>'
-        +'<div class="dcert-section-label">Print Details</div>'
+        +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
+        +'<p class="cert-subtitle">This document certifies the authenticity of a limited edition fine art print.</p>'
+        +'<div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div>'
+        +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
         +rows
-        +'<div class="dcert-qr-row">'
-          +'<img src="'+qrUrl+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;" crossorigin="anonymous">'
+        +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
+          +'<img src="'+qrUrl+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;">'
           +'<div><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.3rem;">Verify Online</div>'
           +'<div style="font-size:11px;color:#666;line-height:1.55;">Scan to view this print on the official Jeffery Asare website.</div>'
           +'<div style="font-size:10px;color:#bbb;margin-top:.2rem;">'+printUrl+'</div></div>'
         +'</div>'
-        +'<p class="dcert-disclaimer">This certificate is issued subject to the Terms of Sale at jefferyasare.com · Purchase does not transfer copyright or reproduction rights.</p>'
-        +'<div class="dcert-sig-grid">'
-          +'<div class="dcert-sig-block"><div class="dcert-sig-val" style="padding-bottom:.3rem;border-bottom:1px solid #111;"><img src="https://jefferyasare.com/signature.png" style="max-height:36px;max-width:100px;" crossorigin="anonymous" onerror="this.outerHTML=\'Jeffery Asare\'"></div><div class="dcert-sig-label">Signature of Artist</div></div>'
-          +'<div class="dcert-sig-block"><div class="dcert-sig-val">'+dateStr+'</div><div class="dcert-sig-label">Date</div></div>'
-          +'<div class="dcert-sig-block"><div class="dcert-sig-val">'+escH(o.buyerName||'')+'</div><div class="dcert-sig-label">Buyer Name</div></div>'
+        +'<p style="margin-top:1.5rem;font-size:10px;color:#aaa;line-height:1.7;">This certificate is issued subject to the Terms of Sale at jefferyasare.com &middot; Purchase does not transfer copyright or reproduction rights.</p>'
+        +'<div class="cert-sig-grid">'
+          +'<div class="cert-sig-block"><div class="cert-sig-img">'+sigHtml+'</div><div class="cert-sig-label">Signature of Artist</div></div>'
+          +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+dateStr+'</div><div class="cert-sig-label">Date</div></div>'
+          +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+escH(o.buyerName||'')+'</div><div class="cert-sig-label">Buyer Name</div></div>'
         +'</div>'
-        +'<p class="dcert-footer">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>';
+        +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>';
 
       var content = document.getElementById('dash-coa-content');
       if(!content){ if(st){ st.className='inline-status err'; st.textContent='Error: capture surface missing.'; } return; }
       content.innerHTML = html;
 
-      // Wait for images to load before capturing
-      setTimeout(function(){
-        html2canvas(content,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false})
+      // Wait for every <img> in the content to finish loading before capturing
+      var imgs = content.querySelectorAll('img');
+      var imgPromises = Array.prototype.map.call(imgs, function(img){
+        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(function(resolve){
+          img.onload = resolve;
+          img.onerror = resolve; // Don't block if an image fails — just render without it
+          setTimeout(resolve, 4000); // Hard cap per image
+        });
+      });
+
+      Promise.all(imgPromises).then(function(){
+        return html2canvas(content,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false});
+      })
           .then(function(canvas){
             var jsPDF = window.jspdf.jsPDF;
             var pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -1300,7 +1314,6 @@ function confirmCOASend(id){
             if(st){ st.className='inline-status err'; st.textContent='PDF generation failed — try again.'; }
             console.error('html2canvas error:',err);
           });
-      }, 800);
     });
 }
 
