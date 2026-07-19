@@ -1594,7 +1594,7 @@ function openPrintDetail(print){
   if(pdDesc)   pdDesc.textContent=print.desc;
   if(pdImgWrap) pdImgWrap.innerHTML=print.img?'<img class="print-detail-img" src="'+print.img+'" alt="'+print.title+'">':"<div class=\"print-detail-img-ph\"></div>";
   if(pdSpecs){
-    var specRows=[["Paper",print.paper],["Edition",print.edition+(print.remaining!==null&&!print.soldOut?' ('+print.remaining+' remaining)':'')],["Finish","Archival, signed and numbered"],["Certificate","Included"]];
+    var specRows=[["Edition",print.edition+(print.remaining!==null&&!print.soldOut?' ('+print.remaining+' remaining)':'')],["Finish","Archival, signed and numbered"],["Certificate","Included"]];
     pdSpecs.innerHTML=specRows.map(function(r){
       return "<div class=\"print-detail-spec-row\"><span class=\"print-detail-spec-key\">"+r[0]+"</span><span class=\"print-detail-spec-val\">"+r[1]+"</span></div>";
     }).join("");
@@ -2133,7 +2133,6 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
       ["Title",p.title+qtyStr],
       ["Series",p.series],
       ["Size",sizeStr],
-      ["Paper",p.paper],
       ["Edition",p.edition],
       ["Print No.",printNum+" of "+edTotal],
       ["Artist","Jeffery Asare"],

@@ -341,10 +341,7 @@
       <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
       <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
     </div>
-    <div class="grid2">
-      <div><label>Paper <span class="opt">(optional)</span></label><input id="coa-paper" type="text" placeholder="e.g. Hahnemühle"></div>
-      <div><label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20"></div>
-    </div>
+    <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
     <div class="grid2">
       <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
       <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
@@ -1133,7 +1130,6 @@ function fillFromClient(prefix, orderId){
         });
         if(!match) return;
         if(match.series)  setV('coa-series',  match.series);
-        if(match.paper)   setV('coa-paper',   match.paper);
         if(match.edition) setV('coa-edition', match.edition);
         if(match.img)     setV('coa-img',     match.img);
       });
@@ -1236,13 +1232,12 @@ function confirmCOASend(id){
       var dateStr = months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
       var coaRefNum = 'COA-'+String(Math.floor(1000+Math.random()*9000))+' · '+now.getFullYear();
       var series  = (match&&match.series)||'';
-      var paper   = (match&&match.paper)||'';
       var edition = (match&&match.edition)||'20';
       var imgSrc  = (match&&match.img)||'';
+      var printId = (match&&match.id)||'';
       var edTotal = parseInt((edition||'').replace(/\D/g,''))||20;
       var printNum = Math.floor(1+Math.random()*edTotal);
-      var slug = (o.printTitle||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-      var printUrl = 'https://jefferyasare.com/?print='+slug;
+      var printUrl = printId ? 'https://jefferyasare.com/?print='+printId : 'https://jefferyasare.com';
       var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
 
       if(imgSrc&&!imgSrc.startsWith('http')) imgSrc = 'https://jefferyasare.com'+(imgSrc.startsWith('/')?'':'/')+imgSrc;
@@ -1252,7 +1247,6 @@ function confirmCOASend(id){
         ['Title',   o.printTitle||'—'],
         ['Series',  series||'—'],
         ['Size',    o.size||'—'],
-        ['Paper',   paper||'—'],
         ['Edition', edition||'—'],
         ['Print No.',printNum+' of '+edTotal],
         ['Artist',  'Jeffery Asare'],
@@ -1457,11 +1451,11 @@ document.getElementById('coa-send').addEventListener('click', function(){
   sendEmail('template_hnd30nb',{
     to_email:v('coa-email'), to_name:v('coa-name'), print_title:v('coa-title'),
     print_series:v('coa-series')||'', print_size:v('coa-size')||'',
-    print_paper:v('coa-paper')||'', print_edition:edStr, print_num:pNum,
+    print_paper:'', print_edition:edStr, print_num:pNum,
     print_img:v('coa-img')||'', coa_ref:coaRef(), date:todayStr(),
     qr_url:qrUrl, print_url:pUrl,
     signature_url:'https://jefferyasare.com/signature.png', site_url:SITE_URL
-  },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-paper','coa-edition','coa-printnum','coa-img']);
+  },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-edition','coa-printnum','coa-img']);
   logToSheet({action:'COA Sent',buyer_name:v('coa-name'),buyer_email:v('coa-email'),print_title:v('coa-title'),size:v('coa-size'),country:'',notes:edStr,order_ref:''});
 });
 
