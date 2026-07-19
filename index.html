@@ -597,6 +597,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Cloudflare Web Analytics — no cookies, no personal data, GDPR-friendly -->
+<!-- TOKEN: get yours from Cloudflare dashboard → Analytics → Web Analytics → add site -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "REPLACE_WITH_YOUR_CF_ANALYTICS_TOKEN"}'></script>
 </head>
 <body>
 
@@ -881,6 +884,31 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 </div>
 
 
+<!-- PRIVACY POLICY PAGE -->
+<div id="page-privacy" class="page">
+  <div class="inner-nav">
+    <span class="nav-logo" id="privLogoBtn">Jeffery Asare</span>
+    <ul class="nav-links"><li><a id="privPortBtn">Portfolio</a></li><li><a id="privAboutBtn">About</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privContactBtn">Contact</a></li></ul>
+    <button class="ham-btn" id="privHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <div class="terms-wrap">
+    <button class="detail-back" id="privBackBtn" style="padding-left:0;">&#8592; Back</button>
+    <h1 style="font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin:1.5rem 0 .3rem;">Privacy Policy</h1>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: July 2026</p>
+    <div class="terms-section"><h2>1. Who We Are</h2><p>This website is operated by Jeffery Asare, a fine art photographer based in Accra, Ghana. Contact: <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>.</p></div>
+    <div class="terms-section"><h2>2. Information We Collect</h2><p>When you purchase a print, we collect your name, email address, and delivery country to fulfil your order and send your Certificate of Authenticity. When you sign up for the newsletter, we collect only your email address. When you submit a contact or commission enquiry, we collect the details you provide in the form.</p></div>
+    <div class="terms-section"><h2>3. How We Use Your Information</h2><p>Your information is used solely to fulfil your order, send your Certificate of Authenticity, respond to your enquiry, and — if you signed up — send occasional updates about new work and print drops. We do not use your data for advertising or sell it to third parties.</p></div>
+    <div class="terms-section"><h2>4. Payment Processing</h2><p>Payments are processed securely by Paystack. We do not store or have access to your card details. Paystack's privacy policy applies to all payment transactions.</p></div>
+    <div class="terms-section"><h2>5. Email Communications</h2><p>Order confirmation and Certificate of Authenticity emails are sent via Brevo. Newsletter emails are sent via Brevo. You can unsubscribe from newsletter emails at any time by replying to any email with "unsubscribe" in the subject line, or by contacting us directly.</p></div>
+    <div class="terms-section"><h2>6. Data Retention</h2><p>Order records are kept for the period required by Ghanaian tax and commercial law. Newsletter subscriber emails are retained until you unsubscribe. We delete your data on request where retention is not legally required.</p></div>
+    <div class="terms-section"><h2>7. Your Rights</h2><p>You have the right to request access to, correction of, or deletion of your personal data at any time. To exercise any of these rights, contact <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>.</p></div>
+    <div class="terms-section"><h2>8. Cookies and Analytics</h2><p>This site uses Cloudflare Web Analytics, a privacy-preserving analytics tool that does not use cookies, does not track individuals across sites, and does not collect personal data. No consent banner is required.</p></div>
+    <div class="terms-section"><h2>9. Governing Law</h2><p>This policy is governed by the laws of the Republic of Ghana. For users in the European Union, we are committed to compliance with the GDPR.</p></div>
+  </div>
+  <div id="privacy-mini-footer"></div>
+</div>
+
+
 <!-- PRINT DETAIL PAGE -->
 <div id="page-print-detail" class="page">
   <div class="inner-nav">
@@ -919,11 +947,11 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <div class="footer-grid">
       <div><div class="footer-brand-name">Jeffery Asare</div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
       <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
-      <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li></ul></div>
+      <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
       <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a></span>
+      <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a> &nbsp;&middot;&nbsp; <a data-nav="privacy">Privacy Policy</a></span>
       <span class="footer-loc">Accra, Ghana</span>
     </div>
   </footer>
@@ -1092,7 +1120,7 @@ var PRINTS = [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
-var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms'};
+var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy'};
 
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
@@ -1129,6 +1157,7 @@ bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn"
 bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","about");bind("shopContactBtn","contact");
 bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");
 bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
+bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");bind("privBackBtn","home");
 bind("pdLogoBtn","home");bind("pdPortBtn","portfolio");bind("pdAboutBtn","about");bind("pdShopBtn","shop");bind("pdContactBtn","contact");bind("pdBackBtn","shop");
 
 // ============================================================
@@ -1144,22 +1173,24 @@ function injectFooters(){
       a.addEventListener("click",function(){ navigate(a.getAttribute("data-nav")); });
     });
   }
-  ["port","detail","shop","contact","terms","pd"].forEach(function(id){
+  ["port","detail","shop","contact","terms","privacy","pd"].forEach(function(id){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
     f.className="mini-footer";
-    var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id;
+    var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id;
     f.innerHTML="<span class=\"mini-footer-copy\">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005.</span>"
       +"<ul class=\"mini-footer-links\">"
       +"<li><a id=\""+igId+"\" href=\"https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh\" target=\"_blank\">Instagram</a></li>"
       +(id!=="contact" ? "<li><a id=\""+cId+"\">Contact</a></li>" : "")
       +"<li><a id=\""+tId+"\">Terms of Sale</a></li>"
+      +"<li><a id=\""+prId+"\">Privacy</a></li>"
       +"</ul>";
     el.appendChild(f);
-    var ce=document.getElementById(cId), te=document.getElementById(tId);
+    var ce=document.getElementById(cId), te=document.getElementById(tId), pre=document.getElementById(prId);
     if(ce) ce.addEventListener("click",function(){ navigate("contact"); });
     if(te) te.addEventListener("click",function(){ navigate("terms"); });
+    if(pre) pre.addEventListener("click",function(){ navigate("privacy"); });
   });
 }
 
@@ -1564,17 +1595,40 @@ Object.keys(MM_NAV).forEach(function(id){
 })();
 
 // ============================================================
-// NEWSLETTER  -  replaced with mailto fallback
+// NEWSLETTER — sends welcome email via Brevo, shows inline confirmation
 // ============================================================
 document.querySelectorAll(".newsletter-btn").forEach(function(btn){
   btn.addEventListener("click",function(){
     var inp=btn.previousElementSibling;
     var email=inp?inp.value.trim():"";
-    if(email && email.indexOf("@")>0){
-      window.location.href="mailto:hello@jefferyasare.com?subject=Newsletter%20Signup&body=Please%20add%20me%20to%20your%20mailing%20list.%0A%0AEmail%3A%20"+encodeURIComponent(email);
-    } else {
-      window.location.href="mailto:hello@jefferyasare.com?subject=Newsletter%20Signup&body=Please%20add%20me%20to%20your%20mailing%20list.";
+    if(!email||email.indexOf("@")<1){
+      inp.style.borderColor="#e00";
+      inp.focus();
+      return;
     }
+    btn.textContent="Sending…";
+    btn.disabled=true;
+    inp.style.borderColor="";
+    fetch("/api/newsletter-signup",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:email})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data.ok){
+        inp.style.display="none";
+        btn.textContent="You're on the list ✓";
+        btn.style.background="transparent";
+        btn.style.color="rgba(255,255,255,.7)";
+        btn.style.cursor="default";
+      } else {
+        btn.textContent="Subscribe";
+        btn.disabled=false;
+        inp.style.borderColor="#e00";
+      }
+    }).catch(function(){
+      btn.textContent="Subscribe";
+      btn.disabled=false;
+    });
   });
 });
 
@@ -1582,7 +1636,7 @@ document.querySelectorAll(".newsletter-btn").forEach(function(btn){
 // ===========================================================
 // PAGE TITLES
 // ===========================================================
-var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
+var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================

@@ -4,16 +4,32 @@
 // Required env var (set in Cloudflare Pages → Settings → Environment variables):
 //   BREVO_API_KEY  — get from Brevo dashboard → SMTP & API → API Keys
 
+const ALLOWED_ORIGINS = ['https://jefferyasare.com', 'https://www.jefferyasare.com'];
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
+  // Block requests not originating from the site
+  const origin = request.headers.get('Origin') || '';
+  const referer = request.headers.get('Referer') || '';
+  const allowed = ALLOWED_ORIGINS.some(o => origin === o || referer.startsWith(o));
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+  }
+
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': origin || 'https://jefferyasare.com',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Cache-Control': 'no-store'
   };
   const jsonHeaders = Object.assign({ 'Content-Type': 'application/json' }, corsHeaders);
+
+  // Basic size guard — PDF base64 shouldn't exceed ~8 MB
+  const contentLength = parseInt(request.headers.get('Content-Length') || '0');
+  if (contentLength > 8 * 1024 * 1024) {
+    return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413, headers: jsonHeaders });
+  }
 
   // Parse request body
   let body;
