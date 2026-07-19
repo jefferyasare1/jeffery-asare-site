@@ -1440,23 +1440,150 @@ document.getElementById('sh-send').addEventListener('click', function(){
   logToSheet({action:'Shipped',buyer_name:v('sh-name'),buyer_email:v('sh-email'),print_title:v('sh-title'),notes:'Tracking: '+v('sh-tracking'),order_ref:''});
 });
 
-// COA
+// COA — generates PDF via html2canvas + jsPDF, sends via Brevo (same flow as order cards)
 document.getElementById('coa-send').addEventListener('click', function(){
   if(!requireFields(['coa-email','coa-name','coa-title','coa-edition'],'coa-status')) return;
-  var edStr = v('coa-edition');
-  var pNum  = v('coa-printnum') || randPrintNum(edStr);
-  var slug  = v('coa-title').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-  var pUrl  = 'https://jefferyasare.com/?print=' + slug;
-  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent(pUrl) + '&color=111111&bgcolor=FFFFFF&margin=3';
-  sendEmail('template_hnd30nb',{
-    to_email:v('coa-email'), to_name:v('coa-name'), print_title:v('coa-title'),
-    print_series:v('coa-series')||'', print_size:v('coa-size')||'',
-    print_paper:'', print_edition:edStr, print_num:pNum,
-    print_img:v('coa-img')||'', coa_ref:coaRef(), date:todayStr(),
-    qr_url:qrUrl, print_url:pUrl,
-    signature_url:'https://jefferyasare.com/signature.png', site_url:SITE_URL
-  },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-edition','coa-printnum','coa-img']);
-  logToSheet({action:'COA Sent',buyer_name:v('coa-name'),buyer_email:v('coa-email'),print_title:v('coa-title'),size:v('coa-size'),country:'',notes:edStr,order_ref:''});
+  var sendBtn = document.getElementById('coa-send');
+  var st      = document.getElementById('coa-status');
+  sendBtn.disabled = true;
+  if(st){ st.className='status-msg'; st.textContent='Generating certificate…'; }
+
+  var toEmail = v('coa-email');
+  var toName  = v('coa-name');
+  var title   = v('coa-title');
+  var series  = v('coa-series');
+  var size    = v('coa-size');
+  var edStr   = v('coa-edition');
+  var imgUrl  = v('coa-img') || '';
+  var pNum    = v('coa-printnum') || randPrintNum(edStr);
+
+  var now = new Date();
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dateStr   = months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  var coaRefNum = 'COA-'+String(Math.floor(1000+Math.random()*9000))+' · '+now.getFullYear();
+
+  // Look up print ID from prints.json for accurate QR URL
+  fetch('/_data/prints.json')
+    .then(function(r){ return r.ok?r.json():null; })
+    .catch(function(){ return null; })
+    .then(function(d){
+      var match = null;
+      if(d&&Array.isArray(d.prints)){
+        match = d.prints.find(function(p){
+          return p.title&&title&&p.title.toLowerCase()===title.toLowerCase();
+        });
+      }
+      var printId = (match&&match.id)||null;
+      var pUrl    = printId ? 'https://jefferyasare.com/?print='+printId : 'https://jefferyasare.com';
+      var imgSrc  = imgUrl || (match&&match.img ? ('https://jefferyasare.com'+(match.img.startsWith('/')?'':'/')+match.img) : '');
+      var qrUrl   = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(pUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
+
+      var rows = [
+        ['Title',     title||'—'],
+        ['Series',    series||'—'],
+        ['Size',      size||'—'],
+        ['Edition',   edStr||'—'],
+        ['Print No.', pNum||'—'],
+        ['Artist',    'Jeffery Asare'],
+        ['Country',   'Ghana']
+      ].map(function(r){
+        return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
+      }).join('');
+
+      Promise.all([
+        toDataURL(imgSrc),
+        toDataURL('https://jefferyasare.com/signature.png'),
+        toDataURL(qrUrl)
+      ]).then(function(dURLs){
+        var artDataURL = dURLs[0];
+        var sigDataURL = dURLs[1];
+        var qrDataURL  = dURLs[2];
+
+        var imgHtml = artDataURL
+          ? '<img class="cert-img" src="'+artDataURL+'" alt="'+escH(title||'')+'">'
+          : '<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">'+escH(title||'No image')+'</div>';
+
+        var sigHtml = sigDataURL
+          ? '<img src="'+sigDataURL+'" alt="Jeffery Asare" style="max-height:80px;max-width:220px;object-fit:contain;display:block;">'
+          : '<div style="font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
+
+        var html = '<div class="cert-header">'
+          +'<span class="cert-brand">Jeffery Asare</span>'
+          +'<span class="cert-ref">'+coaRefNum+'</span>'
+          +'</div>'
+          +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
+          +'<p class="cert-subtitle">This document certifies the authenticity of a limited edition fine art print.</p>'
+          +'<div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div>'
+          +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
+          +rows
+          +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
+            +'<img src="'+(qrDataURL||qrUrl)+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;">'
+            +'<div><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.3rem;">Verify Online</div>'
+            +'<div style="font-size:11px;color:#666;line-height:1.55;">Scan to view this print on the official Jeffery Asare website.</div>'
+            +'<div style="font-size:10px;color:#bbb;margin-top:.2rem;">'+pUrl+'</div></div>'
+          +'</div>'
+          +'<p style="margin-top:1.5rem;font-size:10px;color:#aaa;line-height:1.7;">This certificate is issued subject to the Terms of Sale at jefferyasare.com &middot; Purchase does not transfer copyright or reproduction rights.</p>'
+          +'<div class="cert-sig-grid">'
+            +'<div class="cert-sig-block"><div class="cert-sig-img">'+sigHtml+'</div><div class="cert-sig-label">Signature of Artist</div></div>'
+            +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+dateStr+'</div><div class="cert-sig-label">Date</div></div>'
+            +'<div class="cert-sig-block"><div class="cert-sig-autoval">'+escH(toName)+'</div><div class="cert-sig-label">Buyer Name</div></div>'
+          +'</div>'
+          +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>';
+
+        var content = document.getElementById('dash-coa-content');
+        if(!content){
+          if(st){ st.className='status-msg err'; st.textContent='Error: capture surface missing.'; }
+          sendBtn.disabled=false; return;
+        }
+        content.innerHTML = html;
+
+        document.fonts.ready.then(function(){
+          setTimeout(function(){
+            html2canvas(content,{scale:2,useCORS:false,allowTaint:false,backgroundColor:'#ffffff',logging:false})
+              .then(function(canvas){
+                var jsPDF = window.jspdf.jsPDF;
+                var pdf   = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+                var margin=12, usableW=210-margin*2;
+                var ratio=usableW/canvas.width, imgH=canvas.height*ratio;
+                pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,imgH);
+                var safeName = toName.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
+                pdf.save('COA-'+safeName+'.pdf');
+                if(st) st.textContent='Sending COA to buyer…';
+                var pdfBase64 = pdf.output('datauristring').split(',')[1];
+                fetch('/api/send-coa',{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json'},
+                  body:JSON.stringify({
+                    to_email:toEmail, to_name:toName,
+                    print_title:title, size:size||'',
+                    order_ref:'', pdf_base64:pdfBase64
+                  })
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(result){
+                  if(result.ok){
+                    logToSheet({action:'COA Sent',buyer_name:toName,buyer_email:toEmail,print_title:title,size:size||'',country:'',notes:edStr,order_ref:''});
+                    if(st){ st.className='status-msg ok'; st.textContent='COA emailed to '+escH(toEmail)+' ✓ · PDF attached · saved to your device'; }
+                  } else {
+                    throw new Error(result.error||'Send failed');
+                  }
+                  sendBtn.disabled=false;
+                })
+                .catch(function(err){
+                  sendBtn.disabled=false;
+                  if(st){ st.className='status-msg err'; st.textContent='Email failed — PDF saved to your device. '+escH(String(err.message||err)); }
+                  console.error('COA email error:',err);
+                });
+              })
+              .catch(function(err){
+                sendBtn.disabled=false;
+                if(st){ st.className='status-msg err'; st.textContent='PDF generation failed — try again.'; }
+                console.error('html2canvas error:',err);
+              });
+          }, 150);
+        });
+      });
+    });
 });
 
 // FOLLOW-UP (standalone tab)

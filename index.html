@@ -920,7 +920,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <div><div class="footer-brand-name">Jeffery Asare</div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
       <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
       <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li></ul></div>
-      <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work, print drops, and studio notes.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
+      <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
     <div class="footer-bottom">
       <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a></span>
@@ -1034,7 +1034,7 @@ function PRH(id){
 }
 
 var PRINTS = [
-  PR("s1","PORTRAITS OF PLACE","Stillness in Jamestown","An intimate portrait from historic Jamestown. The baryta paper brings out the subtle highlights in the weathered wall texture. The most limited edition in the collection.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 15",[
+  PR("s1","PORTRAITS OF PLACE","Stillness in Jamestown","An intimate portrait from historic Jamestown. The most limited edition in the collection.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 15",[
     {label:"A3 (29.7 x 42 cm)",price:920},
     {label:"A2 (42 x 59.4 cm)",price:1200},
     {label:"A1 (59.4 x 84.1 cm)",price:1650}
@@ -2096,6 +2096,52 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
       }).catch(function(e){ console.error('Thank-you email failed:',e); });
       openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName,{price:paidStr,country:ctryName,qty:qty,next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'});
+      // ── Auto-send PDF COA to buyer via Brevo (runs in background) ──
+      (function(_email,_name,_ref,_title){
+        document.fonts.ready.then(function(){
+          setTimeout(function(){
+            var cm=document.getElementById('certModal');
+            if(!cm) return;
+            var closeB=document.getElementById('certModalCloseBtn');
+            var dlBtn=document.getElementById('certPrintBtn');
+            var hint=document.getElementById('certPrintHint');
+            var inp=document.getElementById('certBuyerName');
+            var buyerBlock=inp?inp.closest('.cert-sig-block'):null;
+            var tempName=null;
+            if(closeB) closeB.style.visibility='hidden';
+            if(dlBtn)  dlBtn.style.visibility='hidden';
+            if(hint)   hint.style.display='none';
+            if(inp&&buyerBlock){
+              tempName=document.createElement('div');
+              tempName.className='cert-sig-autoval';
+              tempName.textContent=_name;
+              buyerBlock.replaceChild(tempName,inp);
+            }
+            html2canvas(cm,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false}).then(function(canvas){
+              if(closeB) closeB.style.visibility='';
+              if(dlBtn)  dlBtn.style.visibility='';
+              if(hint)   hint.style.display='';
+              if(tempName&&inp&&buyerBlock) buyerBlock.replaceChild(inp,tempName);
+              try{
+                var jsPDF=window.jspdf.jsPDF;
+                var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+                var margin=12,usableW=210-margin*2;
+                pdf.addImage(canvas.toDataURL('image/jpeg',0.9),'JPEG',margin,margin,usableW,canvas.height*(usableW/canvas.width));
+                var b64=pdf.output('datauristring').split(',')[1];
+                fetch('/api/send-coa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+                  to_email:_email,to_name:_name,print_title:_title,size:selectedSize,order_ref:_ref||'',pdf_base64:b64
+                })}).catch(function(){});
+              }catch(e){ console.error('Auto COA error:',e); }
+            }).catch(function(err){
+              if(closeB) closeB.style.visibility='';
+              if(dlBtn)  dlBtn.style.visibility='';
+              if(hint)   hint.style.display='';
+              if(tempName&&inp&&buyerBlock) buyerBlock.replaceChild(inp,tempName);
+              console.error('Auto COA capture error:',err);
+            });
+          }, 2500);
+        });
+      })(email,displayName,response.reference,print.title);
     }
   });
   handler.openIframe();
