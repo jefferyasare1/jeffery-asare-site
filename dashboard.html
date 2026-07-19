@@ -196,6 +196,14 @@
     .status-msg.ok{color:var(--green);}
     .status-msg.err{color:var(--red);}
 
+    /* ── Custom modal (replaces browser alert) ── */
+    #dashModal{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.35);}
+    #dashModal.open{display:flex;}
+    #dashModalBox{background:#fff;max-width:420px;width:calc(100% - 48px);padding:36px 32px 28px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.14);position:relative;}
+    #dashModalMsg{font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:24px;}
+    #dashModalOk{background:var(--ink);color:#fff;border:none;padding:11px 36px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+    #dashModalOk:hover{opacity:.85;}
+
     /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
     #dash-coa-capture{position:absolute;top:-9999px;left:-9999px;width:640px;background:#fff;pointer-events:none;}
     #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;background:#fff;}
@@ -475,6 +483,14 @@
     </div>
     <button class="btn-primary" id="ao-save">Add to Dashboard</button>
     <div class="status-msg" id="ao-status"></div>
+  </div>
+</div>
+
+<!-- Custom modal (replaces browser alert) -->
+<div id="dashModal" role="dialog" aria-modal="true">
+  <div id="dashModalBox">
+    <p id="dashModalMsg"></p>
+    <button id="dashModalOk">OK</button>
   </div>
 </div>
 
@@ -940,6 +956,21 @@ function renderInventory(orders){
   });
 }
 
+// ── Custom modal (replaces browser alert) ─────────────────────────
+function showDashModal(msg){
+  var modal = document.getElementById('dashModal');
+  var msgEl = document.getElementById('dashModalMsg');
+  if(!modal||!msgEl) return;
+  msgEl.textContent = msg;
+  modal.classList.add('open');
+}
+(function(){
+  var okBtn = document.getElementById('dashModalOk');
+  var modal = document.getElementById('dashModal');
+  if(okBtn) okBtn.addEventListener('click', function(){ modal.classList.remove('open'); });
+  if(modal) modal.addEventListener('click', function(e){ if(e.target===modal) modal.classList.remove('open'); });
+})();
+
 // ── Follow-up Digest (emails Jeff a summary of due/overdue items) ─
 function sendFollowUpDigest(){
   var btn = document.getElementById('digestBtn');
@@ -965,7 +996,7 @@ function sendFollowUpDigest(){
 
   if(!overdue.length && !dueToday.length && !dueSoon.length){
     restore();
-    alert('No follow-ups due in the next 3 days — all clear!');
+    showDashModal('No follow-ups due in the next 3 days — all clear!');
     return;
   }
 
@@ -1023,14 +1054,14 @@ function sendFollowUpDigest(){
   .then(function(result){
     restore();
     if(result.ok){
-      alert('Digest sent to jeffery.asare1@gmail.com ✓');
+      showDashModal('Digest sent to jeffery.asare1@gmail.com ✓');
     } else {
-      alert('Error sending digest: '+(result.error||'Unknown error'));
+      showDashModal('Error sending digest: '+(result.error||'Unknown error'));
     }
   })
   .catch(function(err){
     restore();
-    alert('Could not send digest — check your internet connection.');
+    showDashModal('Could not send digest — check your internet connection.');
     console.error('Digest error:',err);
   });
 }
