@@ -39,23 +39,24 @@
     @font-face{font-family:'General Sans';src:url('/fonts/GeneralSans-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;}
     body{background:var(--warm);min-height:100vh;font-family:var(--sans);color:var(--ink);}
     a{color:inherit;}
-    .page{max-width:660px;margin:0 auto;padding:44px 24px 120px;}
+    .page{max-width:700px;margin:0 auto;padding:48px 24px 120px;}
 
     /* ── Header ── */
-    .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:12px;}
-    .brand{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);}
+    .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:12px;}
+    .brand{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
     .header-actions{display:flex;gap:8px;flex-shrink:0;}
-    .header-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 12px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
+    .header-btn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
     .header-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--warm);}
-    .page-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:3px;}
+    .page-title{font-size:30px;font-weight:700;letter-spacing:-.03em;margin-bottom:2px;line-height:1;}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
 
     /* ── Sync bar ── */
-    .sync-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding:10px 14px;background:#fff;border:1px solid var(--rule);}
+    .sync-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding:9px 14px;background:#fff;border:1px solid var(--rule);}
     .sync-info{font-size:12px;color:var(--muted);}
     .sync-info strong{color:var(--ink);font-weight:600;}
-    .btn-sync{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--rule);background:var(--warm);cursor:pointer;font-family:var(--sans);color:var(--muted);transition:all .15s;}
+    .btn-sync{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--rule);background:var(--warm);cursor:pointer;font-family:var(--sans);color:var(--muted);transition:all .15s;}
     .btn-sync:hover{border-color:var(--ink);color:var(--ink);}
-    .btn-sync.spinning{opacity:.5;pointer-events:none;}
+    .btn-sync.spinning{opacity:.4;pointer-events:none;}
 
     /* ── Tabs ── */
     .tabs{display:flex;border-bottom:1px solid var(--rule);margin-bottom:36px;overflow-x:auto;}
@@ -84,19 +85,19 @@
     .section-label:first-child{border-top:none;margin-top:0;padding-top:0;}
 
     /* ── Order cards ── */
-    .order-card{background:#fff;border:1px solid var(--rule);margin-bottom:10px;transition:border-color .15s;}
-    .order-card:hover{border-color:#ccc;}
+    .order-card{background:#fff;border:1px solid var(--rule);margin-bottom:12px;transition:box-shadow .2s, border-color .2s;}
+    .order-card:hover{border-color:#c8c3bc;box-shadow:0 2px 8px rgba(0,0,0,.04);}
     .order-card.urgent{border-left:3px solid var(--red);}
     .order-card.due{border-left:3px solid var(--amber);}
     .order-card.inprog{border-left:3px solid var(--blue-border);}
-    .order-card.done{border-left:3px solid var(--green-border);opacity:.7;}
+    .order-card.done{border-left:3px solid var(--green-border);opacity:.65;}
 
-    .card-main{padding:16px 18px 14px;}
+    .card-main{padding:18px 20px 16px;}
     .card-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-    .card-buyer{font-size:15px;font-weight:700;letter-spacing:-.01em;}
-    .card-date{font-size:11px;color:var(--muted);white-space:nowrap;padding-top:2px;flex-shrink:0;}
-    .card-print{font-size:13px;color:var(--ink);margin-top:2px;}
-    .card-email{font-size:12px;color:var(--muted);margin-top:1px;}
+    .card-buyer{font-size:16px;font-weight:700;letter-spacing:-.02em;}
+    .card-date{font-size:11px;color:var(--muted);white-space:nowrap;padding-top:3px;flex-shrink:0;}
+    .card-print{font-size:13px;color:#444;margin-top:3px;line-height:1.4;}
+    .card-email{font-size:12px;color:var(--muted);margin-top:2px;}
     .card-ref{font-size:11px;color:#bbb;margin-top:1px;}
 
     /* What's next badge */
@@ -131,13 +132,13 @@
     .deadline-chip.blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
     .deadline-chip.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
 
-    .card-actions{display:flex;gap:7px;flex-wrap:wrap;}
-    .btn-card{font-size:11px;font-weight:600;letter-spacing:.04em;padding:7px 13px;border:1px solid var(--rule);background:#fff;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:all .15s;}
+    .card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .btn-card{font-size:11px;font-weight:600;letter-spacing:.04em;padding:8px 14px;border:1px solid var(--rule);background:#fff;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:all .15s;}
     .btn-card:hover{border-color:var(--ink);background:var(--warm);}
-    .btn-card.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
-    .btn-card.primary:hover{opacity:.85;}
-    .btn-card.danger{color:var(--red);border-color:var(--red-border);}
-    .btn-card.danger:hover{background:var(--red-bg);}
+    .btn-card.primary{background:var(--ink);color:#fff;border-color:var(--ink);padding:8px 18px;}
+    .btn-card.primary:hover{opacity:.82;}
+    .btn-card.danger{color:#bbb;border-color:#eee;font-size:10px;}
+    .btn-card.danger:hover{color:var(--red);border-color:var(--red-border);background:var(--red-bg);}
 
     /* Inline expand */
     .card-inline{display:none;border-top:1px solid var(--rule);padding:14px 18px;background:var(--warm);}
@@ -196,7 +197,7 @@
     .status-msg.err{color:var(--red);}
 
     /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
-    #dash-coa-capture{position:fixed;top:-9999px;left:0;width:640px;z-index:-1;background:#fff;pointer-events:none;overflow:hidden;}
+    #dash-coa-capture{position:absolute;top:-9999px;left:-9999px;width:640px;background:#fff;pointer-events:none;}
     #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;background:#fff;}
     #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
     #dash-coa-content .cert-brand{font-size:13px;font-weight:600;letter-spacing:-.01em;color:#111;}
@@ -250,6 +251,7 @@
     </div>
   </div>
   <h1 class="page-title">Dashboard</h1>
+  <p class="page-sub">Jeffery Asare Fine Art Prints &mdash; Order Management</p>
 
   <!-- Sync bar -->
   <div class="sync-bar">
@@ -280,12 +282,13 @@
     </div>
 
     <!-- Stats bar -->
-    <div id="statsBar" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;padding:.75rem 1rem;background:var(--warm);border-radius:8px;border:1px solid var(--rule);"></div>
+    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1.5rem;background:#fff;border:1px solid var(--rule);"></div>
 
     <!-- Search -->
     <div style="margin-bottom:1rem;">
       <input id="searchInput" type="text" placeholder="Search by buyer, print, country, or ref…"
-        style="width:100%;border:1px solid var(--rule);border-radius:6px;padding:.5rem .75rem;font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;"
+        style="width:100%;border:1px solid var(--rule);padding:.6rem .85rem;font-family:var(--sans);font-size:13px;background:#fff;color:var(--ink);outline:none;box-sizing:border-box;transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor=''"
         oninput="renderOrders()">
     </div>
 
@@ -878,13 +881,13 @@ function renderStats(orders){
     ['Total Orders', total],
     ['Revenue Collected', revDisplay],
     ['Pending Shipment', pending],
-    ['Countries', countryCount || 'N/A']
+    ['Countries', countryCount || '—']
   ].map(function(s){
-    return '<div style="flex:1;min-width:100px;text-align:center;">'
-      +'<div style="font-size:18px;font-weight:600;color:var(--ink);">'+s[1]+'</div>'
-      +'<div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;">'+s[0]+'</div>'
+    return '<div style="flex:1;min-width:90px;text-align:center;padding:14px 8px;">'
+      +'<div style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.03em;line-height:1;">'+s[1]+'</div>'
+      +'<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px;">'+s[0]+'</div>'
       +'</div>';
-  }).join('<div style="width:1px;background:var(--rule);"></div>');
+  }).join('<div style="width:1px;background:var(--rule);margin:10px 0;"></div>');
 }
 
 // ── Export CSV ───────────────────────────────────────────────────
@@ -1006,7 +1009,7 @@ function renderOrders(){
     if(o.delivered && !o.followedUp){
       actions += '<button class="btn-card'+(s.next==='followup'?' primary':'')+'" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up →</button>';
     }
-    actions += '<button class="btn-card" style="color:#bbb;border-color:#eee;" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
+    actions += '<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
 
     // ── Meta row ──────────────────────────────────────────────────
     var meta = '';
@@ -1260,10 +1263,12 @@ function confirmCOASend(id){
 
       Promise.all([
         toDataURL(imgSrc),
-        toDataURL('https://jefferyasare.com/signature.png')
+        toDataURL('https://jefferyasare.com/signature.png'),
+        toDataURL(qrUrl)
       ]).then(function(dURLs){
         var artDataURL = dURLs[0];
         var sigDataURL = dURLs[1];
+        var qrDataURL  = dURLs[2];
 
         var imgHtml = artDataURL
           ? '<img class="cert-img" src="'+artDataURL+'" alt="'+escH(o.printTitle||'')+'">'
@@ -1283,7 +1288,7 @@ function confirmCOASend(id){
         +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
         +rows
         +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
-          +'<img src="'+qrUrl+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;">'
+          +'<img src="'+(qrDataURL||qrUrl)+'" width="72" height="72" style="display:block;border:1px solid #e8e4df;flex-shrink:0;">'
           +'<div><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.3rem;">Verify Online</div>'
           +'<div style="font-size:11px;color:#666;line-height:1.55;">Scan to view this print on the official Jeffery Asare website.</div>'
           +'<div style="font-size:10px;color:#bbb;margin-top:.2rem;">'+printUrl+'</div></div>'
@@ -1300,7 +1305,9 @@ function confirmCOASend(id){
       if(!content){ if(st){ st.className='inline-status err'; st.textContent='Error: capture surface missing.'; } return; }
       content.innerHTML = html;
 
-        // All images are data URLs — html2canvas can capture them reliably, no CORS needed
+        // Wait for fonts + a paint frame before capturing
+        document.fonts.ready.then(function(){
+          setTimeout(function(){
         html2canvas(content,{scale:2,useCORS:false,allowTaint:false,backgroundColor:'#ffffff',logging:false})
           .then(function(canvas){
             var jsPDF = window.jspdf.jsPDF;
@@ -1353,6 +1360,8 @@ function confirmCOASend(id){
             if(st){ st.className='inline-status err'; st.textContent='PDF generation failed — try again.'; }
             console.error('html2canvas error:',err);
           });
+          }, 150); // setTimeout
+        }); // document.fonts.ready
       }); // close Promise.all([toDataURL...]).then()
     }); // close fetch(prints.json).then()
 }
