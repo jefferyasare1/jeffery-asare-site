@@ -1091,9 +1091,17 @@ var PRINTS = [
 // ============================================================
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
+var _navFromHistory = false;
+var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms'};
+
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
   if (overlay) overlay.classList.add("fade-in");
+  // Push URL for main pages so each section is shareable/bookmarkable
+  if(!_navFromHistory && _pageUrlMap[page]){
+    var cur = history.state;
+    if(!cur || cur.page !== page) history.pushState({page:page}, '', _pageUrlMap[page]);
+  }
   setTimeout(function(){
     document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
     var t = document.getElementById("page-"+page);
@@ -1108,6 +1116,7 @@ function navigate(page) {
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
+    _navFromHistory = false;
   }, 220);
 }
 
@@ -1697,6 +1706,8 @@ function openPrintDetail(print){
   }
 
   navigate("print-detail");
+  // Give this print its own shareable URL
+  history.pushState({print:print.id}, print.title+' — Jeffery Asare', '?print='+print.id);
 
   // Render "You might also like" after navigation
   setTimeout(function(){
@@ -2437,15 +2448,38 @@ injectFooters();
 renderPortfolio("all");
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
-// Deep link: ?print=s1 navigates to shop and opens that print detail
+// Deep link: ?print=s1 opens that print; ?page=shop goes to that section
 (function(){
   var params=new URLSearchParams(window.location.search);
   var pid=params.get('print');
+  var pg=params.get('page');
   if(pid){
     var matchPrint=PRINTS.find(function(p){ return p.id===pid; });
-    if(matchPrint){ navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400); }
+    if(matchPrint){
+      history.replaceState({print:matchPrint.id}, matchPrint.title+' — Jeffery Asare', '?print='+matchPrint.id);
+      navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400);
+    }
+  } else if(pg && _pageUrlMap[pg]){
+    history.replaceState({page:pg}, '', _pageUrlMap[pg]);
+    navigate(pg);
+  } else {
+    history.replaceState({page:'home'}, '', '/');
   }
 })();
+
+// Browser back/forward button support
+window.addEventListener('popstate', function(e){
+  var s = e.state;
+  if(!s){ _navFromHistory=true; navigate('home'); return; }
+  if(s.print){
+    var p=PRINTS.find(function(x){ return x.id===s.print; });
+    _navFromHistory=true;
+    if(p){ navigate('shop'); setTimeout(function(){ openPrintDetail(p); },400); }
+    else { navigate('shop'); }
+    return;
+  }
+  if(s.page){ _navFromHistory=true; navigate(s.page); }
+});
 // Add badge to home nav Shop button
 var _hsb=document.getElementById("homeShopBtn");
 
