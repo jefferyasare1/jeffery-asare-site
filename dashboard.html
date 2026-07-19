@@ -246,6 +246,7 @@
   <div class="header-bar">
     <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin</div>
     <div class="header-actions">
+      <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">📧 Digest</button>
       <a href="/admin/#/collections/settings" class="header-btn">Content Manager ↗</a>
       <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="header-btn">Email Templates ↗</a>
     </div>
@@ -282,7 +283,10 @@
     </div>
 
     <!-- Stats bar -->
-    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1.5rem;background:#fff;border:1px solid var(--rule);"></div>
+    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1rem;background:#fff;border:1px solid var(--rule);"></div>
+
+    <!-- Edition inventory bar -->
+    <div id="inventoryBar" style="display:none;margin-bottom:1.5rem;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
 
     <!-- Search -->
     <div style="margin-bottom:1rem;">
@@ -887,6 +891,150 @@ function renderStats(orders){
   }).join('<div style="width:1px;background:var(--rule);margin:10px 0;"></div>');
 }
 
+// ── Edition Inventory Bar ────────────────────────────────────────
+var _printsCache = null;
+function getPrints(cb){
+  if(_printsCache){ cb(_printsCache); return; }
+  fetch('/_data/prints.json')
+    .then(function(r){ return r.ok?r.json():null; })
+    .catch(function(){ return null; })
+    .then(function(d){ _printsCache=(d&&d.prints)||[]; cb(_printsCache); });
+}
+
+function renderInventory(orders){
+  var bar = document.getElementById('inventoryBar');
+  if(!bar) return;
+  getPrints(function(prints){
+    if(!prints||!prints.length){ bar.style.display='none'; return; }
+    // Count COAs sent per print title (each COA = 1 unit, respecting qty)
+    var soldMap = {};
+    (orders||loadOrders()).forEach(function(o){
+      if(o.coaSent && o.printTitle){
+        var key = o.printTitle.trim().toLowerCase();
+        soldMap[key] = (soldMap[key]||0) + (parseInt(o.qty)||1);
+      }
+    });
+    var items = prints.map(function(p){
+      var key   = (p.title||'').trim().toLowerCase();
+      var sold  = soldMap[key]||0;
+      var total = parseInt((p.edition||'').replace(/\D/g,''))||0;
+      var rem   = total>0 ? total-sold : null;
+      var pct   = total>0 ? Math.min(100, Math.round(sold/total*100)) : 0;
+      var color = rem===0?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
+      var label = rem===0
+        ? '<span style="color:var(--red);font-weight:700;font-size:10px;">Sold out</span>'
+        : rem!==null
+          ? '<span style="font-size:10px;color:var(--muted);"><strong style="color:var(--ink);">'+rem+'</strong> left · '+sold+'/'+total+'</span>'
+          : '<span style="font-size:10px;color:var(--muted);">'+sold+' sold</span>';
+      return '<div style="padding:10px 14px;border-right:1px solid var(--rule);flex:1;min-width:110px;max-width:180px;">'
+        +'<div style="font-size:10px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+escH(p.title||'')+'">'+escH(p.title||'')+'</div>'
+        +'<div style="margin:5px 0 3px;height:3px;background:#f0ece8;border-radius:2px;">'
+          +'<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:2px;"></div>'
+        +'</div>'+label+'</div>';
+    }).join('');
+    bar.innerHTML = '<div style="display:flex;flex-wrap:nowrap;overflow-x:auto;">'
+      +'<div style="padding:10px 14px;border-right:1px solid var(--rule);display:flex;align-items:center;flex-shrink:0;">'
+        +'<span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#bbb;white-space:nowrap;line-height:1.4;">Edition<br>Tracker</span>'
+      +'</div>'+items+'</div>';
+    bar.style.display='';
+  });
+}
+
+// ── Follow-up Digest (emails Jeff a summary of due/overdue items) ─
+function sendFollowUpDigest(){
+  var btn = document.getElementById('digestBtn');
+  if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+
+  var orders = loadOrders();
+  var overdue=[], dueToday=[], dueSoon=[];
+
+  orders.forEach(function(o){
+    if(!o.delivered || o.followedUp) return;
+    var base = o.deliveredDate || o.shipDate;
+    if(!base) return;
+    var d = daysUntil(addDays(base, 7));
+    var item = { name:o.buyerName||o.buyerEmail||'Unknown', email:o.buyerEmail||'', title:o.printTitle||'—', d:d };
+    if(d < 0) overdue.push(item);
+    else if(d === 0) dueToday.push(item);
+    else if(d <= 3) dueSoon.push(item);
+  });
+
+  var restore = function(){
+    if(btn){ btn.disabled=false; btn.textContent='📧 Digest'; }
+  };
+
+  if(!overdue.length && !dueToday.length && !dueSoon.length){
+    restore();
+    alert('No follow-ups due in the next 3 days — all clear!');
+    return;
+  }
+
+  function tableRows(list){
+    return list.map(function(i){
+      var dLabel = i.d<0?'Overdue '+Math.abs(i.d)+'d':i.d===0?'Today':i.d+'d';
+      return '<tr><td style="padding:7px 12px;border-bottom:1px solid #e8e4df;">'+escH(i.name)+'</td>'
+        +'<td style="padding:7px 12px;border-bottom:1px solid #e8e4df;color:#444;">'+escH(i.title)+'</td>'
+        +'<td style="padding:7px 12px;border-bottom:1px solid #e8e4df;text-align:right;font-weight:600;">'+escH(dLabel)+'</td></tr>';
+    }).join('');
+  }
+
+  function section(list, label, color){
+    if(!list.length) return '';
+    return '<h3 style="margin:20px 0 8px;font-size:14px;color:'+color+';">'+label+'</h3>'
+      +'<table style="border-collapse:collapse;width:100%;font-size:13px;background:#fff;">'
+      +'<tr style="background:#f5f2ee;"><th style="padding:7px 12px;text-align:left;font-weight:600;">Buyer</th>'
+      +'<th style="padding:7px 12px;text-align:left;font-weight:600;">Print</th>'
+      +'<th style="padding:7px 12px;text-align:right;font-weight:600;">Due</th></tr>'
+      +tableRows(list)+'</table>';
+  }
+
+  var dayName = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var dashUrl = 'https://jefferyasare.com/dashboard?key=jA9kx2vP7m';
+
+  var htmlContent = '<div style="font-family:system-ui,sans-serif;max-width:620px;padding:28px 24px;color:#111;">'
+    +'<p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:6px;">Jeffery Asare Dashboard</p>'
+    +'<h2 style="font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em;">Follow-up Digest</h2>'
+    +'<p style="font-size:13px;color:#666;margin-bottom:0;">'+escH(dayName)+'</p>'
+    +section(overdue,   '⚠ Overdue',    '#a00')
+    +section(dueToday,  '📌 Due today',  '#8a5200')
+    +section(dueSoon,   '⏳ Due soon',   '#1a4a8a')
+    +'<p style="margin-top:24px;font-size:12px;color:#999;border-top:1px solid #e8e4df;padding-top:16px;">'
+    +'<a href="'+dashUrl+'" style="color:#111;font-weight:600;">Open Dashboard →</a> to send follow-up emails.</p>'
+    +'</div>';
+
+  var total = overdue.length+dueToday.length+dueSoon.length;
+  var subjectLine = 'Follow-up Digest: '
+    +(overdue.length?overdue.length+' overdue':'')
+    +(dueToday.length?(overdue.length?', ':'')+dueToday.length+' due today':'')
+    +(dueSoon.length?(overdue.length||dueToday.length?', ':'')+dueSoon.length+' due soon':'')
+    +' ('+total+' total)';
+
+  fetch('/api/notify',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      to:'jeffery.asare1@gmail.com',
+      to_name:'Jeff',
+      subject: subjectLine,
+      html_content: htmlContent
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    restore();
+    if(result.ok){
+      alert('Digest sent to jeffery.asare1@gmail.com ✓');
+    } else {
+      alert('Error sending digest: '+(result.error||'Unknown error'));
+    }
+  })
+  .catch(function(err){
+    restore();
+    alert('Could not send digest — check your internet connection.');
+    console.error('Digest error:',err);
+  });
+}
+
 // ── Export CSV ───────────────────────────────────────────────────
 function exportCSV(){
   var orders = loadOrders();
@@ -917,8 +1065,9 @@ function renderOrders(){
     return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
   });
 
-  // Update stats (always from full order list)
+  // Update stats and inventory (always from full order list)
   renderStats(orders);
+  renderInventory(orders);
   populateClientSelectors();
 
   if(queue) queue.innerHTML = buildActionQueue(orders);
