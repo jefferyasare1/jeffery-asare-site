@@ -42,7 +42,11 @@
     .page{max-width:660px;margin:0 auto;padding:44px 24px 120px;}
 
     /* ── Header ── */
-    .brand{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);margin-bottom:32px;}
+    .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:12px;}
+    .brand{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);}
+    .header-actions{display:flex;gap:8px;flex-shrink:0;}
+    .header-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 12px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
+    .header-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--warm);}
     .page-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:3px;}
 
     /* ── Sync bar ── */
@@ -238,7 +242,13 @@
 
 <div class="page">
 
-  <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin &nbsp;·&nbsp; <a href="/admin/#/collections/settings" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Content Manager &rarr;</a> &nbsp;·&nbsp; <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:.06em;">Email Templates &rarr;</a></div>
+  <div class="header-bar">
+    <div class="brand">Jeffery Asare &nbsp;·&nbsp; Admin</div>
+    <div class="header-actions">
+      <a href="/admin/#/collections/settings" class="header-btn">Content Manager ↗</a>
+      <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="header-btn">Email Templates ↗</a>
+    </div>
+  </div>
   <h1 class="page-title">Dashboard</h1>
 
   <!-- Sync bar -->
@@ -1182,6 +1192,23 @@ function openCOAInline(id){
   if(el) el.classList.add('open');
 }
 
+// Convert any URL to a base64 data URL so html2canvas can always render it
+function toDataURL(url){
+  if(!url) return Promise.resolve('');
+  return fetch(url)
+    .then(function(r){ return r.ok?r.blob():null; })
+    .then(function(blob){
+      if(!blob) return '';
+      return new Promise(function(resolve){
+        var fr=new FileReader();
+        fr.onload=function(){ resolve(fr.result); };
+        fr.onerror=function(){ resolve(''); };
+        fr.readAsDataURL(blob);
+      });
+    })
+    .catch(function(){ return ''; });
+}
+
 function confirmCOASend(id){
   var o = loadOrders().find(function(x){ return x.id===id; });
   if(!o) return;
@@ -1216,10 +1243,8 @@ function confirmCOASend(id){
       var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data='+encodeURIComponent(printUrl)+'&color=111111&bgcolor=FFFFFF&margin=3';
 
       if(imgSrc&&!imgSrc.startsWith('http')) imgSrc = 'https://jefferyasare.com'+(imgSrc.startsWith('/')?'':'/')+imgSrc;
-      var imgHtml = imgSrc
-        ? '<img class="cert-img" src="'+imgSrc+'" alt="'+escH(o.printTitle||'')+'">'
-        : '<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">'+escH(o.printTitle||'')+'</div>';
 
+      // Pre-fetch both artwork and signature as data URLs — html2canvas captures these reliably
       var rows = [
         ['Title',   o.printTitle||'—'],
         ['Series',  series||'—'],
@@ -1233,8 +1258,20 @@ function confirmCOASend(id){
         return '<div class="cert-row"><span class="cert-key">'+r[0]+'</span><span class="cert-val">'+r[1]+'</span></div>';
       }).join('');
 
-      var sigHtml = '<img src="https://jefferyasare.com/signature.png" alt="Jeffery Asare"'
-        +' onerror="this.parentElement.innerHTML=\'<div style=&quot;font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;&quot;>Jeffery Asare<\\/div>\'">';
+      Promise.all([
+        toDataURL(imgSrc),
+        toDataURL('https://jefferyasare.com/signature.png')
+      ]).then(function(dURLs){
+        var artDataURL = dURLs[0];
+        var sigDataURL = dURLs[1];
+
+        var imgHtml = artDataURL
+          ? '<img class="cert-img" src="'+artDataURL+'" alt="'+escH(o.printTitle||'')+'">'
+          : '<div style="width:100%;height:100%;background:#f5f2ee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">'+escH(o.printTitle||'')+'</div>';
+
+        var sigHtml = sigDataURL
+          ? '<img src="'+sigDataURL+'" alt="Jeffery Asare" style="max-height:80px;max-width:220px;object-fit:contain;display:block;">'
+          : '<div style="font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
       var html = '<div class="cert-header">'
         +'<span class="cert-brand">Jeffery Asare</span>'
@@ -1263,20 +1300,8 @@ function confirmCOASend(id){
       if(!content){ if(st){ st.className='inline-status err'; st.textContent='Error: capture surface missing.'; } return; }
       content.innerHTML = html;
 
-      // Wait for every <img> in the content to finish loading before capturing
-      var imgs = content.querySelectorAll('img');
-      var imgPromises = Array.prototype.map.call(imgs, function(img){
-        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise(function(resolve){
-          img.onload = resolve;
-          img.onerror = resolve; // Don't block if an image fails — just render without it
-          setTimeout(resolve, 4000); // Hard cap per image
-        });
-      });
-
-      Promise.all(imgPromises).then(function(){
-        return html2canvas(content,{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false});
-      })
+        // All images are data URLs — html2canvas can capture them reliably, no CORS needed
+        html2canvas(content,{scale:2,useCORS:false,allowTaint:false,backgroundColor:'#ffffff',logging:false})
           .then(function(canvas){
             var jsPDF = window.jspdf.jsPDF;
             var pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -1291,9 +1316,8 @@ function confirmCOASend(id){
 
             // Get PDF as base64 to attach to the buyer's email
             var pdfDataUri = pdf.output('datauristring');
-            var pdfBase64 = pdfDataUri.split(',')[1]; // strip "data:application/pdf;base64,"
+            var pdfBase64 = pdfDataUri.split(',')[1];
 
-            // POST to Cloudflare Function → Brevo REST API (supports attachments)
             var today=new Date().toISOString().slice(0,10);
             fetch('/api/send-coa',{
               method:'POST',
@@ -1312,7 +1336,7 @@ function confirmCOASend(id){
               if(result.ok){
                 updateOrder(id,{coaSent:true,coaDate:today});
                 logToSheet({action:'COA Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',notes:'',order_ref:o.orderRef||''});
-                if(st){ st.className='inline-status ok'; st.textContent='COA emailed to '+escH(o.buyerEmail)+' ✓ (PDF attached) · also saved to your device'; }
+                if(st){ st.className='inline-status ok'; st.textContent='COA emailed to '+escH(o.buyerEmail)+' ✓ · PDF attached · saved to your device'; }
                 setTimeout(function(){ renderOrders(); }, 1500);
               } else {
                 throw new Error(result.error||'Send failed');
@@ -1320,7 +1344,7 @@ function confirmCOASend(id){
             })
             .catch(function(err){
               if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
-              if(st){ st.className='inline-status err'; st.textContent='Email failed — '+escH(String(err.message||err))+'. PDF was still saved to your device.'; }
+              if(st){ st.className='inline-status err'; st.textContent='Email failed — '+escH(String(err.message||err))+'. PDF saved to your device.'; }
               console.error('COA email error:',err);
             });
           })
@@ -1329,7 +1353,8 @@ function confirmCOASend(id){
             if(st){ st.className='inline-status err'; st.textContent='PDF generation failed — try again.'; }
             console.error('html2canvas error:',err);
           });
-    });
+      }); // close Promise.all([toDataURL...]).then()
+    }); // close fetch(prints.json).then()
 }
 
 function confirmShip(id){

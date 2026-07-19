@@ -1,1 +1,8 @@
-{"prints":[]}
+{"prints":[
+  {"id":"s1","title":"Stillness in Jamestown","series":"Portraits of Place","paper":"Hahnemuhle Photo Rag Baryta 315gsm","edition":"Edition of 15","img":"/s1.jpg"},
+  {"id":"s2","title":"Kente Geometry","series":"Texture Studies","paper":"Hahnemuhle Photo Rag 308gsm","edition":"Edition of 30","img":"/s2.jpg"},
+  {"id":"s3","title":"Between Stalls","series":"Accra Streets","paper":"Hahnemuhle Photo Rag Baryta 315gsm","edition":"Edition of 25","img":"/s3.jpg"},
+  {"id":"s4","title":"Eclipse I","series":"Eclipse of the Self","paper":"Hahnemuhle Photo Rag 308gsm","edition":"Edition of 20","img":"/s4.jpg"},
+  {"id":"s5","title":"Golden Hour at Labadi","series":"Random Stories","paper":"Hahnemuhle Photo Rag Baryta 315gsm","edition":"Edition of 20","img":"/s5.jpg"},
+  {"id":"s6","title":"Market Weave","series":"Abstract","paper":"Hahnemuhle Photo Rag 308gsm","edition":"Edition of 30","img":"/s6.jpg"}
+]}
