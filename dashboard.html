@@ -647,6 +647,7 @@ function syncFromSheet(){
       if(info) info.innerHTML = 'Synced at <strong>' + lastSyncTime.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</strong>';
       if(btn) btn.classList.remove('spinning');
       renderOrders();
+      checkLowStock();
     })
     .catch(function(){
       if(info) info.textContent = 'Could not reach Sheets. Showing local data.';
@@ -1177,6 +1178,9 @@ function renderOrders(){
     if(!o.coaSent){
       actions += '<button class="btn-card'+(s.next==='coa'?' primary':'')+'" onclick="openCOAInline(\''+o.id+'\')">Send Certificate</button>';
     }
+    if(o.coaSent && !o.shipped && !o.prepSent){
+      actions += '<button class="btn-card" onclick="openPrepUpdateInline(\''+o.id+'\')">Send Prep Update</button>';
+    }
     if(!o.shipped){
       actions += '<button class="btn-card'+(s.next==='ship'?' primary':'')+'" onclick="openShipInline(\''+o.id+'\')">Send Tracking →</button>';
     }
@@ -1252,6 +1256,16 @@ function renderOrders(){
           +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
         +'</div>'
         +'<div class="inline-status" id="coa-st-'+o.id+'"></div>'
+      +'</div>'
+
+      // Prep Update inline
+      +'<div class="card-inline" id="prep-inline-'+o.id+'">'
+        +'<div class="inline-label">Send a preparation update to <strong>'+escH(o.buyerName)+'</strong>? Lets them know their print is being carefully prepared and will ship within 7–14 days.</div>'
+        +'<div class="inline-row">'
+          +'<button class="btn-card primary" onclick="confirmPrepUpdate(\''+o.id+'\')">Confirm &amp; Send</button>'
+          +'<button class="btn-card" onclick="closeInlines(\''+o.id+'\')">Cancel</button>'
+        +'</div>'
+        +'<div class="inline-status" id="prep-st-'+o.id+'"></div>'
       +'</div>'
 
     +'</div>';
@@ -1330,7 +1344,7 @@ function fillFromClient(prefix, orderId){
 
 // ── Inline actions ───────────────────────────────────────────────
 function closeInlines(id){
-  ['ship-inline-','del-inline-','fu-inline-','coa-inline-'].forEach(function(p){
+  ['ship-inline-','del-inline-','fu-inline-','coa-inline-','prep-inline-'].forEach(function(p){
     var el = document.getElementById(p+id); if(el) el.classList.remove('open');
   });
 }
@@ -1581,6 +1595,133 @@ function confirmFollowUp(id){
   }).catch(function(err){
     if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
     console.error(err);
+  });
+}
+
+// ── Low Stock Alerts ─────────────────────────────────────────────
+// Fires after every sync; sends one alert email per print per calendar day.
+var LOW_STOCK_KEY = 'ja_lowstock_alerted'; // { "Print Title": "2026-07-20" }
+var LOW_STOCK_THRESHOLD = 3;
+var JEFF_EMAIL = 'jeffery.asare1@gmail.com';
+
+function checkLowStock(){
+  getPrints(function(prints){
+    if(!prints||!prints.length) return;
+    var orders = loadOrders();
+    var today = new Date().toISOString().slice(0,10);
+    var alerted = {};
+    try { alerted = JSON.parse(localStorage.getItem(LOW_STOCK_KEY)||'{}'); } catch(e){}
+
+    prints.forEach(function(print){
+      // Parse edition total: "Edition of 15" → 15
+      var m = (print.edition||'').match(/\d+/);
+      var total = m ? parseInt(m[0]) : 0;
+      if(!total) return;
+      // Count sold (orders that are real purchases, not admin actions)
+      var sold = orders.filter(function(o){
+        return (o.printTitle||'').toLowerCase() === (print.title||'').toLowerCase();
+      }).length;
+      var remaining = total - sold;
+      if(remaining > LOW_STOCK_THRESHOLD) return;
+      if(remaining < 0) remaining = 0;
+      // Already alerted today?
+      if(alerted[print.title] === today) return;
+
+      // Send the alert
+      var subject = '⚠️ Low stock: ' + print.title + ' — ' + remaining + ' of ' + total + ' remaining';
+      var html_content = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Georgia,serif;">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
+        +'<tr><td align="center">'
+        +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
+        +'<tr><td style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding-bottom:32px;">Jeffery Asare · Dashboard Alert</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:24px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">Low edition stock</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
+        +'<strong style="color:#111;">' + print.title + '</strong> (' + print.edition + ') has only <strong style="color:#c0392b;">' + remaining + ' print' + (remaining===1?'':'s') + ' remaining</strong> in this edition.'
+        +'</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:14px;color:#888;line-height:1.8;padding-bottom:20px;">'
+        +'You may want to consider whether to mark this edition as sold out soon, or note the low availability on the product page.'
+        +'</td></tr>'
+        +'<tr><td style="padding-top:24px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;">'
+        +'This is an automated alert from your dashboard. Sent: ' + new Date().toLocaleString('en-GB') + '</td></tr>'
+        +'</table></td></tr></table></body></html>';
+
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: JEFF_EMAIL, to_name: 'Jeffery', subject: subject, html_content: html_content })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(result){
+        if(result.ok){
+          alerted[print.title] = today;
+          localStorage.setItem(LOW_STOCK_KEY, JSON.stringify(alerted));
+          console.log('[lowstock] Alert sent for', print.title, '—', remaining, 'remaining');
+        }
+      })
+      .catch(function(err){ console.warn('[lowstock] Alert failed for', print.title, err); });
+    });
+  });
+}
+
+function openPrepUpdateInline(id){
+  closeInlines(id);
+  var el = document.getElementById('prep-inline-'+id);
+  if(el) el.classList.add('open');
+}
+
+function confirmPrepUpdate(id){
+  var o = loadOrders().find(function(x){ return x.id===id; });
+  if(!o) return;
+  var st = document.getElementById('prep-st-'+id);
+  var inlineEl = document.getElementById('prep-inline-'+id);
+  if(st){ st.className='inline-status'; st.textContent='Sending…'; }
+  if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=true; }); }
+
+  var firstName = (o.buyerName||'there').split(' ')[0];
+
+  fetch('/api/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: o.buyerEmail,
+      to_name: o.buyerName,
+      subject: 'Your print is being prepared — ' + (o.printTitle||'Fine Art Print'),
+      html_content: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Georgia,serif;">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
+        +'<tr><td align="center">'
+        +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
+        +'<tr><td style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding-bottom:36px;">Jeffery Asare</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is being prepared.</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
+        +'Hi ' + firstName + ', I wanted to let you know that your <strong style="color:#111;">' + (o.printTitle||'fine art print') + '</strong>' + (o.size ? ' (' + o.size + ')' : '') + ' is currently being carefully prepared in my studio.</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">'
+        +'Each print is handled with care — inspected, rolled, and packaged to ensure it arrives in perfect condition. It will ship within <strong style="color:#111;">7–14 business days</strong>, and you\'ll receive a tracking number as soon as it\'s on its way.</td></tr>'
+        +'<tr><td style="padding:28px 0 0;border-top:1px solid #e8e4df;">'
+        +'<p style="font-family:Georgia,serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+        +'<p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p></td></tr>'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+        +(o.orderRef ? 'Order ref: ' + o.orderRef + ' &nbsp;&middot;&nbsp; ' : '')
+        +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com</td></tr>'
+        +'</table></td></tr></table></body></html>'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    if(result.ok){
+      if(st){ st.className='inline-status ok'; st.textContent='Prep update sent to '+escH(o.buyerEmail)+' ✓'; }
+      var today = new Date().toISOString().slice(0,10);
+      updateOrder(id, { prepSent: true, prepDate: today });
+      logToSheet({ action:'Prep Update Sent', buyer_name:o.buyerName, buyer_email:o.buyerEmail, print_title:o.printTitle, size:o.size||'', country:o.country||'', price:o.price||'', qty:o.qty||'', notes:'', order_ref:o.orderRef||'' });
+      setTimeout(function(){ closeInlines(id); renderOrders(); }, 1600);
+    } else {
+      throw new Error(result.error || 'Send failed');
+    }
+  })
+  .catch(function(err){
+    if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+    if(st){ st.className='inline-status err'; st.textContent='Failed — '+escH(String(err.message||err)); }
   });
 }
 

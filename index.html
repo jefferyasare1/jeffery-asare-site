@@ -475,6 +475,35 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-country-select:focus{outline:none;border-color:var(--ink);}
 .pd-delivery-note{font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.7;}
 .pd-delivery-note strong{color:var(--ink);}
+/* SIZE GUIDE */
+.size-guide-toggle{background:none;border:none;font-family:var(--sans);font-size:11px;color:var(--muted);cursor:pointer;padding:0;letter-spacing:.06em;text-decoration:underline;margin-top:.5rem;display:inline-block;}
+.size-guide-toggle:hover{color:var(--ink);}
+.size-guide-panel{display:none;margin-top:1rem;padding:1.2rem;background:var(--warm);border:1px solid var(--rule);}
+.size-guide-panel.open{display:block;}
+.size-guide-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#bbb;margin-bottom:1rem;}
+.size-guide-visual{display:flex;align-items:flex-end;gap:1.2rem;justify-content:center;padding:.5rem 0 1.2rem;}
+.sg-item{display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+.sg-rect{background:var(--ink);opacity:.12;border:1px solid var(--ink);}
+.sg-rect.active-size{opacity:.35;}
+.sg-dim{font-size:9px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:1.4;}
+.sg-name{font-size:10px;font-weight:600;color:var(--ink);letter-spacing:.04em;}
+.sg-person{width:18px;opacity:.25;margin-bottom:0;}
+/* JOURNAL */
+.journal-wrap{max-width:700px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.journal-header{margin-bottom:2.5rem;}
+.journal-header h1{font-family:var(--title);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;letter-spacing:-.02em;margin:.8rem 0 .3rem;}
+.journal-header p{font-size:12px;color:var(--muted);margin:0;}
+.journal-post{border-top:1px solid var(--rule);padding:2rem 0;cursor:pointer;}
+.journal-post:last-child{border-bottom:1px solid var(--rule);}
+.journal-post:hover .journal-post-title{text-decoration:underline;}
+.journal-post-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.journal-post-title{font-family:var(--title);font-size:1.35rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .5rem;line-height:1.25;}
+.journal-post-excerpt{font-size:14px;color:var(--muted);line-height:1.7;margin:0;}
+.journal-post-thumb{width:100%;max-height:280px;object-fit:cover;margin-bottom:1rem;display:block;}
+.journal-body-wrap{max-width:680px;margin:0 auto;padding:3rem 1.5rem 6rem;}
+.journal-body-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.journal-body-title{font-family:var(--title);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:600;letter-spacing:-.02em;margin:.4rem 0 1.6rem;line-height:1.2;}
+.journal-body-text p{font-size:15px;line-height:1.85;color:var(--ink);margin:0 0 1.4em;}
 /* CERTIFICATE */
 #page-cert{background:var(--bg);}
 .cert-wrap{max-width:680px;margin:0 auto;padding:3rem var(--pad) 5rem;}
@@ -908,6 +937,34 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 </div>
 
 
+<!-- JOURNAL / FIELD NOTES -->
+<div id="page-journal" class="page">
+  <div class="inner-nav">
+    <span class="nav-logo" id="journLogoBtn">Jeffery Asare</span>
+    <ul class="nav-links"><li><a id="journPortBtn">Portfolio</a></li><li><a id="journAboutBtn">About</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
+    <button class="ham-btn" id="journHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <!-- Post list view -->
+  <div id="journalListWrap">
+    <div class="journal-wrap">
+      <div class="journal-header">
+        <button class="detail-back" id="journBackBtn" style="padding-left:0;">&#8592; Back</button>
+        <h1>Field Notes</h1>
+        <p>Stories from behind the lens.</p>
+      </div>
+      <div id="journalList"></div>
+    </div>
+  </div>
+  <!-- Single post view -->
+  <div id="journalPostWrap" style="display:none;">
+    <div class="journal-body-wrap">
+      <button class="detail-back" id="journPostBackBtn" style="padding-left:0;">&#8592; All Notes</button>
+      <div id="journalPostContent"></div>
+    </div>
+  </div>
+  <div id="journal-mini-footer"></div>
+</div>
+
 <!-- PRINT DETAIL PAGE -->
 <div id="page-print-detail" class="page">
   <div class="inner-nav">
@@ -921,7 +978,18 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       <div><div class="print-detail-series" id="pdSeries"></div><h1 class="print-detail-title" id="pdTitle"></h1></div>
       <p class="print-detail-desc" id="pdDesc"></p>
       <div class="print-detail-specs" id="pdSpecs"></div>
-      <div><div class="print-detail-size-label">Select size</div><div class="print-detail-size-grid" id="pdSizes"></div></div>
+      <div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;">
+          <div class="print-detail-size-label">Select size</div>
+          <button class="size-guide-toggle" id="sizeGuideToggle">Size guide</button>
+        </div>
+        <div class="print-detail-size-grid" id="pdSizes"></div>
+        <div class="size-guide-panel" id="sizeGuidePanel">
+          <div class="size-guide-label">Actual print sizes</div>
+          <div class="size-guide-visual" id="sizeGuideVisual"></div>
+        </div>
+      </div>
+      <div id="pdCollectors" style="font-size:11px;color:var(--muted);margin:.2rem 0 .6rem;min-height:1.2em;"></div>
       <div class="pd-country-row" id="pdCountryRow" style="display:none;">
         <label class="pd-country-label" for="pdCountry">Where are you buying from?</label>
         <select class="pd-country-select" id="pdCountry">
@@ -945,7 +1013,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   <footer class="site-footer">
     <div class="footer-grid">
       <div><div class="footer-brand-name">Jeffery Asare</div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
-      <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
+      <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">Field Notes</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
       <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
       <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
@@ -1119,7 +1187,7 @@ var PRINTS = [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
-var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy'};
+var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy',journal:'/?page=journal'};
 
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
@@ -1140,6 +1208,7 @@ function navigate(page) {
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
     if (page==="shop") { renderShop(0); }
+    if (page==="journal") { renderJournal(); }
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
@@ -1157,6 +1226,7 @@ bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","
 bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");
 bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
 bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");bind("privBackBtn","home");
+bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journContactBtn","contact");bind("journBackBtn","home");
 bind("pdLogoBtn","home");bind("pdPortBtn","portfolio");bind("pdAboutBtn","about");bind("pdShopBtn","shop");bind("pdContactBtn","contact");bind("pdBackBtn","shop");
 
 // ============================================================
@@ -1172,7 +1242,7 @@ function injectFooters(){
       a.addEventListener("click",function(){ navigate(a.getAttribute("data-nav")); });
     });
   }
-  ["port","detail","shop","contact","terms","privacy","pd"].forEach(function(id){
+  ["port","detail","shop","contact","terms","privacy","pd","journal"].forEach(function(id){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
@@ -1633,9 +1703,75 @@ document.querySelectorAll(".newsletter-btn").forEach(function(btn){
 
 
 // ===========================================================
+// JOURNAL
+// ===========================================================
+var _journalData = null;
+
+function renderJournal(){
+  if(_journalData){ _buildJournalList(_journalData.posts); return; }
+  fetch('/_data/journal.json')
+    .then(function(r){ return r.ok ? r.json() : {posts:[]}; })
+    .then(function(d){ _journalData = d; _buildJournalList(d.posts); })
+    .catch(function(){ _buildJournalList([]); });
+}
+
+function _buildJournalList(posts){
+  var wrap = document.getElementById('journalListWrap');
+  var el = document.getElementById('journalList');
+  var postWrap = document.getElementById('journalPostWrap');
+  if(!el) return;
+  if(wrap) wrap.style.display = '';
+  if(postWrap) postWrap.style.display = 'none';
+  if(!posts.length){
+    el.innerHTML='<p style="color:var(--muted);font-size:14px;">Coming soon.</p>';
+    return;
+  }
+  el.innerHTML = posts.map(function(p){
+    var d = new Date(p.date);
+    var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
+    return '<div class="journal-post" data-jid="'+p.id+'">'
+      +(p.img?'<img class="journal-post-thumb" src="'+p.img+'" alt="'+p.title+'" loading="lazy">':'')
+      +'<div class="journal-post-meta">'+p.series+' &nbsp;·&nbsp; '+dateStr+'</div>'
+      +'<div class="journal-post-title">'+p.title+'</div>'
+      +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
+      +'</div>';
+  }).join('');
+  el.querySelectorAll('.journal-post').forEach(function(card){
+    card.addEventListener('click',function(){
+      var id = card.dataset.jid;
+      var post = posts.find(function(p){ return p.id===id; });
+      if(post) _openJournalPost(post, posts);
+    });
+  });
+}
+
+function _openJournalPost(post, posts){
+  var wrap = document.getElementById('journalListWrap');
+  var postWrap = document.getElementById('journalPostWrap');
+  var content = document.getElementById('journalPostContent');
+  var backBtn = document.getElementById('journPostBackBtn');
+  if(wrap) wrap.style.display = 'none';
+  if(postWrap) postWrap.style.display = '';
+  if(backBtn){
+    backBtn.onclick = function(){ _buildJournalList(posts); };
+  }
+  var d = new Date(post.date);
+  var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
+  var bodyHtml = post.body.split('\n\n').map(function(para){
+    return '<p>'+para.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+  if(content) content.innerHTML =
+    (post.img?'<img style="width:100%;max-height:400px;object-fit:cover;margin-bottom:1.5rem;display:block;" src="'+post.img+'" alt="'+post.title+'" loading="lazy">':'')
+    +'<div class="journal-body-meta">'+post.series+' &nbsp;·&nbsp; '+dateStr+'</div>'
+    +'<h1 class="journal-body-title">'+post.title+'</h1>'
+    +'<div class="journal-body-text">'+bodyHtml+'</div>';
+  window.scrollTo(0,0);
+}
+
+// ===========================================================
 // PAGE TITLES
 // ===========================================================
-var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
+var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"Field Notes - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================
@@ -1792,6 +1928,118 @@ function openPrintDetail(print){
         if(found) openPrintDetail(found);
       });
     });
+
+  // ── Size guide ────────────────────────────────────────────
+  (function(){
+    var toggle = document.getElementById('sizeGuideToggle');
+    var panel  = document.getElementById('sizeGuidePanel');
+    var visual = document.getElementById('sizeGuideVisual');
+    if(!toggle||!panel||!visual) return;
+
+    // Size definitions (mm → pixels at scale: 1mm = 0.28px, person = 170cm)
+    var SIZES = [
+      {label:'A4', w:210, h:297, dims:'21 × 29.7 cm'},
+      {label:'A3', w:297, h:420, dims:'29.7 × 42 cm'},
+      {label:'A2', w:420, h:594, dims:'42 × 59.4 cm'},
+      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm'}
+    ];
+    var scale = 0.17; // mm → px for display
+    var personH = Math.round(1700 * scale); // 170cm in mm
+
+    // Find which sizes this print offers
+    var printLabels = print.sizes.map(function(s){ return s.label; });
+    var firstActiveLabel = print.sizes.length ? print.sizes[0].label : '';
+
+    visual.innerHTML = '';
+    SIZES.forEach(function(sz){
+      var hasSz = printLabels.some(function(l){ return l.indexOf(sz.label) >= 0; });
+      var isActive = printLabels.some(function(l){ return l.indexOf(sz.label) >= 0 && l === firstActiveLabel; });
+      if(!hasSz) return; // only show sizes this print offers
+      var pxW = Math.round(sz.w * scale);
+      var pxH = Math.round(sz.h * scale);
+      var div = document.createElement('div');
+      div.className = 'sg-item';
+      div.innerHTML =
+        '<div class="sg-name">'+sz.label+'</div>'
+        +'<div class="sg-rect'+(isActive?' active-size':'')+'" style="width:'+pxW+'px;height:'+pxH+'px;"></div>'
+        +'<div class="sg-dim">'+sz.dims+'</div>';
+      visual.appendChild(div);
+    });
+    // Person silhouette for scale
+    var person = document.createElement('div');
+    person.className = 'sg-item';
+    person.innerHTML = '<div class="sg-name" style="color:var(--muted);font-weight:400;">You</div>'
+      +'<svg class="sg-person" width="18" height="'+personH+'" viewBox="0 0 18 '+personH+'" fill="none" xmlns="http://www.w3.org/2000/svg">'
+      +'<circle cx="9" cy="9" r="5" fill="var(--ink)"/>'
+      +'<rect x="5" y="18" width="8" height="'+(personH-36)+'" rx="4" fill="var(--ink)"/>'
+      +'<rect x="3" y="'+Math.round(personH*0.55)+'" width="5" height="'+(Math.round(personH*0.3))+'" rx="2" fill="var(--ink)"/>'
+      +'<rect x="10" y="'+Math.round(personH*0.55)+'" width="5" height="'+(Math.round(personH*0.3))+'" rx="2" fill="var(--ink)"/>'
+      +'</svg>'
+      +'<div class="sg-dim">170 cm</div>';
+    visual.appendChild(person);
+
+    // Wire toggle
+    panel.classList.remove('open');
+    toggle.textContent = 'Size guide';
+    toggle.onclick = function(){
+      var isOpen = panel.classList.toggle('open');
+      toggle.textContent = isOpen ? 'Hide guide' : 'Size guide';
+    };
+    // Update active size when pill is clicked
+    if(pdSizes){
+      pdSizes.addEventListener('click', function(e){
+        var pill = e.target.closest('.size-pill');
+        if(!pill) return;
+        var activeLabel = pill.textContent;
+        visual.querySelectorAll('.sg-rect').forEach(function(r,i){
+          var items = visual.querySelectorAll('.sg-item');
+          // match label
+          var name = items[i] ? items[i].querySelector('.sg-name') : null;
+          if(name) r.classList.toggle('active-size', printLabels.some(function(l){ return l === activeLabel && l.indexOf(name.textContent)>=0; }));
+        });
+      });
+    }
+  })();
+
+  // ── Collectors counter ────────────────────────────────────
+  (function(printTitle){
+    var el = document.getElementById('pdCollectors');
+    if(!el) return;
+    el.textContent = '';
+    // Use sessionStorage cache to avoid repeat fetches
+    var cacheKey = 'ja_collectors_cache';
+    var cacheTime = 'ja_collectors_ts';
+    var now = Date.now();
+    var cached = null;
+    try {
+      if(now - parseInt(sessionStorage.getItem(cacheTime)||0) < 300000)
+        cached = JSON.parse(sessionStorage.getItem(cacheKey)||'null');
+    } catch(e){}
+
+    function renderCount(orders){
+      var matches = orders.filter(function(o){
+        return (o.print_title||o.printTitle||'').toLowerCase() === printTitle.toLowerCase();
+      });
+      if(!matches.length) return;
+      var countries = {};
+      matches.forEach(function(o){ var c=o.country||''; if(c) countries[c]=1; });
+      var countryCount = Object.keys(countries).length;
+      el.textContent = 'In '+matches.length+' collection'+(matches.length!==1?'s':'')
+        +(countryCount>1?' across '+countryCount+' countries':'');
+    }
+
+    if(cached){ renderCount(cached); return; }
+    fetch('/api/orders').then(function(r){ return r.ok?r.json():null; }).then(function(d){
+      if(!d) return;
+      var orders = Array.isArray(d) ? d : (d.orders||d.data||[]);
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(orders));
+        sessionStorage.setItem(cacheTime, String(Date.now()));
+      } catch(e){}
+      renderCount(orders);
+    }).catch(function(){});
+  })(print.title);
+
   }, 250);
 }
 

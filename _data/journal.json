@@ -1,0 +1,31 @@
+{
+  "posts": [
+    {
+      "id": "j1",
+      "title": "Why I Only Shoot With My Phone",
+      "date": "2026-07-10",
+      "series": "Field Notes",
+      "excerpt": "There's a theory that constraints breed creativity. I've been testing it for four years with nothing but the camera in my pocket.",
+      "body": "There's a theory that constraints breed creativity. I've been testing it for four years with nothing but the camera in my pocket.\n\nWhen I first started photographing seriously, I had a DSLR. It was a good camera — technically capable, undeniably impressive. But I noticed something: people saw it coming. The moment I raised it, expressions changed. The street shifted. The light on a woman's face at Makola market would flatten the instant she noticed the lens.\n\nThe phone changed everything. It's invisible. People look at their own phones all day; one more person staring at a small rectangle is unremarkable. It gave me access to moments that the DSLR kept locked behind a wall of self-consciousness.\n\nThe technical limitations forced me to think harder about light. You can't zoom your way to a good photograph on a phone — you have to move, get closer, wait. The discipline became part of the practice.",
+      "img": ""
+    },
+    {
+      "id": "j2",
+      "title": "Stillness in Jamestown",
+      "date": "2026-06-22",
+      "series": "Behind the Print",
+      "excerpt": "The photograph almost didn't happen. I was leaving when the light shifted and I turned back.",
+      "body": "The photograph almost didn't happen. I was leaving when the light shifted and I turned back.\n\nI'd been in Jamestown for the afternoon — one of Accra's oldest neighbourhoods, where fishing boats still launch from the beach at dawn and the colonial-era lighthouse looks out over a coastline that hasn't changed in decades.\n\nI was walking toward the main road when the clouds broke at a particular angle. The light didn't announce itself; it just arrived. A man was sitting alone on a low wall, his back to me, looking at nothing in particular. The shadow line crossed him at exactly the right place.\n\nI had six seconds, maybe seven, before the cloud moved back. I got three frames. Only one worked.\n\nThat print — Stillness in Jamestown — is now in the shop. It's an edition of 15. There will never be more than 15.",
+      "img": "/s1.jpg"
+    },
+    {
+      "id": "j3",
+      "title": "On Editions and Why They Matter",
+      "date": "2026-06-05",
+      "series": "Field Notes",
+      "excerpt": "Limiting editions is a promise. Here's what that promise actually means.",
+      "body": "Limiting editions is a promise. Here's what that promise actually means.\n\nWhen I say a print is an edition of 15, I mean exactly 15 will ever be produced — signed, numbered, certified. Not 15 this year, not 15 and then a reprint. 15. When they're gone, that's it.\n\nThis matters for two reasons. The first is artistic: scarcity forces a kind of accountability. If I commit to only 15 of something, I have to be sure that something deserves to exist in the world. It can't be a filler piece. The discipline sharpens the edit.\n\nThe second reason is for collectors. When you buy a print, you're not buying a JPEG someone else can reproduce infinitely. You're buying a specific, numbered object — physical proof of a moment, certified by my signature and a document that travels with it. The certificate isn't bureaucracy; it's a record of what you own and why it's real.",
+      "img": ""
+    }
+  ]
+}
