@@ -226,6 +226,44 @@
     #dash-coa-content .cert-sig-autoval{font-size:13px;color:#111;padding-bottom:.3rem;min-height:44px;display:flex;align-items:flex-end;border-bottom:1px solid #111;}
     #dash-coa-content .cert-sig-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-top:.3rem;}
 
+    /* ── Content Manager ── */
+    .cms-subnav{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:28px;}
+    .cms-tab{padding:8px 18px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans);transition:color .15s;}
+    .cms-tab:hover{color:var(--ink);}
+    .cms-tab.active{color:var(--ink);border-bottom-color:var(--ink);}
+    .cms-panel{display:none;}
+    .cms-panel.active{display:block;}
+    .cms-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .cms-list-title{font-size:15px;font-weight:600;letter-spacing:-.01em;}
+    .cms-item{background:#fff;border:1px solid var(--rule);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .cms-item:hover{border-color:#c8c3bc;}
+    .cms-item-body{flex:1;min-width:0;}
+    .cms-item-title{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cms-item-meta{font-size:11px;color:var(--muted);}
+    .cms-item-actions{display:flex;gap:6px;flex-shrink:0;}
+    .cms-setup-note{background:var(--amber-bg);border:1px solid var(--amber-border);padding:14px 16px;font-size:13px;color:var(--amber);line-height:1.6;margin-bottom:24px;}
+    .cms-setup-note strong{display:block;margin-bottom:4px;font-weight:700;}
+    /* CMS modal */
+    #cmsModal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.45);overflow-y:auto;padding:40px 16px;}
+    #cmsModal.open{display:flex;}
+    .cms-modal-box{background:#fff;width:100%;max-width:600px;padding:32px 28px 40px;position:relative;margin:auto;}
+    .cms-modal-title{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
+    .cms-modal-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+    .cms-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);}
+    .cms-modal-close:hover{color:var(--ink);}
+    .cms-field{margin-bottom:16px;}
+    .cms-field label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+    .cms-field input[type=text],.cms-field input[type=date]{width:100%;border:1px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);outline:none;background:#fff;margin-bottom:0;}
+    .cms-field input:focus{border-color:var(--ink);}
+    .cms-field textarea{width:100%;border:1px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);outline:none;background:#fff;resize:vertical;line-height:1.6;}
+    .cms-field textarea:focus{border-color:var(--ink);}
+    .cms-field-note{font-size:11px;color:#bbb;margin-top:4px;}
+    .cms-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .cms-save-row{display:flex;align-items:center;gap:12px;margin-top:24px;}
+    .cms-status{font-size:12px;min-height:16px;}
+    .cms-status.ok{color:var(--green);}
+    .cms-status.err{color:var(--red);}
+
     /* ── Workflow ── */
     .wf-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--rule);}
     .wf-step:last-child{border-bottom:none;}
@@ -276,6 +314,7 @@
     <button type="button" class="tab" data-tab="followup">Follow-up</button>
     <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
     <button type="button" class="tab" data-tab="workflow">Workflow</button>
+    <button type="button" class="tab" data-tab="content">Content</button>
   </div>
 
   <!-- ════════════════════════════════════
@@ -456,7 +495,56 @@
     </div>
   </div>
 
+  <!-- ════════════════════════════════════
+       CONTENT MANAGER
+  ════════════════════════════════════ -->
+  <div class="panel" id="panel-content">
+    <h2 class="panel-title">Content Manager</h2>
+    <p class="panel-sub">Edit your journal posts and print catalogue directly from here. Changes go live in about 2 minutes.</p>
+
+    <div id="cms-setup-banner" class="cms-setup-note" style="display:none;">
+      <strong>Setup required</strong>
+      Add a <code>GITHUB_TOKEN</code> environment variable in your Cloudflare Pages dashboard, then come back here.
+      <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--amber);font-weight:600;">Open Cloudflare ↗</a>
+    </div>
+
+    <!-- Sub-nav -->
+    <div class="cms-subnav">
+      <button class="cms-tab active" data-cms="journal">Journal Posts</button>
+      <button class="cms-tab" data-cms="prints">Prints Catalogue</button>
+    </div>
+
+    <!-- Journal panel -->
+    <div class="cms-panel active" id="cms-panel-journal">
+      <div class="cms-list-header">
+        <div class="cms-list-title">Field Notes</div>
+        <button class="btn-add" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
+      </div>
+      <div id="cms-journal-list"><div class="empty-state"><div class="empty-icon">📝</div><p>Loading posts…</p></div></div>
+    </div>
+
+    <!-- Prints panel -->
+    <div class="cms-panel" id="cms-panel-prints">
+      <div class="cms-list-header">
+        <div class="cms-list-title">Prints</div>
+      </div>
+      <div id="cms-prints-list"><div class="empty-state"><div class="empty-icon">🖼</div><p>Loading prints…</p></div></div>
+    </div>
+  </div>
+
 </div><!-- /page -->
+
+<!-- ════════════════════════════════════
+     CMS EDIT MODAL
+════════════════════════════════════ -->
+<div id="cmsModal">
+  <div class="cms-modal-box">
+    <button class="cms-modal-close" onclick="cmsCloseModal()">✕</button>
+    <div class="cms-modal-title" id="cmsModalTitle">Edit</div>
+    <div class="cms-modal-sub" id="cmsModalSub"></div>
+    <div id="cmsModalBody"></div>
+  </div>
+</div>
 
 <!-- ════════════════════════════════════
      ADD ORDER MODAL
@@ -1926,6 +2014,235 @@ document.getElementById('wl-send').addEventListener('click', function(){
   },'wl-send','wl-status',['wl-email','wl-name','wl-title','wl-url']);
   logToSheet({action:'Waitlist Notified',buyer_name:v('wl-name'),buyer_email:v('wl-email'),print_title:v('wl-title'),notes:'',order_ref:''});
 });
+
+// ════════════════════════════════════════════════════════════════
+// CONTENT MANAGER
+// ════════════════════════════════════════════════════════════════
+var _cmsData = { journal: null, prints: null };
+var _cmsSha  = { journal: null, prints: null };
+var _cmsLoaded = { journal: false, prints: false };
+
+var CMS_KEY = 'jA9kx2vP7m';
+
+function cmsApiUrl(file){ return '/api/content?key='+CMS_KEY+'&file='+file; }
+
+// ── Sub-nav tabs ────────────────────────────────────────────────
+document.querySelectorAll('.cms-tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.cms-tab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.cms-panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    var which = btn.dataset.cms;
+    document.getElementById('cms-panel-'+which).classList.add('active');
+    if(!_cmsLoaded[which]) cmsLoad(which);
+  });
+});
+
+// Load content tab data when the main Content tab is clicked
+(function(){
+  var contentTabBtn = document.querySelector('[data-tab="content"]');
+  if(contentTabBtn){
+    contentTabBtn.addEventListener('click', function(){
+      if(!_cmsLoaded.journal) cmsLoad('journal');
+    });
+  }
+})();
+
+function cmsLoad(which){
+  _cmsLoaded[which] = true;
+  var el = document.getElementById('cms-'+which+'-list');
+  if(el) el.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+  fetch(cmsApiUrl(which))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){
+        // Token not configured
+        document.getElementById('cms-setup-banner').style.display = 'block';
+        if(el) el.innerHTML = '<div class="empty-state"><p style="color:var(--muted);">Configure GITHUB_TOKEN to enable editing.</p></div>';
+        return;
+      }
+      _cmsSha[which]  = d.sha;
+      _cmsData[which] = d.content;
+      if(which === 'journal') cmsRenderJournal();
+      if(which === 'prints')  cmsRenderPrints();
+    })
+    .catch(function(err){
+      if(el) el.innerHTML = '<div class="empty-state"><p style="color:var(--red);">Could not load content. Check console.</p></div>';
+      console.error('CMS load error:', err);
+    });
+}
+
+// ── Journal ─────────────────────────────────────────────────────
+function cmsRenderJournal(){
+  var el = document.getElementById('cms-journal-list');
+  if(!el) return;
+  var posts = (_cmsData.journal && _cmsData.journal.posts) || [];
+  if(!posts.length){
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No posts yet. Add one above.</p></div>';
+    return;
+  }
+  el.innerHTML = posts.map(function(p, i){
+    return '<div class="cms-item">'
+      +'<div class="cms-item-body">'
+        +'<div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.series||'')+(p.date ? ' &nbsp;·&nbsp; '+p.date : '')+'</div>'
+      +'</div>'
+      +'<div class="cms-item-actions">'
+        +'<button class="btn-card" onclick="cmsOpenJournalEdit('+i+')">Edit</button>'
+        +'<button class="btn-card danger" onclick="cmsDeleteJournal('+i+')">Delete</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function cmsOpenJournalEdit(idx){
+  var isNew = (idx === null);
+  var post = isNew
+    ? { id:'j'+Date.now(), title:'', date:new Date().toISOString().slice(0,10), series:'Field Notes', excerpt:'', body:'', img:'' }
+    : (_cmsData.journal.posts[idx] || {});
+  document.getElementById('cmsModalTitle').textContent = isNew ? 'New Post' : 'Edit Post';
+  document.getElementById('cmsModalSub').textContent   = isNew ? 'Fill in the details below.' : 'Edit the post details below.';
+  document.getElementById('cmsModalBody').innerHTML =
+    '<div class="cms-field"><label>Title</label><input type="text" id="cms-j-title" value="'+escAttr(post.title||'')+'"></div>'
+    +'<div class="cms-grid2">'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-j-series" value="'+escAttr(post.series||'')+'"></div>'
+    +'</div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences shown in the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
+    +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(full story — blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
+    +'<div class="cms-save-row">'
+      +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+','+JSON.stringify(post.id)+')">Save &amp; Publish</button>'
+      +'<div class="cms-status" id="cms-j-status"></div>'
+    +'</div>';
+  cmsOpenModal();
+}
+
+function cmsSaveJournal(idx, postId){
+  var st = document.getElementById('cms-j-status');
+  st.className = 'cms-status'; st.textContent = 'Saving…';
+  var updated = {
+    id:      postId || ('j'+Date.now()),
+    title:   document.getElementById('cms-j-title').value.trim(),
+    date:    document.getElementById('cms-j-date').value,
+    series:  document.getElementById('cms-j-series').value.trim(),
+    excerpt: document.getElementById('cms-j-excerpt').value.trim(),
+    body:    document.getElementById('cms-j-body').value.trim(),
+    img:     '',
+  };
+  if(!updated.title){ st.className='cms-status err'; st.textContent='Title is required.'; return; }
+  var posts = (_cmsData.journal && _cmsData.journal.posts) ? _cmsData.journal.posts.slice() : [];
+  if(idx === null){ posts.unshift(updated); }
+  else { posts[idx] = updated; }
+  var newContent = { posts: posts };
+  cmsPut('journal', newContent, function(err, newSha){
+    if(err){ st.className='cms-status err'; st.textContent=err; return; }
+    st.className='cms-status ok'; st.textContent='Saved ✓ — live in ~2 min';
+    _cmsData.journal = newContent;
+    if(newSha) _cmsSha.journal = newSha;
+    cmsRenderJournal();
+    setTimeout(cmsCloseModal, 1400);
+  });
+}
+
+function cmsDeleteJournal(idx){
+  var post = _cmsData.journal.posts[idx];
+  if(!confirm('Delete "'+post.title+'"? This cannot be undone.')) return;
+  var posts = _cmsData.journal.posts.slice();
+  posts.splice(idx, 1);
+  var newContent = { posts: posts };
+  cmsPut('journal', newContent, function(err, newSha){
+    if(err){ showDashModal('Delete failed: '+err); return; }
+    _cmsData.journal = newContent;
+    if(newSha) _cmsSha.journal = newSha;
+    cmsRenderJournal();
+  });
+}
+
+// ── Prints ──────────────────────────────────────────────────────
+function cmsRenderPrints(){
+  var el = document.getElementById('cms-prints-list');
+  if(!el) return;
+  var prints = (_cmsData.prints && _cmsData.prints.prints) || [];
+  if(!prints.length){ el.innerHTML = '<div class="empty-state"><p>No prints found.</p></div>'; return; }
+  el.innerHTML = prints.map(function(p, i){
+    return '<div class="cms-item">'
+      +'<div class="cms-item-body">'
+        +'<div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.series||'')+'&nbsp;·&nbsp;'+escH(p.edition||'')+'</div>'
+      +'</div>'
+      +'<div class="cms-item-actions">'
+        +'<button class="btn-card" onclick="cmsOpenPrintEdit('+i+')">Edit</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function cmsOpenPrintEdit(idx){
+  var print = (_cmsData.prints && _cmsData.prints.prints && _cmsData.prints.prints[idx]) || {};
+  document.getElementById('cmsModalTitle').textContent = 'Edit Print';
+  document.getElementById('cmsModalSub').textContent   = 'Changes update the shop listing.';
+  document.getElementById('cmsModalBody').innerHTML =
+    '<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
+    +'<div class="cms-grid2">'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div>'
+    +'</div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Image path <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(e.g. /s1.jpg — upload the file to the repo separately)</span></label><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'"></div>'
+    +'<div class="cms-save-row">'
+      +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePrint('+idx+','+JSON.stringify(print.id||'')+')">Save &amp; Publish</button>'
+      +'<div class="cms-status" id="cms-p-status"></div>'
+    +'</div>';
+  cmsOpenModal();
+}
+
+function cmsSavePrint(idx, printId){
+  var st = document.getElementById('cms-p-status');
+  st.className = 'cms-status'; st.textContent = 'Saving…';
+  var updated = {
+    id:      printId,
+    title:   document.getElementById('cms-p-title').value.trim(),
+    series:  document.getElementById('cms-p-series').value.trim(),
+    edition: document.getElementById('cms-p-edition').value.trim(),
+    img:     document.getElementById('cms-p-img').value.trim(),
+  };
+  if(!updated.title){ st.className='cms-status err'; st.textContent='Title is required.'; return; }
+  var prints = (_cmsData.prints && _cmsData.prints.prints) ? _cmsData.prints.prints.slice() : [];
+  prints[idx] = updated;
+  var newContent = { prints: prints };
+  cmsPut('prints', newContent, function(err, newSha){
+    if(err){ st.className='cms-status err'; st.textContent=err; return; }
+    st.className='cms-status ok'; st.textContent='Saved ✓ — live in ~2 min';
+    _cmsData.prints = newContent;
+    if(newSha) _cmsSha.prints = newSha;
+    cmsRenderPrints();
+    setTimeout(cmsCloseModal, 1400);
+  });
+}
+
+// ── Shared API write ────────────────────────────────────────────
+function cmsPut(file, content, cb){
+  fetch('/api/content?key='+CMS_KEY, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ file: file, content: content, sha: _cmsSha[file] }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d.ok) cb(d.error||'Unknown error');
+    else       cb(null, d.sha);
+  })
+  .catch(function(err){ cb('Network error: '+err.message); });
+}
+
+// ── Modal helpers ───────────────────────────────────────────────
+function cmsOpenModal(){  document.getElementById('cmsModal').classList.add('open'); }
+function cmsCloseModal(){ document.getElementById('cmsModal').classList.remove('open'); }
+document.getElementById('cmsModal').addEventListener('click', function(e){
+  if(e.target === this) cmsCloseModal();
+});
+
+// ── Escape helpers ──────────────────────────────────────────────
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Init ─────────────────────────────────────────────────────────
 renderOrders();
