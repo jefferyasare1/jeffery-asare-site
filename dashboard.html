@@ -263,6 +263,29 @@
     .cms-status{font-size:12px;min-height:16px;}
     .cms-status.ok{color:var(--green);}
     .cms-status.err{color:var(--red);}
+    /* Image upload */
+    .img-upload-row{display:flex;gap:8px;align-items:center;}
+    .img-upload-row input[type=text]{flex:1;min-width:0;}
+    .btn-upload{display:inline-flex;align-items:center;gap:4px;padding:9px 14px;border:1px solid var(--rule);background:var(--warm);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;}
+    .btn-upload:hover{border-color:var(--ink);color:var(--ink);}
+    .btn-upload input[type=file]{display:none;}
+    /* Reorder arrows */
+    .cms-item-reorder{display:flex;flex-direction:column;gap:2px;flex-shrink:0;margin-right:4px;}
+    .btn-reorder{background:none;border:1px solid var(--rule);width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:0;line-height:1;}
+    .btn-reorder:hover:not(:disabled){border-color:var(--ink);color:var(--ink);}
+    .btn-reorder:disabled{opacity:.2;cursor:default;}
+    /* Series tabs */
+    .series-selector{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--rule);overflow:hidden;background:#fff;flex-wrap:wrap;}
+    .series-btn{flex:1;padding:9px 14px;font-size:11px;font-weight:500;font-family:var(--sans);background:none;border:none;border-right:1px solid var(--rule);cursor:pointer;color:var(--muted);transition:all .15s;white-space:nowrap;}
+    .series-btn:last-child{border-right:none;}
+    .series-btn.active{background:var(--ink);color:#fff;}
+    .series-btn:hover:not(.active){background:var(--warm);color:var(--ink);}
+    /* Site text sections */
+    .cms-section{margin-bottom:36px;padding-bottom:32px;border-bottom:1px solid var(--rule);}
+    .cms-section:last-child{border-bottom:none;margin-bottom:0;}
+    .cms-section-title{font-size:13px;font-weight:700;letter-spacing:-.01em;margin-bottom:16px;color:var(--ink);}
+    /* Thumbnail in CMS list */
+    .img-preview{width:52px;height:64px;object-fit:cover;border:1px solid var(--rule);flex-shrink:0;background:var(--warm);display:block;margin-right:4px;}
 
     /* ── Workflow ── */
     .wf-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--rule);}
@@ -500,18 +523,20 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-content">
     <h2 class="panel-title">Content Manager</h2>
-    <p class="panel-sub">Edit your journal posts and print catalogue directly from here. Changes go live in about 2 minutes.</p>
+    <p class="panel-sub">Edit everything on your site from here. Changes go live in about 2 minutes after you save.</p>
 
     <div id="cms-setup-banner" class="cms-setup-note" style="display:none;">
       <strong>Setup required</strong>
-      Add a <code>GITHUB_TOKEN</code> environment variable in your Cloudflare Pages dashboard, then come back here.
+      Add a <code>GITHUB_TOKEN</code> environment variable in Cloudflare Pages, then come back here.
       <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--amber);font-weight:600;">Open Cloudflare ↗</a>
     </div>
 
     <!-- Sub-nav -->
     <div class="cms-subnav">
-      <button class="cms-tab active" data-cms="journal">Journal Posts</button>
-      <button class="cms-tab" data-cms="prints">Prints Catalogue</button>
+      <button class="cms-tab active" data-cms="journal">Journal</button>
+      <button class="cms-tab" data-cms="prints">Prints</button>
+      <button class="cms-tab" data-cms="portfolio">Portfolio</button>
+      <button class="cms-tab" data-cms="site">Site Text</button>
     </div>
 
     <!-- Journal panel -->
@@ -526,11 +551,87 @@
     <!-- Prints panel -->
     <div class="cms-panel" id="cms-panel-prints">
       <div class="cms-list-header">
-        <div class="cms-list-title">Prints</div>
+        <div class="cms-list-title">Prints Catalogue</div>
+        <button class="btn-add" onclick="cmsOpenPrintEdit(null)">+ New Print</button>
       </div>
       <div id="cms-prints-list"><div class="empty-state"><div class="empty-icon">🖼</div><p>Loading prints…</p></div></div>
     </div>
-  </div>
+
+    <!-- Portfolio panel -->
+    <div class="cms-panel" id="cms-panel-portfolio">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Select a series to manage its photos.</p>
+      <div class="series-selector" id="cms-series-selector"></div>
+      <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
+        <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
+        <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+      </div>
+      <div id="cms-portfolio-list"></div>
+    </div>
+
+    <!-- Site Text panel -->
+    <div class="cms-panel" id="cms-panel-site">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:28px;">Edit the text and images shown across your site. Each section saves independently.</p>
+
+      <!-- Hero -->
+      <div class="cms-section">
+        <div class="cms-section-title">Home Page Hero</div>
+        <div class="cms-grid2">
+          <div class="cms-field" style="margin-bottom:0"><label>Headline line 1</label><input type="text" id="st-hero-line1"></div>
+          <div class="cms-field" style="margin-bottom:0"><label>Headline line 2</label><input type="text" id="st-hero-line2"></div>
+        </div>
+        <div class="cms-field" style="margin-top:12px"><label>Tagline</label><textarea id="st-hero-desc" rows="2"></textarea></div>
+        <div class="cms-section-title" style="font-size:11px;color:var(--muted);font-weight:600;margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;">Hero Images (1–5)</div>
+        <div id="st-hero-imgs"></div>
+        <div class="cms-field"><label>About portrait photo</label><div class="img-upload-row"><input type="text" id="st-about-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-about-photo','st-about-photo-status')"></label></div><div class="cms-status" id="st-about-photo-status"></div></div>
+        <div class="cms-field"><label>Contact page photo</label><div class="img-upload-row"><input type="text" id="st-contact-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-contact-photo','st-contact-photo-status')"></label></div><div class="cms-status" id="st-contact-photo-status"></div></div>
+        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteHero()">Save Hero &amp; Images</button><div class="cms-status" id="cms-hero-status"></div></div>
+      </div>
+
+      <!-- About -->
+      <div class="cms-section">
+        <div class="cms-section-title">About Page</div>
+        <div class="cms-field"><label>Bio — paragraph 1</label><textarea id="st-bio1" rows="3"></textarea></div>
+        <div class="cms-field"><label>Bio — paragraph 2</label><textarea id="st-bio2" rows="3"></textarea></div>
+        <div class="cms-field"><label>Bio — paragraph 3</label><textarea id="st-bio3" rows="3"></textarea></div>
+        <div class="cms-field"><label>Bio — paragraph 4</label><textarea id="st-bio4" rows="3"></textarea></div>
+        <div class="cms-field"><label>Bio — paragraph 5</label><textarea id="st-bio5" rows="3"></textarea></div>
+        <div class="cms-field"><label>Portrait caption</label><input type="text" id="st-about-caption"></div>
+        <div class="cms-field"><label>Location heading</label><input type="text" id="st-loc-heading"></div>
+        <div class="cms-field"><label>Location — paragraph 1</label><textarea id="st-loc-p1" rows="2"></textarea></div>
+        <div class="cms-field"><label>Location — paragraph 2</label><textarea id="st-loc-p2" rows="2"></textarea></div>
+        <div class="cms-field"><label>Location — paragraph 3</label><textarea id="st-loc-p3" rows="2"></textarea></div>
+        <div class="cms-field"><label>Philosophy heading</label><input type="text" id="st-phil-heading"></div>
+        <div class="cms-field"><label>Philosophy — paragraph 1</label><textarea id="st-phil-p1" rows="3"></textarea></div>
+        <div class="cms-field"><label>Philosophy — paragraph 2</label><textarea id="st-phil-p2" rows="3"></textarea></div>
+        <div class="cms-field"><label>Philosophy — paragraph 3</label><textarea id="st-phil-p3" rows="3"></textarea></div>
+        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteAbout()">Save About Text</button><div class="cms-status" id="cms-about-status"></div></div>
+      </div>
+
+      <!-- Shop -->
+      <div class="cms-section">
+        <div class="cms-section-title">Shop Page</div>
+        <div class="cms-field"><label>Page title</label><input type="text" id="st-shop-title"></div>
+        <div class="cms-field"><label>Description</label><textarea id="st-shop-desc" rows="2"></textarea></div>
+        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteShop()">Save Shop Text</button><div class="cms-status" id="cms-shop-status"></div></div>
+      </div>
+
+      <!-- Contact -->
+      <div class="cms-section">
+        <div class="cms-section-title">Contact Page</div>
+        <div class="cms-field"><label>Intro text</label><textarea id="st-contact-sub" rows="2"></textarea></div>
+        <div class="cms-grid2">
+          <div class="cms-field" style="margin-bottom:0"><label>Email address</label><input type="text" id="st-contact-email"></div>
+          <div class="cms-field" style="margin-bottom:0"><label>Response time note</label><input type="text" id="st-contact-response" placeholder="Typically within 24 hours"></div>
+        </div>
+        <div class="cms-grid2" style="margin-top:12px">
+          <div class="cms-field" style="margin-bottom:0"><label>Instagram handle</label><input type="text" id="st-instagram-handle" placeholder="@jeffasare"></div>
+          <div class="cms-field" style="margin-bottom:0"><label>Instagram URL</label><input type="text" id="st-instagram-url"></div>
+        </div>
+        <div class="cms-save-row" style="margin-top:20px"><button class="btn-card primary" onclick="cmsSaveSiteContact()">Save Contact Info</button><div class="cms-status" id="cms-contact-status"></div></div>
+      </div>
+
+    </div><!-- /cms-panel-site -->
+  </div><!-- /panel-content -->
 
 </div><!-- /page -->
 
@@ -2018,13 +2119,28 @@ document.getElementById('wl-send').addEventListener('click', function(){
 // ════════════════════════════════════════════════════════════════
 // CONTENT MANAGER
 // ════════════════════════════════════════════════════════════════
-var _cmsData = { journal: null, prints: null };
-var _cmsSha  = { journal: null, prints: null };
+// CONTENT MANAGER
+// ════════════════════════════════════════════════════════════════
+var _cmsData   = { journal: null, prints: null };
+var _cmsSha    = { journal: null, prints: null };
 var _cmsLoaded = { journal: false, prints: false };
+
+// Portfolio: per-series
+var _portfolioData   = {};   // { slug: photos[] }
+var _portfolioSha    = {};   // { slug: sha }
+var _portfolioLoaded = {};   // { slug: bool }
+var _portfolioCurrent = null;
+var _seriesList = null;
+var _seriesSha  = null;
+
+// Site text: per settings file
+var _siteData   = {};
+var _siteSha    = {};
+var _siteLoaded = {};
 
 var CMS_KEY = 'jA9kx2vP7m';
 
-function cmsApiUrl(file){ return '/api/content?key='+CMS_KEY+'&file='+file; }
+function cmsApiUrl(file){ return '/api/content?key='+CMS_KEY+'&file='+encodeURIComponent(file); }
 
 // ── Sub-nav tabs ────────────────────────────────────────────────
 document.querySelectorAll('.cms-tab').forEach(function(btn){
@@ -2034,18 +2150,17 @@ document.querySelectorAll('.cms-tab').forEach(function(btn){
     btn.classList.add('active');
     var which = btn.dataset.cms;
     document.getElementById('cms-panel-'+which).classList.add('active');
-    if(!_cmsLoaded[which]) cmsLoad(which);
+    if(which === 'journal'   && !_cmsLoaded.journal) cmsLoad('journal');
+    if(which === 'prints'    && !_cmsLoaded.prints)  cmsLoad('prints');
+    if(which === 'portfolio') cmsInitPortfolio();
+    if(which === 'site')      cmsSiteInit();
   });
 });
 
-// Load content tab data when the main Content tab is clicked
+// Auto-load journal when main Content tab is clicked
 (function(){
-  var contentTabBtn = document.querySelector('[data-tab="content"]');
-  if(contentTabBtn){
-    contentTabBtn.addEventListener('click', function(){
-      if(!_cmsLoaded.journal) cmsLoad('journal');
-    });
-  }
+  var btn = document.querySelector('[data-tab="content"]');
+  if(btn) btn.addEventListener('click', function(){ if(!_cmsLoaded.journal) cmsLoad('journal'); });
 })();
 
 function cmsLoad(which){
@@ -2056,193 +2171,417 @@ function cmsLoad(which){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d.ok){
-        // Token not configured
-        document.getElementById('cms-setup-banner').style.display = 'block';
-        if(el) el.innerHTML = '<div class="empty-state"><p style="color:var(--muted);">Configure GITHUB_TOKEN to enable editing.</p></div>';
+        document.getElementById('cms-setup-banner').style.display='block';
+        if(el) el.innerHTML='<div class="empty-state"><p style="color:var(--muted);">Configure GITHUB_TOKEN to enable editing.</p></div>';
         return;
       }
-      _cmsSha[which]  = d.sha;
-      _cmsData[which] = d.content;
-      if(which === 'journal') cmsRenderJournal();
-      if(which === 'prints')  cmsRenderPrints();
+      _cmsSha[which]=d.sha; _cmsData[which]=d.content;
+      if(which==='journal') cmsRenderJournal();
+      if(which==='prints')  cmsRenderPrints();
     })
     .catch(function(err){
-      if(el) el.innerHTML = '<div class="empty-state"><p style="color:var(--red);">Could not load content. Check console.</p></div>';
-      console.error('CMS load error:', err);
+      if(el) el.innerHTML='<div class="empty-state"><p style="color:var(--red);">Could not load. Check console.</p></div>';
+      console.error('CMS load error:',err);
     });
 }
 
 // ── Journal ─────────────────────────────────────────────────────
 function cmsRenderJournal(){
-  var el = document.getElementById('cms-journal-list');
-  if(!el) return;
-  var posts = (_cmsData.journal && _cmsData.journal.posts) || [];
-  if(!posts.length){
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No posts yet. Add one above.</p></div>';
-    return;
-  }
-  el.innerHTML = posts.map(function(p, i){
+  var el=document.getElementById('cms-journal-list'); if(!el) return;
+  var posts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  if(!posts.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">📝</div><p>No posts yet. Add one above.</p></div>'; return; }
+  el.innerHTML=posts.map(function(p,i){
     return '<div class="cms-item">'
-      +'<div class="cms-item-body">'
-        +'<div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
-        +'<div class="cms-item-meta">'+escH(p.series||'')+(p.date ? ' &nbsp;·&nbsp; '+p.date : '')+'</div>'
+      +'<div class="cms-item-reorder">'
+        +'<button class="btn-reorder" onclick="cmsMoveJournal('+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
+        +'<button class="btn-reorder" onclick="cmsMoveJournal('+i+',1)"'+(i===posts.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
+      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.series||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div></div>'
       +'<div class="cms-item-actions">'
         +'<button class="btn-card" onclick="cmsOpenJournalEdit('+i+')">Edit</button>'
         +'<button class="btn-card danger" onclick="cmsDeleteJournal('+i+')">Delete</button>'
-      +'</div>'
-    +'</div>';
+      +'</div></div>';
   }).join('');
 }
 
+function cmsMoveJournal(idx,dir){
+  var posts=_cmsData.journal.posts.slice(),ni=idx+dir;
+  if(ni<0||ni>=posts.length) return;
+  var t=posts[idx]; posts[idx]=posts[ni]; posts[ni]=t;
+  var nc={posts:posts};
+  cmsPut('journal',nc,function(err,sha){ if(err){alert('Reorder failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal(); });
+}
+
 function cmsOpenJournalEdit(idx){
-  var isNew = (idx === null);
-  var post = isNew
-    ? { id:'j'+Date.now(), title:'', date:new Date().toISOString().slice(0,10), series:'Field Notes', excerpt:'', body:'', img:'' }
-    : (_cmsData.journal.posts[idx] || {});
-  document.getElementById('cmsModalTitle').textContent = isNew ? 'New Post' : 'Edit Post';
-  document.getElementById('cmsModalSub').textContent   = isNew ? 'Fill in the details below.' : 'Edit the post details below.';
-  document.getElementById('cmsModalBody').innerHTML =
+  var isNew=(idx===null);
+  var post=isNew?{id:'j'+Date.now(),title:'',date:new Date().toISOString().slice(0,10),series:'Field Notes',excerpt:'',body:'',img:''}:(_cmsData.journal.posts[idx]||{});
+  document.getElementById('cmsModalTitle').textContent=isNew?'New Post':'Edit Post';
+  document.getElementById('cmsModalSub').textContent=isNew?'Fill in the details below.':'Edit the post details below.';
+  document.getElementById('cmsModalBody').innerHTML=
     '<div class="cms-field"><label>Title</label><input type="text" id="cms-j-title" value="'+escAttr(post.title||'')+'"></div>'
-    +'<div class="cms-grid2">'
-      +'<div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
-      +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-j-series" value="'+escAttr(post.series||'')+'"></div>'
-    +'</div>'
-    +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences shown in the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
-    +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(full story — blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
-    +'<div class="cms-save-row">'
-      +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+','+JSON.stringify(post.id)+')">Save &amp; Publish</button>'
-      +'<div class="cms-status" id="cms-j-status"></div>'
-    +'</div>';
+    +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-j-series" value="'+escAttr(post.series||'')+'"></div></div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
+    +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
+    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+','+JSON.stringify(post.id)+')">Save &amp; Publish</button>'
+    +'<div class="cms-status" id="cms-j-status"></div></div>';
   cmsOpenModal();
 }
 
-function cmsSaveJournal(idx, postId){
-  var st = document.getElementById('cms-j-status');
-  st.className = 'cms-status'; st.textContent = 'Saving…';
-  var updated = {
-    id:      postId || ('j'+Date.now()),
-    title:   document.getElementById('cms-j-title').value.trim(),
-    date:    document.getElementById('cms-j-date').value,
-    series:  document.getElementById('cms-j-series').value.trim(),
-    excerpt: document.getElementById('cms-j-excerpt').value.trim(),
-    body:    document.getElementById('cms-j-body').value.trim(),
-    img:     '',
-  };
-  if(!updated.title){ st.className='cms-status err'; st.textContent='Title is required.'; return; }
-  var posts = (_cmsData.journal && _cmsData.journal.posts) ? _cmsData.journal.posts.slice() : [];
-  if(idx === null){ posts.unshift(updated); }
-  else { posts[idx] = updated; }
-  var newContent = { posts: posts };
-  cmsPut('journal', newContent, function(err, newSha){
-    if(err){ st.className='cms-status err'; st.textContent=err; return; }
-    st.className='cms-status ok'; st.textContent='Saved ✓ — live in ~2 min';
-    _cmsData.journal = newContent;
-    if(newSha) _cmsSha.journal = newSha;
-    cmsRenderJournal();
-    setTimeout(cmsCloseModal, 1400);
+function cmsSaveJournal(idx,postId){
+  var st=document.getElementById('cms-j-status'); st.className='cms-status'; st.textContent='Saving…';
+  var u={id:postId||('j'+Date.now()),title:document.getElementById('cms-j-title').value.trim(),
+    date:document.getElementById('cms-j-date').value,series:document.getElementById('cms-j-series').value.trim(),
+    excerpt:document.getElementById('cms-j-excerpt').value.trim(),body:document.getElementById('cms-j-body').value.trim(),img:''};
+  if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
+  var posts=(_cmsData.journal&&_cmsData.journal.posts)?_cmsData.journal.posts.slice():[];
+  if(idx===null){posts.unshift(u);}else{posts[idx]=u;}
+  var nc={posts:posts};
+  cmsPut('journal',nc,function(err,sha){
+    if(err){st.className='cms-status err';st.textContent=err;return;}
+    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+    _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal(); setTimeout(cmsCloseModal,1400);
   });
 }
 
 function cmsDeleteJournal(idx){
-  var post = _cmsData.journal.posts[idx];
+  var post=_cmsData.journal.posts[idx];
   if(!confirm('Delete "'+post.title+'"? This cannot be undone.')) return;
-  var posts = _cmsData.journal.posts.slice();
-  posts.splice(idx, 1);
-  var newContent = { posts: posts };
-  cmsPut('journal', newContent, function(err, newSha){
-    if(err){ showDashModal('Delete failed: '+err); return; }
-    _cmsData.journal = newContent;
-    if(newSha) _cmsSha.journal = newSha;
-    cmsRenderJournal();
-  });
+  var posts=_cmsData.journal.posts.slice(); posts.splice(idx,1);
+  var nc={posts:posts};
+  cmsPut('journal',nc,function(err,sha){if(err){alert('Delete failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal();});
 }
 
 // ── Prints ──────────────────────────────────────────────────────
 function cmsRenderPrints(){
-  var el = document.getElementById('cms-prints-list');
-  if(!el) return;
-  var prints = (_cmsData.prints && _cmsData.prints.prints) || [];
-  if(!prints.length){ el.innerHTML = '<div class="empty-state"><p>No prints found.</p></div>'; return; }
-  el.innerHTML = prints.map(function(p, i){
+  var el=document.getElementById('cms-prints-list'); if(!el) return;
+  var prints=(_cmsData.prints&&_cmsData.prints.prints)||[];
+  if(!prints.length){el.innerHTML='<div class="empty-state"><p>No prints yet. Add one above.</p></div>';return;}
+  el.innerHTML=prints.map(function(p,i){
     return '<div class="cms-item">'
-      +'<div class="cms-item-body">'
-        +'<div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
-        +'<div class="cms-item-meta">'+escH(p.series||'')+'&nbsp;·&nbsp;'+escH(p.edition||'')+'</div>'
+      +'<div class="cms-item-reorder">'
+        +'<button class="btn-reorder" onclick="cmsMovePrint('+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
+        +'<button class="btn-reorder" onclick="cmsMovePrint('+i+',1)"'+(i===prints.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
+      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.series||'')+'&nbsp;·&nbsp;'+escH(p.edition||'')+'</div></div>'
       +'<div class="cms-item-actions">'
         +'<button class="btn-card" onclick="cmsOpenPrintEdit('+i+')">Edit</button>'
-      +'</div>'
-    +'</div>';
+        +'<button class="btn-card danger" onclick="cmsDeletePrint('+i+')">Delete</button>'
+      +'</div></div>';
   }).join('');
 }
 
+function cmsMovePrint(idx,dir){
+  var prints=_cmsData.prints.prints.slice(),ni=idx+dir;
+  if(ni<0||ni>=prints.length) return;
+  var t=prints[idx]; prints[idx]=prints[ni]; prints[ni]=t;
+  var nc={prints:prints};
+  cmsPut('prints',nc,function(err,sha){if(err){alert('Reorder failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
+}
+
 function cmsOpenPrintEdit(idx){
-  var print = (_cmsData.prints && _cmsData.prints.prints && _cmsData.prints.prints[idx]) || {};
-  document.getElementById('cmsModalTitle').textContent = 'Edit Print';
-  document.getElementById('cmsModalSub').textContent   = 'Changes update the shop listing.';
-  document.getElementById('cmsModalBody').innerHTML =
+  var isNew=(idx===null);
+  var print=isNew?{id:'s'+Date.now(),title:'',series:'',edition:'',img:''}:((_cmsData.prints&&_cmsData.prints.prints&&_cmsData.prints.prints[idx])||{});
+  document.getElementById('cmsModalTitle').textContent=isNew?'New Print':'Edit Print';
+  document.getElementById('cmsModalSub').textContent=isNew?'Add a new print to the shop.':'Changes update the shop listing.';
+  document.getElementById('cmsModalBody').innerHTML=
     '<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
-    +'<div class="cms-grid2">'
-      +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
-      +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div>'
-    +'</div>'
-    +'<div class="cms-field" style="margin-top:16px"><label>Image path <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(e.g. /s1.jpg — upload the file to the repo separately)</span></label><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'"></div>'
-    +'<div class="cms-save-row">'
-      +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePrint('+idx+','+JSON.stringify(print.id||'')+')">Save &amp; Publish</button>'
-      +'<div class="cms-status" id="cms-p-status"></div>'
-    +'</div>';
+    +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div></div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Image</label>'
+      +'<div class="img-upload-row"><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
+      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-p-img\',\'cms-p-upload-status\')"></label></div>'
+      +'<div class="cms-status" id="cms-p-upload-status"></div></div>'
+    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePrint('+JSON.stringify(idx)+','+JSON.stringify(print.id||'')+')">Save &amp; Publish</button>'
+    +'<div class="cms-status" id="cms-p-status"></div></div>';
   cmsOpenModal();
 }
 
-function cmsSavePrint(idx, printId){
-  var st = document.getElementById('cms-p-status');
-  st.className = 'cms-status'; st.textContent = 'Saving…';
-  var updated = {
-    id:      printId,
-    title:   document.getElementById('cms-p-title').value.trim(),
-    series:  document.getElementById('cms-p-series').value.trim(),
-    edition: document.getElementById('cms-p-edition').value.trim(),
-    img:     document.getElementById('cms-p-img').value.trim(),
-  };
-  if(!updated.title){ st.className='cms-status err'; st.textContent='Title is required.'; return; }
-  var prints = (_cmsData.prints && _cmsData.prints.prints) ? _cmsData.prints.prints.slice() : [];
-  prints[idx] = updated;
-  var newContent = { prints: prints };
-  cmsPut('prints', newContent, function(err, newSha){
-    if(err){ st.className='cms-status err'; st.textContent=err; return; }
-    st.className='cms-status ok'; st.textContent='Saved ✓ — live in ~2 min';
-    _cmsData.prints = newContent;
-    if(newSha) _cmsSha.prints = newSha;
-    cmsRenderPrints();
-    setTimeout(cmsCloseModal, 1400);
+function cmsSavePrint(idx,printId){
+  var st=document.getElementById('cms-p-status'); st.className='cms-status'; st.textContent='Saving…';
+  var u={id:printId||('s'+Date.now()),title:document.getElementById('cms-p-title').value.trim(),
+    series:document.getElementById('cms-p-series').value.trim(),edition:document.getElementById('cms-p-edition').value.trim(),
+    img:document.getElementById('cms-p-img').value.trim()};
+  if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
+  var prints=(_cmsData.prints&&_cmsData.prints.prints)?_cmsData.prints.prints.slice():[];
+  if(idx===null){prints.push(u);}else{prints[idx]=u;}
+  var nc={prints:prints};
+  cmsPut('prints',nc,function(err,sha){
+    if(err){st.className='cms-status err';st.textContent=err;return;}
+    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+    _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints(); setTimeout(cmsCloseModal,1400);
   });
 }
 
+function cmsDeletePrint(idx){
+  var p=_cmsData.prints.prints[idx];
+  if(!confirm('Delete "'+p.title+'"? This cannot be undone.')) return;
+  var prints=_cmsData.prints.prints.slice(); prints.splice(idx,1);
+  var nc={prints:prints};
+  cmsPut('prints',nc,function(err,sha){if(err){alert('Delete failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
+}
+
+// ── Portfolio ────────────────────────────────────────────────────
+function cmsInitPortfolio(){
+  if(_seriesList){ cmsBuildSeriesSelector(); if(!_portfolioCurrent&&_seriesList.length) cmsSelectSeries(_seriesList[0].slug); return; }
+  var sel=document.getElementById('cms-series-selector');
+  if(sel) sel.innerHTML='<p style="font-size:12px;color:var(--muted);">Loading series…</p>';
+  fetch(cmsApiUrl('settings/series'))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok){if(sel)sel.innerHTML='<p style="color:var(--red);font-size:12px;">Could not load series.</p>';return;}
+      _seriesList=(d.content&&d.content.series)||[]; _seriesSha=d.sha;
+      cmsBuildSeriesSelector();
+      if(_seriesList.length) cmsSelectSeries(_seriesList[0].slug);
+    })
+    .catch(function(){if(sel)sel.innerHTML='<p style="color:var(--red);font-size:12px;">Error.</p>';});
+}
+
+function cmsBuildSeriesSelector(){
+  var sel=document.getElementById('cms-series-selector'); if(!sel||!_seriesList) return;
+  sel.innerHTML=_seriesList.map(function(s){
+    return '<button class="series-btn'+(s.slug===_portfolioCurrent?' active':'')+'" onclick="cmsSelectSeries(\''+escAttr(s.slug)+'\')">'+escH(s.label)+'</button>';
+  }).join('');
+}
+
+function cmsSelectSeries(slug){
+  _portfolioCurrent=slug; cmsBuildSeriesSelector();
+  var hdr=document.getElementById('cms-portfolio-header'); if(hdr) hdr.style.display='flex';
+  var ttl=document.getElementById('cms-portfolio-series-title');
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  if(ttl) ttl.textContent=(s?s.label:slug)+' Photos';
+  if(_portfolioLoaded[slug]){cmsRenderPortfolio(slug);return;}
+  var el=document.getElementById('cms-portfolio-list');
+  if(el) el.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+  _portfolioLoaded[slug]=true;
+  fetch(cmsApiUrl('portfolio/'+slug))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok){if(el)el.innerHTML='<p style="color:var(--red);font-size:12px;padding:16px 0;">Error loading portfolio.</p>';return;}
+      _portfolioSha[slug]=d.sha; _portfolioData[slug]=(d.content&&d.content.photos)||[];
+      cmsRenderPortfolio(slug);
+    })
+    .catch(function(){if(el)el.innerHTML='<p style="color:var(--red);font-size:12px;padding:16px 0;">Could not load photos.</p>';});
+}
+
+function cmsRenderPortfolio(slug){
+  var el=document.getElementById('cms-portfolio-list'); if(!el) return;
+  var photos=_portfolioData[slug]||[];
+  if(!photos.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📷</div><p>No photos yet. Add one above.</p></div>';return;}
+  el.innerHTML=photos.map(function(p,i){
+    var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2">':'<div class="img-preview"></div>';
+    return '<div class="cms-item">'
+      +'<div class="cms-item-reorder">'
+        +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
+        +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',1)"'+(i===photos.length-1?' disabled':'')+'>↓</button>'
+      +'</div>'
+      +thumb
+      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.loc||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div></div>'
+      +'<div class="cms-item-actions">'
+        +'<button class="btn-card" onclick="cmsOpenPhotoEdit('+i+')">Edit</button>'
+        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+slug+'\','+i+')">Delete</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function cmsOpenPhotoEdit(idx){
+  var slug=_portfolioCurrent; if(!slug) return;
+  var isNew=(idx===null);
+  var photos=_portfolioData[slug]||[];
+  var p=isNew?{title:'',loc:'Accra, Ghana',date:new Date().getFullYear()+'.01',img:'',desc:'',device:'iPhone',format:'ProRAW',edited_in:'Lightroom Mobile'}:(photos[idx]||{});
+  document.getElementById('cmsModalTitle').textContent=isNew?'New Photo':'Edit Photo';
+  document.getElementById('cmsModalSub').textContent=(isNew?'Add to ':'Editing in ')+(slug||'');
+  document.getElementById('cmsModalBody').innerHTML=
+    '<div class="cms-field"><label>Title</label><input type="text" id="cms-ph-title" value="'+escAttr(p.title||'')+'"></div>'
+    +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Location</label><input type="text" id="cms-ph-loc" value="'+escAttr(p.loc||'')+'"></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Date <span style="color:#bbb;font-size:9px;text-transform:none;letter-spacing:0">(e.g. 2026.04)</span></label><input type="text" id="cms-ph-date" value="'+escAttr(p.date||'')+'"></div></div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Description</label><textarea id="cms-ph-desc" rows="3">'+escH(p.desc||'')+'</textarea></div>'
+    +'<div class="cms-field"><label>Image</label>'
+      +'<div class="img-upload-row"><input type="text" id="cms-ph-img" value="'+escAttr(p.img||'')+'" placeholder="filename.jpg or URL">'
+      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-ph-img\',\'cms-ph-upload-status\')"></label></div>'
+      +'<div class="cms-status" id="cms-ph-upload-status"></div></div>'
+    +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Device</label><input type="text" id="cms-ph-device" value="'+escAttr(p.device||'iPhone')+'"></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Edited in</label><input type="text" id="cms-ph-edited" value="'+escAttr(p.edited_in||'Lightroom Mobile')+'"></div></div>'
+    +'<div class="cms-save-row" style="margin-top:20px"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePhoto('+JSON.stringify(idx)+',\''+escAttr(slug)+'\')">Save &amp; Publish</button>'
+    +'<div class="cms-status" id="cms-ph-status"></div></div>';
+  cmsOpenModal();
+}
+
+function cmsSavePhoto(idx,slug){
+  var st=document.getElementById('cms-ph-status'); st.className='cms-status'; st.textContent='Saving…';
+  var u={title:document.getElementById('cms-ph-title').value.trim(),loc:document.getElementById('cms-ph-loc').value.trim(),
+    date:document.getElementById('cms-ph-date').value.trim(),desc:document.getElementById('cms-ph-desc').value.trim(),
+    img:document.getElementById('cms-ph-img').value.trim(),device:document.getElementById('cms-ph-device').value.trim(),
+    format:'ProRAW',edited_in:document.getElementById('cms-ph-edited').value.trim()};
+  if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
+  var photos=(_portfolioData[slug]||[]).slice();
+  if(idx===null){photos.push(u);}else{photos[idx]=u;}
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:photos};
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok){st.className='cms-status err';st.textContent=(d.error||'Save failed');return;}
+      st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+      _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha;
+      cmsRenderPortfolio(slug); setTimeout(cmsCloseModal,1400);
+    })
+    .catch(function(err){st.className='cms-status err';st.textContent='Network error: '+err.message;});
+}
+
+function cmsMovePhoto(slug,idx,dir){
+  var photos=(_portfolioData[slug]||[]).slice(),ni=idx+dir;
+  if(ni<0||ni>=photos.length) return;
+  var t=photos[idx]; photos[idx]=photos[ni]; photos[ni]=t;
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:photos};
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok){alert('Reorder failed: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
+    .catch(function(err){alert('Network error: '+err.message);});
+}
+
+function cmsDeletePhoto(slug,idx){
+  var photos=_portfolioData[slug]||[],p=photos[idx];
+  if(!confirm('Delete "'+p.title+'"? This cannot be undone.')) return;
+  var np=photos.slice(); np.splice(idx,1);
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:np};
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok){alert('Delete failed: '+(d.error||''));return;} _portfolioData[slug]=np; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
+    .catch(function(err){alert('Network error: '+err.message);});
+}
+
+// ── Site Text ────────────────────────────────────────────────────
+function cmsSiteLoad(fileKey,cb){
+  if(_siteLoaded[fileKey]){cb(null,_siteData[fileKey]);return;}
+  _siteLoaded[fileKey]=true;
+  fetch(cmsApiUrl(fileKey))
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok){cb(d.error||'Load failed');return;} _siteData[fileKey]=d.content; _siteSha[fileKey]=d.sha; cb(null,d.content);})
+    .catch(function(err){cb('Network error: '+err.message);});
+}
+
+function cmsSiteInit(){
+  [['settings/general',cmsSitePopulateHero],['settings/about-page',cmsSitePopulateAbout],
+   ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact]]
+  .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){if(!err)pair[1](data);});});
+}
+
+function cmsSitePopulateHero(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-hero-line1',d.hero_line1); set('st-hero-line2',d.hero_line2); set('st-hero-desc',d.hero_desc);
+  set('st-about-photo',d.about_photo); set('st-contact-photo',d.contact_photo);
+  var wrap=document.getElementById('st-hero-imgs');
+  if(wrap) wrap.innerHTML=[1,2,3,4,5].map(function(n){
+    return '<div class="cms-field"><label>Hero image '+n+'</label>'
+      +'<div class="img-upload-row"><input type="text" id="st-hero'+n+'" value="'+escAttr(d['hero'+n]||'')+'" placeholder="URL or /filename.jpg">'
+      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'st-hero'+n+'\',\'st-hero'+n+'-status\')"></label></div>'
+      +'<div class="cms-status" id="st-hero'+n+'-status"></div></div>';
+  }).join('');
+}
+
+function cmsSitePopulateAbout(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-bio1',d.about_bio1);set('st-bio2',d.about_bio2);set('st-bio3',d.about_bio3);set('st-bio4',d.about_bio4);set('st-bio5',d.about_bio5);
+  set('st-about-caption',d.about_caption);set('st-loc-heading',d.about_loc_heading);
+  set('st-loc-p1',d.about_loc_p1);set('st-loc-p2',d.about_loc_p2);set('st-loc-p3',d.about_loc_p3);
+  set('st-phil-heading',d.about_phil_heading);set('st-phil-p1',d.about_phil_p1);set('st-phil-p2',d.about_phil_p2);set('st-phil-p3',d.about_phil_p3);
+}
+
+function cmsSitePopulateShop(d){if(!d)return;function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}set('st-shop-title',d.shop_title);set('st-shop-desc',d.shop_desc);}
+function cmsSitePopulateContact(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-contact-sub',d.contact_sub);set('st-contact-email',d.contact_email);set('st-contact-response',d.contact_response);
+  set('st-instagram-handle',d.contact_instagram_handle);set('st-instagram-url',d.contact_instagram_url);
+}
+
+function cmsSiteSave(fileKey,dataFn,statusId){
+  var st=document.getElementById(statusId); st.className='cms-status'; st.textContent='Saving…';
+  var d=dataFn();
+  var merged=Object.assign({},(_siteData[fileKey]||{}),d);
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:fileKey,content:merged,sha:_siteSha[fileKey]})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){st.className='cms-status err';st.textContent=(res.error||'Save failed');return;}
+      st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+      _siteData[fileKey]=merged; if(res.sha)_siteSha[fileKey]=res.sha;
+    })
+    .catch(function(){st.className='cms-status err';st.textContent='Network error';});
+}
+
+function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+
+function cmsSaveSiteHero(){
+  cmsSiteSave('settings/general',function(){
+    var d={hero_line1:g('st-hero-line1'),hero_line2:g('st-hero-line2'),hero_desc:g('st-hero-desc'),about_photo:g('st-about-photo'),contact_photo:g('st-contact-photo')};
+    [1,2,3,4,5].forEach(function(n){d['hero'+n]=g('st-hero'+n);});
+    return d;
+  },'cms-hero-status');
+}
+function cmsSaveSiteAbout(){
+  cmsSiteSave('settings/about-page',function(){
+    return{about_bio1:g('st-bio1'),about_bio2:g('st-bio2'),about_bio3:g('st-bio3'),about_bio4:g('st-bio4'),about_bio5:g('st-bio5'),
+      about_caption:g('st-about-caption'),about_loc_heading:g('st-loc-heading'),
+      about_loc_p1:g('st-loc-p1'),about_loc_p2:g('st-loc-p2'),about_loc_p3:g('st-loc-p3'),
+      about_phil_heading:g('st-phil-heading'),about_phil_p1:g('st-phil-p1'),about_phil_p2:g('st-phil-p2'),about_phil_p3:g('st-phil-p3')};
+  },'cms-about-status');
+}
+function cmsSaveSiteShop(){cmsSiteSave('settings/shop-page',function(){return{shop_title:g('st-shop-title'),shop_desc:g('st-shop-desc')};},'cms-shop-status');}
+function cmsSaveSiteContact(){
+  cmsSiteSave('settings/contact-info',function(){
+    return{contact_sub:g('st-contact-sub'),contact_email:g('st-contact-email'),contact_response:g('st-contact-response'),
+      contact_instagram_handle:g('st-instagram-handle'),contact_instagram_url:g('st-instagram-url')};
+  },'cms-contact-status');
+}
+
+// ── Image Upload ─────────────────────────────────────────────────
+function cmsUploadImg(input,targetId,statusId){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var st=document.getElementById(statusId); if(st){st.className='cms-status';st.textContent='Uploading…';}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var base64=e.target.result.split(',')[1];
+    var safeName=file.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9.\-_]/g,'').replace(/\.{2,}/g,'.');
+    fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filename:safeName,content:base64})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){var el=document.getElementById(targetId);if(el)el.value=d.path;if(st){st.className='cms-status ok';st.textContent='Uploaded ✓ — live in ~2 min';}}
+        else{if(st){st.className='cms-status err';st.textContent=(d.error||'Upload failed');}}
+      })
+      .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
+  };
+  reader.readAsDataURL(file);
+}
+
 // ── Shared API write ────────────────────────────────────────────
-function cmsPut(file, content, cb){
-  fetch('/api/content?key='+CMS_KEY, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file: file, content: content, sha: _cmsSha[file] }),
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(!d.ok) cb(d.error||'Unknown error');
-    else       cb(null, d.sha);
-  })
-  .catch(function(err){ cb('Network error: '+err.message); });
+function cmsPut(file,content,cb){
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:file,content:content,sha:_cmsSha[file]})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok)cb(d.error||'Unknown error');else cb(null,d.sha);})
+    .catch(function(err){cb('Network error: '+err.message);});
 }
 
 // ── Modal helpers ───────────────────────────────────────────────
-function cmsOpenModal(){  document.getElementById('cmsModal').classList.add('open'); }
-function cmsCloseModal(){ document.getElementById('cmsModal').classList.remove('open'); }
-document.getElementById('cmsModal').addEventListener('click', function(e){
-  if(e.target === this) cmsCloseModal();
-});
+function cmsOpenModal(){document.getElementById('cmsModal').classList.add('open');}
+function cmsCloseModal(){document.getElementById('cmsModal').classList.remove('open');}
+document.getElementById('cmsModal').addEventListener('click',function(e){if(e.target===this)cmsCloseModal();});
 
 // ── Escape helpers ──────────────────────────────────────────────
-function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ── Init ─────────────────────────────────────────────────────────
 renderOrders();

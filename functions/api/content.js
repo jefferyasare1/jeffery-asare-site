@@ -1,18 +1,24 @@
 // Cloudflare Pages Function — Content CMS
-// Reads and writes _data/journal.json and _data/prints.json via the GitHub API
+// Reads and writes any _data/**/*.json file via the GitHub API
 // Used exclusively by the password-protected dashboard
 //
-// GET  /api/content?key=...&file=journal|prints  → returns file content + SHA
-// PUT  /api/content?key=...                       → writes updated content back to GitHub
+// GET  /api/content?key=...&file=<path>  → returns file content + SHA
+//      file examples: journal, prints, settings/general, portfolio/abstract
+// PUT  /api/content?key=...              → writes updated content back to GitHub
 
 const DASHBOARD_KEY = 'jA9kx2vP7m';
 const REPO          = 'jefferyasare1/jeffery-asare-site';
 const BRANCH        = 'main';
 
-const FILE_MAP = {
-  journal: '_data/journal.json',
-  prints:  '_data/prints.json',
-};
+// Resolve a file key to a repo path under _data/
+// Accepts: "journal", "prints", "settings/general", "portfolio/abstract", etc.
+// Rejects anything with ".." or characters outside safe set
+function resolveFilePath(fileKey) {
+  if (!fileKey) return null;
+  if (!/^[a-z0-9][a-z0-9\-_/]*$/.test(fileKey)) return null;
+  if (fileKey.includes('..') || fileKey.includes('//')) return null;
+  return `_data/${fileKey}.json`;
+}
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -45,8 +51,8 @@ export async function onRequest(context) {
   // ── GET — read a file ───────────────────────────────────────────
   if (request.method === 'GET') {
     const fileKey = url.searchParams.get('file');
-    const filePath = FILE_MAP[fileKey];
-    if (!filePath) return json({ error: 'Unknown file. Use file=journal or file=prints.' }, 400);
+    const filePath = resolveFilePath(fileKey);
+    if (!filePath) return json({ error: 'Invalid file key. Use e.g. file=journal, file=settings/general, file=portfolio/abstract' }, 400);
 
     const ghResp = await fetch(
       `https://api.github.com/repos/${REPO}/contents/${filePath}?ref=${BRANCH}`,
@@ -74,9 +80,9 @@ export async function onRequest(context) {
     catch { return json({ error: 'Invalid JSON body' }, 400); }
 
     const { file: fileKey, content, sha, message } = body;
-    const filePath = FILE_MAP[fileKey];
-    if (!filePath) return json({ error: 'Unknown file.' }, 400);
-    if (!sha)      return json({ error: 'Missing sha — re-load the file before saving.' }, 400);
+    const filePath = resolveFilePath(fileKey);
+    if (!filePath) return json({ error: 'Invalid file key.' }, 400);
+    // sha is required for updates; new files omit it (GitHub will create them)
 
     const jsonText = JSON.stringify(content, null, 2) + '\n';
     const encoded  = btoa(unescape(encodeURIComponent(jsonText)));
@@ -86,12 +92,11 @@ export async function onRequest(context) {
       {
         method: 'PUT',
         headers: { ...ghHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(Object.assign({
           message: message || `Dashboard: update ${filePath}`,
           content: encoded,
-          sha,
           branch: BRANCH,
-        }),
+        }, sha ? { sha } : {})),
       }
     );
 
