@@ -3023,10 +3023,12 @@ fetch('/_data/prints.json')
     gsap.set('.hero .btn-pill',{opacity:0,y:10});
 
     // Safety net: if tab is hidden or GSAP stalls, always reveal content after 3s
+    var _visH=null;
     var _introFallback=setTimeout(function(){
+      if(_visH) document.removeEventListener('visibilitychange',_visH);
       curtain.style.display='none';
       gsap.set(['#heroLine1','#heroLine2','#heroDesc','.hero .btn-pill'],
-               {opacity:1,x:0,y:0,clearProps:'transform,opacity'});
+               {opacity:1,x:0,y:0,clearProps:'all'});
     },3000);
 
     function _runIntro(){
@@ -3037,14 +3039,13 @@ fetch('/_data/prints.json')
         .fromTo('#heroLine1',{x:-70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},0.9)
         .fromTo('#heroLine2',{x:70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},1.06)
         .fromTo('#heroDesc',{y:16,opacity:0},{y:0,opacity:1,duration:0.6,ease:'power2.out'},1.3)
-        .fromTo('.hero .btn-pill',{y:10,opacity:0},{y:0,opacity:1,duration:0.45,ease:'power2.out'},1.46)
-        .call(function(){clearTimeout(_introFallback);});
+        .fromTo('.hero .btn-pill',{y:10,opacity:0},{y:0,opacity:1,duration:0.45,ease:'power2.out'},1.46);
     }
 
     if(document.visibilityState==='visible'){
       _runIntro();
     } else {
-      var _visH=function(){
+      _visH=function(){
         if(document.visibilityState==='visible'){
           document.removeEventListener('visibilitychange',_visH);
           _runIntro();
