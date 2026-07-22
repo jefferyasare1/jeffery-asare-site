@@ -584,9 +584,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* ── GSAP MODE — disable conflicting CSS animations ── */
 #gsap-curtain{position:fixed;inset:0;background:#0d0c0b;z-index:9999;}
 .gsap-ready .hero-headline-line{overflow:visible;}
-.gsap-ready .hero-headline-line span{animation:none!important;opacity:0;}
-.gsap-ready .hero-desc{animation:none!important;opacity:0;}
-.gsap-ready .hero-right .btn-pill{animation:none!important;opacity:0;}
+.gsap-ready .hero-headline-line span{animation:none!important;}
+.gsap-ready .hero-desc{animation:none!important;}
+.gsap-ready .hero-right .btn-pill{animation:none!important;}
 .gsap-ready nav{animation:none!important;}
 .gsap-ready .shop-card{animation:none!important;}
 .gsap-ready .photo-card.card-in{animation:none!important;}
@@ -3016,13 +3016,42 @@ fetch('/_data/prints.json')
   // ── 1. CURTAIN PULL + OPPOSING PULL HERO ─────────────────────
   var curtain=document.getElementById('gsap-curtain');
   if(curtain){
-    gsap.timeline()
-      .to(curtain,{y:'-100%',duration:1.15,ease:'expo.inOut',delay:0.2,
-         onComplete:function(){curtain.style.display='none';}})
-      .fromTo('#heroLine1',{x:-70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},0.9)
-      .fromTo('#heroLine2',{x:70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},1.06)
-      .fromTo('#heroDesc',{y:16,opacity:0},{y:0,opacity:1,duration:0.6,ease:'power2.out'},1.3)
-      .fromTo('.hero .btn-pill',{y:10,opacity:0},{y:0,opacity:1,duration:0.45,ease:'power2.out'},1.46);
+    // Set initial states via JS so CSS never permanently hides content
+    gsap.set('#heroLine1',{opacity:0,x:-70});
+    gsap.set('#heroLine2',{opacity:0,x:70});
+    gsap.set('#heroDesc',{opacity:0,y:16});
+    gsap.set('.hero .btn-pill',{opacity:0,y:10});
+
+    // Safety net: if tab is hidden or GSAP stalls, always reveal content after 3s
+    var _introFallback=setTimeout(function(){
+      curtain.style.display='none';
+      gsap.set(['#heroLine1','#heroLine2','#heroDesc','.hero .btn-pill'],
+               {opacity:1,x:0,y:0,clearProps:'transform,opacity'});
+    },3000);
+
+    function _runIntro(){
+      clearTimeout(_introFallback);
+      gsap.timeline()
+        .to(curtain,{yPercent:-100,duration:1.15,ease:'expo.inOut',
+           onComplete:function(){curtain.style.display='none';}},0.2)
+        .fromTo('#heroLine1',{x:-70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},0.9)
+        .fromTo('#heroLine2',{x:70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},1.06)
+        .fromTo('#heroDesc',{y:16,opacity:0},{y:0,opacity:1,duration:0.6,ease:'power2.out'},1.3)
+        .fromTo('.hero .btn-pill',{y:10,opacity:0},{y:0,opacity:1,duration:0.45,ease:'power2.out'},1.46)
+        .call(function(){clearTimeout(_introFallback);});
+    }
+
+    if(document.visibilityState==='visible'){
+      _runIntro();
+    } else {
+      var _visH=function(){
+        if(document.visibilityState==='visible'){
+          document.removeEventListener('visibilitychange',_visH);
+          _runIntro();
+        }
+      };
+      document.addEventListener('visibilitychange',_visH);
+    }
   }
 
   // ── 2. SHOP GRID STAGGER ─────────────────────────────────────
@@ -3058,7 +3087,7 @@ fetch('/_data/prints.json')
   // ── 4. PAGE SWEEP TRANSITION ──────────────────────────────────
   var sweep=document.createElement('div');
   sweep.style.cssText='position:fixed;inset:0;background:#0d0c0b;z-index:9000;pointer-events:none;';
-  gsap.set(sweep,{x:'-101%'});
+  gsap.set(sweep,{xPercent:-101});
   document.body.appendChild(sweep);
 
   var _oNav=window.navigate;
@@ -3067,9 +3096,9 @@ fetch('/_data/prints.json')
       gsap.killTweensOf(sweep);
       gsap.timeline()
         .set(sweep,{pointerEvents:'all'})
-        .to(sweep,{x:'0%',duration:0.38,ease:'power3.in'})
+        .to(sweep,{xPercent:0,duration:0.38,ease:'power3.in'})
         .call(function(){_oNav(page);})
-        .to(sweep,{x:'101%',duration:0.4,ease:'power3.out',delay:0.3})
+        .to(sweep,{xPercent:101,duration:0.4,ease:'power3.out',delay:0.3})
         .set(sweep,{pointerEvents:'none'});
     };
   }
