@@ -581,6 +581,22 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* ── SHOP ANIMATIONS ── */
 @keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .shop-card{animation:shopFadeUp .55s ease both;}
+/* ── GSAP MODE — disable conflicting CSS animations ── */
+#gsap-curtain{position:fixed;inset:0;background:#0d0c0b;z-index:9999;}
+.gsap-ready .hero-headline-line{overflow:visible;}
+.gsap-ready .hero-headline-line span{animation:none!important;opacity:0;}
+.gsap-ready .hero-desc{animation:none!important;opacity:0;}
+.gsap-ready .hero-right .btn-pill{animation:none!important;opacity:0;}
+.gsap-ready nav{animation:none!important;}
+.gsap-ready .shop-card{animation:none!important;}
+.gsap-ready .photo-card.card-in{animation:none!important;}
+.gsap-ready .page.active{animation:none!important;opacity:1!important;}
+.gsap-ready #pageTransition{display:none!important;}
+.gsap-ready .photo-card:hover{transform:none!important;box-shadow:none!important;}
+.gsap-ready .photo-card:hover img{transform:none!important;}
+.gsap-ready .photo-card-info{transition:none!important;}
+.gsap-ready .photo-card:hover .photo-card-info{opacity:0!important;}
+.gsap-ready .shop-card:hover .shop-card-img{transform:none!important;}
 /* ── BUTTONS ── */
 .btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
 .btn-cart:hover{background:var(--ink);color:#fff;}
@@ -630,6 +646,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8228b791c71b4e90b1073715a6c91aee"}'></script>
 </head>
 <body>
+<div id="gsap-curtain"></div>
 
 <!-- PAGE TRANSITION OVERLAY -->
 <div id="pageTransition"></div>
@@ -2989,5 +3006,108 @@ fetch('/_data/prints.json')
   <div class="cart-foot" id="cartFoot"></div>
 </div>
 
+<!-- ── GSAP ANIMATIONS ─────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+(function(){
+  if(typeof gsap==='undefined') return;
+  document.body.classList.add('gsap-ready');
+
+  // ── 1. CURTAIN PULL + OPPOSING PULL HERO ─────────────────────
+  var curtain=document.getElementById('gsap-curtain');
+  if(curtain){
+    gsap.timeline()
+      .to(curtain,{y:'-100%',duration:1.15,ease:'expo.inOut',delay:0.2,
+         onComplete:function(){curtain.style.display='none';}})
+      .fromTo('#heroLine1',{x:-70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},0.9)
+      .fromTo('#heroLine2',{x:70,opacity:0},{x:0,opacity:1,duration:0.85,ease:'power4.out'},1.06)
+      .fromTo('#heroDesc',{y:16,opacity:0},{y:0,opacity:1,duration:0.6,ease:'power2.out'},1.3)
+      .fromTo('.hero .btn-pill',{y:10,opacity:0},{y:0,opacity:1,duration:0.45,ease:'power2.out'},1.46);
+  }
+
+  // ── 2. SHOP GRID STAGGER ─────────────────────────────────────
+  var _oRS=window.renderShop;
+  if(_oRS){
+    window.renderShop=function(page){
+      _oRS(page);
+      requestAnimationFrame(function(){
+        var c=document.querySelectorAll('.shop-card');
+        if(c.length) gsap.fromTo(c,
+          {y:26,opacity:0},
+          {y:0,opacity:1,stagger:0.07,duration:0.52,ease:'power2.out'}
+        );
+      });
+    };
+  }
+
+  // ── 3. PORTFOLIO IMAGE WIPE ───────────────────────────────────
+  var _oRP=window.renderPortfolio;
+  if(_oRP){
+    window.renderPortfolio=function(filter,animate){
+      _oRP(filter,animate);
+      setTimeout(function(){
+        var c=document.querySelectorAll('.photo-card');
+        if(c.length) gsap.fromTo(c,
+          {clipPath:'polygon(0 0,0 0,0 100%,0 100%)'},
+          {clipPath:'polygon(0 0,100% 0,100% 100%,0 100%)',stagger:0.07,duration:0.72,ease:'power4.inOut'}
+        );
+      },animate?290:60);
+    };
+  }
+
+  // ── 4. PAGE SWEEP TRANSITION ──────────────────────────────────
+  var sweep=document.createElement('div');
+  sweep.style.cssText='position:fixed;inset:0;background:#0d0c0b;z-index:9000;pointer-events:none;';
+  gsap.set(sweep,{x:'-101%'});
+  document.body.appendChild(sweep);
+
+  var _oNav=window.navigate;
+  if(_oNav){
+    window.navigate=function(page){
+      gsap.killTweensOf(sweep);
+      gsap.timeline()
+        .set(sweep,{pointerEvents:'all'})
+        .to(sweep,{x:'0%',duration:0.38,ease:'power3.in'})
+        .call(function(){_oNav(page);})
+        .to(sweep,{x:'101%',duration:0.4,ease:'power3.out',delay:0.3})
+        .set(sweep,{pointerEvents:'none'});
+    };
+  }
+
+  // ── 5. CARD HOVER — photo grid + shop grid ────────────────────
+  // Event delegation so it works on dynamically rendered cards
+  document.addEventListener('mouseover',function(e){
+    // Portfolio photo cards
+    var pc=e.target.closest('.photo-card');
+    if(pc&&!pc._g){
+      pc._g=true;
+      var img=pc.querySelector('img');
+      var info=pc.querySelector('.photo-card-info');
+      if(info) gsap.set(info,{opacity:0,y:8});
+      pc.addEventListener('mouseenter',function(){
+        if(img) gsap.to(img,{scale:1.07,duration:0.55,ease:'power2.out'});
+        if(info) gsap.to(info,{opacity:1,y:0,duration:0.28,ease:'power2.out'});
+      });
+      pc.addEventListener('mouseleave',function(){
+        if(img) gsap.to(img,{scale:1,duration:0.45,ease:'power2.out'});
+        if(info) gsap.to(info,{opacity:0,y:8,duration:0.22,ease:'power2.in'});
+      });
+    }
+    // Shop print cards
+    var sc=e.target.closest('.shop-card');
+    if(sc&&!sc._g){
+      sc._g=true;
+      var si=sc.querySelector('.shop-card-img');
+      sc.addEventListener('mouseenter',function(){
+        if(si) gsap.to(si,{y:-10,scale:1.02,duration:0.5,ease:'power2.out'});
+      });
+      sc.addEventListener('mouseleave',function(){
+        if(si) gsap.to(si,{y:0,scale:1,duration:0.45,ease:'power2.out'});
+      });
+    }
+  });
+
+})();
+</script>
 </body>
 </html>
