@@ -582,9 +582,11 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 @keyframes shopFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .shop-card{animation:shopFadeUp .55s ease both;}
 /* ── GSAP MODE — disable conflicting CSS animations ── */
-#gsap-curtain-l,#gsap-curtain-r{position:fixed;top:0;bottom:0;background:#0d0c0b;z-index:9999;}
-#gsap-curtain-l{left:0;width:51%;}
-#gsap-curtain-r{right:0;width:51%;}
+.gsap-strip{position:fixed;left:0;right:0;background:#0d0c0b;z-index:9999;}
+#gsap-s1{top:0%;height:25%;}
+#gsap-s2{top:25%;height:25%;}
+#gsap-s3{top:50%;height:25%;}
+#gsap-s4{top:75%;height:25%;}
 #gsap-flash{position:fixed;inset:0;background:#fff;z-index:9998;opacity:0;pointer-events:none;}
 .gsap-ready body{overflow-x:hidden;}
 .gsap-ready .hero-headline-line{overflow:visible;}
@@ -650,8 +652,10 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8228b791c71b4e90b1073715a6c91aee"}'></script>
 </head>
 <body>
-<div id="gsap-curtain-l"></div>
-<div id="gsap-curtain-r"></div>
+<div id="gsap-s1" class="gsap-strip"></div>
+<div id="gsap-s2" class="gsap-strip"></div>
+<div id="gsap-s3" class="gsap-strip"></div>
+<div id="gsap-s4" class="gsap-strip"></div>
 <div id="gsap-flash"></div>
 
 <!-- PAGE TRANSITION OVERLAY -->
@@ -3019,13 +3023,17 @@ fetch('/_data/prints.json')
   if(typeof gsap==='undefined') return;
   document.body.classList.add('gsap-ready');
 
-  // ── 1. SPLIT CURTAIN + CAMERA FLASH + TEXT SLAM ─────────────
-  var curtainL=document.getElementById('gsap-curtain-l');
-  var curtainR=document.getElementById('gsap-curtain-r');
+  // ── 1. CAMERA SHUTTER STRIPS ─────────────────────────────────
+  var strips=[
+    document.getElementById('gsap-s1'),
+    document.getElementById('gsap-s2'),
+    document.getElementById('gsap-s3'),
+    document.getElementById('gsap-s4')
+  ];
   var flash=document.getElementById('gsap-flash');
 
-  if(curtainL&&curtainR){
-    // Text starts WAY off screen — slams in after curtain rips
+  if(strips[0]){
+    // Text starts off screen — slams in after shutter snaps open
     var _vw=window.innerWidth;
     gsap.set('#heroLine1',{x:-_vw*1.3});
     gsap.set('#heroLine2',{x:_vw*1.3});
@@ -3033,12 +3041,11 @@ fetch('/_data/prints.json')
     gsap.set('.hero .btn-pill',{opacity:0,y:20});
     gsap.set('nav',{opacity:0,y:-80});
 
-    // Safety net: always show content after 3s regardless
+    // Safety net: always show content after 3.5s regardless
     var _visH=null;
     var _introFallback=setTimeout(function(){
       if(_visH) document.removeEventListener('visibilitychange',_visH);
-      curtainL.style.display='none';
-      curtainR.style.display='none';
+      strips.forEach(function(s){s.style.display='none';});
       gsap.set(['#heroLine1','#heroLine2'],{x:0});
       gsap.set(['#heroDesc','.hero .btn-pill','nav'],{opacity:1,y:0,clearProps:'all'});
     },3500);
@@ -3047,29 +3054,30 @@ fetch('/_data/prints.json')
       clearTimeout(_introFallback);
       var tl=gsap.timeline();
 
-      // Curtain RIPS open — left half flies left, right half flies right
-      tl.to(curtainL,{xPercent:-101,duration:1.05,ease:'expo.inOut'},0.2)
-        .to(curtainR,{xPercent:101,duration:1.05,ease:'expo.inOut'},0.2)
+      // Shutter SNAPS open — 4 bands fire alternately left/right
+      tl.to(strips[0],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.1)
+        .to(strips[1],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.2)
+        .to(strips[2],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.3)
+        .to(strips[3],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.4)
 
-        // Nav drops in from top as curtain opens
-        .to('nav',{opacity:1,y:0,duration:0.55,ease:'power3.out'},0.85)
+        // Nav drops in as last strip fires
+        .to('nav',{opacity:1,y:0,duration:0.55,ease:'power3.out'},0.55)
 
-        // CAMERA FLASH — white burst at the moment of reveal
-        .to(flash,{opacity:0.95,duration:0.06,ease:'none'},0.95)
-        .to(flash,{opacity:0,duration:0.35,ease:'power2.out'},1.01)
+        // CAMERA FLASH — white burst at the moment of full reveal
+        .to(flash,{opacity:0.9,duration:0.06,ease:'none'},0.65)
+        .to(flash,{opacity:0,duration:0.35,ease:'power2.out'},0.71)
 
         // "Photography" SLAMS in from the left — overshoot bounce
-        .to('#heroLine1',{x:0,duration:0.75,ease:'back.out(1.9)'},1.02)
+        .to('#heroLine1',{x:0,duration:0.72,ease:'back.out(1.9)'},0.68)
         // "is Poetry." SLAMS in from the right — slightly offset
-        .to('#heroLine2',{x:0,duration:0.75,ease:'back.out(1.9)'},1.17)
+        .to('#heroLine2',{x:0,duration:0.72,ease:'back.out(1.9)'},0.83)
 
         // Desc + button rise up after the slam settles
-        .fromTo('#heroDesc',{opacity:0,y:28},{opacity:1,y:0,duration:0.55,ease:'power3.out'},1.4)
-        .fromTo('.hero .btn-pill',{opacity:0,y:20},{opacity:1,y:0,duration:0.45,ease:'power3.out'},1.55)
+        .fromTo('#heroDesc',{opacity:0,y:28},{opacity:1,y:0,duration:0.55,ease:'power3.out'},1.05)
+        .fromTo('.hero .btn-pill',{opacity:0,y:20},{opacity:1,y:0,duration:0.45,ease:'power3.out'},1.2)
 
         .call(function(){
-          curtainL.style.display='none';
-          curtainR.style.display='none';
+          strips.forEach(function(s){s.style.display='none';});
         });
     }
 
