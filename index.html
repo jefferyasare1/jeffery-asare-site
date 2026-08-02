@@ -10,6 +10,7 @@
 <meta property="og:description" content="Fine art phone photography from Ghana. Limited edition archival prints.">
 <meta property="og:type" content="website">
 <title>Jeffery Asare: Ghana Phone Photography &amp; Fine Art Prints</title>
+<link rel="icon" type="image/png" href="/favicon.png">
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -19,7 +20,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:4
 img{-webkit-user-drag:none;-khtml-user-drag:none;-moz-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select:none;}
 .page{display:none;}.page.active{display:block;}
 nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad);display:flex;align-items:center;justify-content:space-between;}
-.nav-logo{font-family:var(--title);font-size:14px;font-weight:600;letter-spacing:-.01em;text-decoration:none;color:inherit;cursor:pointer;}
+.nav-logo{text-decoration:none;cursor:pointer;display:flex;align-items:center;}
+.nav-logo-img{height:28px;width:auto;display:block;}
+.inner-nav .nav-logo-img{filter:invert(1);}
+nav.scrolled .nav-logo-img{filter:none;}
 .nav-links{display:flex;gap:2rem;list-style:none;}
 .nav-links a{font-size:13px;font-weight:400;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s;}
 .nav-links a:hover{opacity:.55;}
@@ -187,7 +191,8 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .terms-section a{color:var(--ink);}
 .site-footer{background:var(--ink);color:rgba(255,255,255,.6);padding:3.5rem var(--pad) 2rem;}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:3rem;margin-bottom:3rem;}
-.footer-brand-name{font-family:var(--title);font-size:14px;font-weight:600;letter-spacing:-.01em;color:#fff;margin-bottom:.6rem;}
+.footer-brand-name{margin-bottom:.8rem;}
+.footer-logo-img{height:52px;width:auto;display:block;filter:invert(1);}
 .footer-brand-desc{font-size:12px;line-height:1.7;max-width:200px;}
 .footer-col-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem;font-weight:400;}
 .footer-links{list-style:none;display:flex;flex-direction:column;gap:.5rem;}
@@ -695,7 +700,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- HOME -->
 <div id="page-home" class="page active">
   <nav style="color:#fff;">
-    <span class="nav-logo" id="homeLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="homeLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="homePortBtn">Portfolio</a></li><li><a id="homeAboutBtn">About</a></li><li><a id="homeShopBtn">Shop</a></li><li><a id="homeContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="homeHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </nav>
@@ -744,7 +749,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- PORTFOLIO -->
 <div id="page-portfolio" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="portLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="portLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a class="active-link">Portfolio</a></li><li><a id="portAboutBtn">About</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="portHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -767,7 +772,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- DETAIL -->
 <div id="page-detail" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="detailLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="detailLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="detailPortBtn">Portfolio</a></li><li><a id="detailAboutBtn">About</a></li><li><a id="detailShopBtn">Shop</a></li><li><a id="detailContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="detailBackBtn">&#8592; Back</button>
@@ -791,7 +796,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- ABOUT -->
 <div id="page-about" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="aboutLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="aboutLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="aboutPortBtn">Portfolio</a></li><li><a class="active-link">About</a></li><li><a id="aboutShopBtn">Shop</a></li><li><a id="aboutContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="aboutHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -857,7 +862,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- SHOP -->
 <div id="page-shop" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="shopLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="shopLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="shopPortBtn">Portfolio</a></li><li><a id="shopAboutBtn">About</a></li><li><a class="active-link">Shop</a></li><li><a id="shopContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="shopHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -873,7 +878,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- CONTACT -->
 <div id="page-contact" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="contactLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="contactLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="contactPortBtn">Portfolio</a></li><li><a id="contactAboutBtn">About</a></li><li><a id="contactShopBtn">Shop</a></li><li><a class="active-link">Contact</a></li></ul>
     <button class="ham-btn" id="contactHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -918,7 +923,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- TERMS -->
 <div id="page-terms" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="termsLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="termsLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="termsPortBtn">Portfolio</a></li><li><a id="termsAboutBtn">About</a></li><li><a id="termsShopBtn">Shop</a></li><li><a id="termsContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="termsHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -942,7 +947,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- PRIVACY POLICY PAGE -->
 <div id="page-privacy" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="privLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="privLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="privPortBtn">Portfolio</a></li><li><a id="privAboutBtn">About</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="privHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -967,7 +972,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- JOURNAL / FIELD NOTES -->
 <div id="page-journal" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="journLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="journLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="journPortBtn">Portfolio</a></li><li><a id="journAboutBtn">About</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="journHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
@@ -995,7 +1000,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- PRINT DETAIL PAGE -->
 <div id="page-print-detail" class="page">
   <div class="inner-nav">
-    <span class="nav-logo" id="pdLogoBtn">Jeffery Asare</span>
+    <span class="nav-logo" id="pdLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a id="pdPortBtn">Portfolio</a></li><li><a id="pdAboutBtn">About</a></li><li><a id="pdShopBtn">Shop</a></li><li><a id="pdContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="pdBackBtn">&#8592; Back to Shop</button>
@@ -1039,7 +1044,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <template id="footerTpl">
   <footer class="site-footer">
     <div class="footer-grid">
-      <div><div class="footer-brand-name">Jeffery Asare</div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
+      <div><div class="footer-brand-name"><img src="/logo-name.png" alt="Jeffery Asare" class="footer-logo-img"></div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
       <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">Field Notes</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
       <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
       <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
