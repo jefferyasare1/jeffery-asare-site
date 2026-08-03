@@ -61,6 +61,16 @@
     .header-btn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);border-radius:var(--rb);}
     .header-btn:hover{color:var(--ink);background:#faf7f2;border-color:#d4cfc9;}
     .header-btn:active{background:#ede8e0;}
+    .header-btn-clients{background:var(--ink);color:#fff;border-color:var(--ink);}
+    .header-btn-clients:hover{background:#374151;color:#fff;border-color:#374151;}
+    .header-btn-clients:active{background:#1f2937;color:#fff;}
+    .header-btn-clients.header-btn-clients-active{background:#374151;color:#fff;border-color:#374151;box-shadow:0 0 0 3px rgba(17,24,39,.12);}
+
+    /* ── External tools bar (inside Content panel) ── */
+    .ext-tools-bar{display:flex;align-items:center;gap:8px;margin-bottom:24px;padding:10px 14px;background:#fff;border:1px solid var(--rule);border-radius:var(--rb);}
+    .ext-tools-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#bbb;margin-right:4px;white-space:nowrap;}
+    .ext-tool-link{font-size:11px;font-weight:600;letter-spacing:.04em;padding:6px 12px;border:1px solid var(--rule);border-radius:var(--rb);color:var(--muted);text-decoration:none;background:#f5f0ea;transition:all .15s;white-space:nowrap;}
+    .ext-tool-link:hover{color:var(--ink);background:#fff;border-color:#d4cfc9;}
     .page-title{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:2px;line-height:1;}
     .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
 
@@ -356,9 +366,8 @@
   <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
+      <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">👥 Clients</button>
       <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">📧 Digest</button>
-      <a href="/admin/#/collections/settings" class="header-btn">Content Manager ↗</a>
-      <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="header-btn">Email Templates ↗</a>
     </div>
   </div>
 </header>
@@ -376,7 +385,6 @@
   <!-- Tabs -->
   <div class="tabs">
     <button type="button" class="tab active" data-tab="orders">Active Orders</button>
-    <button type="button" class="tab" data-tab="clients">Clients</button>
     <button type="button" class="tab" data-tab="ship">Ship</button>
     <button type="button" class="tab" data-tab="coa">COA</button>
     <button type="button" class="tab" data-tab="followup">Follow-up</button>
@@ -577,6 +585,13 @@
     <h2 class="panel-title">Content Manager</h2>
     <p class="panel-sub">Edit everything on your site from here. Changes go live in about 2 minutes after you save.</p>
 
+    <!-- External tools strip -->
+    <div class="ext-tools-bar">
+      <span class="ext-tools-label">External tools</span>
+      <a href="/admin/#/collections/settings" class="ext-tool-link">Netlify CMS ↗</a>
+      <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="ext-tool-link">Email Templates ↗</a>
+    </div>
+
     <div id="cms-setup-banner" class="cms-setup-note" style="display:none;">
       <strong>Setup required</strong>
       Add a <code>GITHUB_TOKEN</code> environment variable in Cloudflare Pages, then come back here.
@@ -760,6 +775,9 @@ document.querySelectorAll('.tab').forEach(function(tab){
     document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    // Clear Clients header button highlight when navigating away
+    var cb = document.querySelector('.header-btn-clients');
+    if(cb) cb.classList.remove('header-btn-clients-active');
   });
 });
 
@@ -767,6 +785,10 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   document.getElementById('panel-' + name).classList.add('active');
+  // Highlight header Clients button when on clients panel
+  var cb = document.querySelector('.header-btn-clients');
+  if(cb) cb.classList.toggle('header-btn-clients-active', name === 'clients');
+  if(name === 'clients') renderClients();
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
