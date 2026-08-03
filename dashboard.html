@@ -110,6 +110,7 @@
     .aq-tracking{width:160px;font-size:12px;padding:6px 10px;border:1px solid var(--rule);border-radius:var(--rb);font-family:var(--sans);background:#fff;}
     .aq-tracking:focus{outline:none;border-color:#c8bfb5;}
     .aq-status{font-size:11px;color:var(--muted);margin-top:4px;}
+    .manual-entry-divider{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:24px 0 16px;border-top:1px solid var(--rule);margin-top:24px;max-width:740px;}
     .panel{display:none;}
     .panel.active{display:block;}
     .panel-title{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px;}
@@ -501,14 +502,64 @@
 
     <div class="action-panel active" id="action-ship">
       <div id="action-ship-list"></div>
+      <div class="manual-entry-divider">Manual entry</div>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
+      <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
+      <hr class="divider">
+      <label>DHL Tracking Number</label><input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
+      <button class="btn-primary" id="sh-send">Send Tracking Email</button>
+      <div class="status-msg" id="sh-status"></div>
     </div>
 
     <div class="action-panel" id="action-coa">
       <div id="action-coa-list"></div>
+      <div class="manual-entry-divider">Manual entry</div>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
+      <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
+      <hr class="divider">
+      <label>Print Title</label><input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
+      <div class="grid2">
+        <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
+        <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
+      </div>
+      <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
+      <div class="grid2">
+        <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
+        <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
+      </div>
+      <button class="btn-primary" id="coa-send">Send COA Email</button>
+      <div class="status-msg" id="coa-status"></div>
     </div>
 
     <div class="action-panel" id="action-followup">
       <div id="action-followup-list"></div>
+      <div class="manual-entry-divider">Manual entry</div>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
+      <hr class="divider">
+      <label>Print Title</label><input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
+      <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
+      <div class="status-msg" id="fu-status"></div>
     </div>
   </div>
 
