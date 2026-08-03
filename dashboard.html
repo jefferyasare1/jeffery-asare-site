@@ -83,10 +83,23 @@
     .btn-sync.spinning{opacity:.4;pointer-events:none;}
 
     /* ── Tabs ── */
-    .tabs{display:flex;margin-bottom:28px;overflow-x:auto;background:transparent;border-bottom:1px solid var(--rule);padding:0;gap:0;border-radius:0;}
-    .tab{flex-shrink:0;padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);letter-spacing:.01em;transition:color .15s,border-color .15s;border-radius:0;white-space:nowrap;margin-bottom:-1px;}
+    .tabs{display:flex;align-items:flex-end;margin-bottom:28px;overflow-x:auto;background:transparent;border-bottom:1px solid var(--rule);padding:0;gap:0;border-radius:0;}
+    .tab-group{display:flex;flex-direction:column;flex-shrink:0;}
+    .tab-group-label{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c8bfb5;padding:0 14px 5px;white-space:nowrap;}
+    .tab-group-row{display:flex;gap:0;}
+    .tab-sep{width:1px;background:var(--rule);margin:0 6px 0;align-self:stretch;flex-shrink:0;}
+    .tab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);letter-spacing:.01em;transition:color .15s,border-color .15s;border-radius:0;white-space:nowrap;margin-bottom:-1px;display:inline-flex;align-items:center;gap:5px;}
     .tab:hover{color:var(--ink);background:transparent;}
     .tab.active{color:var(--ink);font-weight:600;background:transparent;border-bottom-color:var(--ink);box-shadow:none;}
+    .tab-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:10px;background:var(--ink);color:#fff;line-height:1.5;}
+    .tab-badge.red{background:var(--red);}
+    /* ── Action sub-tabs ── */
+    .action-subtabs{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:24px;}
+    .action-subtab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);transition:color .15s,border-color .15s;margin-bottom:-1px;white-space:nowrap;}
+    .action-subtab:hover{color:var(--ink);}
+    .action-subtab.active{color:var(--ink);font-weight:600;border-bottom-color:var(--ink);}
+    .action-panel{display:none;}
+    .action-panel.active{display:block;}
     .panel{display:none;}
     .panel.active{display:block;}
     .panel-title{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px;}
@@ -407,14 +420,23 @@
   </div>
 
   <!-- Tabs -->
-  <div class="tabs">
-    <button type="button" class="tab active" data-tab="orders">Active Orders</button>
-    <button type="button" class="tab" data-tab="ship">Ship</button>
-    <button type="button" class="tab" data-tab="coa">COA</button>
-    <button type="button" class="tab" data-tab="followup">Follow-up</button>
-    <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
-    <button type="button" class="tab" data-tab="workflow">Workflow</button>
-    <button type="button" class="tab" data-tab="content">Content</button>
+  <div class="tabs" role="navigation" aria-label="Dashboard sections">
+    <div class="tab-group">
+      <div class="tab-group-label">Orders</div>
+      <div class="tab-group-row">
+        <button type="button" class="tab active" data-tab="orders">Active</button>
+        <button type="button" class="tab" data-tab="actions">Actions <span class="tab-badge" id="actionsBadge" style="display:none"></span></button>
+        <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
+      </div>
+    </div>
+    <div class="tab-sep" aria-hidden="true"></div>
+    <div class="tab-group">
+      <div class="tab-group-label">Admin</div>
+      <div class="tab-group-row">
+        <button type="button" class="tab" data-tab="workflow">Workflow</button>
+        <button type="button" class="tab" data-tab="content">Content</button>
+      </div>
+    </div>
   </div>
 
   <!-- ════════════════════════════════════
@@ -458,74 +480,76 @@
   </div>
 
   <!-- ════════════════════════════════════
-       SHIP ORDER
+       ACTIONS (Ship / COA / Follow-up)
   ════════════════════════════════════ -->
-  <div class="panel" id="panel-ship">
-    <h2 class="panel-title">Ship an Order</h2>
-    <p class="panel-sub">Sends the buyer their DHL tracking number the day you drop off the package.</p>
-    <div class="client-sel-wrap">
-      <span class="client-sel-label">Select client</span>
-      <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
-        <option value="">— choose to auto-fill —</option>
-      </select>
+  <div class="panel" id="panel-actions">
+    <div class="action-subtabs">
+      <button type="button" class="action-subtab active" data-action="ship">Ship</button>
+      <button type="button" class="action-subtab" data-action="coa">COA</button>
+      <button type="button" class="action-subtab" data-action="followup">Follow-up</button>
     </div>
-    <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
-    <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
-    <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
-    <hr class="divider">
-    <label>DHL Tracking Number</label><input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
-    <button class="btn-primary" id="sh-send">Send Tracking Email</button>
-    <div class="status-msg" id="sh-status"></div>
-  </div>
 
-  <!-- ════════════════════════════════════
-       SEND COA
-  ════════════════════════════════════ -->
-  <div class="panel" id="panel-coa">
-    <h2 class="panel-title">Send Certificate of Authenticity</h2>
-    <p class="panel-sub">Resend or manually issue a COA. Blanks show a dash on the certificate.</p>
-    <div class="client-sel-wrap">
-      <span class="client-sel-label">Select client</span>
-      <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
-        <option value="">— choose to auto-fill —</option>
-      </select>
+    <div class="action-panel active" id="action-ship">
+      <h2 class="panel-title">Ship an Order</h2>
+      <p class="panel-sub">Sends the buyer their DHL tracking number the day you drop off the package.</p>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
+      <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
+      <hr class="divider">
+      <label>DHL Tracking Number</label><input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
+      <button class="btn-primary" id="sh-send">Send Tracking Email</button>
+      <div class="status-msg" id="sh-status"></div>
     </div>
-    <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
-    <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
-    <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
-    <hr class="divider">
-    <label>Print Title</label><input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
-    <div class="grid2">
-      <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
-      <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
-    </div>
-    <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
-    <div class="grid2">
-      <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
-      <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
-    </div>
-    <button class="btn-primary" id="coa-send">Send COA Email</button>
-    <div class="status-msg" id="coa-status"></div>
-  </div>
 
-  <!-- ════════════════════════════════════
-       FOLLOW-UP
-  ════════════════════════════════════ -->
-  <div class="panel" id="panel-followup">
-    <h2 class="panel-title">Post-Delivery Follow-up</h2>
-    <p class="panel-sub">A warm check-in after the buyer has had time to receive their print, asking how they're enjoying it and inviting them to share a photo.</p>
-    <div class="client-sel-wrap">
-      <span class="client-sel-label">Select client</span>
-      <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
-        <option value="">— choose to auto-fill —</option>
-      </select>
+    <div class="action-panel" id="action-coa">
+      <h2 class="panel-title">Send Certificate of Authenticity</h2>
+      <p class="panel-sub">Resend or manually issue a COA. Blanks show a dash on the certificate.</p>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
+      <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
+      <hr class="divider">
+      <label>Print Title</label><input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
+      <div class="grid2">
+        <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
+        <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
+      </div>
+      <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
+      <div class="grid2">
+        <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
+        <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
+      </div>
+      <button class="btn-primary" id="coa-send">Send COA Email</button>
+      <div class="status-msg" id="coa-status"></div>
     </div>
-    <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
-    <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
-    <hr class="divider">
-    <label>Print Title</label><input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
-    <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
-    <div class="status-msg" id="fu-status"></div>
+
+    <div class="action-panel" id="action-followup">
+      <h2 class="panel-title">Post-Delivery Follow-up</h2>
+      <p class="panel-sub">A warm check-in after the buyer has had time to receive their print, asking how they're enjoying it and inviting them to share a photo.</p>
+      <div class="client-sel-wrap">
+        <span class="client-sel-label">Select client</span>
+        <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
+          <option value="">— choose to auto-fill —</option>
+        </select>
+      </div>
+      <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
+      <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
+      <hr class="divider">
+      <label>Print Title</label><input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
+      <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
+      <div class="status-msg" id="fu-status"></div>
+    </div>
   </div>
 
   <!-- ════════════════════════════════════
@@ -798,20 +822,47 @@ document.querySelectorAll('.tab').forEach(function(tab){
     document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    // Clear Clients header button highlight when navigating away
     var cb = document.querySelector('.header-btn-clients');
     if(cb) cb.classList.remove('header-btn-clients-active');
   });
 });
 
-function switchTab(name){
+// ── Action sub-tab switching ─────────────────────────────────────
+document.querySelectorAll('.action-subtab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.action-subtab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.action-panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('action-' + btn.dataset.action).classList.add('active');
+  });
+});
+
+function switchActionTab(action){
+  document.querySelectorAll('.action-subtab').forEach(function(b){ b.classList.toggle('active', b.dataset.action === action); });
+  document.querySelectorAll('.action-panel').forEach(function(p){ p.classList.remove('active'); });
+  var el = document.getElementById('action-' + action);
+  if(el) el.classList.add('active');
+}
+
+function _activateTab(name){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
-  document.getElementById('panel-' + name).classList.add('active');
-  // Highlight header Clients button when on clients panel
+  var panel = document.getElementById('panel-' + name);
+  if(panel) panel.classList.add('active');
   var cb = document.querySelector('.header-btn-clients');
   if(cb) cb.classList.toggle('header-btn-clients-active', name === 'clients');
   if(name === 'clients') renderClients();
+}
+
+function switchTab(name){
+  // ship/coa/followup now live inside the Actions panel
+  var actionMap = {ship:1, coa:1, followup:1};
+  if(actionMap[name]){
+    _activateTab('actions');
+    switchActionTab(name);
+    return;
+  }
+  _activateTab(name);
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
@@ -1395,9 +1446,15 @@ function renderOrders(){
     return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
   });
 
-  // Update stats and inventory (always from full order list)
+  // Update stats, inventory, and actions badge
   renderStats(orders);
   renderInventory(orders);
+  (function(){
+    var badge = document.getElementById('actionsBadge');
+    if(!badge) return;
+    var needsAction = orders.filter(function(o){ return o.status !== 'done' && (!o.coaSent || !o.shipped); }).length;
+    if(needsAction > 0){ badge.textContent = needsAction; badge.style.display = ''; } else { badge.style.display = 'none'; }
+  })();
   populateClientSelectors();
 
   if(queue) queue.innerHTML = buildActionQueue(orders);
