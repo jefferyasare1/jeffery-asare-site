@@ -117,11 +117,22 @@
     .order-card.inprog{border-left:3px solid #60a5fa;}
     .order-card.done{opacity:.6;}
 
-    .card-main{padding:20px 22px 16px;}
-    .card-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-    .card-buyer{font-size:16px;font-weight:700;letter-spacing:-.02em;}
-    .card-date{font-size:11px;color:var(--muted);white-space:nowrap;padding-top:3px;flex-shrink:0;}
-    .card-print{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4;}
+    /* ── Compact card layout ── */
+    .card-compact{display:flex;align-items:center;gap:14px;padding:14px 20px;}
+    .card-compact-left{flex:1;min-width:0;}
+    .card-compact-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .card-compact .deadline-chip{padding:3px 9px;font-size:9px;margin:6px 0 0;display:inline-block;margin-bottom:0;}
+    .card-expand-btn{width:30px;height:30px;border-radius:var(--rb);border:1.5px solid var(--rule);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:0;opacity:.35;}
+    .order-card:hover .card-expand-btn{opacity:1;}
+    .card-expand-btn:hover{background:#fff;border-color:#c8c0b6;}
+    .card-expand-btn.open{background:#ede8e0;border-color:#c8c0b6;opacity:1;}
+    .card-expand-btn::after{content:'';display:block;width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s;}
+    .card-expand-btn.open::after{transform:rotate(-135deg) translate(-1px,2px);}
+    .card-detail{display:none;border-top:1px solid var(--rule);padding:14px 20px 16px;background:#f0ebe3;}
+    .card-detail.open{display:block;}
+    .card-detail-meta{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;}
+    .card-buyer{font-size:15px;font-weight:700;letter-spacing:-.02em;}
+    .card-print{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
     .card-email{font-size:12px;color:var(--muted);margin-top:2px;}
     .card-ref{font-size:11px;color:#aaa;margin-top:1px;}
 
@@ -1403,8 +1414,7 @@ function renderOrders(){
   function cardHTML(o){
     var s = getStatus(o);
 
-    // ── 5-step visual journey track ──────────────────────────────
-    // Map s.next → step key so the correct dot is highlighted
+    // ── 5-step visual journey track (shown in expanded detail) ───
     var nextToKey = { coa:'coa', ship:'shipped', deliver:'delivered', followup:'followup' };
     var activeKey = nextToKey[s.next] || null;
 
@@ -1434,57 +1444,72 @@ function renderOrders(){
     // ── "New today" badge ─────────────────────────────────────────
     var today = new Date().toISOString().slice(0,10);
     var isToday = o.dateAdded && o.dateAdded.slice(0,10) === today;
-    var newBadge = isToday ? '<span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#fff;padding:2px 7px;margin-left:8px;vertical-align:middle;">NEW</span>' : '';
+    var newBadge = isToday ? '<span style="display:inline-block;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#fff;padding:2px 6px;margin-left:8px;vertical-align:middle;border-radius:2px;">New</span>' : '';
 
-    // ── Status chip ───────────────────────────────────────────────
+    // ── Status chip (compact row) ─────────────────────────────────
     var chip = '<span class="deadline-chip '+s.chip+'">'+escH(s.label)+'</span>';
 
-    // ── Action buttons — primary = what's needed right now ────────
-    var actions = '';
-    if(!o.coaSent){
-      actions += '<button class="btn-card'+(s.next==='coa'?' primary':'')+'" onclick="openCOAInline(\''+o.id+'\')">Send Certificate</button>';
-    }
-    if(o.coaSent && !o.shipped && !o.prepSent){
-      actions += '<button class="btn-card" onclick="openPrepUpdateInline(\''+o.id+'\')">Send Prep Update</button>';
-    }
-    if(!o.shipped){
-      actions += '<button class="btn-card'+(s.next==='ship'?' primary':'')+'" onclick="openShipInline(\''+o.id+'\')">Send Tracking →</button>';
-    }
-    if(o.shipped && !o.delivered){
-      actions += '<button class="btn-card'+(s.next==='deliver'?' primary':'')+'" onclick="openDeliveredInline(\''+o.id+'\')">Mark Delivered</button>';
-    }
-    if(o.delivered && !o.followedUp){
-      actions += '<button class="btn-card'+(s.next==='followup'?' primary':'')+'" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up →</button>';
-    }
-    actions += '<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
+    // ── Primary action (only one — what's needed right now) ───────
+    var primaryBtn = '';
+    if(!o.coaSent && s.next==='coa')
+      primaryBtn = '<button class="btn-card primary" onclick="openCOAInline(\''+o.id+'\')">Send Certificate</button>';
+    else if(!o.shipped && s.next==='ship')
+      primaryBtn = '<button class="btn-card primary" onclick="openShipInline(\''+o.id+'\')">Send Tracking</button>';
+    else if(o.shipped && !o.delivered && s.next==='deliver')
+      primaryBtn = '<button class="btn-card primary" onclick="openDeliveredInline(\''+o.id+'\')">Mark Delivered</button>';
+    else if(o.delivered && !o.followedUp && s.next==='followup')
+      primaryBtn = '<button class="btn-card primary" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up</button>';
 
-    // ── Meta row ──────────────────────────────────────────────────
-    var meta = '';
-    if(o.orderRef)   meta += '<span style="font-size:10px;color:#bbb;margin-right:10px;">Ref: '+escH(o.orderRef)+'</span>';
-    if(o.trackingNum)meta += '<span style="font-size:10px;color:#bbb;">DHL: '+escH(o.trackingNum)+'</span>';
+    // ── Secondary actions (hidden in expanded detail) ─────────────
+    var sec = '';
+    if(!o.coaSent && s.next!=='coa')
+      sec += '<button class="btn-card" onclick="openCOAInline(\''+o.id+'\')">Send Certificate</button>';
+    if(o.coaSent && !o.shipped && !o.prepSent)
+      sec += '<button class="btn-card" onclick="openPrepUpdateInline(\''+o.id+'\')">Send Prep Update</button>';
+    if(!o.shipped && s.next!=='ship')
+      sec += '<button class="btn-card" onclick="openShipInline(\''+o.id+'\')">Send Tracking</button>';
+    if(o.shipped && !o.delivered && s.next!=='deliver')
+      sec += '<button class="btn-card" onclick="openDeliveredInline(\''+o.id+'\')">Mark Delivered</button>';
+    if(o.delivered && !o.followedUp && s.next!=='followup')
+      sec += '<button class="btn-card" onclick="openFollowUpInline(\''+o.id+'\')">Send Follow-up</button>';
+    sec += '<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>';
 
+    // ── Meta info (in expanded detail) ────────────────────────────
+    var metaParts = [escH(o.buyerEmail)];
+    if(o.orderRef)    metaParts.push('Ref: '+escH(o.orderRef));
+    if(o.trackingNum) metaParts.push('DHL: '+escH(o.trackingNum));
+    if(o.dateAdded)   metaParts.push('Ordered '+fmtDate(o.dateAdded));
+    var metaHtml = '<div class="card-detail-meta">'+metaParts.join(' &nbsp;&middot;&nbsp; ')+'</div>';
+
+    // ── Overdue banner ────────────────────────────────────────────
     var urgentBanner = s.urgency===0
       ? '<div class="overdue-banner"><span class="ob-dot"></span>Needs attention — '+escH(s.label)+'</div>'
       : '';
+
     return '<div class="order-card '+cardBorder(s)+'" id="card-'+o.id+'">'
       + urgentBanner
-      +'<div class="card-main">'
-        +'<div class="card-row1">'
-          +'<div>'
-            +'<div class="card-buyer">'+escH(o.buyerName)+newBadge+'</div>'
-            +'<div class="card-print">'+escH(o.printTitle)
-              +(o.size?' &middot; '+escH(o.size):'')
-              +(o.country?' &middot; '+escH(o.country):'')
-              +(o.price?' &middot; '+escH(o.price):'')
-              +(o.qty&&o.qty!=='1'?' &middot; '+escH(o.qty)+' pcs':'')
-            +'</div>'
-            +'<div class="card-email">'+escH(o.buyerEmail)+(meta?'&nbsp;&nbsp;'+meta:'')+'</div>'
+      // Compact row (always visible)
+      +'<div class="card-compact">'
+        +'<div class="card-compact-left">'
+          +'<div class="card-buyer">'+escH(o.buyerName)+newBadge+'</div>'
+          +'<div class="card-print">'+escH(o.printTitle)
+            +(o.size?' &middot; '+escH(o.size):'')
+            +(o.country?' &middot; '+escH(o.country):'')
+            +(o.qty&&o.qty!=='1'?' &middot; '+escH(o.qty)+' pcs':'')
           +'</div>'
-          +'<div class="card-date">'+fmtDate(o.dateAdded)+'</div>'
+          + chip
         +'</div>'
+        +'<div class="card-compact-right">'
+          + primaryBtn
+          +'<button class="card-expand-btn" id="expand-btn-'+o.id+'" onclick="toggleCardDetail(\''+o.id+'\')" aria-label="Expand order details"></button>'
+        +'</div>'
+      +'</div>'
+
+      // Expanded detail panel (hidden by default)
+      +'<div class="card-detail" id="card-detail-'+o.id+'">'
+        + metaHtml
         + jHtml
-        + chip
-        +'<div class="card-actions" style="margin-top:10px;">'+actions+'</div>'
+        +'<div class="card-actions">'+sec+'</div>'
       +'</div>'
 
       // Tracking inline
@@ -1542,6 +1567,15 @@ function renderOrders(){
   }
 
   list.innerHTML = active.map(cardHTML).join('');
+}
+
+// ── Toggle expanded card detail ──────────────────────────────────
+function toggleCardDetail(id){
+  var detail = document.getElementById('card-detail-'+id);
+  var btn    = document.getElementById('expand-btn-'+id);
+  if(!detail) return;
+  var isOpen = detail.classList.toggle('open');
+  if(btn) btn.classList.toggle('open', isOpen);
 }
 
 // ── Scroll to card (from action queue click) ────────────────────
