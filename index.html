@@ -429,12 +429,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 }
 
 /* LOADING SCREEN */
-#siteLoader{position:fixed;inset:0;background:#111;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;transition:opacity .5s ease,visibility .5s ease;}
-#siteLoader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-.loader-logo{font-family:var(--title);font-size:16px;font-weight:600;letter-spacing:-.01em;color:#fff;}
-.loader-bar-wrap{width:120px;height:1px;background:rgba(255,255,255,.15);border-radius:1px;overflow:hidden;}
-.loader-bar{height:100%;background:#fff;border-radius:1px;animation:loaderGrow 1.1s cubic-bezier(.22,.61,.36,1) forwards;}
-@keyframes loaderGrow{from{width:0;}to{width:100%;}}
+#splash{position:fixed;inset:0;background:#000;z-index:9999;pointer-events:all;}
+#splash-logo-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#splash-logo{width:140px;height:140px;display:block;opacity:0;}
 /* PRINT DETAIL PAGE */
 .print-detail-grid{display:grid;grid-template-columns:55% 1fr;gap:4rem;padding:2rem var(--pad) 5rem;align-items:start;}
 .print-detail-img-wrap{position:sticky;top:72px;}
@@ -667,10 +664,11 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- PAGE TRANSITION OVERLAY -->
 <div id="pageTransition"></div>
 
-<!-- LOADING SCREEN -->
-<div id="siteLoader">
-  <span class="loader-logo">Jeffery Asare</span>
-  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+<!-- SPLASH SCREEN: Stamp + Aperture Iris -->
+<div id="splash">
+  <div id="splash-logo-wrap">
+    <img id="splash-logo" src="/logo-mark.png" alt="ja.">
+  </div>
 </div>
 
 
@@ -3038,65 +3036,62 @@ fetch('/_data/prints.json')
   ];
   var flash=document.getElementById('gsap-flash');
 
-  if(strips[0]){
-    // Text starts off screen — slams in after shutter snaps open
-    var _vw=window.innerWidth;
-    gsap.set('#heroLine1',{x:-_vw*1.3});
-    gsap.set('#heroLine2',{x:_vw*1.3});
+  // _runIntro: used for HOME RE-NAVIGATION (sweep transition calls this)
+  // Keeps the shutter strips experience when coming back to home mid-session
+  function _runIntro(){
+    var vw=window.innerWidth;
+    gsap.set('#heroLine1',{x:-vw*1.3});
+    gsap.set('#heroLine2',{x:vw*1.3});
     gsap.set('#heroDesc',{opacity:0,y:28});
     gsap.set('.hero .btn-pill',{opacity:0,y:20});
     gsap.set('nav',{opacity:0,y:-80});
+    gsap.set(flash,{opacity:0});
+    var tl=gsap.timeline();
+    tl.to(strips[0],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.1)
+      .to(strips[1],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.2)
+      .to(strips[2],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.3)
+      .to(strips[3],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.4)
+      .to('nav',{opacity:1,y:0,duration:0.55,ease:'power3.out'},0.55)
+      .to(flash,{opacity:0.9,duration:0.06,ease:'none'},0.65)
+      .to(flash,{opacity:0,duration:0.35,ease:'power2.out'},0.71)
+      .to('#heroLine1',{x:0,duration:0.72,ease:'back.out(1.9)'},0.68)
+      .to('#heroLine2',{x:0,duration:0.72,ease:'back.out(1.9)'},0.83)
+      .fromTo('#heroDesc',{opacity:0,y:28},{opacity:1,y:0,duration:0.55,ease:'power3.out'},1.05)
+      .fromTo('.hero .btn-pill',{opacity:0,y:20},{opacity:1,y:0,duration:0.45,ease:'power3.out'},1.2)
+      .call(function(){strips.forEach(function(s){s.style.display='none';});});
+  }
 
-    // Safety net: always show content after 3.5s regardless
-    var _visH=null;
-    var _introFallback=setTimeout(function(){
-      if(_visH) document.removeEventListener('visibilitychange',_visH);
-      strips.forEach(function(s){s.style.display='none';});
-      gsap.set(['#heroLine1','#heroLine2'],{x:0});
-      gsap.set(['#heroDesc','.hero .btn-pill','nav'],{opacity:1,y:0,clearProps:'all'});
-    },3500);
-
-    function _runIntro(){
-      clearTimeout(_introFallback);
-      var tl=gsap.timeline();
-
-      // Shutter SNAPS open — 4 bands fire alternately left/right
-      tl.to(strips[0],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.1)
-        .to(strips[1],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.2)
-        .to(strips[2],{xPercent:-101,duration:0.42,ease:'expo.inOut'},0.3)
-        .to(strips[3],{xPercent:101,duration:0.42,ease:'expo.inOut'},0.4)
-
-        // Nav drops in as last strip fires
-        .to('nav',{opacity:1,y:0,duration:0.55,ease:'power3.out'},0.55)
-
-        // CAMERA FLASH — white burst at the moment of full reveal
-        .to(flash,{opacity:0.9,duration:0.06,ease:'none'},0.65)
-        .to(flash,{opacity:0,duration:0.35,ease:'power2.out'},0.71)
-
-        // "Photography" SLAMS in from the left — overshoot bounce
-        .to('#heroLine1',{x:0,duration:0.72,ease:'back.out(1.9)'},0.68)
-        // "is Poetry." SLAMS in from the right — slightly offset
-        .to('#heroLine2',{x:0,duration:0.72,ease:'back.out(1.9)'},0.83)
-
-        // Desc + button rise up after the slam settles
-        .fromTo('#heroDesc',{opacity:0,y:28},{opacity:1,y:0,duration:0.55,ease:'power3.out'},1.05)
-        .fromTo('.hero .btn-pill',{opacity:0,y:20},{opacity:1,y:0,duration:0.45,ease:'power3.out'},1.2)
-
-        .call(function(){
-          strips.forEach(function(s){s.style.display='none';});
-        });
+  // ── SPLASH: Stamp + Aperture Iris (initial page load only) ──────
+  var splash=document.getElementById('splash');
+  var splashLogo=document.getElementById('splash-logo');
+  if(splash&&splashLogo){
+    // Strips are only for re-nav; hide them so splash has a clean stage
+    if(strips[0]) strips.forEach(function(s){s.style.display='none';});
+    // Set logo initial state
+    gsap.set(splashLogo,{opacity:0,scale:0.05});
+    gsap.set(splash,{clipPath:'circle(141% at 50% 50%)'});
+    function _runSplash(){
+      gsap.timeline()
+        // Stamp: scales in with overshoot, settles
+        .to(splashLogo,{opacity:1,scale:1.28,duration:0.28,ease:'power3.out'})
+        .to(splashLogo,{scale:0.9,duration:0.11,ease:'power2.in'})
+        .to(splashLogo,{scale:1,duration:0.15,ease:'back.out(2.5)'})
+        // Hold
+        .to(splashLogo,{opacity:1,duration:0.55})
+        // Aperture iris: black field (with logo) collapses inward to reveal hero
+        .to(splash,{clipPath:'circle(0% at 50% 50%)',duration:0.75,ease:'expo.inOut'},'+=0.1')
+        .set(splash,{display:'none',pointerEvents:'none'});
     }
-
     if(document.visibilityState==='visible'){
-      _runIntro();
+      _runSplash();
     } else {
-      _visH=function(){
+      var _splashVH=function(){
         if(document.visibilityState==='visible'){
-          document.removeEventListener('visibilitychange',_visH);
-          _runIntro();
+          document.removeEventListener('visibilitychange',_splashVH);
+          _runSplash();
         }
       };
-      document.addEventListener('visibilitychange',_visH);
+      document.addEventListener('visibilitychange',_splashVH);
     }
   }
 
