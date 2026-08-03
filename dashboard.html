@@ -228,13 +228,15 @@
     /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
     #dash-coa-capture{position:absolute;top:-9999px;left:-9999px;width:640px;background:#fff;pointer-events:none;}
     #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;background:#fff;}
-    #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
-    #dash-coa-content .cert-brand{font-size:13px;font-weight:600;letter-spacing:-.01em;color:#111;}
+    #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
+    #dash-coa-content .cert-brand{display:flex;align-items:center;}
+    #dash-coa-content .cert-brand-logo{height:28px;width:auto;display:block;}
     #dash-coa-content .cert-ref{font-size:11px;color:#888;letter-spacing:.06em;}
     #dash-coa-content .cert-title{font-size:2.4rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.3rem;line-height:1.05;color:#111;}
     #dash-coa-content .cert-subtitle{font-size:12px;color:#888;margin-bottom:1.8rem;}
     /* Centred artwork image — full-width, centred block */
-    #dash-coa-content .cert-img-wrap{width:72%;margin:0 auto 1.8rem;aspect-ratio:4/3;background:#f5f2ee;overflow:hidden;position:relative;display:block;}
+    #dash-coa-content .cert-img-outer{display:flex;justify-content:center;margin-bottom:1.8rem;}
+    #dash-coa-content .cert-img-wrap{width:72%;aspect-ratio:4/3;background:#f5f2ee;overflow:hidden;position:relative;}
     #dash-coa-content .cert-img{width:100%;height:100%;object-fit:cover;display:block;}
     #dash-coa-content .cert-section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.7rem;}
     #dash-coa-content .cert-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #e8e4df;font-size:12px;}
@@ -1678,12 +1680,12 @@ function confirmCOASend(id){
           : '<div style="font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
       var html = '<div class="cert-header">'
-        +'<span class="cert-brand">Jeffery Asare</span>'
+        +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
         +'<span class="cert-ref">'+coaRefNum+'</span>'
         +'</div>'
         +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
         +'<p class="cert-subtitle">This document certifies the authenticity of a limited edition fine art print.</p>'
-        +'<div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div>'
+        +'<div class="cert-img-outer"><div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div></div>'
         +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
         +rows
         +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
@@ -2040,12 +2042,12 @@ document.getElementById('coa-send').addEventListener('click', function(){
           : '<div style="font-family:Georgia,serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
         var html = '<div class="cert-header">'
-          +'<span class="cert-brand">Jeffery Asare</span>'
+          +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
           +'<span class="cert-ref">'+coaRefNum+'</span>'
           +'</div>'
           +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
           +'<p class="cert-subtitle">This document certifies the authenticity of a limited edition fine art print.</p>'
-          +'<div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div>'
+          +'<div class="cert-img-outer"><div class="cert-img-wrap">'+imgHtml+'<div style="position:absolute;inset:0;z-index:2;"></div></div></div>'
           +'<div class="cert-section-label" style="margin-top:1rem;">Print Details</div>'
           +rows
           +'<div style="display:flex;align-items:center;gap:1rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #e8e4df;">'
