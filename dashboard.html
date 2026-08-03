@@ -39,12 +39,20 @@
     @font-face{font-family:'General Sans';src:url('/fonts/GeneralSans-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;}
     body{background:var(--warm);min-height:100vh;font-family:var(--sans);color:var(--ink);}
     a{color:inherit;}
-    .page{max-width:700px;margin:0 auto;padding:48px 24px 120px;}
+    .page{max-width:1200px;margin:0 auto;padding:36px 40px 120px;}
 
     /* ── Header ── */
-    .header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:12px;}
-    .brand{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
-    .header-actions{display:flex;gap:8px;flex-shrink:0;}
+    .header-bar{
+      position:sticky;top:0;z-index:100;
+      background:#fff;border-bottom:1px solid var(--rule);
+      box-shadow:0 1px 0 var(--rule);
+    }
+    .header-inner{
+      max-width:1200px;margin:0 auto;padding:14px 40px;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .brand img{display:block;}
+    .header-actions{display:flex;gap:8px;flex-shrink:0;align-items:center;}
     .header-btn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
     .header-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--warm);}
     .page-title{font-size:30px;font-weight:700;letter-spacing:-.03em;margin-bottom:2px;line-height:1;}
@@ -310,9 +318,8 @@
   </div>
 </div>
 
-<div class="page">
-
-  <div class="header-bar">
+<header class="header-bar">
+  <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
       <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">📧 Digest</button>
@@ -320,6 +327,9 @@
       <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="header-btn">Email Templates ↗</a>
     </div>
   </div>
+</header>
+
+<div class="page">
   <h1 class="page-title">Dashboard</h1>
   <p class="page-sub">Jeffery Asare Fine Art Prints &mdash; Order Management</p>
 
