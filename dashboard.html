@@ -57,22 +57,21 @@
       display:flex;align-items:center;justify-content:space-between;gap:16px;
     }
     .brand img{display:block;}
-    .header-actions{display:flex;gap:8px;flex-shrink:0;align-items:center;}
-    .header-btn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--rule);background:#fff;color:var(--muted);text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--sans);border-radius:var(--rb);}
-    .header-btn:hover{color:var(--ink);background:#faf7f2;border-color:#d4cfc9;}
+    .header-actions{display:flex;gap:4px;flex-shrink:0;align-items:center;}
+    .header-btn{display:inline-flex;align-items:center;font-size:12px;font-weight:500;padding:6px 12px;border:none;background:transparent;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .15s;white-space:nowrap;font-family:var(--sans);border-radius:var(--rb);}
+    .header-btn:hover{color:var(--ink);background:rgba(0,0,0,.04);}
     .header-btn:active{background:#ede8e0;}
-    .header-btn-clients{background:var(--ink);color:#fff;border-color:var(--ink);}
-    .header-btn-clients:hover{background:#374151;color:#fff;border-color:#374151;}
-    .header-btn-clients:active{background:#1f2937;color:#fff;}
-    .header-btn-clients.header-btn-clients-active{background:#374151;color:#fff;border-color:#374151;box-shadow:0 0 0 3px rgba(17,24,39,.12);}
+    .header-btn-clients{color:var(--ink);font-weight:600;}
+    .header-btn-clients:hover{color:var(--ink);}
+    .header-btn-clients.header-btn-clients-active{color:var(--ink);font-weight:600;}
 
     /* ── External tools bar (inside Content panel) ── */
     .ext-tools-bar{display:flex;align-items:center;gap:8px;margin-bottom:24px;padding:10px 14px;background:#fff;border:1px solid var(--rule);border-radius:var(--rb);}
     .ext-tools-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#bbb;margin-right:4px;white-space:nowrap;}
     .ext-tool-link{font-size:11px;font-weight:600;letter-spacing:.04em;padding:6px 12px;border:1px solid var(--rule);border-radius:var(--rb);color:var(--muted);text-decoration:none;background:#f5f0ea;transition:all .15s;white-space:nowrap;}
     .ext-tool-link:hover{color:var(--ink);background:#fff;border-color:#d4cfc9;}
-    .page-title{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:2px;line-height:1;}
-    .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+    .page-greeting{font-size:52px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:4px;}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
 
     /* ── Sync bar ── */
     .sync-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:0 0 14px;background:transparent;border-radius:0;box-shadow:none;border:none;border-bottom:1px solid var(--rule);}
@@ -275,10 +274,10 @@
     #dash-coa-content .cert-sig-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-top:.3rem;}
 
     /* ── Content Manager ── */
-    .cms-subnav{display:flex;gap:2px;margin-bottom:28px;background:#f0ebe3;border-radius:var(--rc);padding:4px 5px;}
-    .cms-tab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:var(--sans);transition:all .18s;border-radius:7px;}
-    .cms-tab:hover{color:var(--ink);background:rgba(255,255,255,.7);}
-    .cms-tab.active{color:var(--ink);font-weight:600;background:#fff;box-shadow:0 1px 3px rgba(120,100,80,.1),0 1px 2px rgba(120,100,80,.07);}
+    .cms-subnav{display:flex;gap:0;margin-bottom:28px;background:transparent;border-radius:0;padding:0;border-bottom:1px solid var(--rule);}
+    .cms-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);transition:color .15s,border-color .15s;border-radius:0;margin-bottom:-1px;}
+    .cms-tab:hover{color:var(--ink);background:transparent;}
+    .cms-tab.active{color:var(--ink);font-weight:600;background:transparent;border-bottom-color:var(--ink);box-shadow:none;}
     .cms-panel{display:none;}
     .cms-panel.active{display:block;}
     .cms-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -383,6 +382,7 @@
   <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
+      <button class="header-btn" onclick="switchTab('content')" title="Manage site content">Content</button>
       <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">Clients</button>
       <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
     </div>
@@ -390,8 +390,15 @@
 </header>
 
 <div class="page">
-  <h1 class="page-title">Dashboard</h1>
-  <p class="page-sub">Jeffery Asare Fine Art Prints &mdash; Order Management</p>
+  <h1 class="page-greeting" id="greetingText"></h1>
+  <p class="page-sub" id="greetingSub">Loading…</p>
+  <script>
+    (function(){
+      var h = new Date().getHours();
+      var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('greetingText').textContent = g + ', Jeff.';
+    })();
+  </script>
 
   <!-- Sync bar -->
   <div class="sync-bar">
@@ -423,7 +430,7 @@
     </div>
 
     <!-- Stats bar -->
-    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1rem;background:#fff;border:1px solid var(--rule);"></div>
+    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1.5rem;background:transparent;border:none;padding:0;"></div>
 
     <!-- Edition inventory bar -->
     <div id="inventoryBar" style="display:none;margin-bottom:1.5rem;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
@@ -1156,35 +1163,45 @@ function parsePrice(str){
 function renderStats(orders){
   var bar = document.getElementById('statsBar');
   if(!bar) return;
-  var total = orders.length;
-  var usdRev = 0, ghsRev = 0;
+  var now = new Date(); now.setHours(0,0,0,0);
+  var weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate()+7);
+  var overdue=0, dueWeek=0, active=0;
+  var usdRev=0, ghsRev=0;
   orders.forEach(function(o){
+    if(o.status==='done') return;
+    active++;
+    var dl = o.deadline ? new Date(o.deadline) : null;
+    if(dl){ dl.setHours(0,0,0,0); if(dl < now) overdue++; else if(dl <= weekEnd) dueWeek++; }
     var s = String(o.price||'').trim();
     var amt = parsePrice(s);
     if(!amt) return;
-    if(s.indexOf('$') !== -1) usdRev += amt;
-    else ghsRev += amt;
+    if(s.indexOf('$') !== -1) usdRev += amt; else ghsRev += amt;
   });
   var revDisplay = '';
   if(usdRev > 0 && ghsRev > 0) revDisplay = '$'+usdRev.toFixed(0)+' + GH&#8373;'+ghsRev.toLocaleString();
   else if(usdRev > 0) revDisplay = '$'+usdRev.toFixed(0);
   else if(ghsRev > 0) revDisplay = 'GH&#8373;'+ghsRev.toLocaleString();
-  else revDisplay = 'N/A';
-  var pending = orders.filter(function(o){ return !o.shipped; }).length;
-  var countries = {};
-  orders.forEach(function(o){ if(o.country) countries[o.country]=true; });
-  var countryCount = Object.keys(countries).length;
-  bar.innerHTML = [
-    ['Total Orders', total],
-    ['Revenue Collected', revDisplay],
-    ['Pending Shipment', pending],
-    ['Countries', countryCount || '—']
-  ].map(function(s){
-    return '<div style="flex:1;min-width:90px;text-align:center;padding:14px 8px;">'
-      +'<div style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.03em;line-height:1;">'+s[1]+'</div>'
-      +'<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px;">'+s[0]+'</div>'
+  else revDisplay = '—';
+  // Update greeting subtitle
+  var sub = document.getElementById('greetingSub');
+  if(sub){
+    if(overdue > 0) sub.textContent = overdue + ' order'+(overdue===1?' is':' are')+' overdue.';
+    else if(dueWeek > 0) sub.textContent = dueWeek + ' order'+(dueWeek===1?' is':' are')+' due this week.';
+    else if(active > 0) sub.textContent = active + ' active order'+(active===1?'':'s')+', all on track.';
+    else sub.textContent = 'No active orders right now.';
+  }
+  var stats = [
+    {label:'Overdue', value: overdue, color: overdue>0 ? '#991b1b' : 'var(--ink)'},
+    {label:'Due this week', value: dueWeek, color: dueWeek>0 ? '#92400e' : 'var(--ink)'},
+    {label:'Active orders', value: active, color: 'var(--ink)'},
+    {label:'Revenue', value: revDisplay, color: 'var(--ink)'}
+  ];
+  bar.innerHTML = stats.map(function(s){
+    return '<div style="flex:1;min-width:100px;padding:14px 16px;">'
+      +'<div style="font-size:26px;font-weight:700;color:'+s.color+';letter-spacing:-.03em;line-height:1;">'+s.value+'</div>'
+      +'<div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:5px;">'+s.label+'</div>'
       +'</div>';
-  }).join('<div style="width:1px;background:var(--rule);margin:10px 0;"></div>');
+  }).join('<div style="width:1px;background:var(--rule);margin:10px 0;self-align:stretch;"></div>');
 }
 
 // ── Edition Inventory Bar ────────────────────────────────────────
