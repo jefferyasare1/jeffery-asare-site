@@ -1829,7 +1829,7 @@ function confirmCOASend(id){
 
         var sigHtml = sigDataURL
           ? '<img src="'+sigDataURL+'" alt="Jeffery Asare" style="max-height:80px;max-width:220px;object-fit:contain;display:block;">'
-          : '<div style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
+          : '<div style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
       var html = '<div class="cert-header">'
         +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
@@ -1938,27 +1938,27 @@ function confirmShip(id){
       subject: 'Your print is on its way — '+(o.printTitle||'Fine Art Print'),
       html_content:
         '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
-        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;">'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
         +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;"></td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is on its way.</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is on its way.</td></tr>'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
           +'Hi '+firstName+', great news — your <strong style="color:#111;">'+(o.printTitle||'fine art print')+'</strong>'+(o.size?' ('+o.size+')':'')+' has been carefully packed and dispatched.'
         +'</td></tr>'
         +'<tr><td style="background:#f5f2ee;padding:24px 28px;display:block;">'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 10px;">DHL Tracking Number</p>'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:20px;font-weight:600;color:#111;margin:0 0 10px;">'+tracking+'</p>'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:13px;color:#888;margin:0;">Track at <a href="https://www.dhl.com/track?trackingNumber='+tracking+'" style="color:#111;">dhl.com</a></p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 10px;">DHL Tracking Number</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:20px;font-weight:600;color:#111;margin:0 0 10px;">'+tracking+'</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:13px;color:#888;margin:0;">Track at <a href="https://www.dhl.com/track?trackingNumber='+tracking+'" style="color:#111;">dhl.com</a></p>'
         +'</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-top:24px;padding-bottom:24px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-top:24px;padding-bottom:24px;">'
           +'Your print ships in a protective tube to ensure it arrives in perfect condition. Reply to this email if you have any questions.'
         +'</td></tr>'
         +'<tr><td style="padding:24px 0 0;border-top:1px solid #e8e4df;">'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
         +'</td></tr>'
-        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
           +(o.orderRef?'Order ref: '+o.orderRef+' &nbsp;&middot;&nbsp; ':'')
           +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com'
         +'</td></tr>'
@@ -1999,25 +1999,25 @@ function confirmFollowUp(id){
       subject: 'How are you enjoying your print? — '+(o.printTitle||'Fine Art Print'),
       html_content:
         '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
-        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;">'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
         +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;"></td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">I hope it arrived safely.</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">I hope it arrived safely.</td></tr>'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
           +'Hi '+firstName+', it\'s been about a week since your <strong style="color:#111;">'+(o.printTitle||'fine art print')+'</strong> was delivered — I just wanted to check in.'
         +'</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
           +'I hope it arrived in perfect condition and that you\'re happy with it. If anything isn\'t right, please reply and I\'ll take care of it right away.'
         +'</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
           +'If you\'re enjoying the piece, sharing a photo or leaving a short review means a great deal — thank you.'
         +'</td></tr>'
         +'<tr><td style="padding:24px 0 0;border-top:1px solid #e8e4df;">'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
-          +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+          +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
         +'</td></tr>'
-        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
           +(o.orderRef?'Order ref: '+o.orderRef+' &nbsp;&middot;&nbsp; ':'')
           +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com'
         +'</td></tr>'
@@ -2073,19 +2073,19 @@ function checkLowStock(){
       // Send the alert
       var subject = '⚠️ Low stock: ' + print.title + ' — ' + remaining + ' of ' + total + ' remaining';
       var html_content = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
-        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;">'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
         +'<tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding-bottom:32px;">Jeffery Asare · Dashboard Alert</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:24px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">Low edition stock</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding-bottom:32px;">Jeffery Asare · Dashboard Alert</td></tr>'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:24px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">Low edition stock</td></tr>'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
         +'<strong style="color:#111;">' + print.title + '</strong> (' + print.edition + ') has only <strong style="color:#c0392b;">' + remaining + ' print' + (remaining===1?'':'s') + ' remaining</strong> in this edition.'
         +'</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;line-height:1.8;padding-bottom:20px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:14px;color:#888;line-height:1.8;padding-bottom:20px;">'
         +'You may want to consider whether to mark this edition as sold out soon, or note the low availability on the product page.'
         +'</td></tr>'
-        +'<tr><td style="padding-top:24px;border-top:1px solid #e8e4df;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;">'
+        +'<tr><td style="padding-top:24px;border-top:1px solid #e8e4df;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:11px;color:#bbb;">'
         +'This is an automated alert from your dashboard. Sent: ' + new Date().toLocaleString('en-GB') + '</td></tr>'
         +'</table></td></tr></table></body></html>';
 
@@ -2131,20 +2131,20 @@ function confirmPrepUpdate(id){
       to_name: o.buyerName,
       subject: 'Your print is being prepared — ' + (o.printTitle||'Fine Art Print'),
       html_content: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
-        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;">'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
         +'<tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
         +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;"></td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is being prepared.</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is being prepared.</td></tr>'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">'
         +'Hi ' + firstName + ', I wanted to let you know that your <strong style="color:#111;">' + (o.printTitle||'fine art print') + '</strong>' + (o.size ? ' (' + o.size + ')' : '') + ' is currently being carefully prepared in my studio.</td></tr>'
-        +'<tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">'
+        +'<tr><td style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">'
         +'Each print is handled with care — inspected, rolled, and packaged to ensure it arrives in perfect condition. It will ship within <strong style="color:#111;">7–14 business days</strong>, and you\'ll receive a tracking number as soon as it\'s on its way.</td></tr>'
         +'<tr><td style="padding:28px 0 0;border-top:1px solid #e8e4df;">'
-        +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
-        +'<p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p></td></tr>'
-        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+        +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+        +'<p style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p></td></tr>'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
         +(o.orderRef ? 'Order ref: ' + o.orderRef + ' &nbsp;&middot;&nbsp; ' : '')
         +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com</td></tr>'
         +'</table></td></tr></table></body></html>'
@@ -2269,7 +2269,7 @@ document.getElementById('coa-send').addEventListener('click', function(){
 
         var sigHtml = sigDataURL
           ? '<img src="'+sigDataURL+'" alt="Jeffery Asare" style="max-height:80px;max-width:220px;object-fit:contain;display:block;">'
-          : '<div style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
+          : '<div style="font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
         var html = '<div class="cert-header">'
           +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
