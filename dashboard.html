@@ -83,14 +83,14 @@
     .btn-sync.spinning{opacity:.4;pointer-events:none;}
 
     /* ── Tabs ── */
-    .tabs{display:flex;align-items:flex-end;margin-bottom:28px;overflow-x:auto;background:transparent;border-bottom:1px solid var(--rule);padding:0;gap:0;border-radius:0;}
+    .tabs{display:flex;align-items:flex-end;margin-bottom:28px;overflow-x:auto;background:transparent;border-bottom:1.5px solid var(--rule);padding:0;gap:0;border-radius:0;}
     .tab-group{display:flex;flex-direction:column;flex-shrink:0;}
-    .tab-group-label{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c8bfb5;padding:0 14px 5px;white-space:nowrap;}
+    .tab-group-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#b0a89e;padding:0 16px 6px;white-space:nowrap;}
     .tab-group-row{display:flex;gap:0;}
-    .tab-sep{width:1px;background:var(--rule);margin:0 6px 0;align-self:stretch;flex-shrink:0;}
-    .tab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);letter-spacing:.01em;transition:color .15s,border-color .15s;border-radius:0;white-space:nowrap;margin-bottom:-1px;display:inline-flex;align-items:center;gap:5px;}
+    .tab-sep{width:1px;background:var(--rule);margin:0 8px;align-self:stretch;flex-shrink:0;}
+    .tab{flex-shrink:0;padding:10px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:3px solid transparent;background:transparent;font-family:var(--sans);letter-spacing:.01em;transition:color .15s,border-color .15s;border-radius:0;white-space:nowrap;margin-bottom:-1.5px;display:inline-flex;align-items:center;gap:6px;}
     .tab:hover{color:var(--ink);background:transparent;}
-    .tab.active{color:var(--ink);font-weight:600;background:transparent;border-bottom-color:var(--ink);box-shadow:none;}
+    .tab.active{color:var(--ink);font-weight:700;background:transparent;border-bottom-color:var(--ink);box-shadow:none;}
     .tab-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:10px;background:var(--ink);color:#fff;line-height:1.5;}
     .tab-badge.red{background:var(--red);}
     /* ── Action sub-tabs ── */
@@ -135,7 +135,6 @@
     /* ── Orders panel — narrow card column within wide page ── */
     #panel-orders .orders-header,
     #panel-orders .search-wrap,
-    #panel-orders .action-queue,
     #ordersList{max-width:740px;}
 
     /* ── Order cards ── */
@@ -430,6 +429,16 @@
     <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
   </div>
 
+  <!-- ── Permanent summary strip (always visible, above tabs) ── -->
+  <div id="summaryStrip" style="margin-bottom:28px;">
+    <!-- Stats row -->
+    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:0;background:transparent;border:none;padding:0 0 20px;border-bottom:1px solid var(--rule);"></div>
+    <!-- Alerts: overdue / needs attention -->
+    <div class="action-queue" id="actionQueue" style="margin-top:16px;"></div>
+    <!-- Edition inventory -->
+    <div id="inventoryBar" style="display:none;margin-top:16px;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
+  </div>
+
   <!-- Tabs -->
   <div class="tabs" role="navigation" aria-label="Dashboard sections">
     <div class="tab-group">
@@ -462,12 +471,6 @@
       </div>
     </div>
 
-    <!-- Stats bar -->
-    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:1.5rem;background:transparent;border:none;padding:0;"></div>
-
-    <!-- Edition inventory bar -->
-    <div id="inventoryBar" style="display:none;margin-bottom:1.5rem;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
-
     <!-- Search -->
     <div class="search-wrap">
       <div class="search-field-wrap">
@@ -475,9 +478,6 @@
         <input id="searchInput" type="search" class="search-input" placeholder="Search orders…" oninput="renderOrders()">
       </div>
     </div>
-
-    <!-- Action queue summary -->
-    <div class="action-queue" id="actionQueue"></div>
 
     <!-- Cards -->
     <div id="ordersList"></div>
@@ -495,12 +495,12 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-actions">
     <div class="action-subtabs">
-      <button type="button" class="action-subtab active" data-action="ship">Ship</button>
-      <button type="button" class="action-subtab" data-action="coa">COA</button>
+      <button type="button" class="action-subtab active" data-action="coa">COA</button>
+      <button type="button" class="action-subtab" data-action="ship">Ship</button>
       <button type="button" class="action-subtab" data-action="followup">Follow-up</button>
     </div>
 
-    <div class="action-panel active" id="action-ship">
+    <div class="action-panel" id="action-ship">
       <div id="action-ship-list"></div>
       <div class="manual-entry-divider">Manual entry</div>
       <div class="client-sel-wrap">
@@ -518,7 +518,7 @@
       <div class="status-msg" id="sh-status"></div>
     </div>
 
-    <div class="action-panel" id="action-coa">
+    <div class="action-panel active" id="action-coa">
       <div id="action-coa-list"></div>
       <div class="manual-entry-divider">Manual entry</div>
       <div class="client-sel-wrap">
@@ -857,7 +857,9 @@ function switchActionTab(action){
   renderActionsPanel();
 }
 
-function renderActionsPanel(){
+function renderActionsPanel(defaultTab){
+  // Default sub-tab is COA (first step in the workflow)
+  if(defaultTab) switchActionTab(defaultTab);
   var orders = loadOrders();
 
   // ── Ship: COA sent, not yet shipped ──────────────────────────
@@ -883,14 +885,15 @@ function renderActionsPanel(){
     }
   }
 
-  // ── COA: not yet sent ─────────────────────────────────────────
+  // ── COA: not yet sent (excludes orders where COA was sent at purchase) ──
   var toCoa = orders.filter(function(o){ return !o.coaSent && o.status !== 'done'; });
   var coaEl = document.getElementById('action-coa-list');
   if(coaEl){
     if(!toCoa.length){
-      coaEl.innerHTML = '<div class="aq-empty">All COAs sent.</div>';
+      coaEl.innerHTML = '<div class="aq-empty">All COAs sent — including any sent automatically at purchase.</div>';
     } else {
-      coaEl.innerHTML = toCoa.map(function(o){
+      coaEl.innerHTML = '<p style="font-size:11px;color:var(--muted);margin-bottom:14px;max-width:740px;">Orders that received a COA automatically at purchase are not shown here.</p>'
+        + toCoa.map(function(o){
         return '<div class="aq-card">'
           +'<div class="aq-info">'
             +'<div class="aq-name">'+escH(o.buyerName)+'</div>'
