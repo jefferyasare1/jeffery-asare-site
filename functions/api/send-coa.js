@@ -27,7 +27,7 @@ export async function onRequestPost(context) {
 
   // Basic size guard — PDF base64 shouldn't exceed ~8 MB
   const contentLength = parseInt(request.headers.get('Content-Length') || '0');
-  if (contentLength > 8 * 1024 * 1024) {
+  if (contentLength > 25 * 1024 * 1024) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413, headers: jsonHeaders });
   }
 

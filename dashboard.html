@@ -2144,8 +2144,8 @@ function confirmCOASend(id){
             var maxW=pW-2*margin, maxH=pH-2*margin;
             var ratio=Math.min(maxW/canvas.width, maxH/canvas.height);
             var imgW=canvas.width*ratio, imgH=canvas.height*ratio;
-            var imgData=canvas.toDataURL('image/png');
-            pdf.addImage(imgData,'PNG',margin+(maxW-imgW)/2,margin,imgW,imgH);
+            var imgData=canvas.toDataURL('image/jpeg', 0.88);
+            pdf.addImage(imgData,'JPEG',margin+(maxW-imgW)/2,margin,imgW,imgH);
             var safeName=(o.buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
 
             // Download PDF to Jeff's machine
@@ -2590,8 +2590,8 @@ document.getElementById('coa-send').addEventListener('click', function(){
                 var maxW=pW-2*margin, maxH=pH-2*margin;
                 var ratio=Math.min(maxW/canvas.width, maxH/canvas.height);
                 var imgW=canvas.width*ratio, imgH=canvas.height*ratio;
-                var imgData=canvas.toDataURL('image/png');
-                pdf.addImage(imgData,'PNG',margin+(maxW-imgW)/2,margin,imgW,imgH);
+                var imgData=canvas.toDataURL('image/jpeg', 0.88);
+                pdf.addImage(imgData,'JPEG',margin+(maxW-imgW)/2,margin,imgW,imgH);
                 var safeName = toName.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
                 pdf.save('COA-'+safeName+'.pdf');
                 if(st) st.textContent='Sending COA to buyer…';
