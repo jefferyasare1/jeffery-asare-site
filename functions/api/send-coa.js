@@ -67,7 +67,9 @@ export async function onRequestPost(context) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
         <!-- Brand -->
-        <tr><td style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding-bottom:36px;">Jeffery Asare</td></tr>
+        <tr><td style="padding-bottom:36px;">
+          <img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;">
+        </td></tr>
         <!-- Heading -->
         <tr><td style="font-family:Georgia,serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
           Thank you, ${firstName}.
