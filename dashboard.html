@@ -317,8 +317,8 @@
     #dash-coa-content .cert-subtitle{font-size:12px;color:#888;margin-bottom:1.8rem;}
     /* Centred artwork image — full-width, centred block */
     #dash-coa-content .cert-img-outer{display:flex;justify-content:center;margin-bottom:1.8rem;}
-    #dash-coa-content .cert-img-wrap{width:72%;aspect-ratio:4/3;background:#f5f2ee;overflow:hidden;position:relative;}
-    #dash-coa-content .cert-img{width:100%;height:100%;object-fit:cover;display:block;}
+    #dash-coa-content .cert-img-wrap{width:72%;background:#f5f2ee;}
+    #dash-coa-content .cert-img{width:100%;height:auto;display:block;}
     #dash-coa-content .cert-section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.7rem;}
     #dash-coa-content .cert-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #e8e4df;font-size:12px;}
     #dash-coa-content .cert-key{color:#888;}
@@ -2174,7 +2174,8 @@ function confirmCOASend(id){
                 if(st){ st.className='inline-status ok'; st.textContent='COA emailed to '+escH(o.buyerEmail)+' ✓ · PDF attached · saved to your device'; }
                 setTimeout(function(){ renderOrders(); }, 1500);
               } else {
-                throw new Error(result.error||'Send failed');
+                var detail = result.details ? (result.details.message || JSON.stringify(result.details).slice(0,120)) : '';
+                throw new Error((result.error||'Send failed') + (detail ? ': ' + detail : ''));
               }
             })
             .catch(function(err){
@@ -2212,7 +2213,7 @@ function confirmShip(id){
       to: o.buyerEmail, to_name: o.buyerName,
       subject: 'Your print is on its way — '+(o.printTitle||'Fine Art Print'),
       html_content:
-        '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>'
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
         +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
@@ -2273,7 +2274,7 @@ function confirmFollowUp(id){
       to: o.buyerEmail, to_name: o.buyerName,
       subject: 'How are you enjoying your print? — '+(o.printTitle||'Fine Art Print'),
       html_content:
-        '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>'
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
         +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
         +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
@@ -2347,7 +2348,7 @@ function checkLowStock(){
 
       // Send the alert
       var subject = '⚠️ Low stock: ' + print.title + ' — ' + remaining + ' of ' + total + ' remaining';
-      var html_content = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>'
+      var html_content = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
         +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
         +'<tr><td align="center">'
@@ -2405,7 +2406,7 @@ function confirmPrepUpdate(id){
       to: o.buyerEmail,
       to_name: o.buyerName,
       subject: 'Your print is being prepared — ' + (o.printTitle||'Fine Art Print'),
-      html_content: '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>'
+      html_content: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
         +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,&quot;Century Gothic&quot;,&quot;Trebuchet MS&quot;,sans-serif;">'
         +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">'
         +'<tr><td align="center">'

@@ -61,22 +61,7 @@ export async function onRequestPost(context) {
     htmlContent: `
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="color-scheme" content="light dark">
-  <meta name="supported-color-schemes" content="light dark">
-  <style>
-    @media (prefers-color-scheme: dark) {
-      .email-wrap  { background-color:#111 !important; }
-      .email-card  { background-color:#1c1c1c !important; }
-      .email-text  { color:#d4cfc9 !important; }
-      .email-head  { color:#f0ebe3 !important; }
-      .email-box   { background-color:#2a2a2a !important; }
-      .email-foot  { border-top-color:#333 !important; color:#666 !important; }
-      .email-sig   { border-top-color:#333 !important; }
-    }
-  </style>
-</head>
+<head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;">
   <table class="email-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
     <tr><td align="center">
