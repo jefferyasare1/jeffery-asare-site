@@ -60,47 +60,66 @@ export async function onRequestPost(context) {
     subject: `Your Certificate of Authenticity — ${print_title || 'Fine Art Print'}`,
     htmlContent: `
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f9f7f4;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .email-wrap  { background-color:#111 !important; }
+      .email-card  { background-color:#1c1c1c !important; }
+      .email-text  { color:#d4cfc9 !important; }
+      .email-head  { color:#f0ebe3 !important; }
+      .email-box   { background-color:#2a2a2a !important; }
+      .email-foot  { border-top-color:#333 !important; color:#666 !important; }
+      .email-sig   { border-top-color:#333 !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;">
+  <table class="email-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
-        <!-- Brand -->
+      <table class="email-card" width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
+        <!-- Logo on black background — readable in light and dark mode -->
         <tr><td style="padding-bottom:36px;">
-          <img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;">
+          <table cellpadding="0" cellspacing="0"><tr>
+            <td style="background:#000;padding:10px;line-height:0;">
+              <img src="https://jefferyasare.com/logo-ja-email.png" alt="ja." width="52" height="52" style="display:block;border:0;">
+            </td>
+          </tr></table>
         </td></tr>
         <!-- Heading -->
-        <tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
+        <tr><td class="email-head" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
           Thank you, ${firstName}.
         </td></tr>
         <!-- Body -->
-        <tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
+        <tr><td class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
           Your order for <strong style="color:#111;">${print_title || 'your fine art print'}</strong>${size ? ' (' + size + ')' : ''} has been confirmed.
         </td></tr>
-        <tr><td style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
+        <tr><td class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
           Attached to this email is your <strong style="color:#111;">Certificate of Authenticity</strong> — a signed document confirming the provenance and authenticity of your limited edition print. Please keep it safe; it is the official record of your ownership.
         </td></tr>
         <!-- Next steps box -->
-        <tr><td style="background:#f5f2ee;padding:24px 28px;margin-bottom:28px;display:block;">
-          <p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 12px;">What happens next</p>
-          <p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#555;line-height:1.7;margin:0;">
+        <tr><td class="email-box" style="background:#f5f2ee;padding:24px 28px;">
+          <p style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 12px;">What happens next</p>
+          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#555;line-height:1.7;margin:0;">
             Your print is now being carefully prepared. It will ship within <strong>7–14 business days</strong>.
             Once it's on its way, you'll receive a second email with your tracking number.
           </p>
         </td></tr>
         <tr><td style="padding:28px 0 0;">
-          <p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.6;margin:0 0 4px;">
+          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.6;margin:0;">
             Questions? Just reply to this email.
           </p>
         </td></tr>
         <!-- Signature -->
-        <tr><td style="padding:28px 0 0;border-top:1px solid #e8e4df;margin-top:32px;">
-          <p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
-          <p style="font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
+        <tr><td class="email-sig" style="padding:28px 0 0;border-top:1px solid #e8e4df;margin-top:32px;">
+          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
+          <p class="email-head" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
         </td></tr>
         <!-- Footer -->
-        <tr><td style="padding-top:32px;border-top:1px solid #e8e4df;font-family:'Futura','Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
+        <tr><td class="email-foot" style="padding-top:32px;border-top:1px solid #e8e4df;font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
           ${order_ref ? 'Order ref: ' + order_ref + ' &nbsp;&middot;&nbsp; ' : ''}Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com
         </td></tr>
       </table>

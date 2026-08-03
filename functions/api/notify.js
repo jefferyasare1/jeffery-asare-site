@@ -53,7 +53,7 @@ export async function onRequest(context) {
   }
 
   const payload = {
-    sender: { name: 'Jeffery Asare Dashboard', email: 'hello@jefferyasare.com' },
+    sender: { name: 'Jeffery Asare', email: 'hello@jefferyasare.com' },
     to: [{ email: to, name: to_name || to }],
     subject: subject,
     htmlContent: html_content
