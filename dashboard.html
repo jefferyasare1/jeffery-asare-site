@@ -366,8 +366,8 @@
   <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
-      <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">👥 Clients</button>
-      <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">📧 Digest</button>
+      <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">Clients</button>
+      <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
     </div>
   </div>
 </header>
@@ -379,7 +379,7 @@
   <!-- Sync bar -->
   <div class="sync-bar">
     <div class="sync-info"><span id="syncStatus">Loading from Google Sheets…</span></div>
-    <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">↻ Sync</button>
+    <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
   </div>
 
   <!-- Tabs -->
@@ -400,7 +400,7 @@
     <div class="orders-header">
       <div class="orders-title">Orders</div>
       <div style="display:flex;gap:.5rem;align-items:center;">
-        <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">&#8595; Export CSV</button>
+        <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
         <button class="btn-add" id="openAddOrder">+ New Order</button>
       </div>
     </div>
@@ -430,7 +430,7 @@
        CLIENTS (Completed Orders)
   ════════════════════════════════════ -->
   <div class="panel" id="panel-clients">
-    <div id="clientsList"><div class="empty-state"><div class="empty-icon">👥</div><p>Completed orders will appear here once a follow-up has been sent.</p></div></div>
+    <div id="clientsList"><div class="empty-state"><p>Completed orders will appear here once a follow-up has been sent.</p></div></div>
   </div>
 
   <!-- ════════════════════════════════════
@@ -588,7 +588,6 @@
     <!-- External tools strip -->
     <div class="ext-tools-bar">
       <span class="ext-tools-label">External tools</span>
-      <a href="/admin/#/collections/settings" class="ext-tool-link">Netlify CMS ↗</a>
       <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="ext-tool-link">Email Templates ↗</a>
     </div>
 
@@ -612,7 +611,7 @@
         <div class="cms-list-title">Field Notes</div>
         <button class="btn-add" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
       </div>
-      <div id="cms-journal-list"><div class="empty-state"><div class="empty-icon">📝</div><p>Loading posts…</p></div></div>
+      <div id="cms-journal-list"><div class="empty-state"><p>Loading posts…</p></div></div>
     </div>
 
     <!-- Prints panel -->
@@ -621,7 +620,7 @@
         <div class="cms-list-title">Prints Catalogue</div>
         <button class="btn-add" onclick="cmsOpenPrintEdit(null)">+ New Print</button>
       </div>
-      <div id="cms-prints-list"><div class="empty-state"><div class="empty-icon">🖼</div><p>Loading prints…</p></div></div>
+      <div id="cms-prints-list"><div class="empty-state"><p>Loading prints…</p></div></div>
     </div>
 
     <!-- Portfolio panel -->
@@ -1107,7 +1106,7 @@ function buildActionQueue(orders){
   } else {
     if(overdue.length){
       html += '<div class="queue-banner red">'
-        +'<div class="queue-title red">⚠ '+overdue.length+' overdue — click to jump</div>'
+        +'<div class="queue-title red">'+overdue.length+' overdue — click to jump</div>'
         +'<div class="queue-desc">'+overdue.map(function(x){
             return '<strong style="cursor:pointer;text-decoration:underline;" onclick="scrollToCard(\''+x.o.id+'\')">'+escH(x.o.buyerName)+'</strong> · '+escH(x.s.label);
           }).join(' &nbsp;&nbsp; ')+'</div></div>';
@@ -1255,7 +1254,7 @@ function sendFollowUpDigest(){
   });
 
   var restore = function(){
-    if(btn){ btn.disabled=false; btn.textContent='📧 Digest'; }
+    if(btn){ btn.disabled=false; btn.textContent='Digest'; }
   };
 
   if(!overdue.length && !dueToday.length && !dueSoon.length){
@@ -1390,7 +1389,7 @@ function renderOrders(){
   if(!active.length){
     list.innerHTML = q
       ? '<div class="empty-state"><p>No active orders match "'+escH(q)+'".</p></div>'
-      : '<div class="empty-state"><div class="empty-icon">📦</div><p>No active orders.<br>Click <strong>+ New Order</strong> when a buyer pays,<br>or sync to pull from Google Sheets.<br><br><em style="font-size:12px;color:#c5b9ab;">Completed orders are in the Clients tab.</em></p></div>';
+      : '<div class="empty-state"><p>No active orders.<br>Click <strong>+ New Order</strong> when a buyer pays,<br>or Sync to pull from Google Sheets.<br><br><em style="font-size:12px;color:#c5b9ab;">Completed orders are in the Clients tab.</em></p></div>';
     return;
   }
 
@@ -1465,7 +1464,7 @@ function renderOrders(){
     if(o.trackingNum)meta += '<span style="font-size:10px;color:#bbb;">DHL: '+escH(o.trackingNum)+'</span>';
 
     var urgentBanner = s.urgency===0
-      ? '<div class="overdue-banner"><span class="ob-dot"></span>Needs immediate attention — '+escH(s.label)+'</div>'
+      ? '<div class="overdue-banner"><span class="ob-dot"></span>Needs attention — '+escH(s.label)+'</div>'
       : '';
     return '<div class="order-card '+cardBorder(s)+'" id="card-'+o.id+'">'
       + urgentBanner
@@ -1569,7 +1568,7 @@ function renderClients(){
   });
 
   if(!complete.length){
-    panel.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>Completed orders will appear here once a follow-up has been sent.</p></div>';
+    panel.innerHTML = '<div class="empty-state"><p>Completed orders will appear here once a follow-up has been sent.</p></div>';
     return;
   }
 
@@ -2326,7 +2325,7 @@ function cmsLoad(which){
 function cmsRenderJournal(){
   var el=document.getElementById('cms-journal-list'); if(!el) return;
   var posts=(_cmsData.journal&&_cmsData.journal.posts)||[];
-  if(!posts.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">📝</div><p>No posts yet. Add one above.</p></div>'; return; }
+  if(!posts.length){ el.innerHTML='<div class="empty-state"><p>No posts yet. Add one above.</p></div>'; return; }
   el.innerHTML=posts.map(function(p,i){
     return '<div class="cms-item">'
       +'<div class="cms-item-reorder">'
