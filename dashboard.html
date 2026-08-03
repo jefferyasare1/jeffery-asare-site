@@ -132,10 +132,33 @@
     .section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin:24px 0 10px;padding-top:16px;border-top:1px solid var(--rule);}
     .section-label:first-child{border-top:none;margin-top:0;padding-top:0;}
 
-    /* ── Orders panel — narrow card column within wide page ── */
-    #panel-orders .orders-header,
-    #panel-orders .search-wrap,
-    #ordersList{max-width:740px;}
+    /* ── Orders split layout ── */
+    #orders-layout{display:flex;gap:28px;align-items:flex-start;}
+    #orders-main{flex:1;min-width:0;}
+    #orders-sidebar{width:260px;flex-shrink:0;position:sticky;top:68px;border:1px solid var(--rule);border-radius:var(--rc);background:#fff;overflow:hidden;}
+    .sidebar-hd{padding:10px 14px;background:#f5f0ea;border-bottom:1px solid var(--rule);}
+    .sidebar-hd-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .sidebar-sec{padding:10px 14px;border-bottom:1px solid var(--rule);}
+    .sidebar-sec:last-child{border-bottom:none;}
+    .sidebar-sec-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+    .sidebar-sec-count{background:var(--red);color:#fff;border-radius:10px;font-size:8px;padding:1px 5px;font-weight:700;}
+    .sidebar-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--rule);}
+    .sidebar-row:last-child{border-bottom:none;}
+    .sidebar-row-info{flex:1;min-width:0;}
+    .sidebar-row-name{font-size:11px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .sidebar-row-sub{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .sidebar-tag{font-size:8px;font-weight:700;padding:2px 5px;border-radius:6px;flex-shrink:0;letter-spacing:.04em;text-transform:uppercase;}
+    .sidebar-tag.coa{background:var(--amber-bg);color:var(--amber);}
+    .sidebar-tag.ship{background:var(--blue-bg);color:var(--blue);}
+    .sidebar-tag.fu{background:var(--green-bg);color:var(--green);}
+    .sidebar-clear{font-size:12px;color:var(--muted);text-align:center;padding:18px 14px;}
+    /* Mini journey dots (compact card row) */
+    .mini-jtrack{display:flex;align-items:center;margin:5px 0 5px;}
+    .mini-jdot{width:7px;height:7px;border-radius:50%;background:var(--rule);flex-shrink:0;}
+    .mini-jdot.done{background:var(--green);}
+    .mini-jdot.active{background:#fff;border:1.5px solid var(--ink);box-sizing:border-box;}
+    .mini-jline{flex:1;height:1.5px;background:var(--rule);min-width:8px;max-width:22px;}
+    .mini-jline.done{background:var(--green);}
 
     /* ── Order cards ── */
     .order-card{background:#fff;border:1px solid var(--rule);border-radius:var(--rc);margin-bottom:10px;box-shadow:none;transition:border-color .15s;overflow:hidden;}
@@ -260,6 +283,11 @@
     .btn-primary:hover{background:#374151;border-color:#374151;}
     .btn-primary:active{background:#1f2937;}
     .btn-primary:disabled{opacity:.4;cursor:default;}
+    /* Small inline action button (used in action queue cards) */
+    .btn-sm{display:inline-flex;align-items:center;background:var(--ink);color:#fff;border:1px solid var(--ink);padding:6px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);border-radius:var(--rb);transition:all .15s;white-space:nowrap;}
+    .btn-sm:hover{background:#374151;border-color:#374151;}
+    .btn-sm:active{background:#1f2937;}
+    .btn-sm:disabled{opacity:.4;cursor:default;}
     .status-msg{margin-top:14px;font-size:13px;text-align:center;min-height:18px;}
     .status-msg.ok{color:var(--green);}
     .status-msg.err{color:var(--red);}
@@ -445,7 +473,7 @@
       <div class="tab-group-label">Orders</div>
       <div class="tab-group-row">
         <button type="button" class="tab active" data-tab="orders">Active</button>
-        <button type="button" class="tab" data-tab="actions">Actions <span class="tab-badge" id="actionsBadge" style="display:none"></span></button>
+        <button type="button" class="tab" data-tab="actions">Actions <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
         <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
       </div>
     </div>
@@ -463,24 +491,32 @@
        ORDERS DASHBOARD
   ════════════════════════════════════ -->
   <div class="panel active" id="panel-orders">
-    <div class="orders-header">
-      <div class="orders-title">Orders</div>
-      <div style="display:flex;gap:.5rem;align-items:center;">
-        <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
-        <button class="btn-add" id="openAddOrder">+ New Order</button>
-      </div>
-    </div>
+    <div id="orders-layout">
+      <!-- ── Left: order list ── -->
+      <div id="orders-main">
+        <div class="orders-header">
+          <div class="orders-title">Orders</div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
+            <button class="btn-add" id="openAddOrder">+ New Order</button>
+          </div>
+        </div>
 
-    <!-- Search -->
-    <div class="search-wrap">
-      <div class="search-field-wrap">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
-        <input id="searchInput" type="search" class="search-input" placeholder="Search orders…" oninput="renderOrders()">
-      </div>
-    </div>
+        <!-- Search -->
+        <div class="search-wrap">
+          <div class="search-field-wrap">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+            <input id="searchInput" type="search" class="search-input" placeholder="Search orders…" oninput="renderOrders()">
+          </div>
+        </div>
 
-    <!-- Cards -->
-    <div id="ordersList"></div>
+        <!-- Cards -->
+        <div id="ordersList"></div>
+      </div>
+
+      <!-- ── Right: action sidebar ── -->
+      <div id="orders-sidebar"></div>
+    </div>
   </div>
 
   <!-- ════════════════════════════════════
@@ -878,7 +914,7 @@ function renderActionsPanel(defaultTab){
           +'</div>'
           +'<div class="aq-actions" id="ship-inline-'+o.id+'">'
             +'<input class="aq-tracking" id="tracking-'+o.id+'" type="text" placeholder="DHL tracking number">'
-            +'<button class="btn-primary" onclick="confirmShip(\''+o.id+'\')">Ship</button>'
+            +'<button class="btn-sm" onclick="confirmShip(\''+o.id+'\')">Ship</button>'
           +'</div>'
         +'</div>';
       }).join('');
@@ -901,7 +937,7 @@ function renderActionsPanel(defaultTab){
             +'<div class="aq-status" id="coa-st-'+o.id+'"></div>'
           +'</div>'
           +'<div class="aq-actions">'
-            +'<button class="btn-primary" onclick="confirmCOASend(\''+o.id+'\')">Send COA</button>'
+            +'<button class="btn-sm" onclick="confirmCOASend(\''+o.id+'\')">Send COA</button>'
           +'</div>'
         +'</div>';
       }).join('');
@@ -923,7 +959,7 @@ function renderActionsPanel(defaultTab){
             +'<div class="aq-status" id="fu-st-'+o.id+'"></div>'
           +'</div>'
           +'<div class="aq-actions" id="fu-inline-'+o.id+'">'
-            +'<button class="btn-primary" onclick="confirmFollowUp(\''+o.id+'\')">Send follow-up</button>'
+            +'<button class="btn-sm" onclick="confirmFollowUp(\''+o.id+'\')">Send follow-up</button>'
           +'</div>'
         +'</div>';
       }).join('');
@@ -1307,7 +1343,7 @@ function renderStats(orders){
   var overdue=0, dueWeek=0, active=0;
   var usdRev=0, ghsRev=0;
   orders.forEach(function(o){
-    if(o.status==='done') return;
+    if(o.status==='done' || o.followedUp) return;
     active++;
     var dl = o.deadline ? new Date(o.deadline) : null;
     if(dl){ dl.setHours(0,0,0,0); if(dl < now) overdue++; else if(dl <= weekEnd) dueWeek++; }
@@ -1518,6 +1554,36 @@ function exportCSV(){
   a.click();
 }
 
+// ── Orders action sidebar ────────────────────────────────────────
+function renderOrdersSidebar(){
+  var el = document.getElementById('orders-sidebar');
+  if(!el) return;
+  var orders = loadOrders();
+  var toCoa  = orders.filter(function(o){ return !o.coaSent  && o.status !== 'done' && !o.followedUp; });
+  var toShip = orders.filter(function(o){ return o.coaSent && !o.shipped && o.status !== 'done' && !o.followedUp; });
+  var toFu   = orders.filter(function(o){ return o.shipped && !o.followedUp && o.status !== 'done'; });
+  function secHTML(label, items, tagClass, tagTxt){
+    if(!items.length) return '';
+    return '<div class="sidebar-sec">'
+      +'<div class="sidebar-sec-label">'+label+' <span class="sidebar-sec-count">'+items.length+'</span></div>'
+      + items.map(function(o){
+        return '<div class="sidebar-row">'
+          +'<div class="sidebar-row-info">'
+            +'<div class="sidebar-row-name">'+escH(o.buyerName)+'</div>'
+            +'<div class="sidebar-row-sub">'+escH(o.printTitle||'—')+'</div>'
+          +'</div>'
+          +'<span class="sidebar-tag '+tagClass+'">'+tagTxt+'</span>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  }
+  var body = secHTML('COA to send', toCoa, 'coa', 'COA')
+           + secHTML('Ready to ship', toShip, 'ship', 'Ship')
+           + secHTML('Follow-up due', toFu, 'fu', 'FU');
+  el.innerHTML = '<div class="sidebar-hd"><div class="sidebar-hd-title">Action queue</div></div>'
+    + (body || '<div class="sidebar-clear">All caught up ✓</div>');
+}
+
 // ── Render ──────────────────────────────────────────────────────
 function renderOrders(){
   var orders = loadOrders();
@@ -1534,13 +1600,18 @@ function renderOrders(){
     return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
   });
 
-  // Update stats, inventory, and actions badge
+  // Update stats, inventory, actions badge, and sidebar
   renderStats(orders);
   renderInventory(orders);
+  renderOrdersSidebar();
   (function(){
     var badge = document.getElementById('actionsBadge');
     if(!badge) return;
-    var needsAction = orders.filter(function(o){ return o.status !== 'done' && (!o.coaSent || !o.shipped); }).length;
+    // Count total pending across all three queues (mirrors renderActionsPanel filters)
+    var _toCoa  = orders.filter(function(o){ return !o.coaSent  && o.status !== 'done' && !o.followedUp; }).length;
+    var _toShip = orders.filter(function(o){ return o.coaSent && !o.shipped && o.status !== 'done' && !o.followedUp; }).length;
+    var _toFu   = orders.filter(function(o){ return o.shipped && !o.followedUp && o.status !== 'done'; }).length;
+    var needsAction = _toCoa + _toShip + _toFu;
     if(needsAction > 0){ badge.textContent = needsAction; badge.style.display = ''; } else { badge.style.display = 'none'; }
   })();
   populateClientSelectors();
@@ -1563,7 +1634,7 @@ function renderOrders(){
   // Always refresh Clients tab (from full unfiltered list)
   renderClients();
 
-  var active = orders.filter(function(o){ return !o.followedUp; });
+  var active = orders.filter(function(o){ return !o.followedUp && o.status !== 'done'; });
 
   if(!active.length){
     list.innerHTML = q
@@ -1613,6 +1684,16 @@ function renderOrders(){
     var today = new Date().toISOString().slice(0,10);
     var isToday = o.dateAdded && o.dateAdded.slice(0,10) === today;
     var newBadge = isToday ? '<span style="display:inline-block;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#111;color:#fff;padding:2px 6px;margin-left:8px;vertical-align:middle;border-radius:2px;">New</span>' : '';
+
+    // ── Mini journey dots (compact row) ──────────────────────────
+    var mDots = [true, !!o.coaSent, !!o.shipped, !!o.delivered, !!o.followedUp];
+    var miniTrack = '<div class="mini-jtrack">';
+    mDots.forEach(function(done, i){
+      var isActive = !done && (i===0 || mDots[i-1]);
+      if(i > 0) miniTrack += '<div class="mini-jline'+(mDots[i-1]&&done?' done':'')+'"></div>';
+      miniTrack += '<div class="mini-jdot'+(done?' done':'')+(isActive?' active':'')+'"></div>';
+    });
+    miniTrack += '</div>';
 
     // ── Status chip (compact row) ─────────────────────────────────
     var chip = '<span class="deadline-chip '+s.chip+'">'+escH(s.label)+'</span>';
@@ -1665,6 +1746,7 @@ function renderOrders(){
             +(o.country?' &middot; '+escH(o.country):'')
             +(o.qty&&o.qty!=='1'?' &middot; '+escH(o.qty)+' pcs':'')
           +'</div>'
+          + miniTrack
           + chip
         +'</div>'
         +'<div class="card-compact-right">'
