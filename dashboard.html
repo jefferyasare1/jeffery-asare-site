@@ -293,12 +293,18 @@
     .status-msg.err{color:var(--red);}
 
     /* ── Custom modal (replaces browser alert) ── */
-    #dashModal{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);}
-    #dashModal.open{display:flex;}
-    #dashModalBox{background:#fff;max-width:420px;width:calc(100% - 48px);padding:40px 36px 32px;text-align:center;box-shadow:0 8px 40px rgba(120,100,80,.18),0 2px 8px rgba(120,100,80,.1);position:relative;border-radius:var(--rc);}
-    #dashModalMsg{font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:24px;}
+    #dashModal,#dashConfirm{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);}
+    #dashModal.open,#dashConfirm.open{display:flex;}
+    #dashModalBox,#dashConfirmBox{background:#fff;max-width:420px;width:calc(100% - 48px);padding:40px 36px 32px;text-align:center;box-shadow:0 8px 40px rgba(120,100,80,.18),0 2px 8px rgba(120,100,80,.1);position:relative;border-radius:var(--rc);}
+    #dashModalMsg,#dashConfirmMsg{font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:24px;}
     #dashModalOk{background:var(--ink);color:#fff;border:none;padding:11px 36px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:var(--rb);transition:background .15s;}
     #dashModalOk:hover{background:#374151;}
+    /* Confirm dialog buttons */
+    .dash-confirm-btns{display:flex;gap:10px;justify-content:center;}
+    #dashConfirmOk{background:var(--red);color:#fff;border:1px solid var(--red);padding:11px 24px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:var(--rb);transition:background .15s;}
+    #dashConfirmOk:hover{background:#7f1d1d;border-color:#7f1d1d;}
+    #dashConfirmCancel{background:transparent;color:var(--muted);border:1px solid var(--rule);padding:11px 24px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:var(--rb);transition:all .15s;}
+    #dashConfirmCancel:hover{color:var(--ink);border-color:#c8c0b6;background:#f5f0ea;}
 
     /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
     #dash-coa-capture{position:absolute;top:-9999px;left:-9999px;width:640px;background:#fff;pointer-events:none;}
@@ -342,7 +348,7 @@
     .cms-setup-note{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--rb);padding:14px 16px;font-size:13px;color:var(--amber);line-height:1.6;margin-bottom:24px;}
     .cms-setup-note strong{display:block;margin-bottom:4px;font-weight:700;}
     /* CMS modal */
-    #cmsModal{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);overflow-y:auto;padding:20px 16px;}
+    #cmsModal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);overflow-y:auto;padding:40px 16px;}
     #cmsModal.open{display:flex;}
     .cms-modal-box{background:#fff;width:100%;max-width:600px;padding:36px 32px 44px;position:relative;margin:auto;border-radius:var(--rc);box-shadow:0 20px 60px rgba(0,0,0,.15),0 4px 16px rgba(0,0,0,.08);}
     .cms-modal-title{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
@@ -844,6 +850,17 @@
   </div>
 </div>
 
+<!-- Custom confirm dialog (replaces native confirm()) -->
+<div id="dashConfirm" role="dialog" aria-modal="true">
+  <div id="dashConfirmBox">
+    <p id="dashConfirmMsg"></p>
+    <div class="dash-confirm-btns">
+      <button id="dashConfirmOk">Confirm</button>
+      <button id="dashConfirmCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Hidden COA PDF capture surface -->
 <div id="dash-coa-capture"><div id="dash-coa-content"></div></div>
 
@@ -1239,9 +1256,10 @@ function updateOrder(id, patch){
 }
 
 function deleteOrder(id){
-  if(!confirm('Remove this order?')) return;
-  saveOrders(loadOrders().filter(function(o){ return o.id !== id; }));
-  renderOrders();
+  showDashConfirm('Remove this order? This cannot be undone.', 'Remove', function(){
+    saveOrders(loadOrders().filter(function(o){ return o.id !== id; }));
+    renderOrders();
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1441,6 +1459,28 @@ function showDashModal(msg){
   var modal = document.getElementById('dashModal');
   if(okBtn) okBtn.addEventListener('click', function(){ modal.classList.remove('open'); });
   if(modal) modal.addEventListener('click', function(e){ if(e.target===modal) modal.classList.remove('open'); });
+})();
+
+// ── Custom confirm dialog (replaces native confirm()) ──────────────
+var _confirmCb = null;
+function showDashConfirm(msg, actionLabel, onConfirm){
+  var modal  = document.getElementById('dashConfirm');
+  var msgEl  = document.getElementById('dashConfirmMsg');
+  var okBtn  = document.getElementById('dashConfirmOk');
+  if(!modal||!msgEl||!okBtn) return;
+  msgEl.textContent    = msg;
+  okBtn.textContent    = actionLabel || 'Confirm';
+  _confirmCb           = onConfirm;
+  modal.classList.add('open');
+}
+(function(){
+  var modal  = document.getElementById('dashConfirm');
+  var okBtn  = document.getElementById('dashConfirmOk');
+  var cancel = document.getElementById('dashConfirmCancel');
+  function closeConfirm(){ if(modal) modal.classList.remove('open'); _confirmCb = null; }
+  if(okBtn)  okBtn.addEventListener('click', function(){ var cb=_confirmCb; closeConfirm(); if(cb) cb(); });
+  if(cancel) cancel.addEventListener('click', closeConfirm);
+  if(modal)  modal.addEventListener('click', function(e){ if(e.target===modal) closeConfirm(); });
 })();
 
 // ── Follow-up Digest (emails Jeff a summary of due/overdue items) ─
@@ -2708,7 +2748,7 @@ function cmsMoveJournal(idx,dir){
   if(ni<0||ni>=posts.length) return;
   var t=posts[idx]; posts[idx]=posts[ni]; posts[ni]=t;
   var nc={posts:posts};
-  cmsPut('journal',nc,function(err,sha){ if(err){alert('Reorder failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal(); });
+  cmsPut('journal',nc,function(err,sha){ if(err){showDashModal('Reorder failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal(); });
 }
 
 function cmsOpenJournalEdit(idx){
@@ -2745,10 +2785,11 @@ function cmsSaveJournal(idx,postId){
 
 function cmsDeleteJournal(idx){
   var post=_cmsData.journal.posts[idx];
-  if(!confirm('Delete "'+post.title+'"? This cannot be undone.')) return;
-  var posts=_cmsData.journal.posts.slice(); posts.splice(idx,1);
-  var nc={posts:posts};
-  cmsPut('journal',nc,function(err,sha){if(err){alert('Delete failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal();});
+  showDashConfirm('Delete "'+post.title+'"? This cannot be undone.', 'Delete', function(){
+    var posts=_cmsData.journal.posts.slice(); posts.splice(idx,1);
+    var nc={posts:posts};
+    cmsPut('journal',nc,function(err,sha){if(err){showDashModal('Delete failed: '+err);return;} _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal();});
+  });
 }
 
 // ── Prints ──────────────────────────────────────────────────────
@@ -2776,7 +2817,7 @@ function cmsMovePrint(idx,dir){
   if(ni<0||ni>=prints.length) return;
   var t=prints[idx]; prints[idx]=prints[ni]; prints[ni]=t;
   var nc={prints:prints};
-  cmsPut('prints',nc,function(err,sha){if(err){alert('Reorder failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
+  cmsPut('prints',nc,function(err,sha){if(err){showDashModal('Reorder failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
 }
 
 function cmsOpenPrintEdit(idx){
@@ -2815,10 +2856,11 @@ function cmsSavePrint(idx,printId){
 
 function cmsDeletePrint(idx){
   var p=_cmsData.prints.prints[idx];
-  if(!confirm('Delete "'+p.title+'"? This cannot be undone.')) return;
-  var prints=_cmsData.prints.prints.slice(); prints.splice(idx,1);
-  var nc={prints:prints};
-  cmsPut('prints',nc,function(err,sha){if(err){alert('Delete failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
+  showDashConfirm('Delete "'+p.title+'"? This cannot be undone.', 'Delete', function(){
+    var prints=_cmsData.prints.prints.slice(); prints.splice(idx,1);
+    var nc={prints:prints};
+    cmsPut('prints',nc,function(err,sha){if(err){showDashModal('Delete failed: '+err);return;} _cmsData.prints=nc; if(sha)_cmsSha.prints=sha; cmsRenderPrints();});
+  });
 }
 
 // ── Portfolio ────────────────────────────────────────────────────
@@ -2940,21 +2982,22 @@ function cmsMovePhoto(slug,idx,dir){
   fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
     .then(function(r){return r.json();})
-    .then(function(d){if(!d.ok){alert('Reorder failed: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
-    .catch(function(err){alert('Network error: '+err.message);});
+    .then(function(d){if(!d.ok){showDashModal('Reorder failed: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
+    .catch(function(err){showDashModal('Network error: '+err.message);});
 }
 
 function cmsDeletePhoto(slug,idx){
   var photos=_portfolioData[slug]||[],p=photos[idx];
-  if(!confirm('Delete "'+p.title+'"? This cannot be undone.')) return;
-  var np=photos.slice(); np.splice(idx,1);
-  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
-  var nc={label:s?s.label:slug,slug:slug,photos:np};
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
-    .then(function(r){return r.json();})
-    .then(function(d){if(!d.ok){alert('Delete failed: '+(d.error||''));return;} _portfolioData[slug]=np; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
-    .catch(function(err){alert('Network error: '+err.message);});
+  showDashConfirm('Delete "'+p.title+'"? This cannot be undone.', 'Delete', function(){
+    var np=photos.slice(); np.splice(idx,1);
+    var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+    var nc={label:s?s.label:slug,slug:slug,photos:np};
+    fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
+      .then(function(r){return r.json();})
+      .then(function(d){if(!d.ok){showDashModal('Delete failed: '+(d.error||''));return;} _portfolioData[slug]=np; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
+      .catch(function(err){showDashModal('Network error: '+err.message);});
+  });
 }
 
 // ── Site Text ────────────────────────────────────────────────────
