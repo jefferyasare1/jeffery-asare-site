@@ -308,22 +308,22 @@
 
     /* ── Hidden COA PDF capture surface — mirrors store cert modal exactly ── */
     #dash-coa-capture{position:absolute;top:-9999px;left:-9999px;width:640px;background:#fff;pointer-events:none;}
-    #dash-coa-content{padding:3rem 2.5rem 2.5rem;font-family:var(--sans);color:#111;background:#fff;}
-    #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:1.2rem;border-bottom:1px solid #e8e4df;margin-bottom:2rem;}
+    #dash-coa-content{padding:1.6rem 2rem 1.6rem;font-family:var(--sans);color:#111;background:#fff;}
+    #dash-coa-content .cert-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:.8rem;border-bottom:1px solid #e8e4df;margin-bottom:1.2rem;}
     #dash-coa-content .cert-brand{display:flex;align-items:center;}
     #dash-coa-content .cert-brand-logo{height:28px;width:51px;display:block;}
     #dash-coa-content .cert-ref{font-size:11px;color:#888;letter-spacing:.06em;}
-    #dash-coa-content .cert-title{font-size:2.4rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.3rem;line-height:1.05;color:#111;}
-    #dash-coa-content .cert-subtitle{font-size:12px;color:#888;margin-bottom:1.8rem;}
+    #dash-coa-content .cert-title{font-size:2rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.2rem;line-height:1.05;color:#111;}
+    #dash-coa-content .cert-subtitle{font-size:11px;color:#888;margin-bottom:1rem;}
     /* Centred artwork image — full-width, centred block */
-    #dash-coa-content .cert-img-outer{display:flex;justify-content:center;margin-bottom:1.8rem;}
+    #dash-coa-content .cert-img-outer{display:flex;justify-content:center;margin-bottom:1rem;}
     #dash-coa-content .cert-img-wrap{width:36%;background:#f5f2ee;}
     #dash-coa-content .cert-img{width:100%;height:auto;display:block;}
     #dash-coa-content .cert-section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.7rem;}
     #dash-coa-content .cert-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #e8e4df;font-size:12px;}
     #dash-coa-content .cert-key{color:#888;}
     #dash-coa-content .cert-val{font-weight:500;color:#111;}
-    #dash-coa-content .cert-sig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-top:2rem;}
+    #dash-coa-content .cert-sig-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-top:1rem;}
     #dash-coa-content .cert-sig-block{display:flex;flex-direction:column;gap:.4rem;}
     #dash-coa-content .cert-sig-img{height:90px;display:flex;align-items:flex-end;}
     #dash-coa-content .cert-sig-img img{max-height:80px;max-width:220px;object-fit:contain;display:block;}
@@ -2140,14 +2140,12 @@ function confirmCOASend(id){
           .then(function(canvas){
             var jsPDF = window.jspdf.jsPDF;
             var pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-            var margin=12, pW=210, pH=297, usableW=pW-2*margin;
-            var ratio=usableW/canvas.width, totalH=canvas.height*ratio;
+            var margin=12, pW=210, pH=297;
+            var maxW=pW-2*margin, maxH=pH-2*margin;
+            var ratio=Math.min(maxW/canvas.width, maxH/canvas.height);
+            var imgW=canvas.width*ratio, imgH=canvas.height*ratio;
             var imgData=canvas.toDataURL('image/png');
-            var pages=Math.ceil((totalH+margin)/pH);
-            for(var p=0;p<pages;p++){
-              if(p>0) pdf.addPage();
-              pdf.addImage(imgData,'PNG',margin,margin-p*pH,usableW,totalH);
-            }
+            pdf.addImage(imgData,'PNG',margin+(maxW-imgW)/2,margin,imgW,imgH);
             var safeName=(o.buyerName||'Certificate').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
 
             // Download PDF to Jeff's machine
@@ -2588,14 +2586,12 @@ document.getElementById('coa-send').addEventListener('click', function(){
               .then(function(canvas){
                 var jsPDF = window.jspdf.jsPDF;
                 var pdf   = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-                var margin=12, pW=210, pH=297, usableW=pW-2*margin;
-                var ratio=usableW/canvas.width, totalH=canvas.height*ratio;
+                var margin=12, pW=210, pH=297;
+                var maxW=pW-2*margin, maxH=pH-2*margin;
+                var ratio=Math.min(maxW/canvas.width, maxH/canvas.height);
+                var imgW=canvas.width*ratio, imgH=canvas.height*ratio;
                 var imgData=canvas.toDataURL('image/png');
-                var pages=Math.ceil((totalH+margin)/pH);
-                for(var p=0;p<pages;p++){
-                  if(p>0) pdf.addPage();
-                  pdf.addImage(imgData,'PNG',margin,margin-p*pH,usableW,totalH);
-                }
+                pdf.addImage(imgData,'PNG',margin+(maxW-imgW)/2,margin,imgW,imgH);
                 var safeName = toName.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-');
                 pdf.save('COA-'+safeName+'.pdf');
                 if(st) st.textContent='Sending COA to buyer…';
