@@ -534,9 +534,10 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .cert-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;align-items:center;justify-content:center;padding:1.5rem;}
 .cert-modal-overlay.open{display:flex;}
 .cert-modal{background:#fff;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;position:relative;padding:3rem 2.5rem 2.5rem;}
+.cert-brand-logo{height:36px;width:auto;display:block;}
 .cert-modal-close{position:absolute;top:1.2rem;right:1.4rem;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;}
 .cert-modal-close:hover{color:var(--ink);}
-.cert-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1.2rem;border-bottom:1px solid var(--rule);margin-bottom:2rem;}
+.cert-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:1.2rem;border-bottom:1px solid var(--rule);margin-bottom:2rem;}
 .cert-brand{font-family:var(--title);font-size:13px;font-weight:600;letter-spacing:-.01em;}
 .cert-ref{font-size:11px;color:var(--muted);letter-spacing:.06em;}
 .cert-title{font-family:var(--title);font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:600;letter-spacing:-.02em;margin-bottom:.3rem;line-height:1.05;}
@@ -622,6 +623,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 #cartSidebar{position:fixed;top:0;right:-440px;width:400px;max-width:96vw;height:100%;background:#fff;z-index:901;display:flex;flex-direction:column;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 32px rgba(0,0,0,.12);}
 #cartSidebar.open{right:0;}
 .cart-head{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.5rem 1rem;border-bottom:1px solid var(--rule);}
+.cart-logo{height:32px;width:auto;display:block;}
 .cart-head h3{font-family:var(--title);font-size:1.1rem;font-weight:600;letter-spacing:-.01em;margin:0;}
 .cart-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1;padding:.1rem .3rem;}
 .cart-items-wrap{flex:1;overflow-y:auto;padding:.5rem 1.5rem;}
@@ -2566,7 +2568,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
   var html=''
     +'<button class="cert-modal-close" id="certModalCloseBtn" style="display:none;" aria-label="Close">&#10005;</button>'
     +'<div class="cert-header">'
-    +'<span class="cert-brand">Jeffery Asare</span>'
+    +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
     +'<span class="cert-ref">'+coaRef+'</span>'
     +'</div>'
     +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
@@ -3013,7 +3015,7 @@ fetch('/_data/prints.json')
 <div id="cartOverlay" onclick="closeCart()"></div>
 <div id="cartSidebar">
   <div class="cart-head">
-    <h3>Your Cart</h3>
+    <img src="/logo-name.png" alt="Jeffery Asare" class="cart-logo">
     <button class="cart-close" onclick="closeCart()">&#10005;</button>
   </div>
   <div class="cart-items-wrap" id="cartItemsWrap"></div>
