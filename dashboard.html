@@ -1918,21 +1918,60 @@ function confirmShip(id){
   if(!o) return;
   var tracking = (document.getElementById('tracking-'+id)||{}).value.trim();
   var st = document.getElementById('ship-st-'+id);
+  var inlineEl = document.getElementById('ship-inline-'+id);
   if(!tracking){ if(st){ st.className='inline-status err'; st.textContent='Enter a tracking number first.'; } return; }
   if(st){ st.className='inline-status'; st.textContent='Sending…'; }
+  if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=true; }); }
 
-  emailjs.send('service_50jojio','template_ufkb3dt',{
-    to_email:o.buyerEmail, to_name:o.buyerName,
-    print_title:o.printTitle, tracking_number:tracking, site_url:SITE_URL,
-    logo_url:'https://jefferyasare.com/logo-mark.png'
-  }).then(function(){
-    if(st){ st.className='inline-status ok'; st.textContent='Tracking email sent ✓'; }
-    var today = new Date().toISOString().slice(0,10);
-    updateOrder(id,{shipped:true, shipDate:today, trackingNum:tracking});
-    logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
-    setTimeout(function(){ closeInlines(id); },1600);
-  }).catch(function(err){
-    if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
+  var firstName = (o.buyerName||'there').split(' ')[0];
+
+  fetch('/api/notify',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      to: o.buyerEmail, to_name: o.buyerName,
+      subject: 'Your print is on its way — '+(o.printTitle||'Fine Art Print'),
+      html_content:
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Georgia,serif;">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
+        +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
+        +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;"></td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">Your print is on its way.</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+          +'Hi '+firstName+', great news — your <strong style="color:#111;">'+(o.printTitle||'fine art print')+'</strong>'+(o.size?' ('+o.size+')':'')+' has been carefully packed and dispatched.'
+        +'</td></tr>'
+        +'<tr><td style="background:#f5f2ee;padding:24px 28px;display:block;">'
+          +'<p style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 10px;">DHL Tracking Number</p>'
+          +'<p style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#111;margin:0 0 10px;">'+tracking+'</p>'
+          +'<p style="font-family:Georgia,serif;font-size:13px;color:#888;margin:0;">Track at <a href="https://www.dhl.com/track?trackingNumber='+tracking+'" style="color:#111;">dhl.com</a></p>'
+        +'</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-top:24px;padding-bottom:24px;">'
+          +'Your print ships in a protective tube to ensure it arrives in perfect condition. Reply to this email if you have any questions.'
+        +'</td></tr>'
+        +'<tr><td style="padding:24px 0 0;border-top:1px solid #e8e4df;">'
+          +'<p style="font-family:Georgia,serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+          +'<p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+        +'</td></tr>'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+          +(o.orderRef?'Order ref: '+o.orderRef+' &nbsp;&middot;&nbsp; ':'')
+          +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com'
+        +'</td></tr>'
+        +'</table></td></tr></table></body></html>'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    if(result.ok){
+      if(st){ st.className='inline-status ok'; st.textContent='Tracking email sent ✓'; }
+      var today = new Date().toISOString().slice(0,10);
+      updateOrder(id,{shipped:true, shipDate:today, trackingNum:tracking});
+      logToSheet({action:'Shipped',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'Tracking: '+tracking,order_ref:o.orderRef||''});
+      setTimeout(function(){ closeInlines(id); },1600);
+    } else { throw new Error(result.error||'Send failed'); }
+  })
+  .catch(function(err){
+    if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+    if(st){ st.className='inline-status err'; st.textContent='Send failed — '+escH(String(err.message||err)); }
     console.error(err);
   });
 }
@@ -1941,20 +1980,57 @@ function confirmFollowUp(id){
   var o = loadOrders().find(function(x){ return x.id===id; });
   if(!o) return;
   var st = document.getElementById('fu-st-'+id);
+  var inlineEl = document.getElementById('fu-inline-'+id);
   if(st){ st.className='inline-status'; st.textContent='Sending…'; }
+  if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=true; }); }
 
-  emailjs.send('service_50jojio','template_postdel01',{
-    to_email:o.buyerEmail, to_name:o.buyerName,
-    print_title:o.printTitle, site_url:SITE_URL,
-    logo_url:'https://jefferyasare.com/logo-mark.png'
-  }).then(function(){
-    if(st){ st.className='inline-status ok'; st.textContent='Follow-up sent ✓'; }
-    var today = new Date().toISOString().slice(0,10);
-    updateOrder(id,{followedUp:true, followDate:today});
-    logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'',order_ref:o.orderRef||''});
-    setTimeout(function(){ closeInlines(id); },1600);
-  }).catch(function(err){
-    if(st){ st.className='inline-status err'; st.textContent='Send failed. Check console.'; }
+  var firstName = (o.buyerName||'there').split(' ')[0];
+
+  fetch('/api/notify',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      to: o.buyerEmail, to_name: o.buyerName,
+      subject: 'How are you enjoying your print? — '+(o.printTitle||'Fine Art Print'),
+      html_content:
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:Georgia,serif;">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
+        +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
+        +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-mark.png" alt="Jeffery Asare" height="44" style="display:block;border:0;"></td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">I hope it arrived safely.</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+          +'Hi '+firstName+', it\'s been about a week since your <strong style="color:#111;">'+(o.printTitle||'fine art print')+'</strong> was delivered — I just wanted to check in.'
+        +'</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+          +'I hope it arrived in perfect condition and that you\'re happy with it. If anything isn\'t right, please reply and I\'ll take care of it right away.'
+        +'</td></tr>'
+        +'<tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+          +'If you\'re enjoying the piece, sharing a photo or leaving a short review means a great deal — thank you.'
+        +'</td></tr>'
+        +'<tr><td style="padding:24px 0 0;border-top:1px solid #e8e4df;">'
+          +'<p style="font-family:Georgia,serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+          +'<p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+        +'</td></tr>'
+        +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">'
+          +(o.orderRef?'Order ref: '+o.orderRef+' &nbsp;&middot;&nbsp; ':'')
+          +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com'
+        +'</td></tr>'
+        +'</table></td></tr></table></body></html>'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    if(result.ok){
+      if(st){ st.className='inline-status ok'; st.textContent='Follow-up sent ✓'; }
+      var today = new Date().toISOString().slice(0,10);
+      updateOrder(id,{followedUp:true, followDate:today});
+      logToSheet({action:'Follow-up Sent',buyer_name:o.buyerName,buyer_email:o.buyerEmail,print_title:o.printTitle,size:o.size||'',country:o.country||'',price:o.price||'',qty:o.qty||'',notes:'',order_ref:o.orderRef||''});
+      setTimeout(function(){ closeInlines(id); },1600);
+    } else { throw new Error(result.error||'Send failed'); }
+  })
+  .catch(function(err){
+    if(inlineEl){ inlineEl.querySelectorAll('button').forEach(function(b){ b.disabled=false; }); }
+    if(st){ st.className='inline-status err'; st.textContent='Send failed — '+escH(String(err.message||err)); }
     console.error(err);
   });
 }
