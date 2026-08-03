@@ -172,7 +172,7 @@
     .card-compact{display:flex;align-items:center;gap:14px;padding:14px 20px;}
     .card-compact-left{flex:1;min-width:0;}
     .card-compact-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-    .card-compact .deadline-chip{padding:3px 9px;font-size:9px;margin:6px 0 0;display:inline-block;margin-bottom:0;}
+    .card-compact .deadline-chip{padding:4px 10px;font-size:11px;font-weight:600;margin:4px 0 0;display:inline-block;}
     .card-expand-btn{width:30px;height:30px;border-radius:var(--rb);border:1.5px solid var(--rule);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:0;opacity:.35;}
     .order-card:hover .card-expand-btn{opacity:1;}
     .card-expand-btn:hover{background:#fff;border-color:#c8c0b6;}
@@ -476,10 +476,10 @@
   <!-- Tabs -->
   <div class="tabs" role="navigation" aria-label="Dashboard sections">
     <div class="tab-group">
-      <div class="tab-group-label">Orders</div>
+      <div class="tab-group-label">Work</div>
       <div class="tab-group-row">
-        <button type="button" class="tab active" data-tab="orders">Active</button>
-        <button type="button" class="tab" data-tab="actions">Actions <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
+        <button type="button" class="tab active" data-tab="actions">To Do <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
+        <button type="button" class="tab" data-tab="orders">Pipeline</button>
         <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
       </div>
     </div>
@@ -487,8 +487,8 @@
     <div class="tab-group">
       <div class="tab-group-label">Admin</div>
       <div class="tab-group-row">
-        <button type="button" class="tab" data-tab="workflow">Workflow</button>
         <button type="button" class="tab" data-tab="content">Content</button>
+        <button type="button" class="tab" data-tab="workflow">Workflow</button>
       </div>
     </div>
   </div>
@@ -496,12 +496,12 @@
   <!-- ════════════════════════════════════
        ORDERS DASHBOARD
   ════════════════════════════════════ -->
-  <div class="panel active" id="panel-orders">
+  <div class="panel" id="panel-orders">
     <div id="orders-layout">
       <!-- ── Left: order list ── -->
       <div id="orders-main">
         <div class="orders-header">
-          <div class="orders-title">Orders</div>
+          <div class="orders-title">Pipeline</div>
           <div style="display:flex;gap:.5rem;align-items:center;">
             <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
             <button class="btn-add" id="openAddOrder">+ New Order</button>
@@ -535,7 +535,7 @@
   <!-- ════════════════════════════════════
        ACTIONS (Ship / COA / Follow-up)
   ════════════════════════════════════ -->
-  <div class="panel" id="panel-actions">
+  <div class="panel active" id="panel-actions">
     <div class="action-subtabs">
       <button type="button" class="action-subtab active" data-action="coa">COA</button>
       <button type="button" class="action-subtab" data-action="ship">Ship</button>
@@ -1359,22 +1359,12 @@ function renderStats(orders){
   var now = new Date(); now.setHours(0,0,0,0);
   var weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate()+7);
   var overdue=0, dueWeek=0, active=0;
-  var usdRev=0, ghsRev=0;
   orders.forEach(function(o){
     if(o.status==='done' || o.followedUp) return;
     active++;
     var dl = o.deadline ? new Date(o.deadline) : null;
     if(dl){ dl.setHours(0,0,0,0); if(dl < now) overdue++; else if(dl <= weekEnd) dueWeek++; }
-    var s = String(o.price||'').trim();
-    var amt = parsePrice(s);
-    if(!amt) return;
-    if(s.indexOf('$') !== -1) usdRev += amt; else ghsRev += amt;
   });
-  var revDisplay = '';
-  if(usdRev > 0 && ghsRev > 0) revDisplay = '$'+usdRev.toFixed(0)+' + GH&#8373;'+ghsRev.toLocaleString();
-  else if(usdRev > 0) revDisplay = '$'+usdRev.toFixed(0);
-  else if(ghsRev > 0) revDisplay = 'GH&#8373;'+ghsRev.toLocaleString();
-  else revDisplay = '—';
   // Update greeting subtitle
   var sub = document.getElementById('greetingSub');
   if(sub){
@@ -1383,14 +1373,14 @@ function renderStats(orders){
     else if(active > 0) sub.textContent = active + ' active order'+(active===1?'':'s')+', all on track.';
     else sub.textContent = 'No active orders right now.';
   }
+  // Three urgency stats only — revenue lives elsewhere
   var stats = [
-    {label:'Overdue', value: overdue, color: overdue>0 ? '#991b1b' : 'var(--ink)'},
-    {label:'Due this week', value: dueWeek, color: dueWeek>0 ? '#92400e' : 'var(--ink)'},
-    {label:'Active orders', value: active, color: 'var(--ink)'},
-    {label:'Revenue', value: revDisplay, color: 'var(--ink)'}
+    {label:'Overdue',       value: overdue, color: overdue>0  ? 'var(--red)'   : 'var(--ink)'},
+    {label:'Due this week', value: dueWeek, color: dueWeek>0  ? 'var(--amber)' : 'var(--ink)'},
+    {label:'Active orders', value: active,  color: 'var(--ink)'}
   ];
   bar.innerHTML = stats.map(function(s){
-    return '<div style="flex:1;min-width:100px;padding:14px 16px;">'
+    return '<div style="flex:1;min-width:80px;padding:14px 16px;">'
       +'<div style="font-size:26px;font-weight:700;color:'+s.color+';letter-spacing:-.03em;line-height:1;">'+s.value+'</div>'
       +'<div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:5px;">'+s.label+'</div>'
       +'</div>';
@@ -1640,10 +1630,11 @@ function renderOrders(){
     return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
   });
 
-  // Update stats, inventory, actions badge, and sidebar
+  // Update stats, inventory, actions badge, sidebar, and To Do queues
   renderStats(orders);
   renderInventory(orders);
   renderOrdersSidebar();
+  renderActionsPanel();
   (function(){
     var badge = document.getElementById('actionsBadge');
     if(!badge) return;
