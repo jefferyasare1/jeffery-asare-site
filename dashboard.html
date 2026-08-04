@@ -421,6 +421,42 @@
     .wf-body .wf-title{font-size:14px;font-weight:600;margin-bottom:3px;}
     .wf-body .wf-desc{font-size:13px;color:var(--muted);line-height:1.55;}
     .wf-tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;margin-top:4px;}
+
+    /* ── Sidebar layout ── */
+    .dash-layout{display:flex;align-items:flex-start;}
+    .dash-sidebar{width:210px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;background:#fff;border-right:1px solid var(--rule);padding:20px 10px;display:flex;flex-direction:column;}
+    .dash-main{flex:1;min-width:0;}
+    .page{max-width:none;padding:28px 36px 80px;}
+    .sn-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#b0a89e;padding:0 8px;margin:0 0 5px;display:block;}
+    .sn-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rb);font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:2px;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;transition:color .12s,background .12s;}
+    .sn-item:hover{color:var(--ink);background:rgba(0,0,0,.03);}
+    .sn-item.active{color:var(--ink);font-weight:600;background:#f0ebe3;}
+    .sn-badge{margin-left:auto;background:var(--ink);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;line-height:1.6;}
+    .sn-badge.warn{background:#b45309;}
+    .sn-divider{height:1px;background:var(--rule);margin:10px 2px;}
+    .sn-bottom{margin-top:auto;padding-top:12px;border-top:1px solid var(--rule);}
+    .sn-bottom .sn-item{font-size:12px;}
+
+    /* ── Filter chips ── */
+    .filter-chips{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+    .filter-chip{font-size:11px;padding:5px 12px;border:1px solid var(--rule);border-radius:20px;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap;}
+    .filter-chip:hover{border-color:#c8c0b6;color:var(--ink);}
+    .filter-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+    /* ── Inventory chips ── */
+    .inv-chips-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;}
+    .inv-chip-item{font-size:11px;padding:4px 9px;border:1px solid var(--rule);border-radius:var(--rb);color:var(--muted);background:#fff;white-space:nowrap;}
+    .inv-chip-item strong{color:var(--ink);font-weight:600;}
+
+    /* ── CMS secondary sidebar ── */
+    .cms-layout{display:flex;gap:0;min-height:400px;}
+    .cms-sidenav{width:150px;flex-shrink:0;border-right:1px solid var(--rule);padding:0;}
+    .cms-sidenav-item{display:block;padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;border-left:2px solid transparent;transition:all .13s;white-space:nowrap;}
+    .cms-sidenav-item:hover{color:var(--ink);}
+    .cms-sidenav-item.active{color:var(--ink);font-weight:600;border-left-color:var(--ink);background:#f5f0ea;}
+    .cms-content-area{flex:1;min-width:0;padding:0 0 0 28px;}
+    .cms-ext-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;padding:7px 12px;background:#fff;border:1px solid var(--rule);border-radius:var(--rb);}
+    .cms-ext-bar .ext-tools-label{margin-right:2px;}
   </style>
 </head>
 <body>
@@ -443,12 +479,47 @@
   <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
-      <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">Clients</button>
       <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
     </div>
   </div>
 </header>
 
+<div class="dash-layout">
+
+<!-- ── Sidebar nav ── -->
+<nav class="dash-sidebar" aria-label="Dashboard navigation">
+  <div style="margin-bottom:14px;">
+    <span class="sn-label">Work</span>
+    <button class="sn-item active" id="sn-orders" onclick="switchTab('orders')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 8h14M8 8v9"/></svg>
+      Orders <span class="sn-badge" id="sn-orders-badge" style="display:none"></span>
+    </button>
+    <button class="sn-item" id="sn-waitlist" onclick="switchTab('waitlist')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>
+      Waitlist
+    </button>
+  </div>
+  <div class="sn-divider"></div>
+  <div style="margin-bottom:14px;">
+    <span class="sn-label">Manage</span>
+    <button class="sn-item" id="sn-content" onclick="switchTab('content')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h12M4 10h8M4 14h5"/></svg>
+      Content
+    </button>
+    <button class="sn-item" id="sn-workflow" onclick="switchTab('workflow')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="10" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="15" cy="15" r="2"/><path d="M7 10h4l2-3.5M7 10l4 0 2 3.5"/></svg>
+      Workflow
+    </button>
+  </div>
+  <div class="sn-bottom">
+    <button class="sn-item" id="sn-clients" onclick="switchTab('clients')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      Clients
+    </button>
+  </div>
+</nav>
+
+<div class="dash-main">
 <div class="page">
   <h1 class="page-greeting" id="greetingText"></h1>
   <p class="page-sub" id="greetingSub">Loading…</p>
@@ -466,39 +537,37 @@
     <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
   </div>
 
-  <!-- ── Permanent summary strip (always visible, above tabs) ── -->
-  <div id="summaryStrip" style="margin-bottom:28px;">
-    <!-- Stats row hidden — subtitle carries the summary -->
+  <!-- Alerts strip (overdue / needs attention only — no "all clear" banner) -->
+  <div id="summaryStrip" style="margin-bottom:20px;">
     <div id="statsBar" style="display:none;"></div>
-    <!-- Alerts: overdue / needs attention (only shown when action needed) -->
     <div id="actionQueue"></div>
-    <!-- Edition inventory -->
-    <div id="inventoryBar" style="display:none;margin-top:16px;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs" role="navigation" aria-label="Dashboard sections">
-    <button type="button" class="tab active" data-tab="actions">To Do <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
-    <button type="button" class="tab" data-tab="orders">Pipeline</button>
-    <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
-    <div class="tab-sep" aria-hidden="true"></div>
-    <button type="button" class="tab" data-tab="content">Content</button>
-    <button type="button" class="tab" data-tab="workflow">Workflow</button>
+    <div id="inventoryBar" style="display:none;"></div>
   </div>
 
   <!-- ════════════════════════════════════
        ORDERS DASHBOARD
   ════════════════════════════════════ -->
-  <div class="panel" id="panel-orders">
+  <div class="panel active" id="panel-orders">
+    <!-- Inventory chips -->
+    <div class="inv-chips-row" id="inv-chips-row" style="display:none;"></div>
+
     <div id="orders-layout">
       <!-- ── Left: order list ── -->
       <div id="orders-main">
         <div class="orders-header">
-          <div class="orders-title">Pipeline</div>
+          <div class="orders-title">Orders</div>
           <div style="display:flex;gap:.5rem;align-items:center;">
             <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
             <button class="btn-add" id="openAddOrder">+ New Order</button>
           </div>
+        </div>
+
+        <!-- Filter chips -->
+        <div class="filter-chips" id="filterChips">
+          <button class="filter-chip active" data-filter="all" onclick="setOrderFilter('all',this)">All</button>
+          <button class="filter-chip" data-filter="coa" onclick="setOrderFilter('coa',this)">Send COA <span id="fc-coa-count"></span></button>
+          <button class="filter-chip" data-filter="ship" onclick="setOrderFilter('ship',this)">Ship <span id="fc-ship-count"></span></button>
+          <button class="filter-chip" data-filter="followup" onclick="setOrderFilter('followup',this)">Follow-up <span id="fc-fu-count"></span></button>
         </div>
 
         <!-- Search -->
@@ -528,7 +597,7 @@
   <!-- ════════════════════════════════════
        ACTIONS (Ship / COA / Follow-up)
   ════════════════════════════════════ -->
-  <div class="panel active" id="panel-actions">
+  <div class="panel" id="panel-actions">
     <div class="action-subtabs">
       <button type="button" class="action-subtab active" data-action="coa">COA</button>
       <button type="button" class="action-subtab" data-action="ship">Ship</button>
@@ -685,25 +754,28 @@
     <h2 class="panel-title">Content Manager</h2>
     <p class="panel-sub">Edit everything on your site from here. Changes go live in about 2 minutes after you save.</p>
 
-    <!-- External tools strip -->
-    <div class="ext-tools-bar">
-      <span class="ext-tools-label">External tools</span>
-      <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="ext-tool-link">Email Templates ↗</a>
-    </div>
-
     <div id="cms-setup-banner" class="cms-setup-note" style="display:none;">
       <strong>Setup required</strong>
       Add a <code>GITHUB_TOKEN</code> environment variable in Cloudflare Pages, then come back here.
       <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--amber);font-weight:600;">Open Cloudflare ↗</a>
     </div>
 
-    <!-- Sub-nav -->
-    <div class="cms-subnav">
-      <button class="cms-tab active" data-cms="journal">Journal</button>
-      <button class="cms-tab" data-cms="prints">Prints</button>
-      <button class="cms-tab" data-cms="portfolio">Portfolio</button>
-      <button class="cms-tab" data-cms="site">Site Text</button>
-    </div>
+    <div class="cms-layout">
+      <!-- Vertical sidebar -->
+      <nav class="cms-sidenav">
+        <button class="cms-sidenav-item active" data-cms="journal">Journal</button>
+        <button class="cms-sidenav-item" data-cms="prints">Prints</button>
+        <button class="cms-sidenav-item" data-cms="portfolio">Portfolio</button>
+        <button class="cms-sidenav-item" data-cms="site">Site Text</button>
+      </nav>
+
+      <!-- Content area -->
+      <div class="cms-content-area">
+        <!-- External tools bar -->
+        <div class="cms-ext-bar">
+          <span class="ext-tools-label">External tools</span>
+          <a href="https://dashboard.emailjs.com/admin/templates" target="_blank" class="ext-tool-link">Email Templates ↗</a>
+        </div>
 
     <!-- Journal panel -->
     <div class="cms-panel active" id="cms-panel-journal">
@@ -797,9 +869,14 @@
       </div>
 
     </div><!-- /cms-panel-site -->
+
+      </div><!-- /cms-content-area -->
+    </div><!-- /cms-layout -->
   </div><!-- /panel-content -->
 
 </div><!-- /page -->
+</div><!-- /dash-main -->
+</div><!-- /dash-layout -->
 
 <!-- ════════════════════════════════════
      CMS EDIT MODAL
@@ -984,12 +1061,17 @@ function renderActionsPanel(defaultTab){
 }
 
 function _activateTab(name){
+  // Legacy tab buttons (none remain, but keep for safety)
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
+  // Sidebar items
+  var sidemap = {orders:'sn-orders', waitlist:'sn-waitlist', content:'sn-content', workflow:'sn-workflow', clients:'sn-clients', actions:'sn-orders'};
+  document.querySelectorAll('.sn-item').forEach(function(el){ el.classList.remove('active'); });
+  var activeId = sidemap[name];
+  if(activeId){ var el = document.getElementById(activeId); if(el) el.classList.add('active'); }
+  // Panels
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   var panel = document.getElementById('panel-' + name);
   if(panel) panel.classList.add('active');
-  var cb = document.querySelector('.header-btn-clients');
-  if(cb) cb.classList.toggle('header-btn-clients-active', name === 'clients');
   if(name === 'clients') renderClients();
 }
 
@@ -1629,17 +1711,23 @@ function renderOrders(){
   // Update stats, inventory, actions badge, sidebar, and To Do queues
   renderStats(orders);
   renderInventory(orders);
+  renderInvChips(orders);
   renderOrdersSidebar();
   renderActionsPanel();
+
+  // Chip counts
+  var _toCoa  = orders.filter(function(o){ return !o.coaSent  && o.status !== 'done' && !o.followedUp; }).length;
+  var _toShip = orders.filter(function(o){ return o.coaSent && !o.shipped && o.status !== 'done' && !o.followedUp; }).length;
+  var _toFu   = orders.filter(function(o){ return o.shipped && !o.followedUp && o.status !== 'done'; }).length;
+  var needsAction = _toCoa + _toShip + _toFu;
   (function(){
     var badge = document.getElementById('actionsBadge');
-    if(!badge) return;
-    // Count total pending across all three queues (mirrors renderActionsPanel filters)
-    var _toCoa  = orders.filter(function(o){ return !o.coaSent  && o.status !== 'done' && !o.followedUp; }).length;
-    var _toShip = orders.filter(function(o){ return o.coaSent && !o.shipped && o.status !== 'done' && !o.followedUp; }).length;
-    var _toFu   = orders.filter(function(o){ return o.shipped && !o.followedUp && o.status !== 'done'; }).length;
-    var needsAction = _toCoa + _toShip + _toFu;
-    if(needsAction > 0){ badge.textContent = needsAction; badge.style.display = ''; } else { badge.style.display = 'none'; }
+    if(badge){ if(needsAction>0){badge.textContent=needsAction;badge.style.display='';}else{badge.style.display='none';} }
+    var snBadge = document.getElementById('sn-orders-badge');
+    if(snBadge){ if(needsAction>0){snBadge.textContent=needsAction;snBadge.style.display='';snBadge.className='sn-badge warn';}else{snBadge.style.display='none';} }
+    var cc=document.getElementById('fc-coa-count');   if(cc)  cc.textContent = _toCoa  ? '('+_toCoa+')'  : '';
+    var sc=document.getElementById('fc-ship-count');  if(sc)  sc.textContent = _toShip ? '('+_toShip+')' : '';
+    var fc=document.getElementById('fc-fu-count');    if(fc)  fc.textContent = _toFu   ? '('+_toFu+')'   : '';
   })();
   populateClientSelectors();
 
@@ -1657,6 +1745,12 @@ function renderOrders(){
           || (o.orderRef||'').toLowerCase().includes(q);
     });
   }
+
+  // Apply filter chip
+  var f = _orderFilter || 'all';
+  if(f === 'coa')     orders = orders.filter(function(o){ return !o.coaSent && o.status !== 'done' && !o.followedUp; });
+  else if(f === 'ship')    orders = orders.filter(function(o){ return o.coaSent && !o.shipped && o.status !== 'done' && !o.followedUp; });
+  else if(f === 'followup') orders = orders.filter(function(o){ return o.shipped && !o.followedUp && o.status !== 'done'; });
 
   // Always refresh Clients tab (from full unfiltered list)
   renderClients();
@@ -1931,6 +2025,38 @@ function populateClientSelectors(){
       sel.appendChild(opt);
     });
     if(prev) sel.value = prev;
+  });
+}
+
+// ── Filter chips ─────────────────────────────────────────────────
+var _orderFilter = 'all';
+function setOrderFilter(f, btn){
+  _orderFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  renderOrders();
+}
+
+// ── Inventory chips (compact row above orders) ────────────────────
+function renderInvChips(orders){
+  var row = document.getElementById('inv-chips-row');
+  if(!row) return;
+  getPrints(function(prints){
+    if(!prints||!prints.length){ row.style.display='none'; return; }
+    var soldMap = {};
+    (orders||loadOrders()).forEach(function(o){
+      if(o.coaSent&&o.printTitle){ var k=o.printTitle.trim().toLowerCase(); soldMap[k]=(soldMap[k]||0)+(parseInt(o.qty)||1); }
+    });
+    var html = prints.map(function(p){
+      var k=(p.title||'').trim().toLowerCase();
+      var ed=parseInt(p.edition)||0;
+      var sold=soldMap[k]||0;
+      var left=ed-sold;
+      if(!ed) return '';
+      return '<span class="inv-chip-item"><strong>'+left+'</strong> left · '+escH(p.title||'')+'</span>';
+    }).filter(Boolean).join('');
+    if(html){ row.innerHTML=html; row.style.display='flex'; }
+    else row.style.display='none';
   });
 }
 
@@ -2683,9 +2809,9 @@ var CMS_KEY = 'jA9kx2vP7m';
 function cmsApiUrl(file){ return '/api/content?key='+CMS_KEY+'&file='+encodeURIComponent(file); }
 
 // ── Sub-nav tabs ────────────────────────────────────────────────
-document.querySelectorAll('.cms-tab').forEach(function(btn){
+document.querySelectorAll('.cms-sidenav-item').forEach(function(btn){
   btn.addEventListener('click', function(){
-    document.querySelectorAll('.cms-tab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.cms-sidenav-item').forEach(function(b){ b.classList.remove('active'); });
     document.querySelectorAll('.cms-panel').forEach(function(p){ p.classList.remove('active'); });
     btn.classList.add('active');
     var which = btn.dataset.cms;
@@ -2697,10 +2823,10 @@ document.querySelectorAll('.cms-tab').forEach(function(btn){
   });
 });
 
-// Auto-load journal when main Content tab is clicked
+// Auto-load journal when main Content nav item is clicked
 (function(){
-  var btn = document.querySelector('[data-tab="content"]');
-  if(btn) btn.addEventListener('click', function(){ if(!_cmsLoaded.journal) cmsLoad('journal'); });
+  var contentBtn = document.getElementById('sn-content');
+  if(contentBtn) contentBtn.addEventListener('click', function(){ if(!_cmsLoaded.journal) cmsLoad('journal'); });
 })();
 
 function cmsLoad(which){
