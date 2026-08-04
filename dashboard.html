@@ -70,8 +70,8 @@
     .ext-tools-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#bbb;margin-right:4px;white-space:nowrap;}
     .ext-tool-link{font-size:11px;font-weight:600;letter-spacing:.04em;padding:6px 12px;border:1px solid var(--rule);border-radius:var(--rb);color:var(--muted);text-decoration:none;background:#f5f0ea;transition:all .15s;white-space:nowrap;}
     .ext-tool-link:hover{color:var(--ink);background:#fff;border-color:#d4cfc9;}
-    .page-greeting{font-size:52px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:4px;}
-    .page-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+    .page-greeting{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:4px;}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
 
     /* ── Sync bar ── */
     .sync-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:0 0 14px;background:transparent;border-radius:0;box-shadow:none;border:none;border-bottom:1px solid var(--rule);}
@@ -110,7 +110,11 @@
     .aq-tracking{width:160px;font-size:12px;padding:6px 10px;border:1px solid var(--rule);border-radius:var(--rb);font-family:var(--sans);background:#fff;}
     .aq-tracking:focus{outline:none;border-color:#c8bfb5;}
     .aq-status{font-size:11px;color:var(--muted);margin-top:4px;}
-    .manual-entry-divider{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:24px 0 16px;border-top:1px solid var(--rule);margin-top:24px;max-width:740px;}
+    .manual-entry-divider{display:none;}/* replaced by toggle */
+    .manual-toggle{display:block;width:100%;max-width:740px;margin-top:20px;padding:9px 14px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px dashed var(--rule);border-radius:var(--rb);cursor:pointer;font-family:var(--sans);text-align:left;transition:all .15s;}
+    .manual-toggle:hover{color:var(--ink);border-color:#c8c0b6;border-style:solid;}
+    .manual-toggle.open{border-style:solid;color:var(--ink);}
+    .manual-body{max-width:740px;}
     .panel{display:none;}
     .panel.active{display:block;}
     .panel-title{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px;}
@@ -118,11 +122,11 @@
 
     /* ── Action queue ── */
     .action-queue{margin-bottom:28px;}
-    .queue-banner{padding:14px 18px;border-radius:var(--rb);margin-bottom:10px;border:1px solid;}
+    .queue-banner{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;padding:9px 14px;border-radius:var(--rb);margin-bottom:10px;border:1px solid;}
     .queue-banner.red{background:var(--red-bg);border-color:var(--red-border);}
     .queue-banner.amber{background:var(--amber-bg);border-color:var(--amber-border);}
     .queue-banner.clear{background:var(--green-bg);border-color:var(--green-border);}
-    .queue-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+    .queue-title{font-size:12px;font-weight:700;white-space:nowrap;}
     .queue-title.red{color:var(--red);}
     .queue-title.amber{color:var(--amber);}
     .queue-title.clear{color:var(--green);}
@@ -439,7 +443,6 @@
   <div class="header-inner">
     <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
     <div class="header-actions">
-      <button class="header-btn" onclick="switchTab('content')" title="Manage site content">Content</button>
       <button class="header-btn header-btn-clients" onclick="switchTab('clients')" title="View completed orders and manage clients">Clients</button>
       <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
     </div>
@@ -465,32 +468,22 @@
 
   <!-- ── Permanent summary strip (always visible, above tabs) ── -->
   <div id="summaryStrip" style="margin-bottom:28px;">
-    <!-- Stats row -->
-    <div id="statsBar" style="display:flex;flex-wrap:wrap;margin-bottom:0;background:transparent;border:none;padding:0 0 20px;border-bottom:1px solid var(--rule);"></div>
-    <!-- Alerts: overdue / needs attention -->
-    <div class="action-queue" id="actionQueue" style="margin-top:16px;"></div>
+    <!-- Stats row hidden — subtitle carries the summary -->
+    <div id="statsBar" style="display:none;"></div>
+    <!-- Alerts: overdue / needs attention (only shown when action needed) -->
+    <div id="actionQueue"></div>
     <!-- Edition inventory -->
     <div id="inventoryBar" style="display:none;margin-top:16px;background:#fff;border:1px solid var(--rule);overflow:hidden;"></div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs" role="navigation" aria-label="Dashboard sections">
-    <div class="tab-group">
-      <div class="tab-group-label">Work</div>
-      <div class="tab-group-row">
-        <button type="button" class="tab active" data-tab="actions">To Do <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
-        <button type="button" class="tab" data-tab="orders">Pipeline</button>
-        <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
-      </div>
-    </div>
+    <button type="button" class="tab active" data-tab="actions">To Do <span class="tab-badge red" id="actionsBadge" style="display:none"></span></button>
+    <button type="button" class="tab" data-tab="orders">Pipeline</button>
+    <button type="button" class="tab" data-tab="waitlist">Waitlist</button>
     <div class="tab-sep" aria-hidden="true"></div>
-    <div class="tab-group">
-      <div class="tab-group-label">Admin</div>
-      <div class="tab-group-row">
-        <button type="button" class="tab" data-tab="content">Content</button>
-        <button type="button" class="tab" data-tab="workflow">Workflow</button>
-      </div>
-    </div>
+    <button type="button" class="tab" data-tab="content">Content</button>
+    <button type="button" class="tab" data-tab="workflow">Workflow</button>
   </div>
 
   <!-- ════════════════════════════════════
@@ -544,64 +537,70 @@
 
     <div class="action-panel" id="action-ship">
       <div id="action-ship-list"></div>
-      <div class="manual-entry-divider">Manual entry</div>
-      <div class="client-sel-wrap">
-        <span class="client-sel-label">Select client</span>
-        <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
-          <option value="">— choose to auto-fill —</option>
-        </select>
+      <button class="manual-toggle" onclick="toggleManualEntry('sh-manual-body',this)">+ Add manually</button>
+      <div id="sh-manual-body" class="manual-body" style="display:none;padding-top:16px;">
+        <div class="client-sel-wrap">
+          <span class="client-sel-label">Select client</span>
+          <select class="client-sel" id="sh-client-sel" onchange="fillFromClient('sh',this.value)">
+            <option value="">— choose to auto-fill —</option>
+          </select>
+        </div>
+        <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
+        <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
+        <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
+        <hr class="divider">
+        <label>DHL Tracking Number</label><input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
+        <button class="btn-primary" id="sh-send">Send Tracking Email</button>
+        <div class="status-msg" id="sh-status"></div>
       </div>
-      <label>Buyer Email</label><input id="sh-email" type="email" placeholder="buyer@example.com">
-      <label>Buyer Name</label><input id="sh-name" type="text" placeholder="Full name">
-      <label>Print Title</label><input id="sh-title" type="text" placeholder="e.g. Golden Hour III">
-      <hr class="divider">
-      <label>DHL Tracking Number</label><input id="sh-tracking" type="text" placeholder="e.g. 1234567890">
-      <button class="btn-primary" id="sh-send">Send Tracking Email</button>
-      <div class="status-msg" id="sh-status"></div>
     </div>
 
     <div class="action-panel active" id="action-coa">
       <div id="action-coa-list"></div>
-      <div class="manual-entry-divider">Manual entry</div>
-      <div class="client-sel-wrap">
-        <span class="client-sel-label">Select client</span>
-        <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
-          <option value="">— choose to auto-fill —</option>
-        </select>
+      <button class="manual-toggle" onclick="toggleManualEntry('coa-manual-body',this)">+ Add manually</button>
+      <div id="coa-manual-body" class="manual-body" style="display:none;padding-top:16px;">
+        <div class="client-sel-wrap">
+          <span class="client-sel-label">Select client</span>
+          <select class="client-sel" id="coa-client-sel" onchange="fillFromClient('coa',this.value)">
+            <option value="">— choose to auto-fill —</option>
+          </select>
+        </div>
+        <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
+        <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
+        <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
+        <hr class="divider">
+        <label>Print Title</label><input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
+        <div class="grid2">
+          <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
+          <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
+        </div>
+        <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
+        <div class="grid2">
+          <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
+          <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
+        </div>
+        <button class="btn-primary" id="coa-send">Send COA Email</button>
+        <div class="status-msg" id="coa-status"></div>
       </div>
-      <div class="form-note">COA reference and today's date are auto-generated. Leave Print No. blank to pick from the edition at random.</div>
-      <label>Buyer Email</label><input id="coa-email" type="email" placeholder="buyer@example.com">
-      <label>Buyer Name</label><input id="coa-name" type="text" placeholder="Full name">
-      <hr class="divider">
-      <label>Print Title</label><input id="coa-title" type="text" placeholder="e.g. Golden Hour III">
-      <div class="grid2">
-        <div><label>Series <span class="opt">(optional)</span></label><input id="coa-series" type="text" placeholder="e.g. Dry Season"></div>
-        <div><label>Size <span class="opt">(optional)</span></label><input id="coa-size" type="text" placeholder="e.g. 50 × 70 cm"></div>
-      </div>
-      <label>Edition</label><input id="coa-edition" type="text" placeholder="e.g. Edition of 20">
-      <div class="grid2">
-        <div><label>Print No. <span class="opt">(optional)</span></label><input id="coa-printnum" type="text" placeholder="e.g. 7 of 20"></div>
-        <div><label>Image URL <span class="opt">(optional)</span></label><input id="coa-img" type="url" placeholder="https://…"></div>
-      </div>
-      <button class="btn-primary" id="coa-send">Send COA Email</button>
-      <div class="status-msg" id="coa-status"></div>
     </div>
 
     <div class="action-panel" id="action-followup">
       <div id="action-followup-list"></div>
-      <div class="manual-entry-divider">Manual entry</div>
-      <div class="client-sel-wrap">
-        <span class="client-sel-label">Select client</span>
-        <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
-          <option value="">— choose to auto-fill —</option>
-        </select>
+      <button class="manual-toggle" onclick="toggleManualEntry('fu-manual-body',this)">+ Add manually</button>
+      <div id="fu-manual-body" class="manual-body" style="display:none;padding-top:16px;">
+        <div class="client-sel-wrap">
+          <span class="client-sel-label">Select client</span>
+          <select class="client-sel" id="fu-client-sel" onchange="fillFromClient('fu',this.value)">
+            <option value="">— choose to auto-fill —</option>
+          </select>
+        </div>
+        <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
+        <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
+        <hr class="divider">
+        <label>Print Title</label><input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
+        <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
+        <div class="status-msg" id="fu-status"></div>
       </div>
-      <label>Buyer Email</label><input id="fu-email" type="email" placeholder="buyer@example.com">
-      <label>Buyer Name</label><input id="fu-name" type="text" placeholder="Full name">
-      <hr class="divider">
-      <label>Print Title</label><input id="fu-title" type="text" placeholder="e.g. Golden Hour III">
-      <button class="btn-primary" id="fu-send">Send Follow-up Email</button>
-      <div class="status-msg" id="fu-status"></div>
     </div>
   </div>
 
@@ -1316,10 +1315,7 @@ function buildActionQueue(orders){
   var html = '';
 
   if(!overdue.length && !due.length){
-    html += '<div class="queue-banner clear">'
-      +'<div class="queue-title clear">All on track</div>'
-      +'<div class="queue-desc">'+active.length+' active order'+(active.length!==1?'s':'')+' · '+complete.length+' complete</div>'
-      +'</div>';
+    // Subtitle already says "all on track" — no banner needed
   } else {
     if(overdue.length){
       html += '<div class="queue-banner red">'
@@ -1936,6 +1932,14 @@ function populateClientSelectors(){
     });
     if(prev) sel.value = prev;
   });
+}
+
+function toggleManualEntry(id, btn){
+  var body = document.getElementById(id);
+  if(!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if(btn){ btn.classList.toggle('open', !open); btn.textContent = open ? '+ Add manually' : '− Add manually'; }
 }
 
 function fillFromClient(prefix, orderId){
