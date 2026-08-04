@@ -61,8 +61,8 @@ export async function onRequestPost(context) {
     htmlContent: `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f9f7f4;font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;">
+<head><meta charset="UTF-8"><style>@font-face{font-family:'General Sans';src:url('https://jefferyasare.com/fonts/GeneralSans-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;}</style></head>
+<body style="margin:0;padding:0;background:#f9f7f4;font-family:'General Sans',system-ui,-apple-system,sans-serif;">
   <table class="email-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
     <tr><td align="center">
       <table class="email-card" width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
@@ -71,36 +71,36 @@ export async function onRequestPost(context) {
           <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="120" height="66" style="display:block;border:0;">
         </td></tr>
         <!-- Heading -->
-        <tr><td class="email-head" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
+        <tr><td class="email-head" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
           Thank you, ${firstName}.
         </td></tr>
         <!-- Body -->
-        <tr><td class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
+        <tr><td class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
           Your order for <strong style="color:#111;">${print_title || 'your fine art print'}</strong>${size ? ' (' + size + ')' : ''} has been confirmed.
         </td></tr>
-        <tr><td class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
+        <tr><td class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
           Attached to this email is your <strong style="color:#111;">Certificate of Authenticity</strong> — a signed document confirming the provenance and authenticity of your limited edition print. Please keep it safe; it is the official record of your ownership.
         </td></tr>
         <!-- Next steps box -->
         <tr><td class="email-box" style="background:#f5f2ee;padding:24px 28px;">
-          <p style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 12px;">What happens next</p>
-          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#555;line-height:1.7;margin:0;">
+          <p style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 12px;">What happens next</p>
+          <p class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:14px;color:#555;line-height:1.7;margin:0;">
             Your print is now being carefully prepared. It will ship within <strong>7–14 business days</strong>.
             Once it's on its way, you'll receive a second email with your tracking number.
           </p>
         </td></tr>
         <tr><td style="padding:28px 0 0;">
-          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#444;line-height:1.6;margin:0;">
+          <p class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:15px;color:#444;line-height:1.6;margin:0;">
             Questions? Just reply to this email.
           </p>
         </td></tr>
         <!-- Signature -->
         <tr><td class="email-sig" style="padding:28px 0 0;border-top:1px solid #e8e4df;margin-top:32px;">
-          <p class="email-text" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
-          <p class="email-head" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
+          <p class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
+          <p class="email-head" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
         </td></tr>
         <!-- Footer -->
-        <tr><td class="email-foot" style="padding-top:32px;border-top:1px solid #e8e4df;font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
+        <tr><td class="email-foot" style="padding-top:32px;border-top:1px solid #e8e4df;font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
           ${order_ref ? 'Order ref: ' + order_ref + ' &nbsp;&middot;&nbsp; ' : ''}Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com
         </td></tr>
       </table>
