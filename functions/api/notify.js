@@ -55,6 +55,7 @@ export async function onRequest(context) {
   const payload = {
     sender: { name: 'Jeffery Asare', email: 'hello@jefferyasare.com' },
     to: [{ email: to, name: to_name || to }],
+    replyTo: { email: 'hello@jefferyasare.com', name: 'Jeffery Asare' },
     subject: subject,
     htmlContent: html_content
   };

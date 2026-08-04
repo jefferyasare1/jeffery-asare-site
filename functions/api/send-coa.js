@@ -68,7 +68,7 @@ export async function onRequestPost(context) {
       <table class="email-card" width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
         <!-- Logo -->
         <tr><td style="padding-bottom:36px;">
-          <img src="https://jefferyasare.com/logo-ja-email.png" alt="Jeffery Asare" width="120" height="67" style="display:block;border:0;">
+          <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="120" height="66" style="display:block;border:0;">
         </td></tr>
         <!-- Heading -->
         <tr><td class="email-head" style="font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:16px;">
