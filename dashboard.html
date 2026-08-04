@@ -424,7 +424,9 @@
 
     /* ── Sidebar layout ── */
     .dash-layout{display:flex;align-items:flex-start;}
-    .dash-sidebar{width:210px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;background:#fff;border-right:1px solid var(--rule);padding:20px 10px;display:flex;flex-direction:column;}
+    .dash-sidebar{width:210px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--rule);padding:16px 10px 20px;display:flex;flex-direction:column;}
+    .sn-logo{padding:0 6px;margin-bottom:20px;}
+    .sn-logo img{height:28px;width:auto;display:block;}
     .dash-main{flex:1;min-width:0;}
     .page{max-width:none;padding:28px 36px 80px;}
     .sn-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#b0a89e;padding:0 8px;margin:0 0 5px;display:block;}
@@ -475,19 +477,13 @@
 <!-- Show login gate immediately (sync) only if not already authenticated — prevents flash -->
 <script>if(sessionStorage.getItem('ja_admin_auth')!=='1'){document.getElementById('pw-gate').style.display='flex';}</script>
 
-<header class="header-bar">
-  <div class="header-inner">
-    <div class="brand"><img src="/logo-name.png" alt="Jeffery Asare" style="height:32px;width:auto;display:block;"></div>
-    <div class="header-actions">
-      <button class="header-btn" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
-    </div>
-  </div>
-</header>
-
 <div class="dash-layout">
 
 <!-- ── Sidebar nav ── -->
 <nav class="dash-sidebar" aria-label="Dashboard navigation">
+  <div class="sn-logo">
+    <img src="/logo-name.png" alt="Jeffery Asare">
+  </div>
   <div style="margin-bottom:14px;">
     <span class="sn-label">Work</span>
     <button class="sn-item active" id="sn-orders" onclick="switchTab('orders')">
@@ -521,33 +517,37 @@
 
 <div class="dash-main">
 <div class="page">
-  <h1 class="page-greeting" id="greetingText"></h1>
-  <p class="page-sub" id="greetingSub">Loading…</p>
-  <script>
-    (function(){
-      var h = new Date().getHours();
-      var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-      document.getElementById('greetingText').textContent = g + ', Jeff.';
-    })();
-  </script>
-
-  <!-- Sync bar -->
-  <div class="sync-bar">
-    <div class="sync-info"><span id="syncStatus">Loading from Google Sheets…</span></div>
-    <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
-  </div>
-
-  <!-- Alerts strip (overdue / needs attention only — no "all clear" banner) -->
-  <div id="summaryStrip" style="margin-bottom:20px;">
-    <div id="statsBar" style="display:none;"></div>
-    <div id="actionQueue"></div>
-    <div id="inventoryBar" style="display:none;"></div>
-  </div>
 
   <!-- ════════════════════════════════════
        ORDERS DASHBOARD
   ════════════════════════════════════ -->
   <div class="panel active" id="panel-orders">
+    <h1 class="page-greeting" id="greetingText"></h1>
+    <p class="page-sub" id="greetingSub">Loading…</p>
+    <script>
+      (function(){
+        var h = new Date().getHours();
+        var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+        document.getElementById('greetingText').textContent = g + ', Jeff.';
+      })();
+    </script>
+
+    <!-- Sync bar + Digest -->
+    <div class="sync-bar">
+      <div class="sync-info"><span id="syncStatus">Loading from Google Sheets…</span></div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn-sync" id="digestBtn" onclick="sendFollowUpDigest()" title="Email yourself a list of due/overdue follow-ups">Digest</button>
+        <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
+      </div>
+    </div>
+
+    <!-- Alerts strip -->
+    <div id="summaryStrip" style="margin-bottom:20px;">
+      <div id="statsBar" style="display:none;"></div>
+      <div id="actionQueue"></div>
+      <div id="inventoryBar" style="display:none;"></div>
+    </div>
+
     <!-- Inventory chips -->
     <div class="inv-chips-row" id="inv-chips-row" style="display:none;"></div>
 
@@ -797,7 +797,10 @@
 
     <!-- Portfolio panel -->
     <div class="cms-panel" id="cms-panel-portfolio">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Select a series to manage its photos.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <p style="font-size:13px;color:var(--muted);margin:0;">Select a series to manage its photos.</p>
+        <button class="btn-add" onclick="cmsAddSeries()" style="font-size:11px;padding:5px 12px;">+ New Series</button>
+      </div>
       <div class="series-selector" id="cms-series-selector"></div>
       <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
         <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
@@ -1977,32 +1980,25 @@ function renderClients(){
     return;
   }
 
-  var html = '<div class="orders-header" style="margin-bottom:20px;">'
-    +'<div class="orders-title">Clients <span style="font-size:14px;font-weight:400;color:var(--muted);">&nbsp;'+complete.length+' completed</span></div>'
+  var html = '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;">'
+    +'<span style="font-size:13px;font-weight:600;color:var(--ink);">'+complete.length+' clients</span>'
     +'</div>';
 
+  html += '<div style="display:flex;flex-direction:column;gap:0;">';
   html += complete.map(function(o){
-    var sinceLabel = o.followDate ? 'Followed up ' + fmtDate(o.followDate) : o.dateAdded ? 'Ordered ' + fmtDate(o.dateAdded) : '';
-    var meta = [o.printTitle, o.size, o.country].filter(Boolean).join(' · ');
-    return '<div class="client-card" id="card-'+o.id+'">'
-      +'<div class="client-card-body">'
-        +'<div class="client-card-name">'+escH(o.buyerName)+'</div>'
-        +'<div class="client-card-meta">'+escH(meta)+'</div>'
-        +'<div class="client-card-meta" style="margin-top:1px;">'+escH(o.buyerEmail)
-          +(o.orderRef?' &nbsp;·&nbsp; Ref: '+escH(o.orderRef):'')
-        +'</div>'
+    var date = o.followDate ? fmtDate(o.followDate) : o.dateAdded ? fmtDate(o.dateAdded) : '';
+    var print = [o.printTitle, o.size].filter(Boolean).join(', ');
+    return '<div style="display:flex;align-items:center;gap:16px;padding:11px 0;border-bottom:1px solid var(--rule);">'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(o.buyerName)+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(print)+(o.country?' · '+escH(o.country):'')+'</div>'
       +'</div>'
-      +'<div class="client-card-badge">'
-        +'<span class="deadline-chip green" style="white-space:nowrap;">Complete ✓</span>'
-        +(sinceLabel?'<div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:right;">'+escH(sinceLabel)+'</div>':'')
-      +'</div>'
-      +'<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;margin-left:4px;">'
-        +'<button class="btn-card" style="white-space:nowrap;" onclick="switchTab(\'coa\');fillFromClient(\'coa\',\''+o.id+'\')">Re-send COA</button>'
-        +'<button class="btn-card" style="white-space:nowrap;" onclick="switchTab(\'followup\');fillFromClient(\'fu\',\''+o.id+'\')">Follow-up</button>'
-        +'<button class="btn-card danger" onclick="deleteOrder(\''+o.id+'\')">Remove</button>'
-      +'</div>'
+      +'<div style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;">'+escH(o.buyerEmail)+'</div>'
+      +'<div style="font-size:11px;color:#b0a89e;white-space:nowrap;flex-shrink:0;min-width:80px;text-align:right;">'+escH(date)+'</div>'
+      +'<button class="btn-card danger" style="font-size:10px;padding:3px 8px;flex-shrink:0;" onclick="deleteOrder(\''+o.id+'\')">Remove</button>'
     +'</div>';
   }).join('');
+  html += '</div>';
 
   panel.innerHTML = html;
 }
@@ -3012,6 +3008,27 @@ function cmsBuildSeriesSelector(){
   sel.innerHTML=_seriesList.map(function(s){
     return '<button class="series-btn'+(s.slug===_portfolioCurrent?' active':'')+'" onclick="cmsSelectSeries(\''+escAttr(s.slug)+'\')">'+escH(s.label)+'</button>';
   }).join('');
+}
+
+function cmsAddSeries(){
+  var label = (prompt('Series name (e.g. "Portraits of Home"):')||'').trim();
+  if(!label) return;
+  var slug = label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  if(!slug){ alert('Could not generate a slug from that name.'); return; }
+  if(_seriesList && _seriesList.find(function(s){return s.slug===slug;})){
+    alert('A series with that name already exists.'); return;
+  }
+  if(!_seriesList) _seriesList=[];
+  _seriesList.push({slug:slug, label:label});
+  _portfolioData[slug]=[];
+  cmsBuildSeriesSelector();
+  cmsSelectSeries(slug);
+  // Persist updated series list
+  fetch('/api/content?key='+CMS_KEY, {method:'PUT', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({file:'settings/series', content:{series:_seriesList}, sha:_seriesSha||''})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.ok && d.sha) _seriesSha = d.sha;
+  });
 }
 
 function cmsSelectSeries(slug){
