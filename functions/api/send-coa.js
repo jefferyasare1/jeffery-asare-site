@@ -61,7 +61,7 @@ export async function onRequestPost(context) {
     htmlContent: `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><style>@font-face{font-family:'General Sans';src:url('https://jefferyasare.com/fonts/GeneralSans-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;}</style></head>
+<head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f9f7f4;font-family:'General Sans',system-ui,-apple-system,sans-serif;">
   <table class="email-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
     <tr><td align="center">
