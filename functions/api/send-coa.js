@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
     sender: { name: 'Jeffery Asare', email: 'hello@jefferyasare.com' },
     to: [{ email: to_email, name: to_name || to_email }],
     replyTo: { email: 'hello@jefferyasare.com' },
-    subject: `Your Certificate of Authenticity — ${print_title || 'Fine Art Print'}`,
+    subject: `Your Certificate of Authenticity: ${print_title || 'Fine Art Print'}`,
     htmlContent: `
 <!DOCTYPE html>
 <html lang="en">
@@ -79,7 +79,7 @@ export async function onRequestPost(context) {
           Your order for <strong style="color:#111;">${print_title || 'your fine art print'}</strong>${size ? ' (' + size + ')' : ''} has been confirmed.
         </td></tr>
         <tr><td class="email-text" style="font-family:'General Sans',system-ui,-apple-system,sans-serif;font-size:15px;color:#444;line-height:1.75;padding-bottom:24px;">
-          Attached to this email is your <strong style="color:#111;">Certificate of Authenticity</strong> — a signed document confirming the provenance and authenticity of your limited edition print. Please keep it safe; it is the official record of your ownership.
+          Attached to this email is your <strong style="color:#111;">Certificate of Authenticity</strong>, a signed document confirming the provenance and authenticity of your limited edition print. Please keep it safe; it is the official record of your ownership.
         </td></tr>
         <!-- Next steps box -->
         <tr><td class="email-box" style="background:#f5f2ee;padding:24px 28px;">
