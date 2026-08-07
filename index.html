@@ -2779,7 +2779,35 @@ document.addEventListener("keydown",function(e){
 // INIT
 // ============================================================
 injectFooters();
-renderPortfolio("all");
+// Load portfolio series + photos from CMS, then render
+fetch('/_data/settings/series.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(!d || !Array.isArray(d.series) || !d.series.length) return;
+    SERIES_LIST = d.series;
+    buildFilterBar();
+    return Promise.all(d.series.map(function(s){
+      return fetch('/_data/portfolio/'+s.slug+'.json')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(sd){
+          if(!sd || !Array.isArray(sd.photos)) return [];
+          return sd.photos.map(function(p){ return Object.assign({},p,{series:s.slug}); });
+        })
+        .catch(function(){ return []; });
+    }));
+  })
+  .then(function(allArrays){
+    if(!allArrays) { renderPortfolio('all'); return; }
+    var flat=[].concat.apply([],allArrays).map(function(p){
+      var id=p.title?p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'p'+Math.random().toString(36).slice(2);
+      return {id:id,series:p.series,title:p.title,loc:p.loc||'',date:p.date||'',
+        img:p.img||'',desc:p.desc||'',
+        tech:[["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]};
+    });
+    if(flat.length) PHOTOS=flat;
+    renderPortfolio('all');
+  })
+  .catch(function(){ renderPortfolio('all'); });
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Deep link: ?print=s1 opens that print; ?page=shop goes to that section
@@ -2909,35 +2937,6 @@ fetch('/_data/settings/general.json')
       var img=document.getElementById('contactPhotoImg');
       if(img){ img.src=s.contact_photo; img.style.display='block'; }
     }
-  })
-  .catch(function(){});
-
-// Load portfolio series + photos from CMS
-fetch('/_data/settings/series.json')
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(d){
-    if(!d || !Array.isArray(d.series) || !d.series.length) return;
-    SERIES_LIST = d.series;
-    buildFilterBar();
-    return Promise.all(d.series.map(function(s){
-      return fetch('/_data/portfolio/'+s.slug+'.json')
-        .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(sd){
-          if(!sd || !Array.isArray(sd.photos)) return [];
-          return sd.photos.map(function(p){ return Object.assign({},p,{series:s.slug}); });
-        })
-        .catch(function(){ return []; });
-    }));
-  })
-  .then(function(allArrays){
-    if(!allArrays) return;
-    var flat=[].concat.apply([],allArrays).map(function(p){
-      var id=p.title?p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'p'+Math.random().toString(36).slice(2);
-      return {id:id,series:p.series,title:p.title,loc:p.loc||'',date:p.date||'',
-        img:p.img||'',desc:p.desc||'',
-        tech:[["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]};
-    });
-    if(flat.length) PHOTOS=flat;
   })
   .catch(function(){});
 
