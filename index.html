@@ -1330,8 +1330,14 @@ function buildFilterBar(){
   });
 }
 
+function shuffleArray(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
 function renderPortfolio(filter, animate){
-  var pool=filter==="all"?PHOTOS:PHOTOS.filter(function(p){ return p.series===filter; });
+  var pool=filter==="all"?shuffleArray(PHOTOS):PHOTOS.filter(function(p){ return p.series===filter; });
   var visible=pool.filter(function(p){ return p.title!=="Untitled" && !p.hidden; }).slice(0,MAX_DISPLAY);
   var grid=document.getElementById("photoGrid");
   if(!grid) return;
