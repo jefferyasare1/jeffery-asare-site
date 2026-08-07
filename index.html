@@ -1459,20 +1459,7 @@ if(fb){ fb.addEventListener("click",function(e){
   var btn=e.target.closest(".filter-btn"); if(!btn) return;
   document.querySelectorAll(".filter-btn").forEach(function(b){ b.classList.remove("active"); });
   btn.classList.add("active");
-  var filter=btn.dataset.filter;
-  // Series mood intro
-  var introEl=document.getElementById("series-intro");
-  var introText=document.getElementById("seriesIntroText");
-  if(introEl&&introText){
-    if(_introTimer) clearTimeout(_introTimer);
-    introEl.classList.remove("open");
-    introText.textContent=filter!=="all"?(SERIES_INTROS[filter]||""):"";
-    if(filter!=="all"&&introText.textContent){
-      requestAnimationFrame(function(){introEl.classList.add("open");});
-      _introTimer=setTimeout(function(){introEl.classList.remove("open");},3800);
-    }
-  }
-  renderPortfolio(filter, true);
+  renderPortfolio(btn.dataset.filter, true);
 }); }
 
 // ============================================================
