@@ -1300,7 +1300,7 @@ function injectFooters(){
 // PORTFOLIO
 // ============================================================
 var PH_C=["ph-warm","ph-cool","ph-mono","ph-red","ph-gold","ph-grn"];
-var MAX_DISPLAY=20;
+var MAX_DISPLAY=999;
 
 // Default series — replaced by CMS data when loaded
 var SERIES_LIST=[
@@ -1332,7 +1332,7 @@ function buildFilterBar(){
 
 function renderPortfolio(filter, animate){
   var pool=filter==="all"?PHOTOS:PHOTOS.filter(function(p){ return p.series===filter; });
-  var visible=pool.filter(function(p){ return p.title!=="Untitled"; }).slice(0,MAX_DISPLAY);
+  var visible=pool.filter(function(p){ return p.title!=="Untitled" && !p.hidden; }).slice(0,MAX_DISPLAY);
   var grid=document.getElementById("photoGrid");
   if(!grid) return;
 

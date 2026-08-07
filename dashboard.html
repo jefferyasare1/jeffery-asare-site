@@ -3142,18 +3142,20 @@ function cmsRenderPortfolio(slug){
   var photos=_portfolioData[slug]||[];
   if(!photos.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📷</div><p>No photos yet. Add one above.</p></div>';return;}
   el.innerHTML=photos.map(function(p,i){
-    var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2">':'<div class="img-preview"></div>';
-    return '<div class="cms-item">'
+    var isHidden=!!p.hidden;
+    var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2" style="'+(isHidden?'opacity:.35;filter:grayscale(60%)':'')+'">':'<div class="img-preview"></div>';
+    return '<div class="cms-item" style="'+(isHidden?'opacity:.6':'')+'">'
       +'<div class="cms-item-reorder">'
         +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
         +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',1)"'+(i===photos.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
       +thumb
-      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+(isHidden?' <span style="font-size:10px;color:#bbb;font-weight:400">(hidden)</span>':'')+'</div>'
         +'<div class="cms-item-meta">'+escH(p.loc||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div></div>'
       +'<div class="cms-item-actions">'
         +'<button class="btn-card" onclick="cmsOpenPhotoEdit('+i+')">Edit</button>'
-        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+slug+'\','+i+')">Delete</button>'
+        +'<button class="btn-card" onclick="cmsToggleHide(\''+slug+'\','+i+')">'+(isHidden?'Show':'Hide')+'</button>'
+        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+slug+'\','+i+')">Remove</button>'
       +'</div></div>';
   }).join('');
 }
@@ -3229,6 +3231,18 @@ function cmsDeletePhoto(slug,idx){
       .then(function(d){if(!d.ok){showDashModal('Delete failed: '+(d.error||''));return;} _portfolioData[slug]=np; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
       .catch(function(err){showDashModal('Network error: '+err.message);});
   });
+}
+
+function cmsToggleHide(slug,idx){
+  var photos=(_portfolioData[slug]||[]).slice();
+  photos[idx]=Object.assign({},photos[idx],{hidden:!photos[idx].hidden});
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:photos};
+  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok){showDashModal('Could not update: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
+    .catch(function(err){showDashModal('Network error: '+err.message);});
 }
 
 // ── Site Text ────────────────────────────────────────────────────
