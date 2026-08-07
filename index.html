@@ -605,7 +605,6 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .gsap-ready .photo-card:hover{transform:none!important;box-shadow:none!important;}
 .gsap-ready .photo-card:hover img{transform:none!important;}
 .gsap-ready .photo-card-info{transition:none!important;}
-.gsap-ready .photo-card:hover .photo-card-info{opacity:0!important;}
 .gsap-ready .shop-card:hover .shop-card-img{transform:none!important;}
 /* ── BUTTONS ── */
 .btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
@@ -1445,7 +1444,15 @@ function renderShop(page){
   if(!list) return;
   list.innerHTML="";
   var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print"; });
-  if(!allVisible.length){ list.innerHTML="<p class=\"shop-empty\">No prints available yet.</p>"; return; }
+  if(!allVisible.length){
+    list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
+      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">◻</div>'
+      +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
+      +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
+      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;·&nbsp; or get in touch</p>'
+      +'</div>';
+    return;
+  }
   var totalPages=Math.ceil(allVisible.length/SHOP_PER_PAGE);
   var visible=allVisible.slice(page*SHOP_PER_PAGE,(page+1)*SHOP_PER_PAGE);
   visible.forEach(function(p){
