@@ -64,20 +64,20 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 #series-intro.open{max-height:60px;padding:.4rem var(--pad) 0;}
 #series-intro span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-style:italic;opacity:0;transform:translateY(8px);transition:opacity .6s ease .15s,transform .6s ease .15s;}
 #series-intro.open span{opacity:1;transform:translateY(0);}
-.potw{padding:5rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
-.potw-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2.5rem;}
-.potw-inner{display:grid;grid-template-columns:5fr 4fr;gap:4rem;align-items:center;}
-.potw-img-wrap{position:relative;overflow:hidden;aspect-ratio:4/5;background:var(--warm);cursor:pointer;}
-.potw-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease;}
-.potw-img-wrap:hover img{transform:scale(1.03);}
-.potw-body{padding:1rem 0;}
-.potw-week{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
-.potw-title{font-family:var(--title);font-size:clamp(1.8rem,3.5vw,3rem);font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-bottom:.8rem;}
-.potw-loc{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.8rem;}
-.potw-note{font-size:13px;line-height:1.9;color:#555;max-width:320px;border-left:2px solid var(--warm);padding-left:1.2rem;font-style:italic;}
-.potw-btn{margin-top:2.2rem;display:inline-flex;align-items:center;gap:.5rem;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--ink);color:var(--ink);padding:.6rem 1.4rem;cursor:pointer;transition:all .2s;font-family:var(--sans);}
+.potw{padding:1.4rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
+.potw-label{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
+.potw-inner{display:flex;gap:1rem;align-items:center;}
+.potw-img-wrap{width:52px;height:68px;flex-shrink:0;position:relative;overflow:hidden;background:var(--warm);cursor:pointer;}
+.potw-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease;}
+.potw-img-wrap:hover img{transform:scale(1.06);}
+.potw-body{display:flex;align-items:center;gap:1.2rem;flex:1;flex-wrap:wrap;}
+.potw-week{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.potw-title{font-family:var(--title);font-size:clamp(.95rem,1.5vw,1.2rem);font-weight:600;letter-spacing:-.02em;line-height:1.1;}
+.potw-loc{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.potw-note{display:none;}
+.potw-btn{display:inline-flex;align-items:center;font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--ink);color:var(--ink);padding:.35rem .9rem;cursor:pointer;transition:all .2s;font-family:var(--sans);white-space:nowrap;margin-left:auto;}
 .potw-btn:hover{background:var(--ink);color:#fff;}
-@media(max-width:700px){.potw-inner{grid-template-columns:1fr;gap:2rem;}}
+@media(max-width:640px){.potw-body{gap:.7rem;}.potw-btn{margin-left:0;}}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
 .photo-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
@@ -1527,7 +1527,7 @@ function renderShop(page){
   var list=document.getElementById("shopList");
   if(!list) return;
   list.innerHTML="";
-  var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print"; });
+  var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img && (p.img.indexOf('/')==0||p.img.indexOf('http')==0); });
   if(!allVisible.length){
     list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
       +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">◻</div>'
