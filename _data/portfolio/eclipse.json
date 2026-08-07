@@ -1,1 +1,20 @@
-{"label":"Eclipse Of The Self","slug":"eclipse","photos":[]}
+{
+  "label": "Eclipse Of The Self",
+  "slug": "eclipse",
+  "photos": [
+    {"title":"The Veil Speaks","loc":"Accra, Ghana","date":"2026.01","img":"/ec-the-veil-speaks.jpg","desc":"Something unseen presses forward. The veil is not a barrier — it is a message.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Consumed by Shadow","loc":"Accra, Ghana","date":"2026.01","img":"/ec-consumed-by-shadow.jpg","desc":"When the dark does not threaten but absorbs. A self dissolving into something larger.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Before I Disappeared","loc":"Accra, Ghana","date":"2026.01","img":"/ec-before-i-disappeared.jpg","desc":"The last moment of being fully visible. Everything after is a kind of fading.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Searching for Signs","loc":"Accra, Ghana","date":"2026.01","img":"/ec-searching-for-signs.jpg","desc":"Eyes open, looking inward. The signs were always there.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Unraveling in Colour","loc":"Accra, Ghana","date":"2026.01","img":"/ec-unraveling-in-colour.jpg","desc":"Coming apart is not always quiet. Sometimes it is vivid.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Covered in Gold","loc":"Accra, Ghana","date":"2026.01","img":"/ec-covered-in-gold.jpg","desc":"To be gilded is not to be whole. But there is beauty in the covering.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Still in the Glow","loc":"Accra, Ghana","date":"2026.01","img":"/ec-still-in-the-glow.jpg","desc":"Bathed in something warm and unearned. Stillness as its own kind of grace.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"The Joy That Holds","loc":"Accra, Ghana","date":"2026.01","img":"/ec-the-joy-that-holds.jpg","desc":"Not the joy that erupts. The joy that stays — quiet, steady, unexplained.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"The Space Between","loc":"Accra, Ghana","date":"2026.01","img":"/ec-the-space-between.jpg","desc":"Neither here nor there. The gap is where most of living happens.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"No More Than a Shadow","loc":"Accra, Ghana","date":"2026.01","img":"/ec-no-more-than-a-shadow.jpg","desc":"Reduced to outline. What remains when everything else is stripped away.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"She Burns Bright","loc":"Accra, Ghana","date":"2026.01","img":"/ec-she-burns-bright.jpg","desc":"Not burning out. Burning forward. The kind of light that does not ask permission.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Of Gold and Gravity","loc":"Accra, Ghana","date":"2026.01","img":"/ec-of-gold-and-gravity.jpg","desc":"Heavy and luminous at once. To carry gold is still to carry weight.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Before the Words Come","loc":"Accra, Ghana","date":"2026.01","img":"/ec-before-the-words-come.jpg","desc":"The moment just before language arrives. Pure feeling, unmediated.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"},
+    {"title":"Blood and Shadow","loc":"Accra, Ghana","date":"2026.01","img":"/ec-blood-and-shadow.jpg","desc":"The series ends where it began — in the body, in the dark, in the self.","device":"iPhone","format":"ProRAW","edited_in":"Lightroom Mobile"}
+  ]
+}
