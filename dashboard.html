@@ -3120,6 +3120,12 @@ function cmsAddSeries(){
   });
 }
 
+function cmsReloadSeries(){
+  if(!_portfolioCurrent) return;
+  delete _portfolioLoaded[_portfolioCurrent];
+  cmsSelectSeries(_portfolioCurrent);
+}
+
 function cmsSelectSeries(slug){
   _portfolioCurrent=slug; cmsBuildSeriesSelector();
   var hdr=document.getElementById('cms-portfolio-header'); if(hdr) hdr.style.display='flex';
