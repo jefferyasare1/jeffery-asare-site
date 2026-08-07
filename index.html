@@ -36,6 +36,14 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .hero-dot{width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:transparent;cursor:pointer;padding:0;transition:background .3s;}
 .hero-dot.active{background:#fff;border-color:#fff;}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.52) 0%,transparent 28%),linear-gradient(to top,rgba(0,0,0,.55) 0%,rgba(0,0,0,.1) 60%,transparent 100%);}
+@keyframes kb1{from{transform:scale(1) translate(0,0);}to{transform:scale(1.09) translate(-1.5%,-.5%);}}
+@keyframes kb2{from{transform:scale(1.05) translate(1%,-.5%);}to{transform:scale(1) translate(-.5%,.5%);}}
+@keyframes kb3{from{transform:scale(1.02) translate(-.5%,.5%);}to{transform:scale(1.08) translate(.5%,-.5%);}}
+.hero-slide:nth-child(1).active img{animation:kb1 8s ease-out forwards;}
+.hero-slide:nth-child(2).active img{animation:kb2 8s ease-in-out forwards;}
+.hero-slide:nth-child(3).active img{animation:kb3 8s ease-out forwards;}
+.hero-slide:nth-child(4).active img{animation:kb1 8s ease-in-out forwards;}
+.hero-slide:nth-child(5).active img{animation:kb2 8s ease-out forwards;}
 nav:not(.inner-nav) .nav-links a{position:relative;}
 nav:not(.inner-nav) .nav-links a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:#fff;transition:width .28s ease;}
 nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
@@ -52,6 +60,24 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .filter-btn{padding:.45rem 1rem;border-radius:999px;border:1px solid var(--rule);background:none;font-size:12px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:all .2s;color:var(--muted);}
 .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .filter-btn:hover:not(.active){border-color:#bbb;color:var(--ink);}
+#series-intro{overflow:hidden;max-height:0;transition:max-height .5s ease,padding .5s ease;padding:0 var(--pad);}
+#series-intro.open{max-height:60px;padding:.4rem var(--pad) 0;}
+#series-intro span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-style:italic;opacity:0;transform:translateY(8px);transition:opacity .6s ease .15s,transform .6s ease .15s;}
+#series-intro.open span{opacity:1;transform:translateY(0);}
+.potw{padding:5rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
+.potw-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2.5rem;}
+.potw-inner{display:grid;grid-template-columns:5fr 4fr;gap:4rem;align-items:center;}
+.potw-img-wrap{position:relative;overflow:hidden;aspect-ratio:4/5;background:var(--warm);cursor:pointer;}
+.potw-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease;}
+.potw-img-wrap:hover img{transform:scale(1.03);}
+.potw-body{padding:1rem 0;}
+.potw-week{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.potw-title{font-family:var(--title);font-size:clamp(1.8rem,3.5vw,3rem);font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-bottom:.8rem;}
+.potw-loc{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.8rem;}
+.potw-note{font-size:13px;line-height:1.9;color:#555;max-width:320px;border-left:2px solid var(--warm);padding-left:1.2rem;font-style:italic;}
+.potw-btn{margin-top:2.2rem;display:inline-flex;align-items:center;gap:.5rem;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--ink);color:var(--ink);padding:.6rem 1.4rem;cursor:pointer;transition:all .2s;font-family:var(--sans);}
+.potw-btn:hover{background:var(--ink);color:#fff;}
+@media(max-width:700px){.potw-inner{grid-template-columns:1fr;gap:2rem;}}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
 .photo-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
@@ -743,6 +769,19 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       </div>
     </div>
   </div>
+  <div class="potw reveal" id="potwSection" style="display:none;">
+    <div class="potw-label">Photo of the Week</div>
+    <div class="potw-inner">
+      <div class="potw-img-wrap" id="potwImgWrap"></div>
+      <div class="potw-body">
+        <div class="potw-week" id="potwWeek"></div>
+        <h2 class="potw-title" id="potwTitle"></h2>
+        <div class="potw-loc" id="potwLoc"></div>
+        <p class="potw-note" id="potwNote"></p>
+        <button class="potw-btn" id="potwViewBtn">View in portfolio &nbsp;&#8594;</button>
+      </div>
+    </div>
+  </div>
   <div id="home-mini-footer"></div>
 </div>
 
@@ -765,6 +804,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <button class="filter-btn" data-filter="abstract">Abstract</button>
   </div>
   <!-- filter buttons are rebuilt from CMS series data on load -->
+  <div id="series-intro"><span id="seriesIntroText"></span></div>
   <div class="photo-grid" id="photoGrid"></div>
   <div id="port-mini-footer"></div>
 </div>
@@ -1369,13 +1409,70 @@ function renderPortfolio(filter, animate){
   }
 }
 
+// ============================================================
+// PHOTO OF THE WEEK
+// ============================================================
+function renderPhotoOfWeek(){
+  var section=document.getElementById("potwSection");
+  if(!section||!PHOTOS||!PHOTOS.length) return;
+  var pool=PHOTOS.filter(function(p){return p.title!=="Untitled"&&!p.hidden&&p.img;});
+  if(!pool.length) return;
+  var weekNum=Math.floor(Date.now()/(7*24*60*60*1000));
+  var photo=pool[weekNum%pool.length];
+  var now=new Date();
+  var startOfYear=new Date(now.getFullYear(),0,1);
+  var weekOfYear=Math.ceil(((now-startOfYear)/86400000+startOfYear.getDay()+1)/7);
+  document.getElementById("potwWeek").textContent="Week "+String(weekOfYear).padStart(2,"0")+" · "+now.getFullYear();
+  document.getElementById("potwTitle").textContent=photo.title||"";
+  document.getElementById("potwLoc").textContent=photo.loc||"";
+  document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
+    ?photo.desc
+    :"A quiet frame — chosen this week for the way it holds still.";
+  var wrap=document.getElementById("potwImgWrap");
+  wrap.innerHTML='<img src="'+photo.img+'" alt="'+photo.title+'" loading="lazy">';
+  function goToPhoto(){
+    var pool2=PHOTOS.filter(function(p){return p.title!=="Untitled"&&!p.hidden;});
+    var idx=pool2.findIndex(function(p){return p.img===photo.img;});
+    navigate("portfolio");
+    setTimeout(function(){if(idx>=0) openLightbox(idx,pool2);},400);
+  }
+  wrap.addEventListener("click",goToPhoto);
+  var btn=document.getElementById("potwViewBtn");
+  if(btn) btn.addEventListener("click",goToPhoto);
+  section.style.display="";
+  setTimeout(function(){addRevealClasses();initReveal();},120);
+}
+
+// ============================================================
+// SERIES MOOD INTROS
+// ============================================================
+var SERIES_INTROS={
+  "random-stories":"Ordinary moments. Unscripted, unrepeatable.",
+  "portraits":"Every face holds a story it never chose to tell.",
+  "eclipse":"The self, obscured — searching for its own light."
+};
+var _introTimer=null;
+
 // after render, kick reveal
 var fb=document.getElementById("filterBar");
 if(fb){ fb.addEventListener("click",function(e){
   var btn=e.target.closest(".filter-btn"); if(!btn) return;
   document.querySelectorAll(".filter-btn").forEach(function(b){ b.classList.remove("active"); });
   btn.classList.add("active");
-  renderPortfolio(btn.dataset.filter, true);
+  var filter=btn.dataset.filter;
+  // Series mood intro
+  var introEl=document.getElementById("series-intro");
+  var introText=document.getElementById("seriesIntroText");
+  if(introEl&&introText){
+    if(_introTimer) clearTimeout(_introTimer);
+    introEl.classList.remove("open");
+    introText.textContent=filter!=="all"?(SERIES_INTROS[filter]||""):"";
+    if(filter!=="all"&&introText.textContent){
+      requestAnimationFrame(function(){introEl.classList.add("open");});
+      _introTimer=setTimeout(function(){introEl.classList.remove("open");},3800);
+    }
+  }
+  renderPortfolio(filter, true);
 }); }
 
 // ============================================================
@@ -2819,6 +2916,7 @@ fetch('/_data/settings/series.json')
     });
     if(flat.length) PHOTOS=flat;
     renderPortfolio('all');
+    renderPhotoOfWeek();
   })
   .catch(function(){ renderPortfolio('all'); });
 renderShop();

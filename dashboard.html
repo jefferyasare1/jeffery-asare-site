@@ -804,7 +804,10 @@
       <div class="series-selector" id="cms-series-selector"></div>
       <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
         <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
-        <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-add" onclick="cmsReloadSeries()" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;" title="Refresh photos from server">⟳ Reload</button>
+          <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+        </div>
       </div>
       <div id="cms-portfolio-list"></div>
     </div>
