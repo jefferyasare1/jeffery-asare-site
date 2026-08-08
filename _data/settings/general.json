@@ -1,6 +1,6 @@
 {
-  "about_photo": "https://res.cloudinary.com/dnayq60ze/image/upload/v1782763377/about-portrait_gzaa2y.jpg",
-  "contact_photo": "https://res.cloudinary.com/dnayq60ze/image/upload/v1782763444/contact-photo_uq3aan.jpg",
+  "about_photo": "/about-portrait.JPG",
+  "contact_photo": "/contact-photo.jpg",
   "hero_desc": "Phone photography from Ghana. Every image is a conversation between light and stillness.",
   "hero1": "/hero-5.jpg",
   "hero_line1": "Photography",

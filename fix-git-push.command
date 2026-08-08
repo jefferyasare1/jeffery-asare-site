@@ -7,13 +7,13 @@ rm -rf .git/rebase-merge
 
 echo ""
 echo "=== Committing ==="
-git add index.html ambient.mp3 2>/dev/null; git add index.html
+git add -A
 git diff --cached --stat
-git commit -m "Royalty-free ambient melody + minimal SVG controls" 2>&1 || echo "(nothing to commit)"
+git commit -m "Site updates" 2>&1 || echo "(nothing to commit)"
 
 echo ""
 echo "=== Pushing ==="
-git push --force 2>&1
+git push origin main 2>&1
 
 echo ""
 echo "=== Done ==="
