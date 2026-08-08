@@ -2949,85 +2949,37 @@ document.addEventListener("keydown",function(e){
 })();
 
 // ============================================================
-// AMBIENT MELODY  (A-minor pentatonic, piano-like, ~63s loop)
+// AMBIENT MELODY  (HTML5 audio — /ambient.mp3, loops, fades)
 // ============================================================
 (function(){
   var btn=document.getElementById("ambientBtn");
   if(!btn) return;
-  var ctx=null,gainNode=null,dry=null,revIn=null,running=false;
+  var audio=null,running=false,fadeTimer=null;
 
-  function buildSound(){
-    ctx=new (window.AudioContext||window.webkitAudioContext)();
-    gainNode=ctx.createGain(); gainNode.gain.value=0;
-    gainNode.connect(ctx.destination);
-
-    // Reverb: feedback delay network
-    var d1=ctx.createDelay(3); d1.delayTime.value=0.46;
-    var d2=ctx.createDelay(3); d2.delayTime.value=0.71;
-    var fb1=ctx.createGain(); fb1.gain.value=0.35;
-    var fb2=ctx.createGain(); fb2.gain.value=0.28;
-    var wet=ctx.createGain(); wet.gain.value=0.48;
-    d1.connect(fb1); fb1.connect(d2);
-    d2.connect(fb2); fb2.connect(d1);
-    d1.connect(wet); d2.connect(wet); wet.connect(gainNode);
-    revIn=d1;
-
-    dry=ctx.createGain(); dry.gain.value=0.52; dry.connect(gainNode);
-
-    // A-minor pentatonic melody — each entry: [freq, startSec, durationSec]
-    var A3=220,C4=261.63,D4=293.66,E4=329.63,G4=392,A4=440;
-    var notes=[
-      // Phrase 1 — gentle ascent
-      [A3, 0.0, 4.0],
-      [C4, 3.8, 3.5],
-      [E4, 7.0, 3.5],
-      [G4, 10.0,3.0],
-      [A4, 12.5,5.0],
-      // Phrase 2 — descent, more intimate
-      [G4, 17.5,3.5],
-      [E4, 20.5,3.0],
-      [D4, 23.0,3.5],
-      [C4, 26.0,3.0],
-      [A3, 28.5,5.0],
-      // Phrase 3 — mid question
-      [C4, 34.0,3.0],
-      [E4, 36.5,3.0],
-      [D4, 39.0,2.5],
-      [E4, 41.0,3.5],
-      [G4, 44.0,3.0],
-      // Phrase 4 — resolution
-      [E4, 47.0,3.0],
-      [C4, 49.5,3.5],
-      [A3, 52.5,9.0]  // long final note, silence before loop
-    ];
-    var LOOP=63;  // seconds per loop
-    var REPS=9;   // pre-schedule 9 loops ≈ 9.5 minutes
-
-    function playNote(freq,when,dur){
-      // Piano-ish timbre: fundamental + 2nd + 3rd harmonic with ADSR
-      [[1,0.26],[2,0.09],[3,0.035]].forEach(function(h){
-        var osc=ctx.createOscillator();
-        osc.type="sine";
-        osc.frequency.value=freq*h[0];
-        osc.detune.value=(Math.random()-0.5)*5; // tiny warmth
-        var env=ctx.createGain();
-        env.gain.setValueAtTime(0,when);
-        env.gain.linearRampToValueAtTime(h[1],when+0.025);         // attack
-        env.gain.exponentialRampToValueAtTime(h[1]*0.4,when+0.7);  // decay
-        env.gain.setValueAtTime(h[1]*0.4,when+dur-1.2);            // sustain
-        env.gain.exponentialRampToValueAtTime(0.0001,when+dur+1.5); // release
-        osc.connect(env);
-        env.connect(dry); env.connect(revIn);
-        osc.start(when); osc.stop(when+dur+2);
-      });
+  function getAudio(){
+    if(!audio){
+      audio=new Audio("/ambient.mp3");
+      audio.loop=true;
+      audio.volume=0;
     }
+    return audio;
+  }
 
-    function scheduleLoop(offset){
-      notes.forEach(function(n){ playNote(n[0],offset+n[1],n[2]); });
-    }
-
-    var t0=ctx.currentTime+0.15;
-    for(var i=0;i<REPS;i++) scheduleLoop(t0+LOOP*i);
+  function fadeTo(target,ms){
+    clearInterval(fadeTimer);
+    var a=getAudio();
+    var start=a.volume;
+    var steps=50;
+    var step=0;
+    var diff=target-start;
+    fadeTimer=setInterval(function(){
+      step++;
+      a.volume=Math.min(1,Math.max(0,+(start+diff*(step/steps)).toFixed(4)));
+      if(step>=steps){
+        clearInterval(fadeTimer);
+        if(target===0) a.pause();
+      }
+    },ms/steps);
   }
 
   function setIcons(on){
@@ -3038,20 +2990,20 @@ document.addEventListener("keydown",function(e){
   }
 
   function toggleAmbient(){
-    if(!ctx) buildSound();
     running=!running;
     btn.classList.toggle("active",running);
     setIcons(running);
-    var resume=(ctx.state==="suspended")?ctx.resume():Promise.resolve();
-    resume.then(function(){
-      gainNode.gain.cancelScheduledValues(ctx.currentTime);
-      gainNode.gain.setValueAtTime(gainNode.gain.value,ctx.currentTime);
-      if(running){
-        gainNode.gain.linearRampToValueAtTime(0.32,ctx.currentTime+2.5);
-      } else {
-        gainNode.gain.linearRampToValueAtTime(0,ctx.currentTime+2);
-      }
-    });
+    if(running){
+      getAudio().play().catch(function(){
+        // Autoplay blocked — try once on next interaction
+        running=false;
+        btn.classList.remove("active");
+        setIcons(false);
+      });
+      fadeTo(0.72,3000);   // 3-second fade in
+    } else {
+      fadeTo(0,2000);       // 2-second fade out, then pause
+    }
   }
   btn.addEventListener("click",toggleAmbient);
 })();
