@@ -78,6 +78,47 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .potw-btn{display:inline-flex;align-items:center;font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--ink);color:var(--ink);padding:.35rem .9rem;cursor:pointer;transition:all .2s;font-family:var(--sans);white-space:nowrap;margin-left:auto;}
 .potw-btn:hover{background:var(--ink);color:#fff;}
 @media(max-width:640px){.potw-body{gap:.7rem;}.potw-btn{margin-left:0;}}
+/* ---- POTW Editorial Spread (portfolio) ---- */
+.potw-editorial{position:relative;width:100%;height:62vh;min-height:300px;overflow:hidden;background:#1a1410;display:none;}
+.potw-editorial.visible{display:block;}
+.potw-editorial-img{width:100%;height:100%;object-fit:cover;display:block;opacity:.72;}
+.potw-editorial-over{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.80) 0%,rgba(0,0,0,.3) 55%,transparent 100%),linear-gradient(to top,rgba(0,0,0,.45) 0%,transparent 55%);}
+.potw-editorial-body{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);padding-bottom:calc(var(--pad) + .5rem);}
+.potw-editorial-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.9rem;}
+.potw-editorial-title{font-family:var(--title);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:600;color:#fff;letter-spacing:-.03em;line-height:1.0;margin-bottom:.4rem;}
+.potw-editorial-loc{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.8rem;}
+.potw-editorial-desc{font-size:13px;color:rgba(255,255,255,.6);line-height:1.8;max-width:400px;margin-bottom:1.4rem;}
+.potw-editorial-btn{display:inline-flex;align-items:center;gap:.5rem;background:#fff;color:#111;border:none;border-radius:999px;padding:.65rem 1.5rem;font-size:12px;font-family:var(--sans);cursor:pointer;transition:opacity .2s;width:fit-content;}
+.potw-editorial-btn:hover{opacity:.85;}
+@media(max-width:640px){.potw-editorial{height:55vh;}.potw-editorial-desc{display:none;}}
+/* ---- Dark Room Mode ---- */
+html.darkroom{--bg:#0d0d0d;--warm:#141210;--rule:#242220;--muted:#585450;}
+html.darkroom body{background:#0d0d0d;color:#c8c0b4;}
+html.darkroom .inner-nav{background:#0d0d0d;border-color:#242220;}
+html.darkroom .inner-nav .nav-links a{color:#585450;}
+html.darkroom .inner-nav .nav-links a:hover,html.darkroom .inner-nav .nav-links a.active-link{color:#c8c0b4;}
+html.darkroom .page-header p{color:#585450;}
+html.darkroom .filter-btn{border-color:#242220;color:#585450;}
+html.darkroom .filter-btn.active{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
+html.darkroom .filter-btn:hover:not(.active){border-color:#444;color:#c8c0b4;}
+html.darkroom .photo-card{background:#1a1816;}
+html.darkroom .potw-editorial-over{background:linear-gradient(to right,rgba(0,0,0,.88) 0%,rgba(0,0,0,.4) 55%,transparent 100%),linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 55%);}
+html.darkroom .lb-close,html.darkroom .lb-arrow{border-color:rgba(255,255,255,.15);}
+html.darkroom .shop-grid-item{background:#1a1816;}
+html.darkroom .about-body{background:#0d0d0d;}
+html.darkroom .contact-form input,html.darkroom .contact-form textarea{background:#1a1816;border-color:#242220;color:#c8c0b4;}
+html.darkroom .potw-editorial{background:#0d0d0d;}
+/* ---- Floating Controls ---- */
+.float-controls{position:fixed;bottom:1.4rem;right:1.4rem;display:flex;flex-direction:column;gap:.5rem;z-index:400;}
+.float-btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(20,18,14,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:var(--sans);}
+.float-btn:hover{background:rgba(40,36,28,.9);color:#fff;border-color:rgba(255,255,255,.35);}
+.float-btn.active{background:#fff;color:#111;border-color:#fff;}
+.float-btn[data-tip]{position:relative;}
+.float-btn[data-tip]::before{content:attr(data-tip);position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;}
+.float-btn[data-tip]:hover::before{opacity:1;}
+html.darkroom .float-btn{border-color:rgba(255,255,255,.15);background:rgba(13,13,13,.85);}
+html.darkroom .float-btn.active{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
+#surpriseBtn{display:none;}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
 .photo-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
@@ -769,20 +810,14 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       </div>
     </div>
   </div>
-  <div class="potw reveal" id="potwSection" style="display:none;">
-    <div class="potw-label">Photo of the Week</div>
-    <div class="potw-inner">
-      <div class="potw-img-wrap" id="potwImgWrap"></div>
-      <div class="potw-body">
-        <div class="potw-week" id="potwWeek"></div>
-        <h2 class="potw-title" id="potwTitle"></h2>
-        <div class="potw-loc" id="potwLoc"></div>
-        <p class="potw-note" id="potwNote"></p>
-        <button class="potw-btn" id="potwViewBtn">View in portfolio &nbsp;&#8594;</button>
-      </div>
-    </div>
-  </div>
   <div id="home-mini-footer"></div>
+</div>
+
+<!-- FLOATING CONTROLS (all pages) -->
+<div class="float-controls" id="floatControls">
+  <button class="float-btn" id="darkRoomBtn" data-tip="Dark room" aria-label="Toggle dark room mode">🌙</button>
+  <button class="float-btn" id="ambientBtn" data-tip="Ambient sound" aria-label="Toggle ambient sound">🔊</button>
+  <button class="float-btn" id="surpriseBtn" data-tip="Surprise me" aria-label="Open a random photo">✦</button>
 </div>
 
 <!-- PORTFOLIO -->
@@ -791,6 +826,18 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <span class="nav-logo" id="portLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
     <ul class="nav-links"><li><a class="active-link">Portfolio</a></li><li><a id="portAboutBtn">About</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="portHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <!-- POTW EDITORIAL SPREAD -->
+  <div class="potw-editorial" id="potwSection">
+    <img id="potwEditorialImg" src="" alt="" class="potw-editorial-img">
+    <div class="potw-editorial-over"></div>
+    <div class="potw-editorial-body">
+      <div class="potw-editorial-label" id="potwWeek"></div>
+      <h2 class="potw-editorial-title" id="potwTitle"></h2>
+      <div class="potw-editorial-loc" id="potwLoc"></div>
+      <p class="potw-editorial-desc" id="potwNote"></p>
+      <button class="potw-editorial-btn" id="potwViewBtn">Open in lightbox &nbsp;&#8594;</button>
+    </div>
   </div>
   <div class="page-header">
     <h1>Portfolio</h1>
@@ -1422,25 +1469,24 @@ function renderPhotoOfWeek(){
   var now=new Date();
   var startOfYear=new Date(now.getFullYear(),0,1);
   var weekOfYear=Math.ceil(((now-startOfYear)/86400000+startOfYear.getDay()+1)/7);
-  document.getElementById("potwWeek").textContent="Week "+String(weekOfYear).padStart(2,"0")+" · "+now.getFullYear();
+  // Populate editorial spread
+  document.getElementById("potwWeek").textContent="Photo of the Week · Week "+String(weekOfYear).padStart(2,"0")+" · "+now.getFullYear();
   document.getElementById("potwTitle").textContent=photo.title||"";
   document.getElementById("potwLoc").textContent=photo.loc||"";
   document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
     ?photo.desc
     :"A quiet frame — chosen this week for the way it holds still.";
-  var wrap=document.getElementById("potwImgWrap");
-  wrap.innerHTML='<img src="'+photo.img+'" alt="'+photo.title+'" loading="lazy">';
+  var img=document.getElementById("potwEditorialImg");
+  if(img){ img.src=photo.img; img.alt=photo.title||""; }
   function goToPhoto(){
     var pool2=PHOTOS.filter(function(p){return p.title!=="Untitled"&&!p.hidden;});
     var idx=pool2.findIndex(function(p){return p.img===photo.img;});
-    navigate("portfolio");
-    setTimeout(function(){if(idx>=0) openLightbox(idx,pool2);},400);
+    setTimeout(function(){if(idx>=0) openLightbox(idx,pool2);},100);
   }
-  wrap.addEventListener("click",goToPhoto);
+  if(img) img.addEventListener("click",goToPhoto);
   var btn=document.getElementById("potwViewBtn");
-  if(btn) btn.addEventListener("click",goToPhoto);
-  section.style.display="";
-  setTimeout(function(){addRevealClasses();initReveal();},120);
+  if(btn){ btn.addEventListener("click",goToPhoto); }
+  section.classList.add("visible");
 }
 
 // ============================================================
@@ -2845,6 +2891,114 @@ document.addEventListener("keydown",function(e){
 
 // ===========================================================
 // LOADING SCREEN
+// ============================================================
+// DARK ROOM MODE
+// ============================================================
+(function(){
+  var btn=document.getElementById("darkRoomBtn");
+  if(!btn) return;
+  var KEY="darkroom";
+  function setDark(on){
+    document.documentElement.classList.toggle("darkroom",on);
+    btn.classList.toggle("active",on);
+    btn.textContent=on?"☀":"🌙";
+    try{localStorage.setItem(KEY,on?"1":"");}catch(e){}
+  }
+  // restore preference
+  try{ if(localStorage.getItem(KEY)) setDark(true); }catch(e){}
+  btn.addEventListener("click",function(){
+    setDark(!document.documentElement.classList.contains("darkroom"));
+  });
+})();
+
+// ============================================================
+// AMBIENT SOUND
+// ============================================================
+(function(){
+  var btn=document.getElementById("ambientBtn");
+  if(!btn) return;
+  var ctx=null,gainNode=null,source=null,running=false;
+  function buildSound(){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var rate=ctx.sampleRate;
+    // Layer 1: brown noise (low rumble)
+    var bufLen=rate*4;
+    var buf=ctx.createBuffer(2,bufLen,rate);
+    for(var ch=0;ch<2;ch++){
+      var d=buf.getChannelData(ch);
+      var last=0;
+      for(var i=0;i<bufLen;i++){
+        var white=(Math.random()*2-1);
+        last=(last+0.02*white)/1.02;
+        d[i]=last*12;
+      }
+    }
+    source=ctx.createBufferSource();
+    source.buffer=buf;
+    source.loop=true;
+    var filter=ctx.createBiquadFilter();
+    filter.type="lowpass";
+    filter.frequency.value=280;
+    filter.Q.value=0.8;
+    // Layer 2: very subtle high oscillator (air)
+    var osc=ctx.createOscillator();
+    osc.type="sine";
+    osc.frequency.value=60;
+    var oscGain=ctx.createGain();
+    oscGain.gain.value=0.018;
+    osc.connect(oscGain);
+    gainNode=ctx.createGain();
+    gainNode.gain.value=0;
+    source.connect(filter);
+    filter.connect(gainNode);
+    oscGain.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start();
+    osc.start();
+  }
+  function toggleAmbient(){
+    if(!ctx) buildSound();
+    if(ctx.state==="suspended") ctx.resume();
+    running=!running;
+    btn.classList.toggle("active",running);
+    btn.textContent=running?"🔇":"🔊";
+    gainNode.gain.cancelScheduledValues(ctx.currentTime);
+    if(running){
+      gainNode.gain.setTargetAtTime(0.045,ctx.currentTime,1.8);
+    } else {
+      gainNode.gain.setTargetAtTime(0,ctx.currentTime,1.2);
+    }
+  }
+  btn.addEventListener("click",toggleAmbient);
+})();
+
+// ============================================================
+// SURPRISE ME
+// ============================================================
+(function(){
+  var btn=document.getElementById("surpriseBtn");
+  if(!btn) return;
+  // show only on portfolio page
+  function updateVisibility(){
+    var onPortfolio=document.getElementById("page-portfolio").classList.contains("active");
+    btn.style.display=onPortfolio?"flex":"none";
+  }
+  // hook into navigate
+  var _origNav=window.navigate;
+  window.navigate=function(pg){
+    if(_origNav) _origNav(pg);
+    setTimeout(updateVisibility,50);
+  };
+  updateVisibility();
+  btn.addEventListener("click",function(){
+    if(!PHOTOS||!PHOTOS.length) return;
+    var pool=PHOTOS.filter(function(p){return !p.hidden&&p.img;});
+    if(!pool.length) return;
+    var idx=Math.floor(Math.random()*pool.length);
+    openLightbox(idx,pool);
+  });
+})();
+
 // ============================================================
 // NAV SCROLL BEHAVIOUR
 // ============================================================
