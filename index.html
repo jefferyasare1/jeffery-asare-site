@@ -92,7 +92,7 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .potw-editorial-btn:hover{opacity:.85;}
 @media(max-width:640px){.potw-editorial{height:55vh;}.potw-editorial-desc{display:none;}}
 /* ---- Dark Room Mode ---- */
-html.darkroom{--bg:#0d0d0d;--warm:#141210;--rule:#242220;--muted:#585450;}
+html.darkroom{--bg:#0d0d0d;--warm:#1a1816;--rule:#242220;--muted:#585450;--ink:#c8c0b4;}
 html.darkroom body{background:#0d0d0d;color:#c8c0b4;}
 html.darkroom .inner-nav{background:#0d0d0d;border-color:#242220;}
 html.darkroom .inner-nav .nav-links a{color:#585450;}
@@ -108,6 +108,31 @@ html.darkroom .shop-grid-item{background:#1a1816;}
 html.darkroom .about-body{background:#0d0d0d;}
 html.darkroom .contact-form input,html.darkroom .contact-form textarea{background:#1a1816;border-color:#242220;color:#c8c0b4;}
 html.darkroom .potw-editorial{background:#0d0d0d;}
+/* dark room — hardcoded-color body text */
+html.darkroom .detail-desc,
+html.darkroom .about-bio p,
+html.darkroom .about-col-body p,
+html.darkroom .shop-desc,
+html.darkroom .terms-section p,
+html.darkroom .print-detail-desc,
+html.darkroom .cert-clause{color:rgba(200,192,180,.72);}
+/* dark room — shop/detail UI */
+html.darkroom .qty-control{background:#1a1816;border-color:#242220;}
+html.darkroom .qty-btn,html.darkroom .qty-val{color:#c8c0b4;}
+html.darkroom .qty-btn:hover{background:#242220;}
+html.darkroom .tech-row,html.darkroom .tech-label,html.darkroom .detail-print-bar{border-color:#242220;}
+html.darkroom .shop-card-footer{border-color:#242220;}
+html.darkroom .size-pill{color:#585450;border-color:#242220;}
+html.darkroom .size-pill:hover:not(.active){border-color:#444;color:#c8c0b4;}
+html.darkroom .shop-view-btn{background:#1a1816;border-color:#242220;color:#c8c0b4;}
+html.darkroom .shop-view-btn:hover{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
+html.darkroom .mini-footer{border-color:#242220;}
+html.darkroom .field-input,html.darkroom .field-select,html.darkroom .field-textarea{background:#1a1816;border-color:#242220;color:#c8c0b4;}
+html.darkroom .field-input::placeholder,html.darkroom .field-textarea::placeholder{color:#383430;}
+html.darkroom #series-intro span{color:#585450;}
+html.darkroom .potw{background:#0d0d0d;border-color:#242220;}
+html.darkroom .about-cols{border-color:#242220;}
+html.darkroom .about-cta{border-color:#242220;}
 /* ---- Floating Controls ---- */
 .float-controls{position:fixed;bottom:1.4rem;right:1.4rem;display:flex;flex-direction:column;gap:.5rem;z-index:400;}
 .float-btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(20,18,14,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:var(--sans);}
@@ -2921,7 +2946,7 @@ document.addEventListener("keydown",function(e){
   function buildSound(){
     ctx=new (window.AudioContext||window.webkitAudioContext)();
     var rate=ctx.sampleRate;
-    // Layer 1: brown noise (low rumble)
+    // Brown noise buffer
     var bufLen=rate*4;
     var buf=ctx.createBuffer(2,bufLen,rate);
     for(var ch=0;ch<2;ch++){
@@ -2936,16 +2961,17 @@ document.addEventListener("keydown",function(e){
     source=ctx.createBufferSource();
     source.buffer=buf;
     source.loop=true;
+    // Warm lowpass filter — wide enough to be audible on laptop speakers
     var filter=ctx.createBiquadFilter();
     filter.type="lowpass";
-    filter.frequency.value=280;
-    filter.Q.value=0.8;
-    // Layer 2: very subtle high oscillator (air)
+    filter.frequency.value=800;
+    filter.Q.value=0.5;
+    // Subtle air tone — audible frequency
     var osc=ctx.createOscillator();
     osc.type="sine";
-    osc.frequency.value=60;
+    osc.frequency.value=180;
     var oscGain=ctx.createGain();
-    oscGain.gain.value=0.018;
+    oscGain.gain.value=0.06;
     osc.connect(oscGain);
     gainNode=ctx.createGain();
     gainNode.gain.value=0;
@@ -2953,21 +2979,24 @@ document.addEventListener("keydown",function(e){
     filter.connect(gainNode);
     oscGain.connect(gainNode);
     gainNode.connect(ctx.destination);
-    source.start();
-    osc.start();
+    source.start(0);
+    osc.start(0);
   }
   function toggleAmbient(){
     if(!ctx) buildSound();
-    if(ctx.state==="suspended") ctx.resume();
     running=!running;
     btn.classList.toggle("active",running);
     btn.textContent=running?"🔇":"🔊";
-    gainNode.gain.cancelScheduledValues(ctx.currentTime);
-    if(running){
-      gainNode.gain.setTargetAtTime(0.045,ctx.currentTime,1.8);
-    } else {
-      gainNode.gain.setTargetAtTime(0,ctx.currentTime,1.2);
-    }
+    var resume=(ctx.state==="suspended")?ctx.resume():Promise.resolve();
+    resume.then(function(){
+      gainNode.gain.cancelScheduledValues(ctx.currentTime);
+      gainNode.gain.setValueAtTime(gainNode.gain.value,ctx.currentTime);
+      if(running){
+        gainNode.gain.linearRampToValueAtTime(0.22,ctx.currentTime+2.5);
+      } else {
+        gainNode.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);
+      }
+    });
   }
   btn.addEventListener("click",toggleAmbient);
 })();
