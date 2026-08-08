@@ -2945,42 +2945,49 @@ document.addEventListener("keydown",function(e){
   var ctx=null,gainNode=null,source=null,running=false;
   function buildSound(){
     ctx=new (window.AudioContext||window.webkitAudioContext)();
-    var rate=ctx.sampleRate;
-    // Brown noise buffer
-    var bufLen=rate*4;
-    var buf=ctx.createBuffer(2,bufLen,rate);
-    for(var ch=0;ch<2;ch++){
-      var d=buf.getChannelData(ch);
-      var last=0;
-      for(var i=0;i<bufLen;i++){
-        var white=(Math.random()*2-1);
-        last=(last+0.02*white)/1.02;
-        d[i]=last*12;
-      }
-    }
-    source=ctx.createBufferSource();
-    source.buffer=buf;
-    source.loop=true;
-    // Warm lowpass filter — wide enough to be audible on laptop speakers
-    var filter=ctx.createBiquadFilter();
-    filter.type="lowpass";
-    filter.frequency.value=800;
-    filter.Q.value=0.5;
-    // Subtle air tone — audible frequency
-    var osc=ctx.createOscillator();
-    osc.type="sine";
-    osc.frequency.value=180;
-    var oscGain=ctx.createGain();
-    oscGain.gain.value=0.06;
-    osc.connect(oscGain);
     gainNode=ctx.createGain();
     gainNode.gain.value=0;
-    source.connect(filter);
-    filter.connect(gainNode);
-    oscGain.connect(gainNode);
     gainNode.connect(ctx.destination);
-    source.start(0);
-    osc.start(0);
+    // Fake reverb: two cross-coupled feedback delays
+    var rev1=ctx.createDelay(2); rev1.delayTime.value=0.37;
+    var rev2=ctx.createDelay(2); rev2.delayTime.value=0.53;
+    var fb1=ctx.createGain(); fb1.gain.value=0.38;
+    var fb2=ctx.createGain(); fb2.gain.value=0.32;
+    var revMix=ctx.createGain(); revMix.gain.value=0.58;
+    rev1.connect(fb1); fb1.connect(rev2);
+    rev2.connect(fb2); fb2.connect(rev1);
+    rev1.connect(revMix); rev2.connect(revMix);
+    revMix.connect(gainNode);
+    // Dry bus
+    var dry=ctx.createGain(); dry.gain.value=0.42; dry.connect(gainNode);
+    // Am7 chord — 7 voices spread across 3 octaves
+    var voices=[
+      {f:55,    g:0.38,d:0},
+      {f:110,   g:0.32,d:-3},
+      {f:164.81,g:0.26,d:2},
+      {f:220,   g:0.20,d:-2},
+      {f:261.63,g:0.15,d:1},
+      {f:329.63,g:0.10,d:-1},
+      {f:392,   g:0.06,d:3}
+    ];
+    voices.forEach(function(v,i){
+      var osc=ctx.createOscillator();
+      osc.type="sine";
+      osc.frequency.value=v.f;
+      osc.detune.value=v.d;
+      // Each voice has its own slow vibrato (rate slightly different per voice)
+      var lfo=ctx.createOscillator();
+      lfo.type="sine";
+      lfo.frequency.value=0.07+(i*0.013);
+      var lfoG=ctx.createGain();
+      lfoG.gain.value=v.f*0.004;
+      lfo.connect(lfoG); lfoG.connect(osc.frequency);
+      lfo.start(0);
+      var vg=ctx.createGain(); vg.gain.value=v.g;
+      osc.connect(vg);
+      vg.connect(rev1); vg.connect(dry);
+      osc.start(0);
+    });
   }
   function toggleAmbient(){
     if(!ctx) buildSound();
@@ -2992,9 +2999,10 @@ document.addEventListener("keydown",function(e){
       gainNode.gain.cancelScheduledValues(ctx.currentTime);
       gainNode.gain.setValueAtTime(gainNode.gain.value,ctx.currentTime);
       if(running){
-        gainNode.gain.linearRampToValueAtTime(0.22,ctx.currentTime+2.5);
+        // Slow cinematic fade-in over 4 seconds
+        gainNode.gain.linearRampToValueAtTime(0.28,ctx.currentTime+4);
       } else {
-        gainNode.gain.linearRampToValueAtTime(0,ctx.currentTime+1.5);
+        gainNode.gain.linearRampToValueAtTime(0,ctx.currentTime+2.5);
       }
     });
   }
