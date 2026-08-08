@@ -3113,10 +3113,8 @@ function cmsAddSeries(){
   cmsBuildSeriesSelector();
   cmsSelectSeries(slug);
   // Persist updated series list
-  fetch('/api/content?key='+CMS_KEY, {method:'PUT', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({file:'settings/series', content:{series:_seriesList}, sha:_seriesSha||''})
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.ok && d.sha) _seriesSha = d.sha;
+  ghFreshPut('settings/series',{series:_seriesList},function(err,newSha){
+    if(!err&&newSha) _seriesSha=newSha;
   });
 }
 
@@ -3203,16 +3201,12 @@ function cmsSavePhoto(idx,slug){
   if(idx===null){photos.push(u);}else{photos[idx]=u;}
   var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
   var nc={label:s?s.label:slug,slug:slug,photos:photos};
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(!d.ok){st.className='cms-status err';st.textContent=(d.error||'Save failed');return;}
-      st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
-      _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha;
-      cmsRenderPortfolio(slug); setTimeout(cmsCloseModal,1400);
-    })
-    .catch(function(err){st.className='cms-status err';st.textContent='Network error: '+err.message;});
+  ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+    if(err){st.className='cms-status err';st.textContent=err;return;}
+    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+    _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha;
+    cmsRenderPortfolio(slug); setTimeout(cmsCloseModal,1400);
+  });
 }
 
 function cmsMovePhoto(slug,idx,dir){
@@ -3221,11 +3215,10 @@ function cmsMovePhoto(slug,idx,dir){
   var t=photos[idx]; photos[idx]=photos[ni]; photos[ni]=t;
   var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
   var nc={label:s?s.label:slug,slug:slug,photos:photos};
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
-    .then(function(r){return r.json();})
-    .then(function(d){if(!d.ok){showDashModal('Reorder failed: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
-    .catch(function(err){showDashModal('Network error: '+err.message);});
+  ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+    if(err){showDashModal('Reorder failed: '+err);return;}
+    _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha; cmsRenderPortfolio(slug);
+  });
 }
 
 function cmsDeletePhoto(slug,idx){
@@ -3234,11 +3227,10 @@ function cmsDeletePhoto(slug,idx){
     var np=photos.slice(); np.splice(idx,1);
     var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
     var nc={label:s?s.label:slug,slug:slug,photos:np};
-    fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
-      .then(function(r){return r.json();})
-      .then(function(d){if(!d.ok){showDashModal('Delete failed: '+(d.error||''));return;} _portfolioData[slug]=np; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
-      .catch(function(err){showDashModal('Network error: '+err.message);});
+    ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+      if(err){showDashModal('Delete failed: '+err);return;}
+      _portfolioData[slug]=np; if(newSha)_portfolioSha[slug]=newSha; cmsRenderPortfolio(slug);
+    });
   });
 }
 
@@ -3247,11 +3239,10 @@ function cmsToggleHide(slug,idx){
   photos[idx]=Object.assign({},photos[idx],{hidden:!photos[idx].hidden});
   var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
   var nc={label:s?s.label:slug,slug:slug,photos:photos};
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:'portfolio/'+slug,content:nc,sha:_portfolioSha[slug]})})
-    .then(function(r){return r.json();})
-    .then(function(d){if(!d.ok){showDashModal('Could not update: '+(d.error||''));return;} _portfolioData[slug]=photos; if(d.sha)_portfolioSha[slug]=d.sha; cmsRenderPortfolio(slug);})
-    .catch(function(err){showDashModal('Network error: '+err.message);});
+  ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+    if(err){showDashModal('Could not update: '+err);return;}
+    _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha; cmsRenderPortfolio(slug);
+  });
 }
 
 // ── Site Text ────────────────────────────────────────────────────
@@ -3305,15 +3296,11 @@ function cmsSiteSave(fileKey,dataFn,statusId){
   var st=document.getElementById(statusId); st.className='cms-status'; st.textContent='Saving…';
   var d=dataFn();
   var merged=Object.assign({},(_siteData[fileKey]||{}),d);
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:fileKey,content:merged,sha:_siteSha[fileKey]})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){st.className='cms-status err';st.textContent=(res.error||'Save failed');return;}
-      st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
-      _siteData[fileKey]=merged; if(res.sha)_siteSha[fileKey]=res.sha;
-    })
-    .catch(function(){st.className='cms-status err';st.textContent='Network error';});
+  ghFreshPut(fileKey,merged,function(err,newSha){
+    if(err){st.className='cms-status err';st.textContent=err;return;}
+    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+    _siteData[fileKey]=merged; if(newSha)_siteSha[fileKey]=newSha;
+  });
 }
 
 function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
@@ -3362,12 +3349,28 @@ function cmsUploadImg(input,targetId,statusId){
 }
 
 // ── Shared API write ────────────────────────────────────────────
-function cmsPut(file,content,cb){
-  fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({file:file,content:content,sha:_cmsSha[file]})})
+
+// Always fetch the current SHA from GitHub right before writing,
+// so we never hit 409 "SHA does not match" even when git has pushed
+// changes outside the dashboard since the page loaded.
+function ghFreshPut(fileKey,content,cb){
+  fetch(cmsApiUrl(fileKey))
     .then(function(r){return r.json();})
-    .then(function(d){if(!d.ok)cb(d.error||'Unknown error');else cb(null,d.sha);})
-    .catch(function(err){cb('Network error: '+err.message);});
+    .then(function(fresh){
+      var sha=(fresh.ok&&fresh.sha)?fresh.sha:null;
+      return fetch('/api/content?key='+CMS_KEY,{method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({file:fileKey,content:content,sha:sha})});
+    })
+    .then(function(r){return r.json();})
+    .then(function(res){cb(res.ok?null:(res.error||'Save failed'),res.ok?res.sha:null);})
+    .catch(function(err){cb('Network error: '+err.message,null);});
+}
+
+function cmsPut(file,content,cb){
+  ghFreshPut(file,content,function(err,newSha){
+    if(err) cb(err);
+    else { if(newSha)_cmsSha[file]=newSha; cb(null,newSha); }
+  });
 }
 
 // ── Modal helpers ───────────────────────────────────────────────
