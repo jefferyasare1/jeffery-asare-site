@@ -1,13 +1,6 @@
 {
   "prints": [
     {
-      "id": "s1",
-      "title": "Stillness in Jamestown",
-      "series": "Portraits of Place",
-      "edition": "Edition of 15",
-      "img": "/s1.jpg"
-    },
-    {
       "id": "s2",
       "title": "Kente Geometry",
       "series": "Texture Studies",
