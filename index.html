@@ -1828,58 +1828,66 @@ document.addEventListener("contextmenu",function(e){ if(e.target.tagName==="IMG"
 document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") e.preventDefault(); });
 
 // ============================================================
-// PORTFOLIO PARALLAX
+// PORTFOLIO + POTW PARALLAX  (lerp-smoothed continuous loop)
 // ============================================================
 (function(){
-  var ticking=false;
+  var EASE=0.1;   // lerp factor per frame — raise for snappier, lower for floatier
+  var S_PORT=12;  // portfolio ±% shift
+  var S_POTW=24;  // POTW ±% shift
 
-  function tick(){
-    // Portfolio cards
-    document.querySelectorAll(".photo-card").forEach(function(card){
-      var img=card.querySelector("img");
-      if(!img||!img.src||img.style.display==="none") return;
-      var rect=card.getBoundingClientRect();
-      var d=(rect.top+rect.height/2-window.innerHeight/2)/window.innerHeight;
-      d=Math.max(-1,Math.min(1,d));
-      var shift=d*12; // ±12% — image is 130% tall so no gaps
-      var scale=card._pxHover?1.05:1;
-      img.style.transform="translateY("+shift+"%) scale("+scale+")";
-    });
-    // POTW editorial spread
-    var potwEl=document.getElementById("potwSection");
-    var potwImg=document.getElementById("potwEditorialImg");
-    if(potwEl&&potwImg&&potwEl.classList.contains("visible")){
-      var rect=potwEl.getBoundingClientRect();
-      var d=(rect.top+rect.height/2-window.innerHeight/2)/window.innerHeight;
-      d=Math.max(-1,Math.min(1,d));
-      potwImg.style.transform="translateY("+(d*24)+"%)";
-    }
-    ticking=false;
+  var cards=[];
+  var potwSh=0,potwTgt=0;
+
+  function dist(el){
+    var r=el.getBoundingClientRect();
+    return Math.max(-1,Math.min(1,(r.top+r.height/2-window.innerHeight/2)/window.innerHeight));
   }
 
-  // Hover: event delegation so dynamic cards work too
+  // Pick up newly rendered cards without re-processing old ones
+  function refresh(){
+    document.querySelectorAll(".photo-card").forEach(function(el){
+      if(el._pxInit) return;
+      var img=el.querySelector("img");
+      if(!img) return;
+      el._pxInit=true;
+      var t=dist(el)*S_PORT;
+      cards.push({el:el,img:img,sh:t,tsh:t,sc:1});
+    });
+  }
+
+  // Hover state — event delegation, no CSS transition (lerp handles scale)
   document.addEventListener("mouseenter",function(e){
-    var card=e.target.closest(".photo-card");
-    if(!card) return;
-    card._pxHover=true;
-    var img=card.querySelector("img");
-    if(img) img.style.transition="transform .7s cubic-bezier(.22,.61,.36,1)";
-    tick();
+    var c=e.target.closest(".photo-card"); if(c) c._pxHover=true;
   },true);
   document.addEventListener("mouseleave",function(e){
-    var card=e.target.closest(".photo-card");
-    if(!card) return;
-    card._pxHover=false;
-    var img=card.querySelector("img");
-    if(img) img.style.transition="transform .5s cubic-bezier(.22,.61,.36,1)";
-    tick();
+    var c=e.target.closest(".photo-card"); if(c) c._pxHover=false;
   },true);
 
+  // On scroll: update targets only (no DOM writes here)
   window.addEventListener("scroll",function(){
-    if(!ticking){ requestAnimationFrame(tick); ticking=true; }
+    cards.forEach(function(s){ s.tsh=dist(s.el)*S_PORT; });
+    var pEl=document.getElementById("potwSection");
+    if(pEl&&pEl.classList.contains("visible")) potwTgt=dist(pEl)*S_POTW;
   },{passive:true});
 
-  tick(); // run once on load
+  // Continuous lerp loop — runs every frame, glides toward targets
+  (function loop(){
+    requestAnimationFrame(loop);
+    refresh(); // catch any cards added since last frame
+    cards.forEach(function(s){
+      var tsc=s.el._pxHover?1.05:1;
+      s.sh+=(s.tsh-s.sh)*EASE;
+      s.sc+=(tsc-s.sc)*EASE;
+      s.img.style.transform="translateY("+s.sh+"%) scale("+s.sc+")";
+    });
+    var pImg=document.getElementById("potwEditorialImg");
+    if(pImg){
+      potwSh+=(potwTgt-potwSh)*EASE;
+      pImg.style.transform="translateY("+potwSh+"%)";
+    }
+  })();
+
+  refresh();
 })();
 document.addEventListener("keydown",function(e){ if((e.ctrlKey||e.metaKey)&&["s","S","u","U"].indexOf(e.key)>-1) e.preventDefault(); });
 
