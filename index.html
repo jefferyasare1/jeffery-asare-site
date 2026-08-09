@@ -382,8 +382,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .delay-6{transition-delay:.6s!important;}
 
 /* Photo card hover — subtle depth only, no card lift */
-.photo-card{transition:box-shadow .8s ease;}
-.photo-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);}
+/* hover effect is purely JS: parallax shift + 3D tilt */
 /* img transform controlled entirely by JS parallax lerp — no CSS transitions on transform */
 .photo-card-info{transition:opacity .8s ease;}
 .photo-card:hover .photo-card-info{opacity:1;}
@@ -1833,7 +1832,6 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
 // ============================================================
 (function(){
   var EASE=0.05;       // lerp factor for parallax shift
-  var SCALE_EASE=0.004;// lerp factor for hover scale
   var TILT=10;         // max tilt degrees
   var TILT_EASE=0.08;  // tilt follows cursor with slight lag
   var S_PORT=12;  // portfolio ±% shift
@@ -1855,7 +1853,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       if(!img) return;
       el._pxInit=true;
       var t=dist(el)*S_PORT;
-      cards.push({el:el,img:img,sh:t,tsh:t,sc:1,rx:0,ry:0});
+      cards.push({el:el,img:img,sh:t,tsh:t,rx:0,ry:0});
     });
   }
 
@@ -1889,14 +1887,12 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     requestAnimationFrame(loop);
     refresh(); // catch any cards added since last frame
     cards.forEach(function(s){
-      var tsc=s.el._pxHover?1.04:1;
       var trx=s.el._pxHover?(-(s.el._pxTy||0)*TILT):0;
       var try_=s.el._pxHover?((s.el._pxTx||0)*TILT):0;
       s.sh+=(s.tsh-s.sh)*EASE;
-      s.sc+=(tsc-s.sc)*SCALE_EASE;
       s.rx+=(trx-s.rx)*TILT_EASE;
       s.ry+=(try_-s.ry)*TILT_EASE;
-      s.img.style.transform="perspective(600px) translateY("+s.sh+"%) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg) scale("+s.sc+")";
+      s.img.style.transform="perspective(600px) translateY("+s.sh+"%) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg)";
     });
     var pImg=document.getElementById("potwEditorialImg");
     if(pImg){
