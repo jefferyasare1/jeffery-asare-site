@@ -383,8 +383,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .delay-6{transition-delay:.6s!important;}
 
 /* Photo card hover — enhanced */
-.photo-card{transition:transform .3s ease,box-shadow .3s ease;}
-.photo-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.15);}
+.photo-card{transition:transform .9s cubic-bezier(.22,.61,.36,1),box-shadow .9s cubic-bezier(.22,.61,.36,1);}
+.photo-card:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,.12);}
 .photo-card img{transition:transform .8s cubic-bezier(.22,.61,.36,1);}
 .photo-card:hover img{transform:scale(1.06);}
 .photo-card-info{transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;}
@@ -1835,7 +1835,8 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
 // PORTFOLIO + POTW PARALLAX  (lerp-smoothed continuous loop)
 // ============================================================
 (function(){
-  var EASE=0.1;   // lerp factor per frame — raise for snappier, lower for floatier
+  var EASE=0.1;       // lerp factor for parallax shift
+  var SCALE_EASE=0.04; // lerp factor for hover scale — slower, more deliberate
   var S_PORT=12;  // portfolio ±% shift
   var S_POTW=24;  // POTW ±% shift
 
@@ -1881,7 +1882,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     cards.forEach(function(s){
       var tsc=s.el._pxHover?1.05:1;
       s.sh+=(s.tsh-s.sh)*EASE;
-      s.sc+=(tsc-s.sc)*EASE;
+      s.sc+=(tsc-s.sc)*SCALE_EASE;
       s.img.style.transform="translateY("+s.sh+"%) scale("+s.sc+")";
     });
     var pImg=document.getElementById("potwEditorialImg");
