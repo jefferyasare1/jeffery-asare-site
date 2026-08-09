@@ -28,8 +28,8 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .inner-nav{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);padding:0 var(--pad);height:52px;display:flex;align-items:center;justify-content:space-between;z-index:200;}
 .inner-nav .nav-links a{font-size:12px;color:var(--muted);}
 .inner-nav .nav-links a:hover,.inner-nav .nav-links a.active-link{color:var(--ink);}
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);overflow:hidden;background:#1a1410;}
-.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;background:linear-gradient(160deg,#c8a870,#3d2810);}
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);overflow:hidden;background:#000;}
+.hero-slide{position:absolute;inset:0;opacity:0;background:linear-gradient(160deg,#c8a870,#3d2810);}
 .hero-slide.active{opacity:1;}
 .hero-slide img{width:100%;height:100%;object-fit:cover;display:block;opacity:.78;}
 .hero-dots{position:absolute;bottom:1.6rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:3;}
@@ -377,6 +377,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .photo-card:hover img{transform:scale(1.06);}
 .photo-card-info{transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;}
 .photo-card:hover .photo-card-info{opacity:1;transform:translateY(0);}
+/* Portfolio parallax — images slightly oversized so scroll shift has room */
+.photo-card img{position:absolute;top:-6%;left:0;width:100%;height:112%;object-fit:cover;transition:none;will-change:transform;}
+.photo-card:hover img{transform:none;} /* JS handles transform */
 
 /* Filter button transitions */
 .filter-btn{transition:all .25s cubic-bezier(.22,.61,.36,1);}
@@ -1735,25 +1738,75 @@ if(cForm){
 }
 
 // ============================================================
-// HERO SLIDESHOW
+// HERO SLIDESHOW — Ken Burns + Fade through Black
 // ============================================================
 (function(){
-  var slides=document.querySelectorAll(".hero-slide"),dotsWrap=document.getElementById("heroDots");
+  var slides=document.querySelectorAll(".hero-slide");
+  var dotsWrap=document.getElementById("heroDots");
   if(!slides.length||!dotsWrap) return;
-  var current=0,timer=null;
+  var current=0,timer=null,busy=false;
+
   slides.forEach(function(_,i){
     var dot=document.createElement("button");
     dot.className="hero-dot"+(i===0?" active":"");
     dot.setAttribute("aria-label","Slide "+(i+1));
     dotsWrap.appendChild(dot);
-    dot.addEventListener("click",function(){ goTo(i); resetTimer(); });
+    dot.addEventListener("click",function(){ if(!busy){ goTo(i); resetTimer(); } });
   });
-  function goTo(n){
-    slides[current].classList.remove("active"); dotsWrap.children[current].classList.remove("active");
-    current=(n+slides.length)%slides.length;
-    slides[current].classList.add("active"); dotsWrap.children[current].classList.add("active");
+
+  // Force-restart Ken Burns animation on each incoming slide
+  function kbRestart(slide){
+    var img=slide.querySelector("img"); if(!img) return;
+    img.style.animation="none"; void img.offsetWidth; img.style.animation="";
   }
-  function resetTimer(){ clearInterval(timer); timer=setInterval(function(){ goTo(current+1); },5000); }
+
+  function goTo(n){
+    var next=(n+slides.length)%slides.length;
+    if(next===current||busy) return;
+    busy=true;
+
+    var outSlide=slides[current];
+    var inSlide=slides[next];
+
+    dotsWrap.children[current].classList.remove("active");
+    dotsWrap.children[next].classList.add("active");
+
+    // Phase 1: fade current slide to black (0.55s)
+    outSlide.style.transition="opacity .55s ease";
+    outSlide.style.opacity="0";
+
+    setTimeout(function(){
+      // Screen is now pure black — swap slides
+      outSlide.classList.remove("active");
+      outSlide.style.cssText=""; // clear inline, CSS keeps it hidden
+
+      inSlide.style.opacity="0";
+      inSlide.style.transition="none";
+      inSlide.classList.add("active");
+      kbRestart(inSlide); // restart KB animation fresh on this slide
+
+      // Phase 2: fade new slide in from black (0.7s)
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          inSlide.style.transition="opacity .7s ease";
+          inSlide.style.opacity="1";
+          setTimeout(function(){
+            inSlide.style.cssText=""; // hand back to CSS
+            busy=false;
+          },700);
+        });
+      });
+
+      current=next;
+    },580);
+  }
+
+  function resetTimer(){
+    clearInterval(timer);
+    timer=setInterval(function(){ goTo(current+1); },6500);
+  }
+
+  kbRestart(slides[0]); // kick off KB on first slide
   resetTimer();
 })();
 
@@ -1762,6 +1815,50 @@ if(cForm){
 // ============================================================
 document.addEventListener("contextmenu",function(e){ if(e.target.tagName==="IMG") e.preventDefault(); });
 document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") e.preventDefault(); });
+
+// ============================================================
+// PORTFOLIO PARALLAX
+// ============================================================
+(function(){
+  var ticking=false;
+
+  function tick(){
+    document.querySelectorAll(".photo-card").forEach(function(card){
+      var img=card.querySelector("img");
+      if(!img||!img.src||img.style.display==="none") return;
+      var rect=card.getBoundingClientRect();
+      // Distance of card centre from viewport centre, normalised to [-1,1]
+      var d=(rect.top+rect.height/2-window.innerHeight/2)/window.innerHeight;
+      d=Math.max(-1,Math.min(1,d));
+      var shift=d*9; // ±9% shift — image is 112% tall so no gaps
+      var scale=card._pxHover?1.05:1;
+      img.style.transform="translateY("+shift+"%) scale("+scale+")";
+    });
+    ticking=false;
+  }
+
+  // Hover: smooth scale in/out while keeping parallax
+  document.querySelectorAll(".photo-card").forEach(function(card){
+    card.addEventListener("mouseenter",function(){
+      card._pxHover=true;
+      var img=card.querySelector("img");
+      if(img) img.style.transition="transform .7s cubic-bezier(.22,.61,.36,1)";
+      tick();
+    });
+    card.addEventListener("mouseleave",function(){
+      card._pxHover=false;
+      var img=card.querySelector("img");
+      if(img) img.style.transition="transform .5s cubic-bezier(.22,.61,.36,1)";
+      tick();
+    });
+  });
+
+  window.addEventListener("scroll",function(){
+    if(!ticking){ requestAnimationFrame(tick); ticking=true; }
+  },{passive:true});
+
+  tick(); // run once on load
+})();
 document.addEventListener("keydown",function(e){ if((e.ctrlKey||e.metaKey)&&["s","S","u","U"].indexOf(e.key)>-1) e.preventDefault(); });
 
 // ============================================================
