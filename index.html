@@ -159,8 +159,7 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 #surpriseBtn{display:none;}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
-.photo-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1);}
-.photo-card:hover img{transform:scale(1.04);}
+.photo-card img{width:100%;height:100%;object-fit:cover;display:block;}
 .photo-card-info{position:absolute;bottom:0;left:0;right:0;padding:2rem 1.2rem 1.2rem;background:linear-gradient(transparent,rgba(0,0,0,.65));opacity:0;transition:opacity .3s;}
 .photo-card:hover .photo-card-info{opacity:1;}
 .photo-card-title{font-size:13px;color:#fff;font-weight:400;margin-bottom:.2rem;}
@@ -385,8 +384,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* Photo card hover — subtle depth only, no card lift */
 .photo-card{transition:box-shadow .8s ease;}
 .photo-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1);}
-.photo-card img{transition:transform .8s cubic-bezier(.22,.61,.36,1);}
-.photo-card:hover img{transform:scale(1.06);}
+/* img transform controlled entirely by JS parallax lerp — no CSS transitions on transform */
 .photo-card-info{transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;}
 .photo-card:hover .photo-card-info{opacity:1;transform:translateY(0);}
 /* Portfolio parallax — images oversized so shift never reveals card bg */
@@ -713,8 +711,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .gsap-ready .photo-card.card-in{animation:none!important;}
 .gsap-ready .page.active{animation:none!important;opacity:1!important;}
 .gsap-ready #pageTransition{display:none!important;}
-.gsap-ready .photo-card:hover{transform:none!important;box-shadow:none!important;}
-.gsap-ready .photo-card:hover img{transform:none!important;}
+.gsap-ready .photo-card:hover{transform:none!important;} /* box-shadow allowed — JS lerp handles img transform */
 .gsap-ready .photo-card-info{transition:none!important;}
 .gsap-ready .shop-card:hover .shop-card-img{transform:none!important;}
 /* ── BUTTONS ── */
