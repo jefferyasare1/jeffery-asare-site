@@ -1,13 +1,6 @@
 {
   "prints": [
     {
-      "id": "s5",
-      "title": "Golden Hour at Labadi",
-      "series": "Random Stories",
-      "edition": "Edition of 20",
-      "img": "/s5.jpg"
-    },
-    {
       "id": "s4",
       "title": "Eclipse I",
       "series": "Eclipse of the Self",
