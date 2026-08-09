@@ -377,11 +377,12 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .photo-card:hover img{transform:scale(1.06);}
 .photo-card-info{transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;}
 .photo-card:hover .photo-card-info{opacity:1;transform:translateY(0);}
-/* Portfolio parallax — images slightly oversized so scroll shift has room */
-.photo-card img{position:absolute;top:-6%;left:0;width:100%;height:112%;object-fit:cover;transition:none;will-change:transform;}
+/* Portfolio parallax — images oversized so shift never reveals card bg */
+.photo-card{background:#111;} /* dark fallback: invisible if edge shows */
+.photo-card img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;transition:none;will-change:transform;}
 .photo-card:hover img{transform:none;} /* JS handles transform */
 /* POTW editorial parallax */
-.potw-editorial-img{position:absolute;top:-8%;left:0;width:100%;height:116%;object-fit:cover;opacity:.72;will-change:transform;}
+.potw-editorial-img{position:absolute;top:-12%;left:0;width:100%;height:124%;object-fit:cover;opacity:.72;will-change:transform;}
 
 /* Filter button transitions */
 .filter-btn{transition:all .25s cubic-bezier(.22,.61,.36,1);}
@@ -1832,7 +1833,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       var rect=card.getBoundingClientRect();
       var d=(rect.top+rect.height/2-window.innerHeight/2)/window.innerHeight;
       d=Math.max(-1,Math.min(1,d));
-      var shift=d*9; // ±9% — image is 112% tall so no gaps
+      var shift=d*12; // ±12% — image is 130% tall so no gaps
       var scale=card._pxHover?1.05:1;
       img.style.transform="translateY("+shift+"%) scale("+scale+")";
     });
