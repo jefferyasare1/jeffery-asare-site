@@ -133,17 +133,25 @@ html.darkroom #series-intro span{color:#585450;}
 html.darkroom .potw{background:#0d0d0d;border-color:#242220;}
 html.darkroom .about-cols{border-color:#242220;}
 html.darkroom .about-cta{border-color:#242220;}
-/* ---- Floating Controls ---- */
-.float-controls{position:fixed;bottom:1.4rem;left:1.4rem;display:flex;flex-direction:column;gap:.45rem;z-index:400;}
-.float-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(16,14,10,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:rgba(255,255,255,.58);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;}
-.float-btn svg{display:block;flex-shrink:0;}
-.float-btn:hover{background:rgba(40,36,28,.88);color:#fff;border-color:rgba(255,255,255,.28);}
-.float-btn.active{background:rgba(255,255,255,.95);color:#111;border-color:rgba(255,255,255,.95);}
-.float-btn[data-tip]{position:relative;}
-.float-btn[data-tip]::before{content:attr(data-tip);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;}
-.float-btn[data-tip]:hover::before{opacity:1;}
-html.darkroom .float-btn{border-color:rgba(255,255,255,.12);background:rgba(13,13,13,.82);}
-html.darkroom .float-btn.active{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
+/* ---- Floating Controls (hidden — buttons moved into nav) ---- */
+#floatControls{display:none;}
+/* ---- Nav Utility Buttons (dark room + ambient) ---- */
+.nav-util{display:flex;align-items:center;gap:.35rem;}
+.nav-util-btn{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:rgba(255,255,255,.65);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;flex-shrink:0;}
+.nav-util-btn svg{display:block;flex-shrink:0;}
+.nav-util-btn:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.38);}
+.nav-util-btn.active{background:rgba(255,255,255,.9);color:#111;border-color:transparent;}
+/* Inside inner-nav (light bg) */
+.inner-nav .nav-util-btn{border-color:rgba(0,0,0,.1);background:transparent;color:var(--muted);}
+.inner-nav .nav-util-btn:hover{background:rgba(0,0,0,.05);color:var(--ink);border-color:rgba(0,0,0,.15);}
+.inner-nav .nav-util-btn.active{background:var(--ink);color:var(--bg);border-color:transparent;}
+html.darkroom .inner-nav .nav-util-btn{border-color:rgba(255,255,255,.1);color:#585450;}
+html.darkroom .inner-nav .nav-util-btn:hover{color:#c8c0b4;border-color:rgba(255,255,255,.18);}
+html.darkroom .inner-nav .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
+/* Tooltip (below button) */
+.nav-util-btn[data-tip]{position:relative;}
+.nav-util-btn[data-tip]::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:500;}
+.nav-util-btn[data-tip]:hover::after{opacity:1;}
 #surpriseBtn{display:none;}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
@@ -382,7 +390,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .photo-card img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;transition:none;will-change:transform;}
 .photo-card:hover img{transform:none;} /* JS handles transform */
 /* POTW editorial parallax */
-.potw-editorial-img{position:absolute;top:-12%;left:0;width:100%;height:124%;object-fit:cover;opacity:.72;will-change:transform;}
+.potw-editorial-img{position:absolute;top:-26%;left:0;width:100%;height:152%;object-fit:cover;opacity:.72;will-change:transform;}
 
 /* Filter button transitions */
 .filter-btn{transition:all .25s cubic-bezier(.22,.61,.36,1);}
@@ -1844,7 +1852,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       var rect=potwEl.getBoundingClientRect();
       var d=(rect.top+rect.height/2-window.innerHeight/2)/window.innerHeight;
       d=Math.max(-1,Math.min(1,d));
-      potwImg.style.transform="translateY("+(d*10)+"%)";
+      potwImg.style.transform="translateY("+(d*24)+"%)";
     }
     ticking=false;
   }
@@ -3037,24 +3045,44 @@ document.addEventListener("keydown",function(e){
 // ===========================================================
 // LOADING SCREEN
 // ============================================================
+// INJECT NAV UTILITY BUTTONS (dark room + ambient) into every nav
+// ============================================================
+(function(){
+  var MOON='<svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 2A5 5 0 1 0 12 7 3.8 3.8 0 0 1 7 2Z"/></svg>';
+  var SUN='<svg class="icon-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:none"><circle cx="7" cy="7" r="2.6" fill="currentColor"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.1 3.1l1.4 1.4M9.5 9.5l1.4 1.4M3.1 10.9l1.4-1.4M9.5 4.5l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  var SON='<svg class="icon-sound-on" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 5H4l3-2.6v9.2L4 9H1.5Z" fill="currentColor"/><path d="M9.5 4.3c.9.8 1.3 1.7 1.3 2.7s-.4 1.9-1.3 2.7" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M11.4 2.5c1.4 1.3 2.1 2.8 2.1 4.5s-.7 3.2-2.1 4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>';
+  var SOFF='<svg class="icon-sound-off" width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:none"><path d="M1.5 5H4l3-2.6v9.2L4 9H1.5Z" fill="currentColor"/><path d="M9.5 5l3.5 4M13 5l-3.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  var HTML='<div class="nav-util">'+
+    '<button class="nav-util-btn darkroom-toggle" data-tip="Dark room" aria-label="Toggle dark room mode">'+MOON+SUN+'</button>'+
+    '<button class="nav-util-btn ambient-toggle" data-tip="Ambient melody" aria-label="Toggle ambient melody">'+SON+SOFF+'</button>'+
+    '</div>';
+  document.querySelectorAll(".ham-btn").forEach(function(ham){
+    var tmp=document.createElement("span");
+    tmp.innerHTML=HTML;
+    ham.parentNode.insertBefore(tmp.firstChild,ham);
+  });
+})();
+
+// ============================================================
 // DARK ROOM MODE
 // ============================================================
 (function(){
-  var btn=document.getElementById("darkRoomBtn");
-  if(!btn) return;
   var KEY="darkroom";
   function setDark(on){
     document.documentElement.classList.toggle("darkroom",on);
-    btn.classList.toggle("active",on);
-    var moon=document.getElementById("iconMoon");
-    var sun=document.getElementById("iconSun");
-    if(moon) moon.style.display=on?"none":"block";
-    if(sun)  sun.style.display=on?"block":"none";
+    document.querySelectorAll(".darkroom-toggle").forEach(function(btn){
+      btn.classList.toggle("active",on);
+      var moon=btn.querySelector(".icon-moon");
+      var sun=btn.querySelector(".icon-sun");
+      if(moon) moon.style.display=on?"none":"block";
+      if(sun)  sun.style.display=on?"block":"none";
+    });
     try{localStorage.setItem(KEY,on?"1":"");}catch(e){}
   }
-  // restore preference
   try{ if(localStorage.getItem(KEY)) setDark(true); }catch(e){}
-  btn.addEventListener("click",function(){
+  document.addEventListener("click",function(e){
+    var btn=e.target.closest(".darkroom-toggle");
+    if(!btn) return;
     setDark(!document.documentElement.classList.contains("darkroom"));
   });
 })();
@@ -3063,8 +3091,6 @@ document.addEventListener("keydown",function(e){
 // AMBIENT MELODY  (HTML5 audio — /ambient.mp3, loops, fades)
 // ============================================================
 (function(){
-  var btn=document.getElementById("ambientBtn");
-  if(!btn) return;
   var audio=null,running=false,fadeTimer=null;
 
   function getAudio(){
@@ -3093,30 +3119,31 @@ document.addEventListener("keydown",function(e){
     },ms/steps);
   }
 
-  function setIcons(on){
-    var a=document.getElementById("iconSoundOn");
-    var b=document.getElementById("iconSoundOff");
-    if(a) a.style.display=on?"none":"block";
-    if(b) b.style.display=on?"block":"none";
+  function updateBtns(){
+    document.querySelectorAll(".ambient-toggle").forEach(function(btn){
+      btn.classList.toggle("active",running);
+      var on=btn.querySelector(".icon-sound-on");
+      var off=btn.querySelector(".icon-sound-off");
+      if(on)  on.style.display=running?"block":"none";
+      if(off) off.style.display=running?"none":"block";
+    });
   }
 
-  function toggleAmbient(){
+  document.addEventListener("click",function(e){
+    var btn=e.target.closest(".ambient-toggle");
+    if(!btn) return;
     running=!running;
-    btn.classList.toggle("active",running);
-    setIcons(running);
+    updateBtns();
     if(running){
       getAudio().play().catch(function(){
-        // Autoplay blocked — try once on next interaction
         running=false;
-        btn.classList.remove("active");
-        setIcons(false);
+        updateBtns();
       });
-      fadeTo(0.72,3000);   // 3-second fade in
+      fadeTo(0.72,3000);
     } else {
-      fadeTo(0,2000);       // 2-second fade out, then pause
+      fadeTo(0,2000);
     }
-  }
-  btn.addEventListener("click",toggleAmbient);
+  });
 })();
 
 // ============================================================
