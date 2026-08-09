@@ -767,6 +767,7 @@
         <button class="cms-sidenav-item" data-cms="prints">Prints</button>
         <button class="cms-sidenav-item" data-cms="portfolio">Portfolio</button>
         <button class="cms-sidenav-item" data-cms="site">Site Text</button>
+        <button class="cms-sidenav-item" data-cms="files">Files</button>
       </nav>
 
       <!-- Content area -->
@@ -875,6 +876,30 @@
       </div>
 
     </div><!-- /cms-panel-site -->
+
+    <!-- Files panel -->
+    <div class="cms-panel" id="cms-panel-files">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:28px;">Rename a photo file — updates the file on GitHub, fixes every JSON reference automatically, and reflects on your PC after the next git sync.</p>
+
+      <div class="cms-section">
+        <div class="cms-section-title">Rename a Photo</div>
+        <div class="cms-grid2">
+          <div class="cms-field" style="margin-bottom:0">
+            <label>Current filename</label>
+            <input type="text" id="rename-old" placeholder="e.g. contact-photo.jpg">
+          </div>
+          <div class="cms-field" style="margin-bottom:0">
+            <label>New filename</label>
+            <input type="text" id="rename-new" placeholder="e.g. jeff-at-studio.jpg">
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;">Use only letters, numbers, hyphens and underscores. Keep the .jpg / .png extension.</p>
+        <div class="cms-save-row" style="margin-top:16px">
+          <button class="btn-card primary" onclick="cmsRenamePhoto()">Rename</button>
+          <div class="cms-status" id="rename-status"></div>
+        </div>
+      </div>
+    </div><!-- /cms-panel-files -->
 
       </div><!-- /cms-content-area -->
     </div><!-- /cms-layout -->
@@ -3371,6 +3396,36 @@ function cmsPut(file,content,cb){
     if(err) cb(err);
     else { if(newSha)_cmsSha[file]=newSha; cb(null,newSha); }
   });
+}
+
+// ── Photo Rename ─────────────────────────────────────────────────
+function cmsRenamePhoto(){
+  var st=document.getElementById('rename-status');
+  var oldName=(document.getElementById('rename-old').value||'').trim();
+  var newName=(document.getElementById('rename-new').value||'').trim();
+  if(!oldName||!newName){st.className='cms-status err';st.textContent='Fill in both fields.';return;}
+  if(oldName===newName){st.className='cms-status err';st.textContent='Names are the same.';return;}
+  st.className='cms-status';st.textContent='Renaming — this may take a few seconds…';
+  fetch('/api/rename?key='+CMS_KEY,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({oldName:oldName,newName:newName})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){
+      st.className='cms-status ok';
+      var msg='Renamed ✓ — live in ~2 min';
+      if(d.updatedJsonFiles&&d.updatedJsonFiles.length) msg+=' · Updated '+d.updatedJsonFiles.length+' JSON file(s)';
+      st.textContent=msg;
+      document.getElementById('rename-old').value='';
+      document.getElementById('rename-new').value='';
+    } else {
+      st.className='cms-status err';
+      st.textContent=d.error||'Rename failed.';
+    }
+  })
+  .catch(function(err){st.className='cms-status err';st.textContent='Network error: '+err.message;});
 }
 
 // ── Modal helpers ───────────────────────────────────────────────
