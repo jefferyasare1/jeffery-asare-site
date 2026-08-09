@@ -1860,13 +1860,18 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     });
   }
 
-  // Hover state — event delegation, no CSS transition (lerp handles scale)
-  document.addEventListener("mouseenter",function(e){
-    var c=e.target.closest(".photo-card"); if(c) c._pxHover=true;
-  },true);
-  document.addEventListener("mouseleave",function(e){
-    var c=e.target.closest(".photo-card"); if(c) c._pxHover=false;
-  },true);
+  // Hover state — use mouseover/mouseout with relatedTarget check so moving
+  // between card and its child img doesn't false-trigger a leave
+  document.addEventListener("mouseover",function(e){
+    var c=e.target.closest(".photo-card");
+    if(c) c._pxHover=true;
+  });
+  document.addEventListener("mouseout",function(e){
+    var c=e.target.closest(".photo-card");
+    if(!c) return;
+    // Only mark as left when pointer truly exits the card element
+    if(!c.contains(e.relatedTarget)) c._pxHover=false;
+  });
 
   // On scroll: update targets only (no DOM writes here)
   window.addEventListener("scroll",function(){
