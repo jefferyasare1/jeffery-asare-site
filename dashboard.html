@@ -534,7 +534,6 @@
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="10" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="15" cy="15" r="2"/><path d="M7 10h4l2-3.5M7 10l4 0 2 3.5"/></svg>
       Workflow
     </button>
-  </div>
     <button class="sn-item" id="sn-newsletter" onclick="switchTab('newsletter')">
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="16" height="12" rx="2"/><path d="M2 8l8 5 8-5"/></svg>
       Newsletter <span class="sn-badge" id="sn-newsletter-badge" style="display:none;"></span>
@@ -1222,7 +1221,7 @@ function _activateTab(name){
   // Legacy tab buttons (none remain, but keep for safety)
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
   // Sidebar items
-  var sidemap = {orders:'sn-orders', waitlist:'sn-waitlist', content:'sn-content', workflow:'sn-workflow', clients:'sn-clients', actions:'sn-orders'};
+  var sidemap = {orders:'sn-orders', waitlist:'sn-waitlist', content:'sn-content', workflow:'sn-workflow', clients:'sn-clients', actions:'sn-orders', newsletter:'sn-newsletter'};
   document.querySelectorAll('.sn-item').forEach(function(el){ el.classList.remove('active'); });
   var activeId = sidemap[name];
   if(activeId){ var el = document.getElementById(activeId); if(el) el.classList.add('active'); }
@@ -1327,8 +1326,7 @@ function nlUpdatePreview(){
   var iframe   = document.getElementById('nl-preview-iframe');
   if(!iframe) return;
   var html = nlBuildPreviewHtml(subject, message, ctaText, ctaUrl);
-  var doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open(); doc.write(html); doc.close();
+  iframe.srcdoc = html;
 }
 
 function nlConfirmSend(){
