@@ -34,9 +34,9 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
   <tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;border-radius:4px;overflow:hidden;">
 
-      <!-- Dark header -->
-      <tr><td style="background:#111;padding:18px 48px;">
-        <p style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:0;">Jeffery Asare</p>
+      <!-- Logo header -->
+      <tr><td style="background:#ffffff;padding:24px 48px;border-bottom:1px solid #e8e4df;">
+        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="140" style="display:block;height:auto;max-width:140px;">
       </td></tr>
 
       <!-- Body -->
