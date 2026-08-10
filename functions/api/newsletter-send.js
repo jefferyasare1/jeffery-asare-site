@@ -16,20 +16,26 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
   const messageHtml = message
     .split('\n\n')
     .filter(p => p.trim())
-    .map(p => `<p style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.85;margin:0 0 18px;">${p.replace(/\n/g, '<br>')}</p>`)
+    .map(p => `<p style="font-family:'General Sans',system-ui,sans-serif;font-size:15px;color:#444;line-height:1.85;margin:0 0 18px;">${p.replace(/\n/g, '<br>')}</p>`)
     .join('');
 
   const ctaBlock = (ctaText && ctaUrl) ? `
     <table cellpadding="0" cellspacing="0" style="margin:32px 0;">
       <tr><td style="background:#111;border-radius:3px;">
-        <a href="${ctaUrl}" style="display:inline-block;padding:14px 28px;font-family:Georgia,serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-decoration:none;">${ctaText}</a>
+        <a href="${ctaUrl}" style="display:inline-block;padding:14px 28px;font-family:'General Sans',system-ui,sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-decoration:none;">${ctaText}</a>
       </td></tr>
     </table>` : '';
 
+  const GS = "'General Sans',system-ui,sans-serif";
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f9f7f4;">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@font-face{font-family:"General Sans";src:url("https://jefferyasare.com/fonts/GeneralSans-Variable.woff2") format("woff2");font-weight:100 900;font-style:normal;}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f9f7f4;font-family:${GS};">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
   <tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;border-radius:4px;overflow:hidden;">
@@ -41,18 +47,18 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
 
       <!-- Body -->
       <tr><td style="padding:48px 48px 36px;">
-        <p style="font-family:Georgia,serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 20px;">New Work</p>
-        <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;margin:0 0 28px;letter-spacing:-.02em;">${subject}</h1>
+        <p style="font-family:${GS};font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 20px;">New Work</p>
+        <h1 style="font-family:${GS};font-size:28px;font-weight:600;color:#111;line-height:1.2;margin:0 0 28px;letter-spacing:-.02em;">${subject}</h1>
         ${messageHtml}
         ${ctaBlock}
         <hr style="border:none;border-top:1px solid #e8e4df;margin:32px 0 28px;">
-        <p style="font-family:Georgia,serif;font-size:13px;color:#999;font-style:italic;margin:0 0 4px;">With gratitude,</p>
-        <p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
+        <p style="font-family:${GS};font-size:13px;color:#999;margin:0 0 4px;">With gratitude,</p>
+        <p style="font-family:${GS};font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
       </td></tr>
 
       <!-- Footer -->
       <tr><td style="background:#f9f7f4;padding:20px 48px;border-top:1px solid #e8e4df;">
-        <p style="font-family:Georgia,serif;font-size:11px;color:#bbb;line-height:1.8;margin:0;">
+        <p style="font-family:${GS};font-size:11px;color:#bbb;line-height:1.8;margin:0;">
           Accra, Ghana &nbsp;·&nbsp; <a href="https://jefferyasare.com" style="color:#bbb;text-decoration:none;">jefferyasare.com</a><br>
           You're receiving this because you signed up at jefferyasare.com.<br>
           <a href="{{unsubscribe}}" style="color:#bbb;">Unsubscribe</a>

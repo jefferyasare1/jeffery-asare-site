@@ -84,8 +84,13 @@ export async function onRequestPost(context) {
     htmlContent: `
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f9f7f4;font-family:Georgia,serif;">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face{font-family:"General Sans";src:url("https://jefferyasare.com/fonts/GeneralSans-Variable.woff2") format("woff2");font-weight:100 900;font-style:normal;}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f9f7f4;font-family:'General Sans',system-ui,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
@@ -93,20 +98,20 @@ export async function onRequestPost(context) {
           <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
         </td></tr>
         <tr><td style="height:28px;"></td></tr>
-        <tr><td style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">
+        <tr><td style="font-family:'General Sans',system-ui,sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">
           You're on the list.
         </td></tr>
-        <tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">
+        <tr><td style="font-family:'General Sans',system-ui,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:20px;">
           Thank you for signing up. You'll be among the first to hear about new work, print drops, and moments from behind the lens.
         </td></tr>
-        <tr><td style="font-family:Georgia,serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">
+        <tr><td style="font-family:'General Sans',system-ui,sans-serif;font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">
           No noise — just what matters.
         </td></tr>
         <tr><td style="padding:28px 0 0;border-top:1px solid #e8e4df;">
-          <p style="font-family:Georgia,serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
-          <p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
+          <p style="font-family:'General Sans',system-ui,sans-serif;font-size:14px;color:#888;margin:0 0 4px;">With gratitude,</p>
+          <p style="font-family:'General Sans',system-ui,sans-serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
         </td></tr>
-        <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Georgia,serif;font-size:11px;color:#bbb;line-height:1.6;">
+        <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:'General Sans',system-ui,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
           Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp;
           <a href="https://jefferyasare.com" style="color:#bbb;">jefferyasare.com</a>
           <br><br>
