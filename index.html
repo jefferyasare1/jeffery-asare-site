@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="pinterest" content="nopin" description="Images on this site may not be pinned.">
 <meta name="description" content="Fine art phone photography by Jeffery Asare. Limited edition archival prints from Accra, Ghana.">
 <meta name="author" content="Jeffery Asare">
@@ -52,7 +52,7 @@ nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:1.4rem var(--pad)
 .inner-nav{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);padding:0 var(--pad);height:52px;display:flex;align-items:center;justify-content:space-between;z-index:200;}
 .inner-nav .nav-links a{font-size:12px;color:var(--muted);}
 .inner-nav .nav-links a:hover,.inner-nav .nav-links a.active-link{color:var(--ink);}
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);overflow:hidden;background:#000;}
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);overflow:hidden;background:#000;}
 .hero-slide{position:absolute;inset:0;opacity:0;background:linear-gradient(160deg,#c8a870,#3d2810);}
 .hero-slide.active{opacity:1;}
 .hero-slide img{width:100%;height:100%;object-fit:cover;display:block;opacity:.78;}
@@ -355,6 +355,12 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
   .field-row-2{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr;}
   .shop-list{grid-template-columns:1fr;}
+  /* Bottom safe area so content doesn't hide behind home bar */
+  .mini-footer{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));}
+  /* Page header spacing feels tight on small screens */
+  .page-header{padding-top:1.5rem;}
+  /* About page: smaller hero font */
+  .about-hero-name{font-size:clamp(1.8rem,8vw,2.6rem);}
 }
 
 /* =====================================================
@@ -505,6 +511,16 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   .ham-btn{display:flex;}
   .inner-nav .ham-btn{color:var(--ink);}
   nav .ham-btn{color:#fff;}
+  /* Safe-area insets for notched phones (iPhone X+) */
+  nav{padding-left:max(var(--pad),env(safe-area-inset-left));padding-right:max(var(--pad),env(safe-area-inset-right));}
+  .inner-nav{padding-left:max(var(--pad),env(safe-area-inset-left));padding-right:max(var(--pad),env(safe-area-inset-right));}
+  .mobile-menu{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);}
+  /* Larger touch targets for filter buttons */
+  .filter-btn{min-height:40px;padding:.55rem 1.1rem;}
+  /* Hero desc: let it breathe on mobile */
+  .hero-desc{max-width:none;}
+  /* Hero content: stack cleanly */
+  .hero-headline{font-size:clamp(2.2rem,9vw,3.4rem);}
 }
 
 /* ── HERO PLACEHOLDER (before real images) ── */
@@ -811,8 +827,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <!-- MOBILE MENU OVERLAY -->
 <div class="mobile-menu" id="mobileMenu">
   <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">&#10005;</button>
-  <a id="mmPortBtn">Portfolio</a>
   <a id="mmAboutBtn">About</a>
+  <a id="mmPortBtn">Portfolio</a>
   <a id="mmShopBtn">Shop</a>
   <a id="mmContactBtn">Contact</a>
   <span class="mobile-menu-foot">Jeffery Asare · Accra, Ghana</span>
@@ -833,7 +849,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-home" class="page active">
   <nav style="color:#fff;">
     <span class="nav-logo" id="homeLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="homePortBtn">Portfolio</a></li><li><a id="homeAboutBtn">About</a></li><li><a id="homeShopBtn">Shop</a></li><li><a id="homeContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="homeAboutBtn">About</a></li><li><a id="homePortBtn">Portfolio</a></li><li><a id="homeShopBtn">Shop</a></li><li><a id="homeContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="homeHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </nav>
   <div class="hero">
@@ -899,7 +915,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-portfolio" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="portLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a class="active-link">Portfolio</a></li><li><a id="portAboutBtn">About</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="portAboutBtn">About</a></li><li><a class="active-link">Portfolio</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="portHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <!-- POTW EDITORIAL SPREAD -->
@@ -935,7 +951,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-detail" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="detailLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="detailPortBtn">Portfolio</a></li><li><a id="detailAboutBtn">About</a></li><li><a id="detailShopBtn">Shop</a></li><li><a id="detailContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="detailAboutBtn">About</a></li><li><a id="detailPortBtn">Portfolio</a></li><li><a id="detailShopBtn">Shop</a></li><li><a id="detailContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="detailBackBtn">&#8592; Back</button>
   <div id="detailImgWrap"></div>
@@ -959,7 +975,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-about" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="aboutLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="aboutPortBtn">Portfolio</a></li><li><a class="active-link">About</a></li><li><a id="aboutShopBtn">Shop</a></li><li><a id="aboutContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a class="active-link">About</a></li><li><a id="aboutPortBtn">Portfolio</a></li><li><a id="aboutShopBtn">Shop</a></li><li><a id="aboutContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="aboutHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="about-hero">
@@ -1025,7 +1041,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-shop" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="shopLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="shopPortBtn">Portfolio</a></li><li><a id="shopAboutBtn">About</a></li><li><a class="active-link">Shop</a></li><li><a id="shopContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="shopAboutBtn">About</a></li><li><a id="shopPortBtn">Portfolio</a></li><li><a class="active-link">Shop</a></li><li><a id="shopContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="shopHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="page-header">
@@ -1041,7 +1057,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-contact" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="contactLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="contactPortBtn">Portfolio</a></li><li><a id="contactAboutBtn">About</a></li><li><a id="contactShopBtn">Shop</a></li><li><a class="active-link">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="contactAboutBtn">About</a></li><li><a id="contactPortBtn">Portfolio</a></li><li><a id="contactShopBtn">Shop</a></li><li><a class="active-link">Contact</a></li></ul>
     <button class="ham-btn" id="contactHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="contact-body">
@@ -1086,7 +1102,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-terms" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="termsLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="termsPortBtn">Portfolio</a></li><li><a id="termsAboutBtn">About</a></li><li><a id="termsShopBtn">Shop</a></li><li><a id="termsContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="termsAboutBtn">About</a></li><li><a id="termsPortBtn">Portfolio</a></li><li><a id="termsShopBtn">Shop</a></li><li><a id="termsContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="termsHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="terms-wrap">
@@ -1110,7 +1126,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-privacy" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="privLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="privPortBtn">Portfolio</a></li><li><a id="privAboutBtn">About</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="privAboutBtn">About</a></li><li><a id="privPortBtn">Portfolio</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="privHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="terms-wrap">
@@ -1135,7 +1151,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-journal" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="journLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="journPortBtn">Portfolio</a></li><li><a id="journAboutBtn">About</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="journAboutBtn">About</a></li><li><a id="journPortBtn">Portfolio</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="journHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <!-- Post list view -->
@@ -1163,7 +1179,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-print-detail" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="pdLogoBtn"><img src="/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="pdPortBtn">Portfolio</a></li><li><a id="pdAboutBtn">About</a></li><li><a id="pdShopBtn">Shop</a></li><li><a id="pdContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="pdAboutBtn">About</a></li><li><a id="pdPortBtn">Portfolio</a></li><li><a id="pdShopBtn">Shop</a></li><li><a id="pdContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="pdBackBtn">&#8592; Back to Shop</button>
   <div class="print-detail-grid">
