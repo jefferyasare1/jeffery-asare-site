@@ -711,7 +711,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .gsap-ready .page.active{animation:none!important;opacity:1!important;}
 .gsap-ready #pageTransition{display:none!important;}
 .gsap-ready .photo-card:hover{transform:none!important;} /* box-shadow allowed — JS lerp handles img transform */
-.gsap-ready .photo-card-info{transition:none!important;}
+/* .photo-card-info transition now CSS-only — removed gsap-ready override */
 .gsap-ready .shop-card:hover .shop-card-img{transform:none!important;}
 /* ── BUTTONS ── */
 .btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
@@ -3627,21 +3627,9 @@ fetch('/_data/prints.json')
   // Event delegation so it works on dynamically rendered cards
   document.addEventListener('mouseover',function(e){
     // Portfolio photo cards
-    var pc=e.target.closest('.photo-card');
-    if(pc&&!pc._g){
-      pc._g=true;
-      var img=pc.querySelector('img');
-      var info=pc.querySelector('.photo-card-info');
-      if(info) gsap.set(info,{opacity:0,y:8});
-      pc.addEventListener('mouseenter',function(){
-        if(img) gsap.to(img,{scale:1.07,duration:0.55,ease:'power2.out'});
-        if(info) gsap.to(info,{opacity:1,y:0,duration:0.28,ease:'power2.out'});
-      });
-      pc.addEventListener('mouseleave',function(){
-        if(img) gsap.to(img,{scale:1,duration:0.45,ease:'power2.out'});
-        if(info) gsap.to(info,{opacity:0,y:8,duration:0.22,ease:'power2.in'});
-      });
-    }
+    // Photo card hover: handled by parallax IIFE (translateY) + 3D tilt (rotateX/rotateY via RAF loop)
+    // Caption opacity handled by CSS (.photo-card:hover .photo-card-info)
+    // GSAP intentionally removed from photo cards — no scale, no y-shift
     // Shop print cards
     var sc=e.target.closest('.shop-card');
     if(sc&&!sc._g){
