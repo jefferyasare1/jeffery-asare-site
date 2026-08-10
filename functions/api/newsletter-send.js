@@ -22,7 +22,7 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
   const ctaBlock = (ctaText && ctaUrl) ? `
     <table cellpadding="0" cellspacing="0" style="margin:32px 0;">
       <tr><td style="background:#111;border-radius:3px;">
-        <a href="${ctaUrl}" style="display:inline-block;padding:14px 28px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;text-decoration:none;">${ctaText}</a>
+        <a href="${ctaUrl}" style="display:inline-block;padding:14px 28px;font-family:Georgia,serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-decoration:none;">${ctaText}</a>
       </td></tr>
     </table>` : '';
 
@@ -36,12 +36,12 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
 
       <!-- Logo header -->
       <tr><td style="background:#ffffff;padding:24px 48px;border-bottom:1px solid #e8e4df;">
-        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="140" style="display:block;height:auto;max-width:140px;">
+        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
       </td></tr>
 
       <!-- Body -->
       <tr><td style="padding:48px 48px 36px;">
-        <p style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 20px;">New Work</p>
+        <p style="font-family:Georgia,serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 20px;">New Work</p>
         <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:600;color:#111;line-height:1.2;margin:0 0 28px;letter-spacing:-.02em;">${subject}</h1>
         ${messageHtml}
         ${ctaBlock}
@@ -52,7 +52,7 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
 
       <!-- Footer -->
       <tr><td style="background:#f9f7f4;padding:20px 48px;border-top:1px solid #e8e4df;">
-        <p style="font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.8;margin:0;">
+        <p style="font-family:Georgia,serif;font-size:11px;color:#bbb;line-height:1.8;margin:0;">
           Accra, Ghana &nbsp;·&nbsp; <a href="https://jefferyasare.com" style="color:#bbb;text-decoration:none;">jefferyasare.com</a><br>
           You're receiving this because you signed up at jefferyasare.com.<br>
           <a href="{{unsubscribe}}" style="color:#bbb;">Unsubscribe</a>

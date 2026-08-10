@@ -90,7 +90,7 @@ export async function onRequestPost(context) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
         <tr><td style="padding-bottom:32px;padding-top:8px;border-bottom:1px solid #e8e4df;margin-bottom:36px;">
-          <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="140" style="display:block;height:auto;max-width:140px;">
+          <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
         </td></tr>
         <tr><td style="height:28px;"></td></tr>
         <tr><td style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">
@@ -106,7 +106,7 @@ export async function onRequestPost(context) {
           <p style="font-family:Georgia,serif;font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
           <p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
         </td></tr>
-        <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
+        <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Georgia,serif;font-size:11px;color:#bbb;line-height:1.6;">
           Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp;
           <a href="https://jefferyasare.com" style="color:#bbb;">jefferyasare.com</a>
           <br><br>
