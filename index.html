@@ -167,15 +167,11 @@ html.darkroom .btn-pill{background:rgba(200,192,180,.9);color:#0d0d0d;}
 html.darkroom .size-pill.active{background:#c8c0b4;color:#0d0d0d;}
 /* ---- Floating Controls (hidden) ---- */
 #floatControls{display:none;}
-/* ---- Util Bar — centered bottom pill (dark room + ambient) ---- */
-#utilBar{position:fixed;left:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.4rem;z-index:400;opacity:.82;transition:opacity .35s ease;}
-#utilBar:hover{opacity:1;}
-/* Hero page */
-#utilBar.on-hero{opacity:.75;}
-#utilBar.on-hero:hover{opacity:1;}
-#utilBar.on-hero .nav-util-btn{border-color:rgba(255,255,255,.28);background:rgba(0,0,0,.3);color:rgba(255,255,255,.72);}
-#utilBar.on-hero .nav-util-btn:hover{background:rgba(0,0,0,.55);color:#fff;border-color:rgba(255,255,255,.5);}
-#utilBar.on-hero .nav-util-btn.active{background:rgba(255,255,255,.9);color:#111;border-color:transparent;}
+/* ---- Portfolio title row — h1 + toggles on same line ---- */
+.port-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.port-title-row h1{margin-bottom:0;}
+/* ---- Util Bar — inline in portfolio page header ---- */
+#utilBar{display:flex;flex-direction:row;gap:.5rem;flex-shrink:0;opacity:1;}
 /* Button base */
 .nav-util-btn{width:33px;height:33px;border-radius:50%;border:1px solid rgba(0,0,0,.14);background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;flex-shrink:0;}
 .nav-util-btn svg{display:block;flex-shrink:0;}
@@ -940,7 +936,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     </div>
   </div>
   <div class="page-header">
-    <h1>Portfolio</h1>
+    <div class="port-title-row">
+      <h1>Portfolio</h1>
+    </div>
     <p id="portfolioDesc">Every image in this portfolio was shot on an iPhone or a Google Pixel and edited entirely on a phone. Some are quiet observations. Others are deliberate reimaginings of a scene. All of them started with something that stopped me long enough to reach for my pocket.</p>
   </div>
   <div class="filter-bar" id="filterBar">
@@ -3137,7 +3135,7 @@ document.addEventListener("keydown",function(e){
 // ===========================================================
 // LOADING SCREEN
 // ============================================================
-// UTIL BAR — centered fixed pill below nav (dark room + ambient)
+// UTIL BAR — dark room + ambient toggles, inline in portfolio header
 // ============================================================
 (function(){
   var MOON='<svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 2A5 5 0 1 0 12 7 3.8 3.8 0 0 1 7 2Z"/></svg>';
@@ -3149,17 +3147,10 @@ document.addEventListener("keydown",function(e){
   bar.innerHTML=
     '<button class="nav-util-btn darkroom-toggle" data-tip="Dark room" aria-label="Toggle dark room mode">'+MOON+SUN+'</button>'+
     '<button class="nav-util-btn ambient-toggle" data-tip="Ambient melody" aria-label="Toggle ambient melody">'+SON+SOFF+'</button>';
-  document.body.appendChild(bar);
-
-  // Adapt pill style when hero page is active (dark bg) vs inner pages (light bg)
-  function syncBarTheme(){
-    var onHero=document.getElementById("page-home")&&
-               document.getElementById("page-home").classList.contains("active");
-    bar.classList.toggle("on-hero",!!onHero);
-  }
-  syncBarTheme();
-  new MutationObserver(syncBarTheme).observe(document.getElementById("page-home"),
-    {attributes:true,attributeFilter:["class"]});
+  // Insert into the portfolio page-header title row so it scrolls with content
+  var portRow=document.querySelector('.port-title-row');
+  if(portRow){ portRow.appendChild(bar); }
+  else { document.body.appendChild(bar); }
 })();
 
 // ============================================================
