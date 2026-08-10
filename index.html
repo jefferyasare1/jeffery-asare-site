@@ -165,18 +165,14 @@ html.darkroom .about-shop-strip{background:#111008;}
 html.darkroom .btn-dark{background:#c8c0b4;color:#0d0d0d;}
 html.darkroom .btn-pill{background:rgba(200,192,180,.9);color:#0d0d0d;}
 html.darkroom .size-pill.active{background:#c8c0b4;color:#0d0d0d;}
-/* dark room — tilt button */
-html.darkroom #tiltEnableBtn{background:rgba(26,24,22,.9);border-color:rgba(255,255,255,.14);color:#c8c0b4;}
 /* ---- Floating Controls (hidden) ---- */
 #floatControls{display:none;}
-/* ---- Util Bar — ghost corner controls (bottom-right) ---- */
-#utilBar{position:fixed;bottom:1.4rem;right:1.4rem;display:flex;flex-direction:column;gap:.3rem;z-index:400;opacity:.82;transition:opacity .35s ease;}
+/* ---- Util Bar — centered bottom pill (dark room + ambient) ---- */
+#utilBar{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:row;gap:.4rem;z-index:400;opacity:.82;transition:opacity .35s ease;}
 #utilBar:hover{opacity:1;}
-/* Hero page: keep fully visible against the dark image */
+/* Hero page */
 #utilBar.on-hero{opacity:.75;}
 #utilBar.on-hero:hover{opacity:1;}
-/* Tilt-enable pill — iOS only, created dynamically */
-#tiltEnableBtn{position:fixed;bottom:5.2rem;right:1.4rem;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,.13);border-radius:999px;padding:.38rem .88rem;font-size:11px;letter-spacing:.04em;color:var(--ink);cursor:pointer;font-family:var(--sans);z-index:400;box-shadow:0 2px 8px rgba(0,0,0,.1);white-space:nowrap;display:block;}
 #utilBar.on-hero .nav-util-btn{border-color:rgba(255,255,255,.28);background:rgba(0,0,0,.3);color:rgba(255,255,255,.72);}
 #utilBar.on-hero .nav-util-btn:hover{background:rgba(0,0,0,.55);color:#fff;border-color:rgba(255,255,255,.5);}
 #utilBar.on-hero .nav-util-btn.active{background:rgba(255,255,255,.9);color:#111;border-color:transparent;}
@@ -188,10 +184,12 @@ html.darkroom #tiltEnableBtn{background:rgba(26,24,22,.9);border-color:rgba(255,
 html.darkroom .nav-util-btn{border-color:rgba(255,255,255,.12);background:rgba(13,13,13,.82);color:#585450;}
 html.darkroom .nav-util-btn:hover{color:#c8c0b4;border-color:rgba(255,255,255,.2);background:rgba(30,28,26,.9);}
 html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
-/* Tooltip — appears LEFT of button (so it doesn't clip off-screen) */
+/* Tooltip — appears ABOVE button */
 .nav-util-btn[data-tip]{position:relative;}
-.nav-util-btn[data-tip]::after{content:attr(data-tip);position:absolute;right:calc(100% + 8px);top:50%;transform:translateY(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:500;}
+.nav-util-btn[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:500;}
 .nav-util-btn[data-tip]:hover::after{opacity:1;}
+/* Suppress tooltips on touch screens — hover state sticks and labels persist */
+@media(hover:none){.nav-util-btn[data-tip]::after{display:none;}}
 #surpriseBtn{display:none;}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
@@ -372,10 +370,6 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
   .page-header{padding-top:1.5rem;}
   /* About page: smaller hero font */
   .about-hero-name{font-size:clamp(1.8rem,8vw,2.6rem);}
-  /* About page: keep 2-col on mobile with compact portrait */
-  .about-hero{grid-template-columns:1fr 37%;gap:.9rem;padding:2rem var(--pad) 3rem;}
-  #aboutPortraitImg{max-height:210px;object-position:top center;}
-  .about-caption{font-size:10px;margin-top:.3rem;}
 }
 
 /* =====================================================
@@ -1903,27 +1897,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       usingGyro=true;
     },{passive:true});
   }
-  if(window.DeviceOrientationEvent){
-    if(typeof DeviceOrientationEvent.requestPermission==="function"){
-      // iOS 13+ — requestPermission() must come from an explicit user tap.
-      // Show a small pill button so the user can opt in deliberately.
-      var tiltBtn=document.createElement("button");
-      tiltBtn.id="tiltEnableBtn";
-      tiltBtn.setAttribute("aria-label","Enable tilt parallax effect");
-      tiltBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M7 1.5A5.5 5.5 0 1 0 12.5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9.5 1.5h3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Enable tilt';
-      document.body.appendChild(tiltBtn);
-      tiltBtn.addEventListener("click",function(){
-        DeviceOrientationEvent.requestPermission()
-          .then(function(s){
-            if(s==="granted"){ startGyro(); }
-            tiltBtn.remove();
-          })
-          .catch(function(){ tiltBtn.remove(); });
-      },{once:true});
-    } else {
-      startGyro(); // Android / non-gated browsers — no permission needed
-    }
-  }
+  // Gyro tilt disabled — removed per design decision
 
   function dist(el){
     var r=el.getBoundingClientRect();
