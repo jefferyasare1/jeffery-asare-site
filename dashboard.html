@@ -538,6 +538,10 @@
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="16" height="12" rx="2"/><path d="M2 8l8 5 8-5"/></svg>
       Newsletter <span class="sn-badge" id="sn-newsletter-badge" style="display:none;"></span>
     </button>
+    <button class="sn-item" id="sn-messages" onclick="switchTab('messages')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6l-4 3V5a1 1 0 0 1 1-1Z"/></svg>
+      Messages <span class="sn-badge" id="sn-messages-badge" style="display:none;"></span>
+    </button>
   </div>
   <div class="sn-bottom">
     <button class="sn-item" id="sn-clients" onclick="switchTab('clients')">
@@ -1024,6 +1028,37 @@
     </div>
   </div>
 
+  <!-- ════════════════════════════════════
+       MESSAGES
+  ════════════════════════════════════ -->
+  <div class="panel" id="panel-messages">
+    <h2 class="panel-title">Messages</h2>
+    <p class="panel-sub">Contact form submissions from the site. Click any message to read it and send a reply.</p>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div id="msg-status-line" style="font-size:12px;color:var(--muted);"></div>
+      <button class="btn-card" id="msg-refresh-btn" onclick="msgInit(true)" style="font-size:11px;padding:6px 12px;">↻ Refresh</button>
+    </div>
+
+    <!-- Message list -->
+    <div id="msg-list"></div>
+
+    <!-- Reply modal overlay -->
+    <div id="msg-reply-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:10px;padding:32px 36px;width:100%;max-width:540px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+        <button onclick="msgCloseReply()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Reply to</div>
+        <div id="msg-reply-to" style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:20px;"></div>
+        <textarea id="msg-reply-body" rows="8" placeholder="Write your reply here..." style="width:100%;border:1.5px solid var(--rule);border-radius:6px;padding:12px 14px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;resize:vertical;line-height:1.7;outline:none;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;align-items:center;">
+          <button class="btn-primary" id="msg-reply-send-btn" onclick="msgSendReply()" style="width:auto;padding:11px 22px;">Send Reply</button>
+          <button class="btn-card" onclick="msgCloseReply()">Cancel</button>
+          <div id="msg-reply-status" style="font-size:12px;color:var(--muted);margin-left:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /page -->
 </div><!-- /dash-main -->
 </div><!-- /dash-layout -->
@@ -1221,7 +1256,7 @@ function _activateTab(name){
   // Legacy tab buttons (none remain, but keep for safety)
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
   // Sidebar items
-  var sidemap = {orders:'sn-orders', waitlist:'sn-waitlist', content:'sn-content', workflow:'sn-workflow', clients:'sn-clients', actions:'sn-orders', newsletter:'sn-newsletter'};
+  var sidemap = {orders:'sn-orders', waitlist:'sn-waitlist', content:'sn-content', workflow:'sn-workflow', clients:'sn-clients', actions:'sn-orders', newsletter:'sn-newsletter', messages:'sn-messages'};
   document.querySelectorAll('.sn-item').forEach(function(el){ el.classList.remove('active'); });
   var activeId = sidemap[name];
   if(activeId){ var el = document.getElementById(activeId); if(el) el.classList.add('active'); }
@@ -1243,6 +1278,7 @@ function switchTab(name){
   _activateTab(name);
   if(name === 'actions') renderActionsPanel();
   if(name === 'newsletter') nlInit();
+  if(name === 'messages') msgInit();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2254,6 +2290,156 @@ function scrollToCard(id){
     setTimeout(function(){ el.style.outline=''; el.style.outlineOffset=''; },2200);
   },120);
 }
+
+// ══════════════════════════════════════════════════════════════
+// MESSAGES — contact form inbox with reply capability
+// ══════════════════════════════════════════════════════════════
+var _msgData = null;
+var _msgReplyId = null;
+
+function msgInit(forceRefresh) {
+  var listEl = document.getElementById('msg-list');
+  var statusEl = document.getElementById('msg-status-line');
+  if (!listEl) return;
+  if (_msgData && !forceRefresh) { msgRender(); return; }
+  if (statusEl) statusEl.textContent = 'Loading messages…';
+  listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:13px;">Loading…</div>';
+  fetch('/api/messages?key=jA9kx2vP7m')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      _msgData = Array.isArray(data) ? data : [];
+      msgRender();
+      // Update badge
+      var unread = _msgData.filter(function(m){ return !m.read; }).length;
+      var badge = document.getElementById('sn-messages-badge');
+      if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+    })
+    .catch(function(e){
+      if (listEl) listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:#c00;font-size:13px;">Failed to load messages. Check your connection.</div>';
+      if (statusEl) statusEl.textContent = '';
+    });
+}
+
+function msgRender() {
+  var listEl = document.getElementById('msg-list');
+  var statusEl = document.getElementById('msg-status-line');
+  if (!listEl) return;
+  var msgs = _msgData || [];
+  var unread = msgs.filter(function(m){ return !m.read; }).length;
+  if (statusEl) statusEl.textContent = msgs.length + ' message' + (msgs.length !== 1 ? 's' : '') + (unread ? ' · ' + unread + ' unread' : '');
+  if (!msgs.length) {
+    listEl.innerHTML = '<div style="padding:48px 0;text-align:center;color:var(--muted);font-size:13px;">No messages yet. Contact form submissions will appear here.</div>';
+    return;
+  }
+  listEl.innerHTML = msgs.map(function(m){
+    var date = new Date(m.timestamp);
+    var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var preview = m.message.length > 100 ? m.message.slice(0,100) + '…' : m.message;
+    var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;font-weight:600;">Replied</span>' : '';
+    var unreadDot = !m.read ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4a3b2e;margin-right:6px;flex-shrink:0;margin-top:3px;"></span>' : '';
+    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,box-shadow .15s;" onmouseenter="this.style.borderColor=\'#d4cfc9\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.07)\'" onmouseleave="this.style.borderColor=\'var(--rule)\';this.style.boxShadow=\'none\'">'
+      + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">'
+      + unreadDot
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">'
+      + '<span style="font-size:13px;font-weight:'+(m.read?'500':'700')+';color:var(--ink);">' + m.name + ' &lt;' + m.email + '&gt;</span>'
+      + '<span style="font-size:11px;color:var(--muted);white-space:nowrap;">' + dateStr + '</span>'
+      + '</div>'
+      + '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;">' + m.subject + ' ' + repliedBadge + '</div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;">' + preview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      + '</div></div></div>';
+  }).join('');
+}
+
+var _msgOpenId = null;
+function msgOpen(id) {
+  var msg = (_msgData||[]).find(function(m){ return m.id === id; });
+  if (!msg) return;
+  _msgOpenId = id;
+
+  // Mark as read locally
+  if (!msg.read) {
+    msg.read = true;
+    // Update badge silently (no re-render needed — we just refresh counts)
+    var unread = _msgData.filter(function(m){ return !m.read; }).length;
+    var badge = document.getElementById('sn-messages-badge');
+    if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+  }
+
+  var date = new Date(msg.timestamp).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var replyToEl = document.getElementById('msg-reply-to');
+  var bodyEl = document.getElementById('msg-reply-body');
+  var statusEl = document.getElementById('msg-reply-status');
+  var overlay = document.getElementById('msg-reply-overlay');
+  if (!replyToEl || !bodyEl || !overlay) return;
+
+  replyToEl.innerHTML = '<strong>' + msg.name + '</strong> &lt;' + msg.email + '&gt;'
+    + '<br><span style="font-size:12px;color:var(--muted);font-weight:400;">' + msg.subject + ' — ' + date + '</span>'
+    + '<div style="background:#f9f7f4;border-radius:6px;padding:12px 16px;margin-top:12px;font-size:13px;line-height:1.75;color:#444;">' + msg.message.replace(/\n/g,'<br>').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+
+  // If already replied, show reply text
+  if (msg.replied && msg.replyText) {
+    bodyEl.value = '';
+    bodyEl.placeholder = 'Already replied. Type a new message to follow up.';
+    if (statusEl) statusEl.innerHTML = '<span style="color:#166534;">✓ Reply sent ' + new Date(msg.repliedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + '</span>';
+  } else {
+    bodyEl.value = '';
+    bodyEl.placeholder = 'Write your reply here…';
+    if (statusEl) statusEl.textContent = '';
+  }
+
+  overlay.style.display = 'flex';
+  bodyEl.focus();
+}
+
+function msgCloseReply() {
+  var overlay = document.getElementById('msg-reply-overlay');
+  if (overlay) overlay.style.display = 'none';
+  _msgOpenId = null;
+}
+
+function msgSendReply() {
+  var id = _msgOpenId;
+  if (!id) return;
+  var bodyEl = document.getElementById('msg-reply-body');
+  var statusEl = document.getElementById('msg-reply-status');
+  var sendBtn = document.getElementById('msg-reply-send-btn');
+  var replyText = bodyEl ? bodyEl.value.trim() : '';
+  if (!replyText) { if (statusEl) { statusEl.textContent = 'Please write a reply first.'; statusEl.style.color = '#c00'; } return; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; }
+  if (statusEl) { statusEl.textContent = ''; }
+  fetch('/api/contact-reply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: 'jA9kx2vP7m', messageId: id, replyText: replyText })
+  })
+  .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+  .then(function(res){
+    if (res.ok) {
+      if (statusEl) { statusEl.textContent = '✓ Reply sent!'; statusEl.style.color = '#166534'; }
+      // Update local data
+      var msg = (_msgData||[]).find(function(m){ return m.id === id; });
+      if (msg) { msg.replied = true; msg.replyText = replyText; msg.repliedAt = new Date().toISOString(); }
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Reply'; }
+      // Re-render list, close modal after a moment
+      msgRender();
+      setTimeout(function(){ msgCloseReply(); }, 1400);
+    } else {
+      if (statusEl) { statusEl.textContent = res.data.error || 'Failed to send.'; statusEl.style.color = '#c00'; }
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Reply'; }
+    }
+  })
+  .catch(function(){
+    if (statusEl) { statusEl.textContent = 'Network error. Try again.'; statusEl.style.color = '#c00'; }
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Reply'; }
+  });
+}
+
+// Close reply modal on overlay click
+document.addEventListener('click', function(e){
+  var overlay = document.getElementById('msg-reply-overlay');
+  if (overlay && e.target === overlay) msgCloseReply();
+});
 
 // ── Clients tab (completed orders) ──────────────────────────────
 function renderClients(){
