@@ -48,6 +48,7 @@ nav:not(.inner-nav) .nav-links a{position:relative;}
 nav:not(.inner-nav) .nav-links a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:#fff;transition:width .28s ease;}
 nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .hero-content{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;}
+.hero-left{display:flex;flex-direction:column;align-items:flex-start;}
 .hero-headline{font-family:var(--title);font-size:clamp(2.8rem,6vw,5.5rem);font-weight:600;line-height:1.0;color:#fff;letter-spacing:-.03em;max-width:600px;}
 .hero-right{text-align:left;flex-shrink:0;}
 .hero-desc{font-size:12px;color:rgba(255,255,255,.7);line-height:1.7;max-width:220px;margin-bottom:1.5rem;}
@@ -840,11 +841,13 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <div class="hero-dots" id="heroDots"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1 class="hero-headline">
-        <span class="hero-headline-line"><span id="heroLine1">Photography</span></span>
-        <span class="hero-headline-line"><span id="heroLine2">is Poetry.</span></span>
-      </h1>
-      <p class="hero-desc" id="heroDesc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
+      <div class="hero-left">
+        <h1 class="hero-headline">
+          <span class="hero-headline-line"><span id="heroLine1">Photography</span></span>
+          <span class="hero-headline-line"><span id="heroLine2">is Poetry.</span></span>
+        </h1>
+        <p class="hero-desc" id="heroDesc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
+      </div>
       <div class="hero-right">
         <button class="btn-pill" id="heroViewBtn">View the portfolio &#8594;</button>
       </div>
