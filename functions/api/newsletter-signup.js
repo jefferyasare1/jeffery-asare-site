@@ -1,5 +1,6 @@
 // Cloudflare Pages Function — handles newsletter signups
-// Sends a welcome email to the subscriber via Brevo REST API
+// 1. Saves subscriber to Brevo contacts list
+// 2. Sends a welcome email via Brevo transactional API
 //
 // Required env var (Cloudflare Pages → Settings → Environment variables):
 //   BREVO_API_KEY — your Brevo API key
@@ -27,11 +28,37 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Server misconfiguration' }), { status: 500, headers: jsonHeaders });
   }
 
-  const firstName = email.split('@')[0];
+  const brevoHeaders = { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' };
 
+  // ── 1. Save contact to Brevo list ─────────────────────────────
+  // createUpdateEnabled:true means re-subscribing is safe (no duplicate error)
+  try {
+    const contactRes = await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: brevoHeaders,
+      body: JSON.stringify({
+        email,
+        updateEnabled: true,
+        attributes: { SUBSCRIBED_FROM: 'website-footer' }
+      })
+    });
+    // 204 = already exists (updated), 201 = newly created — both are fine
+    if (!contactRes.ok && contactRes.status !== 204) {
+      const err = await contactRes.json().catch(() => ({}));
+      // code 16 = "Contact already in list" — not a real error, continue
+      if (err.code !== 'duplicate_parameter') {
+        console.error('Brevo contacts error:', JSON.stringify(err));
+      }
+    }
+  } catch (err) {
+    // Don't block the welcome email if contact save fails
+    console.error('Brevo contacts fetch error:', err.message);
+  }
+
+  // ── 2. Send welcome email ──────────────────────────────────────
   const emailPayload = {
     sender: { name: 'Jeffery Asare', email: 'hello@jefferyasare.com' },
-    to: [{ email: email }],
+    to: [{ email }],
     replyTo: { email: 'hello@jefferyasare.com' },
     subject: 'You\'re on the list.',
     htmlContent: `
@@ -57,7 +84,10 @@ export async function onRequestPost(context) {
           <p style="font-family:Georgia,serif;font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
         </td></tr>
         <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:Arial,sans-serif;font-size:11px;color:#bbb;line-height:1.6;">
-          Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; <a href="https://jefferyasare.com" style="color:#bbb;">jefferyasare.com</a>
+          Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp;
+          <a href="https://jefferyasare.com" style="color:#bbb;">jefferyasare.com</a>
+          <br><br>
+          <a href="https://jefferyasare.com" style="color:#bbb;">Unsubscribe</a>
         </td></tr>
       </table>
     </td></tr>
@@ -69,12 +99,12 @@ export async function onRequestPost(context) {
   try {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
-      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+      headers: brevoHeaders,
       body: JSON.stringify(emailPayload)
     });
     const data = await res.json();
     if (!res.ok) {
-      console.error('Brevo newsletter error:', JSON.stringify(data));
+      console.error('Brevo email error:', JSON.stringify(data));
       return new Response(JSON.stringify({ error: 'Email send failed' }), { status: 502, headers: jsonHeaders });
     }
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: jsonHeaders });
