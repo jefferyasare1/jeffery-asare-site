@@ -227,10 +227,10 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .btn-outline:hover{border-color:#999;}
 .shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem 1.5rem;}
 .shop-card{display:flex;flex-direction:column;cursor:pointer;}
-.shop-card-img-wrap{overflow:hidden;margin-bottom:1rem;}
-.shop-card-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.25,.46,.45,.94);}
+.shop-card-img-wrap{position:relative;overflow:hidden;aspect-ratio:4/5;margin-bottom:1rem;}
+.shop-card-img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;display:block;transition:none;will-change:transform;}
 .shop-card-img-ph{width:100%;aspect-ratio:4/5;background:var(--warm);}
-.shop-card:hover .shop-card-img{transform:translateY(-10px);}
+/* shop-card hover: parallax + 3D tilt via JS IIFE (same as photo-card) */
 .shop-card-body{display:flex;flex-direction:column;flex:1;}
 .shop-card-series{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
 .shop-card-title{font-family:var(--title);font-size:.95rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-bottom:.2rem;}
@@ -712,7 +712,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .gsap-ready #pageTransition{display:none!important;}
 .gsap-ready .photo-card:hover{transform:none!important;} /* box-shadow allowed — JS lerp handles img transform */
 /* .photo-card-info transition now CSS-only — removed gsap-ready override */
-.gsap-ready .shop-card:hover .shop-card-img{transform:none!important;}
+/* shop-card GSAP override removed — no transform to override */
 /* ── BUTTONS ── */
 .btn-cart{display:inline-flex;align-items:center;gap:.4rem;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.65rem 1.3rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .2s;}
 .btn-cart:hover{background:var(--ink);color:#fff;}
@@ -844,8 +844,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
         <span class="hero-headline-line"><span id="heroLine1">Photography</span></span>
         <span class="hero-headline-line"><span id="heroLine2">is Poetry.</span></span>
       </h1>
+      <p class="hero-desc" id="heroDesc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
       <div class="hero-right">
-        <p class="hero-desc" id="heroDesc">Phone photography from Ghana. Every image is a conversation between light and stillness.</p>
         <button class="btn-pill" id="heroViewBtn">View the portfolio &#8594;</button>
       </div>
     </div>
@@ -1855,20 +1855,28 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       var t=dist(el)*S_PORT;
       cards.push({el:el,img:img,sh:t,tsh:t,rx:0,ry:0});
     });
+    document.querySelectorAll(".shop-card").forEach(function(el){
+      if(el._pxInit) return;
+      var img=el.querySelector(".shop-card-img");
+      if(!img) return;
+      el._pxInit=true;
+      var t=dist(el)*S_PORT;
+      cards.push({el:el,img:img,sh:t,tsh:t,rx:0,ry:0});
+    });
   }
 
-  // Hover + cursor tracking for 3D tilt
+  // Hover + cursor tracking for 3D tilt (photo-card + shop-card)
   document.addEventListener("mouseover",function(e){
-    var c=e.target.closest(".photo-card");
+    var c=e.target.closest(".photo-card,.shop-card");
     if(c) c._pxHover=true;
   });
   document.addEventListener("mouseout",function(e){
-    var c=e.target.closest(".photo-card");
+    var c=e.target.closest(".photo-card,.shop-card");
     if(!c) return;
     if(!c.contains(e.relatedTarget)){ c._pxHover=false; c._pxTx=0; c._pxTy=0; }
   });
   document.addEventListener("mousemove",function(e){
-    var c=e.target.closest(".photo-card");
+    var c=e.target.closest(".photo-card,.shop-card");
     if(!c) return;
     var r=c.getBoundingClientRect();
     c._pxTx=(e.clientX-r.left)/r.width-.5;  // -0.5 to 0.5
@@ -3630,18 +3638,7 @@ fetch('/_data/prints.json')
     // Photo card hover: handled by parallax IIFE (translateY) + 3D tilt (rotateX/rotateY via RAF loop)
     // Caption opacity handled by CSS (.photo-card:hover .photo-card-info)
     // GSAP intentionally removed from photo cards — no scale, no y-shift
-    // Shop print cards
-    var sc=e.target.closest('.shop-card');
-    if(sc&&!sc._g){
-      sc._g=true;
-      var si=sc.querySelector('.shop-card-img');
-      sc.addEventListener('mouseenter',function(){
-        if(si) gsap.to(si,{y:-10,scale:1.02,duration:0.5,ease:'power2.out'});
-      });
-      sc.addEventListener('mouseleave',function(){
-        if(si) gsap.to(si,{y:0,scale:1,duration:0.45,ease:'power2.out'});
-      });
-    }
+    // Shop print cards: GSAP scale/y removed — no movement on hover
   });
 
 })();
