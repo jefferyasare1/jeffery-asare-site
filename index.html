@@ -11,6 +11,30 @@
 <meta property="og:type" content="website">
 <title>Jeffery Asare: Ghana Phone Photography &amp; Fine Art Prints</title>
 <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Jeffery Asare",
+  "url": "https://jefferyasare.com",
+  "jobTitle": "Photographer",
+  "description": "Fine art phone photographer based in Accra, Ghana. Limited edition archival prints.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Accra",
+    "addressCountry": "GH"
+  },
+  "offers": {
+    "@type": "Offer",
+    "itemOffered": {
+      "@type": "Product",
+      "name": "Fine Art Photographic Prints",
+      "description": "Limited edition archival prints of phone photography from Ghana."
+    }
+  }
+}
+</script>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -951,7 +975,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     </div>
     <div>
       <div style="position:relative;">
-        <img id="aboutPortraitImg" src="" alt="Jeffery Asare" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);" onerror="this.style.display='none';document.getElementById('aboutPortraitPh').style.display='flex';">
+        <img id="aboutPortraitImg" src="" alt="Jeffery Asare" loading="lazy" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);" onerror="this.style.display='none';document.getElementById('aboutPortraitPh').style.display='flex';">
         <div class="about-photo-ph" id="aboutPortraitPh" style="display:none;width:100%;aspect-ratio:3/4;background:var(--warm);"><span>Add images/about-portrait.jpg to your folder</span></div>
       </div>
       <p class="about-caption" id="aboutCaption">Jeffery Asare, Accra, 2026.</p>
@@ -1047,7 +1071,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
       </form>
     </div>
     <div class="contact-right-inner">
-      <div><img id="contactPhotoImg" src="" alt="" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--warm);border-radius:4px;" onerror="this.style.display='none'"></div>
+      <div><img id="contactPhotoImg" src="" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--warm);border-radius:4px;" onerror="this.style.display='none'"></div>
       <div class="contact-details">
         <div><div class="contact-detail-label">Email</div><div class="contact-detail-val" id="contactEmail">hello@jefferyasare.com</div></div>
         <div><div class="contact-detail-label">Instagram</div><div class="contact-detail-val"><a id="contactInstagram" href="https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh" target="_blank" style="color:inherit;text-decoration:none;">@jeffasare</a></div></div>
@@ -1843,6 +1867,32 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
   var cards=[];
   var potwSh=0,potwTgt=0;
 
+  // ── Gyroscope tilt for mobile ──────────────────────────────
+  var gyroTx=0, gyroTy=0, usingGyro=false;
+  function startGyro(){
+    var baseB=null, baseG=null;
+    window.addEventListener("deviceorientation",function(e){
+      if(baseB===null){ baseB=e.beta||0; baseG=e.gamma||0; }
+      // clamp to ±25° from neutral position
+      gyroTy=Math.max(-.5,Math.min(.5,(e.beta -baseB)/25));
+      gyroTx=Math.max(-.5,Math.min(.5,(e.gamma-baseG)/25));
+      usingGyro=true;
+    },{passive:true});
+  }
+  if(window.DeviceOrientationEvent){
+    if(typeof DeviceOrientationEvent.requestPermission==="function"){
+      // iOS 13+ — request on first touch
+      document.addEventListener("touchstart",function ask(){
+        DeviceOrientationEvent.requestPermission()
+          .then(function(s){ if(s==="granted") startGyro(); })
+          .catch(function(){});
+        document.removeEventListener("touchstart",ask);
+      },{once:true,passive:true});
+    } else {
+      startGyro(); // Android — no permission needed
+    }
+  }
+
   function dist(el){
     var r=el.getBoundingClientRect();
     return Math.max(-1,Math.min(1,(r.top+r.height/2-window.innerHeight/2)/window.innerHeight));
@@ -1898,8 +1948,11 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     requestAnimationFrame(loop);
     refresh(); // catch any cards added since last frame
     cards.forEach(function(s){
-      var trx=s.el._pxHover?(-(s.el._pxTy||0)*TILT):0;
-      var try_=s.el._pxHover?((s.el._pxTx||0)*TILT):0;
+      var tx=usingGyro?gyroTx:(s.el._pxHover?(s.el._pxTx||0):0);
+      var ty=usingGyro?gyroTy:(s.el._pxHover?(s.el._pxTy||0):0);
+      var active=usingGyro||s.el._pxHover;
+      var trx=active?(-ty*TILT):0;
+      var try_=active?(tx*TILT):0;
       s.sh+=(s.tsh-s.sh)*EASE;
       s.rx+=(trx-s.rx)*TILT_EASE;
       s.ry+=(try_-s.ry)*TILT_EASE;
@@ -2641,7 +2694,7 @@ function renderCartItems(){
     return;
   }
   wrap.innerHTML=CART.map(function(item,idx){
-    var imgEl=item.print.img?'<img class="cart-item-img" src="'+item.print.img+'" alt="'+item.print.title+'">'
+    var imgEl=item.print.img?'<img class="cart-item-img" src="'+item.print.img+'" alt="'+item.print.title+'" loading="lazy">'
       :'<div class="cart-item-img-ph"></div>';
     var itemPrice=item.price||item.print.priceGHC;
     var priceStr=CURRENCY==='USD'?'$'+(itemPrice*USD_RATE*item.qty).toFixed(0)

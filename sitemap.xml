@@ -38,6 +38,12 @@
     <priority>0.3</priority>
   </url>
 
+  <url>
+    <loc>https://jefferyasare.com/?page=journal</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
   <!-- Individual prints -->
   <url>
     <loc>https://jefferyasare.com/?print=s1</loc>
