@@ -30,28 +30,48 @@ export async function onRequestPost(context) {
 
   const brevoHeaders = { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' };
 
-  // ── 1. Save contact to Brevo list ─────────────────────────────
-  // createUpdateEnabled:true means re-subscribing is safe (no duplicate error)
+  // ── 1. Find or create the Newsletter list ─────────────────────
+  let listId = null;
   try {
+    const listsRes = await fetch('https://api.brevo.com/v3/contacts/lists?limit=50', { headers: brevoHeaders });
+    const listsData = await listsRes.json();
+    const existing = listsData.lists?.find(l => l.name === 'Newsletter');
+    if (existing) {
+      listId = existing.id;
+    } else {
+      const createRes = await fetch('https://api.brevo.com/v3/contacts/lists', {
+        method: 'POST',
+        headers: brevoHeaders,
+        body: JSON.stringify({ name: 'Newsletter', folderId: 1 })
+      });
+      const created = await createRes.json();
+      listId = created.id ?? null;
+    }
+  } catch (e) {
+    console.error('Brevo list lookup error:', e.message);
+  }
+
+  // ── 2. Save contact to Brevo (+ add to Newsletter list) ───────
+  try {
+    const contactPayload = {
+      email,
+      updateEnabled: true,
+      attributes: { SUBSCRIBED_FROM: 'website-footer' }
+    };
+    if (listId) contactPayload.listIds = [listId];
+
     const contactRes = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: brevoHeaders,
-      body: JSON.stringify({
-        email,
-        updateEnabled: true,
-        attributes: { SUBSCRIBED_FROM: 'website-footer' }
-      })
+      body: JSON.stringify(contactPayload)
     });
-    // 204 = already exists (updated), 201 = newly created — both are fine
     if (!contactRes.ok && contactRes.status !== 204) {
-      const err = await contactRes.json().catch(() => ({}));
-      // code 16 = "Contact already in list" — not a real error, continue
-      if (err.code !== 'duplicate_parameter') {
-        console.error('Brevo contacts error:', JSON.stringify(err));
+      const errData = await contactRes.json().catch(() => ({}));
+      if (errData.code !== 'duplicate_parameter') {
+        console.error('Brevo contacts error:', JSON.stringify(errData));
       }
     }
   } catch (err) {
-    // Don't block the welcome email if contact save fails
     console.error('Brevo contacts fetch error:', err.message);
   }
 

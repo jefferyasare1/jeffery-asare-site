@@ -450,6 +450,34 @@
     .inv-chip-item{font-size:11px;padding:4px 9px;border:1px solid var(--rule);border-radius:var(--rb);color:var(--muted);background:#fff;white-space:nowrap;}
     .inv-chip-item strong{color:var(--ink);font-weight:600;}
 
+    /* ── Newsletter panel ── */
+    .nl-stat-row{display:flex;gap:12px;margin-bottom:28px;}
+    .nl-stat{flex:1;background:#fff;border:1px solid var(--rule);border-radius:var(--rc);padding:18px 20px;}
+    .nl-stat-val{font-size:28px;font-weight:700;letter-spacing:-.04em;color:var(--ink);line-height:1;}
+    .nl-stat-label{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.02em;}
+    .nl-compose{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:flex-start;}
+    .nl-form{min-width:0;}
+    .nl-preview-wrap{min-width:0;position:sticky;top:80px;}
+    .nl-preview-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .nl-preview-frame{border:1px solid var(--rule);border-radius:var(--rb);overflow:hidden;background:#f9f7f4;}
+    .nl-preview-bar{background:#e5e0d8;padding:8px 12px;display:flex;align-items:center;gap:6px;}
+    .nl-preview-dot{width:8px;height:8px;border-radius:50%;background:#c5bdb5;}
+    .nl-preview-body{padding:0;font-size:0;line-height:0;}
+    .nl-preview-body iframe{width:100%;height:420px;border:none;display:block;}
+    .nl-field{margin-bottom:16px;}
+    .nl-field label{display:block;font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--muted);margin-bottom:5px;}
+    .nl-field input,.nl-field textarea{width:100%;border:1.5px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);outline:none;background:#fff;border-radius:var(--rb);transition:border-color .15s;resize:vertical;}
+    .nl-field input:focus,.nl-field textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(17,24,39,.08);}
+    .nl-field textarea{line-height:1.6;}
+    .nl-field-note{font-size:11px;color:#9ca3af;margin-top:4px;}
+    .nl-cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .nl-send-row{display:flex;align-items:center;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--rule);}
+    .nl-confirm-overlay{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);align-items:center;justify-content:center;}
+    .nl-confirm-overlay.open{display:flex;}
+    .nl-confirm-box{background:#fff;max-width:420px;width:calc(100% - 48px);padding:40px 36px 32px;text-align:center;border-radius:var(--rc);box-shadow:0 16px 48px rgba(0,0,0,.18);}
+    .nl-confirm-title{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;}
+    .nl-confirm-sub{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:24px;}
+    .nl-confirm-btns{display:flex;gap:10px;justify-content:center;}
     /* ── CMS secondary sidebar ── */
     .cms-layout{display:flex;gap:0;min-height:400px;}
     .cms-sidenav{width:150px;flex-shrink:0;border-right:1px solid var(--rule);padding:0;}
@@ -505,6 +533,11 @@
     <button class="sn-item" id="sn-workflow" onclick="switchTab('workflow')">
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="10" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="15" cy="15" r="2"/><path d="M7 10h4l2-3.5M7 10l4 0 2 3.5"/></svg>
       Workflow
+    </button>
+  </div>
+    <button class="sn-item" id="sn-newsletter" onclick="switchTab('newsletter')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="16" height="12" rx="2"/><path d="M2 8l8 5 8-5"/></svg>
+      Newsletter <span class="sn-badge" id="sn-newsletter-badge" style="display:none;"></span>
     </button>
   </div>
   <div class="sn-bottom">
@@ -905,6 +938,93 @@
     </div><!-- /cms-layout -->
   </div><!-- /panel-content -->
 
+  <!-- ════════════════════════════════════
+       NEWSLETTER
+  ════════════════════════════════════ -->
+  <div class="panel" id="panel-newsletter">
+    <h2 class="panel-title">Newsletter</h2>
+    <p class="panel-sub">Announce new work directly to your subscribers. Sends a proper email campaign via Brevo.</p>
+
+    <!-- Subscriber stats -->
+    <div class="nl-stat-row">
+      <div class="nl-stat">
+        <div class="nl-stat-val" id="nl-count">—</div>
+        <div class="nl-stat-label">Subscribers on list</div>
+      </div>
+      <div class="nl-stat">
+        <div class="nl-stat-val" id="nl-total">—</div>
+        <div class="nl-stat-label">Total Brevo contacts</div>
+      </div>
+      <div class="nl-stat" style="flex:2;display:flex;align-items:center;">
+        <p style="font-size:12px;color:var(--muted);line-height:1.65;margin:0;">
+          Every subscriber who signs up on your site lands here automatically.
+          Write your announcement below and hit Send — it goes out immediately.
+        </p>
+      </div>
+    </div>
+
+    <!-- Compose + Preview side-by-side -->
+    <div class="nl-compose">
+
+      <!-- Left: form -->
+      <div class="nl-form">
+        <div class="nl-field">
+          <label>Subject line</label>
+          <input type="text" id="nl-subject" placeholder="e.g. Something new." oninput="nlUpdatePreview()">
+          <div class="nl-field-note">This is what subscribers see in their inbox before they open.</div>
+        </div>
+        <div class="nl-field">
+          <label>Message</label>
+          <textarea id="nl-message" rows="10" placeholder="Write your announcement here…" oninput="nlUpdatePreview()"></textarea>
+          <div class="nl-field-note">Separate paragraphs with a blank line. Plain text — no HTML needed.</div>
+        </div>
+        <div style="margin-bottom:8px;font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--muted);">Call-to-action button <span style="font-weight:400;letter-spacing:0;text-transform:none;">(optional)</span></div>
+        <div class="nl-cta-row">
+          <div class="nl-field" style="margin-bottom:0;">
+            <label>Button text</label>
+            <input type="text" id="nl-cta-text" placeholder="View the work →" oninput="nlUpdatePreview()">
+          </div>
+          <div class="nl-field" style="margin-bottom:0;">
+            <label>Button URL</label>
+            <input type="text" id="nl-cta-url" placeholder="https://jefferyasare.com/?page=portfolio" oninput="nlUpdatePreview()">
+          </div>
+        </div>
+        <div class="nl-send-row">
+          <button class="btn-primary" id="nl-send-btn" onclick="nlConfirmSend()" style="width:auto;padding:12px 28px;">Send to all subscribers</button>
+          <div class="cms-status" id="nl-status"></div>
+        </div>
+      </div>
+
+      <!-- Right: live preview -->
+      <div class="nl-preview-wrap">
+        <div class="nl-preview-label">Live preview</div>
+        <div class="nl-preview-frame">
+          <div class="nl-preview-bar">
+            <div class="nl-preview-dot"></div>
+            <div class="nl-preview-dot"></div>
+            <div class="nl-preview-dot"></div>
+          </div>
+          <div class="nl-preview-body">
+            <iframe id="nl-preview-iframe" title="Email preview" scrolling="yes"></iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Newsletter send confirm dialog -->
+  <div class="nl-confirm-overlay" id="nlConfirmOverlay">
+    <div class="nl-confirm-box">
+      <div class="nl-confirm-title">Ready to send?</div>
+      <div class="nl-confirm-sub" id="nlConfirmSub">This will send the email to all <strong id="nlConfirmCount">—</strong> subscribers on your Newsletter list. This cannot be undone.</div>
+      <div class="nl-confirm-btns">
+        <button class="btn-primary" id="nlConfirmSendBtn" style="width:auto;padding:11px 24px;" onclick="nlDoSend()">Yes, send now</button>
+        <button class="btn-card" onclick="document.getElementById('nlConfirmOverlay').classList.remove('open')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /page -->
 </div><!-- /dash-main -->
 </div><!-- /dash-layout -->
@@ -1123,6 +1243,134 @@ function switchTab(name){
   }
   _activateTab(name);
   if(name === 'actions') renderActionsPanel();
+  if(name === 'newsletter') nlInit();
+}
+
+// ══════════════════════════════════════════════════════════════
+// NEWSLETTER
+// ══════════════════════════════════════════════════════════════
+var _nlSubCount = null;
+
+var NL_DEFAULT_MESSAGE = [
+  'Something has been stopping me lately.',
+  '',
+  '[Tell them about the new photos — the light, the moment, what made you press the shutter. Write it like you\'re talking to one person, not a list. Be specific. Specific is interesting.]',
+  '',
+  'These are now live on the site. Limited edition — 20 prints per image, hand-signed and numbered. Once they\'re gone, they\'re gone.',
+  '',
+  'First come, first served.'
+].join('\n');
+
+function nlInit(){
+  // Set default template text if empty
+  var msgEl = document.getElementById('nl-message');
+  if(msgEl && !msgEl.value.trim()) msgEl.value = NL_DEFAULT_MESSAGE;
+  var subEl = document.getElementById('nl-subject');
+  if(subEl && !subEl.value.trim()) subEl.value = 'New work.';
+  nlUpdatePreview();
+  nlFetchCount();
+}
+
+function nlFetchCount(){
+  fetch('/api/newsletter-subscribers')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      _nlSubCount = d.listCount ?? d.total ?? 0;
+      var countEl = document.getElementById('nl-count');
+      var totalEl = document.getElementById('nl-total');
+      var badgeEl = document.getElementById('sn-newsletter-badge');
+      if(countEl) countEl.textContent = d.listCount !== null ? d.listCount : '—';
+      if(totalEl) totalEl.textContent = d.total ?? '—';
+      if(badgeEl && d.listCount > 0){
+        badgeEl.textContent = d.listCount;
+        badgeEl.style.display = '';
+      }
+    })
+    .catch(function(){ /* silent */ });
+}
+
+function nlBuildPreviewHtml(subject, message, ctaText, ctaUrl){
+  var paragraphs = message.split('\n\n').filter(function(p){ return p.trim(); });
+  var msgHtml = paragraphs.map(function(p){
+    return '<p style="font-family:Georgia,serif;font-size:14px;color:#444;line-height:1.85;margin:0 0 16px;">'+p.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+
+  var ctaBlock = '';
+  if(ctaText && ctaUrl){
+    ctaBlock = '<table cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td style="background:#111;border-radius:3px;"><a href="'+ctaUrl+'" style="display:inline-block;padding:12px 22px;font-family:Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;text-decoration:none;">'+ctaText+'</a></td></tr></table>';
+  }
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f9f7f4;">'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:20px 10px;">'
+    +'<tr><td align="center"><table width="500" cellpadding="0" cellspacing="0" style="background:#fff;max-width:500px;border-radius:4px;overflow:hidden;">'
+    +'<tr><td style="background:#111;padding:14px 36px;"><p style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:0;">Jeffery Asare</p></td></tr>'
+    +'<tr><td style="padding:36px 36px 28px;">'
+    +'<p style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 16px;">New Work</p>'
+    +'<h1 style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#111;line-height:1.2;margin:0 0 22px;letter-spacing:-.02em;">'+(subject||'New work.')+'</h1>'
+    +msgHtml
+    +ctaBlock
+    +'<hr style="border:none;border-top:1px solid #e8e4df;margin:24px 0 20px;">'
+    +'<p style="font-family:Georgia,serif;font-size:12px;color:#999;font-style:italic;margin:0 0 3px;">With gratitude,</p>'
+    +'<p style="font-family:Georgia,serif;font-size:13px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+    +'</td></tr>'
+    +'<tr><td style="background:#f9f7f4;padding:16px 36px;border-top:1px solid #e8e4df;">'
+    +'<p style="font-family:Arial,sans-serif;font-size:10px;color:#bbb;line-height:1.8;margin:0;">Accra, Ghana · jefferyasare.com<br>You\'re receiving this because you signed up at jefferyasare.com.<br><a href="#" style="color:#bbb;">Unsubscribe</a></p>'
+    +'</td></tr>'
+    +'</table></td></tr></table></body></html>';
+}
+
+function nlUpdatePreview(){
+  var subject  = (document.getElementById('nl-subject')  ||{}).value || '';
+  var message  = (document.getElementById('nl-message')  ||{}).value || '';
+  var ctaText  = (document.getElementById('nl-cta-text') ||{}).value || '';
+  var ctaUrl   = (document.getElementById('nl-cta-url')  ||{}).value || '';
+  var iframe   = document.getElementById('nl-preview-iframe');
+  if(!iframe) return;
+  var html = nlBuildPreviewHtml(subject, message, ctaText, ctaUrl);
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+}
+
+function nlConfirmSend(){
+  var subject = ((document.getElementById('nl-subject')||{}).value||'').trim();
+  var message = ((document.getElementById('nl-message')||{}).value||'').trim();
+  if(!subject){ alert('Please add a subject line.'); return; }
+  if(!message){ alert('Please write a message.'); return; }
+  var countEl = document.getElementById('nlConfirmCount');
+  if(countEl) countEl.textContent = _nlSubCount !== null ? _nlSubCount : '—';
+  document.getElementById('nlConfirmOverlay').classList.add('open');
+}
+
+function nlDoSend(){
+  var btn = document.getElementById('nlConfirmSendBtn');
+  var statusEl = document.getElementById('nl-status');
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+  document.getElementById('nlConfirmOverlay').classList.remove('open');
+  if(statusEl){ statusEl.textContent = 'Sending campaign…'; statusEl.className = 'cms-status'; }
+
+  fetch('/api/newsletter-send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subject:  ((document.getElementById('nl-subject') ||{}).value||'').trim(),
+      message:  ((document.getElementById('nl-message') ||{}).value||'').trim(),
+      ctaText:  ((document.getElementById('nl-cta-text')||{}).value||'').trim(),
+      ctaUrl:   ((document.getElementById('nl-cta-url') ||{}).value||'').trim()
+    })
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+  .then(function(res){
+    if(btn){ btn.disabled = false; btn.textContent = 'Yes, send now'; }
+    if(res.ok){
+      if(statusEl){ statusEl.textContent = '✓ Campaign sent successfully.'; statusEl.className = 'cms-status ok'; }
+    } else {
+      if(statusEl){ statusEl.textContent = '✗ ' + (res.d.error || 'Send failed. Try again.'); statusEl.className = 'cms-status err'; }
+    }
+  })
+  .catch(function(e){
+    if(btn){ btn.disabled = false; btn.textContent = 'Yes, send now'; }
+    if(statusEl){ statusEl.textContent = '✗ Network error. Try again.'; statusEl.className = 'cms-status err'; }
+  });
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
