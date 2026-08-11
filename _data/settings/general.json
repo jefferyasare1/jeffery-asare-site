@@ -1,12 +1,12 @@
 {
-  "about_photo": "/about-portrait.jpg",
-  "contact_photo": "/contact-photo.jpg",
+  "about_photo": "/images/ui/about-portrait.jpg",
+  "contact_photo": "/images/ui/contact-photo.jpg",
   "hero_desc": "Phone photography from Ghana. Every image is a conversation between light and stillness.",
-  "hero1": "/blinded-by-the-spotlight.jpg",
+  "hero1": "/images/ui/blinded-by-the-spotlight.jpg",
   "hero_line1": "Photography",
-  "hero2": "/the-veil-speaks.jpg",
+  "hero2": "/images/ui/the-veil-speaks.jpg",
   "hero_line2": "is Poetry.",
-  "hero3": "/limitations.jpg",
-  "hero4": "/unlocking-new-horizons.jpg",
-  "hero5": "/what-she-bears.jpg"
+  "hero3": "/images/ui/limitations.jpg",
+  "hero4": "/images/ui/unlocking-new-horizons.jpg",
+  "hero5": "/images/ui/what-she-bears.jpg"
 }

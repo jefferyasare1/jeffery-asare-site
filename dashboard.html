@@ -494,7 +494,7 @@
 <!-- ── Password gate ─────────────────────────────────────── -->
 <div id="pw-gate">
   <div class="pw-box">
-    <div class="pw-logo"><img src="/logo-name.png" alt="Jeffery Asare" style="height:38px;width:auto;display:block;margin:0 auto 4px;"></div>
+    <div class="pw-logo"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" style="height:38px;width:auto;display:block;margin:0 auto 4px;"></div>
     <div class="pw-title">Sign in</div>
     <div class="pw-sub">This area is private.</div>
     <input id="pw-input" type="password" placeholder="Password" autocomplete="current-password">
@@ -510,7 +510,7 @@
 <!-- ── Sidebar nav ── -->
 <nav class="dash-sidebar" aria-label="Dashboard navigation">
   <div class="sn-logo">
-    <img src="/logo-name.png" alt="Jeffery Asare">
+    <img src="/images/ui/logo-name.png" alt="Jeffery Asare">
   </div>
   <div style="margin-bottom:14px;">
     <span class="sn-label">Work</span>
@@ -1346,7 +1346,7 @@ function nlBuildPreviewHtml(subject, message, ctaText, ctaUrl){
   return head+'<body style="margin:0;padding:0;background:#f9f7f4;">'
     +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:20px 10px;">'
     +'<tr><td align="center"><table width="500" cellpadding="0" cellspacing="0" style="background:#fff;max-width:500px;border-radius:4px;overflow:hidden;">'
-    +'<tr><td style="background:#ffffff;padding:20px 36px;border-bottom:1px solid #e8e4df;"><img src="/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;"></td></tr>'
+    +'<tr><td style="background:#ffffff;padding:20px 36px;border-bottom:1px solid #e8e4df;"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;"></td></tr>'
     +'<tr><td style="padding:36px 36px 28px;">'
     +'<p style="font-family:'+GS+';font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#c5b9ab;margin:0 0 16px;">New Work</p>'
     +'<h1 style="font-family:'+GS+';font-size:22px;font-weight:600;color:#111;line-height:1.2;margin:0 0 22px;letter-spacing:-.02em;">'+(subject||'New work.')+'</h1>'
@@ -2771,7 +2771,7 @@ function confirmCOASend(id){
 
       Promise.all([
         toDataURL(imgSrc),
-        toDataURL('https://jefferyasare.com/signature.png'),
+        toDataURL('https://jefferyasare.com/images/ui/signature.png'),
         toDataURL(qrUrl)
       ]).then(function(dURLs){
         var artDataURL = dURLs[0];
@@ -2787,7 +2787,7 @@ function confirmCOASend(id){
           : '<div style="font-family:&quot;General Sans&quot;,system-ui,-apple-system,sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
       var html = '<div class="cert-header">'
-        +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
+        +'<span class="cert-brand"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
         +'<span class="cert-ref">'+coaRefNum+'</span>'
         +'</div>'
         +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'
@@ -3215,7 +3215,7 @@ document.getElementById('coa-send').addEventListener('click', function(){
 
       Promise.all([
         toDataURL(imgSrc),
-        toDataURL('https://jefferyasare.com/signature.png'),
+        toDataURL('https://jefferyasare.com/images/ui/signature.png'),
         toDataURL(qrUrl)
       ]).then(function(dURLs){
         var artDataURL = dURLs[0];
@@ -3231,7 +3231,7 @@ document.getElementById('coa-send').addEventListener('click', function(){
           : '<div style="font-family:&quot;General Sans&quot;,system-ui,-apple-system,sans-serif;font-size:1.3rem;font-style:italic;padding-bottom:.3rem;border-bottom:1px solid #111;">Jeffery Asare</div>';
 
         var html = '<div class="cert-header">'
-          +'<span class="cert-brand"><img src="/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
+          +'<span class="cert-brand"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="cert-brand-logo"></span>'
           +'<span class="cert-ref">'+coaRefNum+'</span>'
           +'</div>'
           +'<h1 class="cert-title">Certificate<br>of Authenticity</h1>'

@@ -1011,7 +1011,7 @@ document.getElementById('coa-send').addEventListener('click', function(){
     print_paper:v('coa-paper')||'', print_edition:edStr, print_num:pNum,
     print_img:v('coa-img')||'', coa_ref:coaRef(), date:todayStr(),
     qr_url:qrUrl, print_url:pUrl,
-    signature_url:'https://jefferyasare.com/signature.png', site_url:SITE_URL
+    signature_url:'https://jefferyasare.com/images/ui/signature.png', site_url:SITE_URL
   },'coa-send','coa-status',['coa-email','coa-name','coa-title','coa-series','coa-size','coa-paper','coa-edition','coa-printnum','coa-img']);
   logToSheet({action:'COA Sent',buyer_name:v('coa-name'),buyer_email:v('coa-email'),print_title:v('coa-title'),size:v('coa-size'),country:'',notes:edStr,order_ref:''});
 });
