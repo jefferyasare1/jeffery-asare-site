@@ -1349,7 +1349,6 @@ function switchTab(name){
 // ══════════════════════════════════════════════════════════════
 var _anLoaded = false;
 var _anDays   = 7;
-var AN_TOKEN  = 'cfut_jtpHipAbF1lJxq6DwOauLmWKohdhratk73VzduQS0f86c8a9';
 var AN_SITE   = '6b50b64b1c014798bc7c501263e735a9';
 var AN_ACCT   = 'b3b955e91bdbfb8b1a8a44485418ed7f';
 
@@ -1406,10 +1405,10 @@ function anLoad(days){
           orderBy: [sum_visits_DESC]
         ) {
           sum { visits }
-          dimensions { countryName }
+          dimensions { clientCountryName }
         }
         referrers: rumWebsiteMetricsAdaptiveGroups(
-          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"},{refererHost_neq: "jefferyasare.com"},{refererHost_neq: ""}]}
+          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
           limit: 10
           orderBy: [sum_visits_DESC]
         ) {
@@ -1420,11 +1419,11 @@ function anLoad(days){
     }
   }`;
 
-  fetch('https://api.cloudflare.com/client/v4/graphql', {
+  fetch('/api/analytics', {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer ' + AN_TOKEN,
-      'Content-Type':  'application/json'
+      'Content-Type':    'application/json',
+      'X-Dashboard-Key': 'jA9kx2vP7m'
     },
     body: JSON.stringify({ query: query })
   })
@@ -1453,7 +1452,7 @@ function anLoad(days){
 
     // ── Countries ──
     anRenderRows('an-countries', acct.countries, function(r){
-      return { label: r.dimensions.countryName || 'Unknown', value: r.sum.visits };
+      return { label: r.dimensions.clientCountryName || 'Unknown', value: r.sum.visits };
     });
 
     // ── Referrers ──
