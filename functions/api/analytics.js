@@ -6,9 +6,11 @@
  * bypassing the browser's CORS restriction.
  *
  * Called only from dashboard.html (protected by dashboard password).
+ *
+ * Required environment variable (set in Cloudflare Pages → Settings → Variables):
+ *   CF_TOKEN — a Cloudflare API token with Analytics:Read permission
  */
 
-const CF_TOKEN   = 'cfut_jtpHipAbF1lJxq6DwOauLmWKohdhratk73VzduQS0f86c8a9';
 const ALLOWED_KEY = 'jA9kx2vP7m'; // matches the dashboard secret URL key
 
 const CORS_HEADERS = {
@@ -24,6 +26,15 @@ export async function onRequestOptions() {
 
 // Handle the actual POST from dashboard.html
 export async function onRequestPost(context) {
+  // Read token from environment variable (never hardcoded)
+  const CF_TOKEN = context.env.CF_TOKEN;
+  if (!CF_TOKEN) {
+    return new Response(JSON.stringify({ error: 'Server misconfiguration: CF_TOKEN not set' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    });
+  }
+
   // Basic auth — require the dashboard key header
   const key = context.request.headers.get('X-Dashboard-Key');
   if (key !== ALLOWED_KEY) {
