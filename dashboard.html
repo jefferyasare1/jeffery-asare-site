@@ -548,6 +548,10 @@
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
       Clients
     </button>
+    <button class="sn-item" id="sn-analytics" onclick="switchTab('analytics')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 14 7 9 11 13 18 6"/><line x1="15" y1="6" x2="18" y2="6"/><line x1="18" y1="6" x2="18" y2="9"/></svg>
+      Analytics
+    </button>
   </div>
 </nav>
 
@@ -628,6 +632,64 @@
   ════════════════════════════════════ -->
   <div class="panel" id="panel-clients">
     <div id="clientsList"><div class="empty-state"><p>Completed orders will appear here once a follow-up has been sent.</p></div></div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       ANALYTICS
+  ════════════════════════════════════ -->
+  <div class="panel" id="panel-analytics">
+    <style>
+      .an-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+      .an-title{font-size:20px;font-weight:600;letter-spacing:-.02em;}
+      .an-range{display:flex;gap:6px;}
+      .an-range button{font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;padding:5px 12px;border-radius:20px;border:1.5px solid #d8d5d1;background:transparent;cursor:pointer;color:#555;transition:all .15s;}
+      .an-range button.active{background:#111;color:#fff;border-color:#111;}
+      .an-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+      .an-stat{background:#faf9f7;border:1px solid #ede9e4;border-radius:10px;padding:16px 18px;}
+      .an-stat-val{font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1;}
+      .an-stat-lbl{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-top:6px;}
+      .an-section{margin-bottom:24px;}
+      .an-section-title{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#888;margin-bottom:10px;}
+      .an-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0ede9;font-size:13px;}
+      .an-row:last-child{border-bottom:none;}
+      .an-row-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333;}
+      .an-row-bar-wrap{width:90px;height:5px;background:#ede9e4;border-radius:3px;flex-shrink:0;}
+      .an-row-bar{height:5px;background:#111;border-radius:3px;}
+      .an-row-count{width:42px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:#555;flex-shrink:0;}
+      .an-loading{color:#aaa;font-size:13px;padding:20px 0;}
+      .an-error{color:#c0392b;font-size:13px;padding:12px 0;}
+      .an-cf-link{display:inline-block;margin-top:20px;font-size:12px;color:#555;text-decoration:none;border-bottom:1px solid #ccc;}
+      .an-cf-link:hover{color:#111;border-color:#111;}
+    </style>
+
+    <div class="an-header">
+      <span class="an-title">Analytics</span>
+      <div class="an-range">
+        <button id="an-btn-7" class="active" onclick="anLoad(7)">7 days</button>
+        <button id="an-btn-30" onclick="anLoad(30)">30 days</button>
+      </div>
+    </div>
+
+    <div class="an-stats" id="an-stats">
+      <div class="an-stat"><div class="an-stat-val an-loading">—</div><div class="an-stat-lbl">Visits</div></div>
+      <div class="an-stat"><div class="an-stat-val an-loading">—</div><div class="an-stat-lbl">Page Views</div></div>
+      <div class="an-stat"><div class="an-stat-val an-loading">—</div><div class="an-stat-lbl">Unique Visitors</div></div>
+    </div>
+
+    <div class="an-section">
+      <div class="an-section-title">Top Pages</div>
+      <div id="an-pages"><div class="an-loading">Loading…</div></div>
+    </div>
+    <div class="an-section">
+      <div class="an-section-title">Top Countries</div>
+      <div id="an-countries"><div class="an-loading">Loading…</div></div>
+    </div>
+    <div class="an-section">
+      <div class="an-section-title">Top Referrers</div>
+      <div id="an-referrers"><div class="an-loading">Loading…</div></div>
+    </div>
+
+    <a class="an-cf-link" href="https://dash.cloudflare.com/b3b955e91bdbfb8b1a8a44485418ed7f/web-analytics/overview?siteTag=6b50b64b1c014798bc7c501263e735a9" target="_blank" rel="noopener">View full report in Cloudflare →</a>
   </div>
 
   <!-- ════════════════════════════════════
@@ -1279,6 +1341,164 @@ function switchTab(name){
   if(name === 'actions') renderActionsPanel();
   if(name === 'newsletter') nlInit();
   if(name === 'messages') msgInit();
+  if(name === 'analytics') anInit();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANALYTICS  (Cloudflare Web Analytics via GraphQL)
+// ══════════════════════════════════════════════════════════════
+var _anLoaded = false;
+var _anDays   = 7;
+var AN_TOKEN  = 'cfut_jtpHipAbF1lJxq6DwOauLmWKohdhratk73VzduQS0f86c8a9';
+var AN_SITE   = '6b50b64b1c014798bc7c501263e735a9';
+var AN_ACCT   = 'b3b955e91bdbfb8b1a8a44485418ed7f';
+
+function anInit(){
+  if(_anLoaded) return;
+  _anLoaded = true;
+  anLoad(_anDays);
+}
+
+function anLoad(days){
+  _anDays = days;
+  _anLoaded = true;
+
+  // update range buttons
+  document.querySelectorAll('.an-range button').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('an-btn-' + days);
+  if(btn) btn.classList.add('active');
+
+  // reset UI
+  document.getElementById('an-stats').innerHTML =
+    '<div class="an-stat"><div class="an-stat-val">—</div><div class="an-stat-lbl">Visits</div></div>' +
+    '<div class="an-stat"><div class="an-stat-val">—</div><div class="an-stat-lbl">Page Views</div></div>' +
+    '<div class="an-stat"><div class="an-stat-val">—</div><div class="an-stat-lbl">Unique Visitors</div></div>';
+  ['an-pages','an-countries','an-referrers'].forEach(function(id){
+    document.getElementById(id).innerHTML = '<div class="an-loading">Loading…</div>';
+  });
+
+  // date range
+  var end   = new Date();
+  var start = new Date(); start.setDate(start.getDate() - days);
+  function fmt(d){ return d.toISOString().slice(0,10); }
+
+  var query = `{
+    viewer {
+      accounts(filter: {accountTag: "${AN_ACCT}"}) {
+        total: rumWebsiteMetricsAdaptiveGroups(
+          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
+          limit: 1
+        ) {
+          sum { visits pageViews }
+          uniq { uniques }
+        }
+        pages: rumPageloadEventsAdaptiveGroups(
+          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
+          limit: 10
+          orderBy: [count_DESC]
+        ) {
+          count
+          dimensions { requestPath }
+        }
+        countries: rumWebsiteMetricsAdaptiveGroups(
+          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
+          limit: 10
+          orderBy: [sum_visits_DESC]
+        ) {
+          sum { visits }
+          dimensions { countryName }
+        }
+        referrers: rumWebsiteMetricsAdaptiveGroups(
+          filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"},{refererHost_neq: "jefferyasare.com"},{refererHost_neq: ""}]}
+          limit: 10
+          orderBy: [sum_visits_DESC]
+        ) {
+          sum { visits }
+          dimensions { refererHost }
+        }
+      }
+    }
+  }`;
+
+  fetch('https://api.cloudflare.com/client/v4/graphql', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + AN_TOKEN,
+      'Content-Type':  'application/json'
+    },
+    body: JSON.stringify({ query: query })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(json){
+    if(json.errors){
+      anError('API error: ' + json.errors[0].message);
+      return;
+    }
+    var acct = json.data.viewer.accounts[0];
+
+    // ── Totals ──
+    var tot = (acct.total && acct.total[0]) || null;
+    var visits    = tot ? anFmt(tot.sum.visits)    : '0';
+    var pageViews = tot ? anFmt(tot.sum.pageViews) : '0';
+    var uniques   = tot ? anFmt(tot.uniq.uniques)  : '0';
+    document.getElementById('an-stats').innerHTML =
+      '<div class="an-stat"><div class="an-stat-val">' + visits    + '</div><div class="an-stat-lbl">Visits</div></div>' +
+      '<div class="an-stat"><div class="an-stat-val">' + pageViews + '</div><div class="an-stat-lbl">Page Views</div></div>' +
+      '<div class="an-stat"><div class="an-stat-val">' + uniques   + '</div><div class="an-stat-lbl">Unique Visitors</div></div>';
+
+    // ── Pages ──
+    anRenderRows('an-pages', acct.pages, function(r){
+      return { label: r.dimensions.requestPath || '/', value: r.count };
+    });
+
+    // ── Countries ──
+    anRenderRows('an-countries', acct.countries, function(r){
+      return { label: r.dimensions.countryName || 'Unknown', value: r.sum.visits };
+    });
+
+    // ── Referrers ──
+    anRenderRows('an-referrers', acct.referrers, function(r){
+      return { label: r.dimensions.refererHost || 'Direct', value: r.sum.visits };
+    });
+  })
+  .catch(function(err){
+    anError('Could not load analytics. Check your connection.');
+    console.error('Analytics fetch error:', err);
+  });
+}
+
+function anFmt(n){
+  n = parseInt(n) || 0;
+  if(n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return n.toString();
+}
+
+function anRenderRows(id, rows, mapper){
+  var el = document.getElementById(id);
+  if(!rows || !rows.length){
+    el.innerHTML = '<div class="an-loading">No data yet.</div>';
+    return;
+  }
+  var mapped = rows.map(mapper).filter(function(r){ return r.label; });
+  if(!mapped.length){
+    el.innerHTML = '<div class="an-loading">No data yet.</div>';
+    return;
+  }
+  var max = mapped[0].value || 1;
+  el.innerHTML = mapped.map(function(r){
+    var pct = Math.round((r.value / max) * 100);
+    return '<div class="an-row">' +
+      '<span class="an-row-label" title="' + r.label + '">' + r.label + '</span>' +
+      '<span class="an-row-bar-wrap"><span class="an-row-bar" style="width:' + pct + '%"></span></span>' +
+      '<span class="an-row-count">' + anFmt(r.value) + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function anError(msg){
+  ['an-pages','an-countries','an-referrers'].forEach(function(id){
+    document.getElementById(id).innerHTML = '<div class="an-error">' + msg + '</div>';
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
