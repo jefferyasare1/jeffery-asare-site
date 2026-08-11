@@ -1384,12 +1384,12 @@ function anLoad(days){
   var query = `{
     viewer {
       accounts(filter: {accountTag: "${AN_ACCT}"}) {
-        total: rumWebsiteMetricsAdaptiveGroups(
+        total: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
           limit: 1
         ) {
-          sum { visits pageViews }
-          uniq { uniques }
+          count
+          sum { visits }
         }
         pages: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
@@ -1399,15 +1399,15 @@ function anLoad(days){
           count
           dimensions { requestPath }
         }
-        countries: rumWebsiteMetricsAdaptiveGroups(
+        countries: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
           limit: 10
           orderBy: [sum_visits_DESC]
         ) {
           sum { visits }
-          dimensions { clientCountryName }
+          dimensions { countryName }
         }
-        referrers: rumWebsiteMetricsAdaptiveGroups(
+        referrers: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
           limit: 10
           orderBy: [sum_visits_DESC]
@@ -1437,13 +1437,11 @@ function anLoad(days){
 
     // ── Totals ──
     var tot = (acct.total && acct.total[0]) || null;
-    var visits    = tot ? anFmt(tot.sum.visits)    : '0';
-    var pageViews = tot ? anFmt(tot.sum.pageViews) : '0';
-    var uniques   = tot ? anFmt(tot.uniq.uniques)  : '0';
+    var visits    = tot ? anFmt(tot.sum.visits) : '0';
+    var pageViews = tot ? anFmt(tot.count)      : '0';
     document.getElementById('an-stats').innerHTML =
       '<div class="an-stat"><div class="an-stat-val">' + visits    + '</div><div class="an-stat-lbl">Visits</div></div>' +
-      '<div class="an-stat"><div class="an-stat-val">' + pageViews + '</div><div class="an-stat-lbl">Page Views</div></div>' +
-      '<div class="an-stat"><div class="an-stat-val">' + uniques   + '</div><div class="an-stat-lbl">Unique Visitors</div></div>';
+      '<div class="an-stat"><div class="an-stat-val">' + pageViews + '</div><div class="an-stat-lbl">Page Views</div></div>';
 
     // ── Pages ──
     anRenderRows('an-pages', acct.pages, function(r){
@@ -1452,7 +1450,7 @@ function anLoad(days){
 
     // ── Countries ──
     anRenderRows('an-countries', acct.countries, function(r){
-      return { label: r.dimensions.clientCountryName || 'Unknown', value: r.sum.visits };
+      return { label: r.dimensions.countryName || 'Unknown', value: r.sum.visits };
     });
 
     // ── Referrers ──
