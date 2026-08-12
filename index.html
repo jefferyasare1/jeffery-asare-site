@@ -204,28 +204,25 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .ph-red{background:linear-gradient(160deg,#3a0808,#c84020);}
 .ph-gold{background:linear-gradient(160deg,#c88020,#8b6010);}
 .ph-grn{background:linear-gradient(160deg,#082808,#406820);}
-/* LIGHTBOX — split panel editorial */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;}
+/* LIGHTBOX — cinematic overlay */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:500;align-items:center;justify-content:center;}
 .lightbox.open{display:flex;}
-.lb-panel{display:flex;width:min(1040px,96vw);height:min(640px,90vh);border-radius:4px;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.75);}
-.lb-left{flex:0 0 62%;background:#0f0f0f;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.lb-right{flex:1;background:#0a0a0a;border-left:1px solid #191919;display:flex;flex-direction:column;padding:22px 22px 18px;overflow:hidden;}
-.lb-rhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
-.lb-count{font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.22);}
-.lb-close{background:none;border:none;color:rgba(255,255,255,.3);font-size:20px;cursor:pointer;line-height:1;padding:0;}
+.lb-cin{position:relative;width:min(920px,96vw);height:min(660px,90vh);border-radius:3px;overflow:hidden;background:#080808;}
+#lbImgWrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.lb-img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+.lb-cin-top{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.55) 0%,transparent 100%);pointer-events:none;}
+.lb-cin-top button{pointer-events:all;}
+.lb-count{font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.3);}
+.lb-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;line-height:1;padding:0;transition:color .2s;}
 .lb-close:hover{color:#fff;}
-.lb-series{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:5px;}
-.lb-title{font-family:var(--title);font-size:19px;font-weight:400;color:#fff;line-height:1.2;margin-bottom:5px;}
-.lb-sub{font-size:11px;color:rgba(255,255,255,.32);letter-spacing:.05em;margin-bottom:20px;}
-.lb-rule{height:1px;background:#181818;margin-bottom:16px;}
-.lb-desc{font-size:12.5px;color:rgba(255,255,255,.48);line-height:1.8;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;font-style:italic;}
-.lb-foot{margin-top:16px;padding-top:12px;border-top:1px solid #181818;display:flex;justify-content:space-between;}
-.lb-device{font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.04em;}
-.lb-format-val{font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.04em;}
-.lb-img{max-width:92%;max-height:92%;object-fit:contain;display:block;}
-.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(255,255,255,.15);width:36px;height:36px;border-radius:50%;color:rgba(255,255,255,.4);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2;}
-.lb-arrow:hover{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.3);}
-.lb-prev{left:12px;}.lb-next{right:12px;}
+.lb-cin-gradient{position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(to top,rgba(0,0,0,.96) 0%,rgba(0,0,0,.3) 60%,transparent 100%);pointer-events:none;}
+.lb-cin-bottom{position:absolute;bottom:0;left:0;right:0;padding:20px 24px 26px;}
+.lb-series{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px;}
+.lb-title{font-family:var(--title);font-size:clamp(18px,2.4vw,26px);font-weight:400;color:#fff;line-height:1.2;margin-bottom:5px;}
+.lb-sub{font-size:11px;color:rgba(255,255,255,.42);letter-spacing:.05em;}
+.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);width:38px;height:38px;border-radius:50%;color:rgba(255,255,255,.45);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2;}
+.lb-arrow:hover{background:rgba(0,0,0,.6);color:#fff;border-color:rgba(255,255,255,.35);}
+.lb-prev{left:14px;}.lb-next{right:14px;}
 .detail-back{padding:1.2rem var(--pad);font-size:12px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--sans);display:flex;align-items:center;gap:.4rem;}
 .detail-back:hover{color:var(--ink);}
 .detail-hero-ph{width:100%;height:60vh;display:flex;align-items:center;justify-content:center;background:var(--warm);}
@@ -569,11 +566,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 @keyframes lbCrossIn{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
 @keyframes lbCrossOut{to{opacity:0;transform:scale(1.02);}}
 /* ── LIGHTBOX RESPONSIVE ── */
-@media(max-width:700px){
-  .lb-panel{flex-direction:column;}
-  .lb-left{flex:0 0 55%;min-height:0;}
-  .lb-right{flex:1;padding:16px 16px 14px;}
-  .lb-desc{-webkit-line-clamp:4;}
+@media(max-width:600px){
+  .lb-cin{width:100vw;height:100dvh;border-radius:0;}
+  .lb-cin-bottom{padding:16px 18px 22px;}
 }
 
 /* ── WORD REVEAL (about headline) ── */
@@ -853,26 +848,19 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
-  <div class="lb-panel">
-    <div class="lb-left">
-      <div id="lbImgWrap"></div>
-      <button class="lb-arrow lb-prev" id="lbPrevBtn">&#8249;</button>
-      <button class="lb-arrow lb-next" id="lbNextBtn">&#8250;</button>
+  <div class="lb-cin">
+    <div id="lbImgWrap"></div>
+    <div class="lb-cin-top">
+      <span class="lb-count" id="lbCount">1 / 1</span>
+      <button class="lb-close" id="lbCloseBtn">&#10005;</button>
     </div>
-    <div class="lb-right">
-      <div class="lb-rhead">
-        <span class="lb-count" id="lbCount">1 / 1</span>
-        <button class="lb-close" id="lbCloseBtn">&#10005;</button>
-      </div>
+    <button class="lb-arrow lb-prev" id="lbPrevBtn">&#8249;</button>
+    <button class="lb-arrow lb-next" id="lbNextBtn">&#8250;</button>
+    <div class="lb-cin-gradient"></div>
+    <div class="lb-cin-bottom">
       <div class="lb-series" id="lbSeries"></div>
       <div class="lb-title" id="lbTitle"></div>
       <div class="lb-sub" id="lbSub"></div>
-      <div class="lb-rule"></div>
-      <div class="lb-desc" id="lbDesc"></div>
-      <div class="lb-foot">
-        <span class="lb-device" id="lbDevice"></span>
-        <span class="lb-format-val" id="lbFormat"></span>
-      </div>
     </div>
   </div>
 </div>
@@ -1648,9 +1636,6 @@ function updateLightbox(crossfade){
       series=document.getElementById("lbSeries"),
       title=document.getElementById("lbTitle"),
       sub=document.getElementById("lbSub"),
-      desc=document.getElementById("lbDesc"),
-      device=document.getElementById("lbDevice"),
-      fmt=document.getElementById("lbFormat"),
       wrap=document.getElementById("lbImgWrap");
   if(count)  count.textContent=(currentLbIdx+1)+" / "+currentLbPhotos.length;
   if(series){
@@ -1658,13 +1643,10 @@ function updateLightbox(crossfade){
     series.textContent=sl?sl.label:(p.series||'').replace(/-/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
   }
   if(title)  title.textContent=p.title;
-  if(sub)    sub.textContent=p.loc+"\u2002\u00b7\u2002"+p.date;
-  if(desc)   desc.textContent=p.desc?"\u201c"+p.desc+"\u201d":'';
-  if(device) device.textContent=p.tech&&p.tech[0]?p.tech[0][1]:'';
-  if(fmt)    fmt.textContent=p.tech&&p.tech[1]?p.tech[1][1]+(p.tech[2]&&p.tech[2][1]?'\u2002\u00b7\u2002'+p.tech[2][1]:''):'';
+  if(sub)    sub.textContent=(p.loc?p.loc+"\u2002\u00b7\u2002":"")+p.date;
   if(!wrap) return;
   var newImg=p.img
-    ?"<img class=\"lb-img lb-img-current\" src=\""+p.img+"\" alt=\""+p.title+"\">"
+    ?"<img class=\"lb-img lb-img-current\" src=\""+p.img+"\" alt=\""+p.title+"\" style=\"max-width:100%;max-height:100%;object-fit:contain;display:block;\">"
     :"<div class=\""+PH_C[currentLbIdx%PH_C.length]+" lb-img-current\" style=\"width:100%;height:100%;\"></div>";
   if(crossfade && wrap.firstElementChild){
     var old=wrap.firstElementChild;
