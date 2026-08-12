@@ -371,6 +371,15 @@
     .cms-status{font-size:12px;min-height:16px;}
     .cms-status.ok{color:var(--green);}
     .cms-status.err{color:var(--red);}
+    /* AI suggestion box */
+    .cms-ai-box{margin-top:12px;padding:14px 16px;background:#f0ede8;border:1px solid #ddd8d0;border-radius:var(--rb);display:none;}
+    .cms-ai-box.visible{display:block;}
+    .cms-ai-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .cms-ai-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+    .cms-ai-desc{font-size:12px;color:#555;line-height:1.55;margin-bottom:12px;}
+    .cms-ai-apply{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:var(--rb);cursor:pointer;}
+    .cms-ai-apply:hover{background:#374151;}
+    .cms-ai-loading{font-size:12px;color:var(--muted);font-style:italic;}
     /* Image upload */
     .img-upload-row{display:flex;gap:8px;align-items:center;}
     .img-upload-row input[type=text]{flex:1;min-width:0;}
@@ -925,8 +934,8 @@
         <div class="cms-field" style="margin-top:12px"><label>Tagline</label><textarea id="st-hero-desc" rows="2"></textarea></div>
         <div class="cms-section-title" style="font-size:11px;color:var(--muted);font-weight:600;margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;">Hero Images (1–5)</div>
         <div id="st-hero-imgs"></div>
-        <div class="cms-field"><label>About portrait photo</label><div class="img-upload-row"><input type="text" id="st-about-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-about-photo','st-about-photo-status')"></label></div><div class="cms-status" id="st-about-photo-status"></div></div>
-        <div class="cms-field"><label>Contact page photo</label><div class="img-upload-row"><input type="text" id="st-contact-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-contact-photo','st-contact-photo-status')"></label></div><div class="cms-status" id="st-contact-photo-status"></div></div>
+        <div class="cms-field"><label>About portrait photo</label><div class="img-upload-row"><input type="text" id="st-about-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-about-photo','st-about-photo-status',false,'about-portrait.jpg')"></label></div><div class="cms-status" id="st-about-photo-status"></div></div>
+        <div class="cms-field"><label>Contact page photo</label><div class="img-upload-row"><input type="text" id="st-contact-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-contact-photo','st-contact-photo-status',false,'contact-photo.jpg')"></label></div><div class="cms-status" id="st-contact-photo-status"></div></div>
         <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteHero()">Save Hero &amp; Images</button><div class="cms-status" id="cms-hero-status"></div></div>
       </div>
 
@@ -3863,8 +3872,14 @@ function cmsOpenPhotoEdit(idx){
     +'<div class="cms-field" style="margin-top:16px"><label>Description</label><textarea id="cms-ph-desc" rows="3">'+escH(p.desc||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Image</label>'
       +'<div class="img-upload-row"><input type="text" id="cms-ph-img" value="'+escAttr(p.img||'')+'" placeholder="filename.jpg or URL">'
-      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-ph-img\',\'cms-ph-upload-status\')"></label></div>'
-      +'<div class="cms-status" id="cms-ph-upload-status"></div></div>'
+      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-ph-img\',\'cms-ph-upload-status\',true)"></label></div>'
+      +'<div class="cms-status" id="cms-ph-upload-status"></div>'
+      +'<div class="cms-ai-box" id="cms-ph-ai-box">'
+        +'<div class="cms-ai-label">✦ AI Title Suggestion</div>'
+        +'<div class="cms-ai-title" id="cms-ph-ai-title"></div>'
+        +'<div class="cms-ai-desc" id="cms-ph-ai-desc"></div>'
+        +'<button class="cms-ai-apply" onclick="cmsApplyAiSuggestion()">Apply to fields</button>'
+      +'</div></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Device</label><input type="text" id="cms-ph-device" value="'+escAttr(p.device||'iPhone')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Edited in</label><input type="text" id="cms-ph-edited" value="'+escAttr(p.edited_in||'Lightroom Mobile')+'"></div></div>'
     +'<div class="cms-save-row" style="margin-top:20px"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePhoto('+JSON.stringify(idx)+',\''+escAttr(slug)+'\')">Save &amp; Publish</button>'
@@ -4011,23 +4026,85 @@ function cmsSaveSiteContact(){
 }
 
 // ── Image Upload ─────────────────────────────────────────────────
-function cmsUploadImg(input,targetId,statusId){
-  var file=input.files&&input.files[0]; if(!file) return;
-  var st=document.getElementById(statusId); if(st){st.className='cms-status';st.textContent='Uploading…';}
+
+// Resize + compress image to ≤1920px, 85% JPEG, then call cb(base64, mimeType)
+function compressForUpload(file, cb){
   var reader=new FileReader();
   reader.onload=function(e){
-    var base64=e.target.result.split(',')[1];
-    var safeName=file.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9.\-_]/g,'').replace(/\.{2,}/g,'.');
+    var img=new Image();
+    img.onload=function(){
+      var MAX=1920, w=img.width, h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      var canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var dataUrl=canvas.toDataURL('image/jpeg',0.85);
+      cb(dataUrl.split(',')[1],'image/jpeg');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// enableAi — show AI suggestion after upload (portfolio photos only)
+// forceName — override filename (about-portrait.jpg, contact-photo.jpg)
+function cmsUploadImg(input,targetId,statusId,enableAi,forceName){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var st=document.getElementById(statusId); if(st){st.className='cms-status';st.textContent='Compressing…';}
+  compressForUpload(file,function(base64,mime){
+    if(st){st.textContent='Uploading…';}
+    var safeName=forceName||(file.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9.\-_]/g,'').replace(/\.{2,}/g,'.'));
     fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({filename:safeName,content:base64})})
       .then(function(r){return r.json();})
       .then(function(d){
-        if(d.ok){var el=document.getElementById(targetId);if(el)el.value=d.path;if(st){st.className='cms-status ok';st.textContent='Uploaded ✓ — live in ~2 min';}}
-        else{if(st){st.className='cms-status err';st.textContent=(d.error||'Upload failed');}}
+        if(d.ok){
+          var el=document.getElementById(targetId); if(el)el.value=d.path;
+          if(st){st.className='cms-status ok';st.textContent='Uploaded ✓ — live in ~2 min';}
+          if(enableAi) cmsAiSuggest(base64);
+        } else {
+          if(st){st.className='cms-status err';st.textContent=(d.error||'Upload failed');}
+        }
       })
       .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
-  };
-  reader.readAsDataURL(file);
+  });
+}
+
+// Call /api/ai-suggest and show result in the AI box
+function cmsAiSuggest(base64){
+  var box=document.getElementById('cms-ph-ai-box'); if(!box) return;
+  var titleEl=document.getElementById('cms-ph-ai-title');
+  var descEl=document.getElementById('cms-ph-ai-desc');
+  box.className='cms-ai-box visible';
+  titleEl.innerHTML='<span class="cms-ai-loading">Thinking…</span>';
+  descEl.textContent='';
+  fetch('/api/ai-suggest?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({image:base64,mimeType:'image/jpeg'})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){
+        titleEl.textContent=d.title||'';
+        descEl.textContent=d.description||'';
+      } else {
+        titleEl.textContent='Could not suggest a title.';
+        descEl.textContent=d.error||'';
+      }
+    })
+    .catch(function(err){
+      titleEl.textContent='AI error: '+err.message;
+      descEl.textContent='';
+    });
+}
+
+// Copy AI suggestion into the title + description fields
+function cmsApplyAiSuggestion(){
+  var titleEl=document.getElementById('cms-ph-ai-title');
+  var descEl=document.getElementById('cms-ph-ai-desc');
+  var t=titleEl?titleEl.textContent.trim():'';
+  var d=descEl?descEl.textContent.trim():'';
+  if(t){var f=document.getElementById('cms-ph-title');if(f)f.value=t;}
+  if(d){var g=document.getElementById('cms-ph-desc');if(g)g.value=d;}
 }
 
 // ── Shared API write ────────────────────────────────────────────
