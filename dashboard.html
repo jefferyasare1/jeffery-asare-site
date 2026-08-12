@@ -371,6 +371,13 @@
     .cms-status{font-size:12px;min-height:16px;}
     .cms-status.ok{color:var(--green);}
     .cms-status.err{color:var(--red);}
+    /* Print size selector */
+    .cms-sizes-wrap{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+    .cms-size-row{display:flex;align-items:center;gap:12px;}
+    .cms-size-chk-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;min-width:44px;user-select:none;}
+    .cms-size-chk-lbl input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--ink);flex-shrink:0;}
+    .cms-size-price{width:160px;border:1.5px solid var(--rule);padding:7px 10px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);transition:border-color .15s;}
+    .cms-size-price:focus{border-color:var(--ink);}
     /* AI suggestion box */
     .cms-ai-box{margin-top:12px;padding:14px 16px;background:#f0ede8;border:1px solid #ddd8d0;border-radius:var(--rb);display:none;}
     .cms-ai-box.visible{display:block;}
@@ -3726,14 +3733,30 @@ function cmsMovePrint(idx,dir){
 
 function cmsOpenPrintEdit(idx){
   var isNew=(idx===null);
-  var print=isNew?{id:'s'+Date.now(),title:'',series:'',edition:'',img:''}:((_cmsData.prints&&_cmsData.prints.prints&&_cmsData.prints.prints[idx])||{});
+  var print=isNew?{id:'s'+Date.now(),title:'',series:'',edition:'',img:'',sizes:[]}:((_cmsData.prints&&_cmsData.prints.prints&&_cmsData.prints.prints[idx])||{});
+  var existSizes=print.sizes||[];
+  // Build size rows: A4, A3, A2, A1
+  var SIZE_LABELS=['A4','A3','A2','A1'];
+  var sizeRows=SIZE_LABELS.map(function(lbl){
+    var found=existSizes.find(function(s){return s.label===lbl;});
+    var chk=found?'checked':'';
+    var price=found?found.price:'';
+    var display=found?'':'display:none;';
+    return '<div class="cms-size-row" id="cms-sz-row-'+lbl+'">'
+      +'<label class="cms-size-chk-lbl"><input type="checkbox" id="cms-sz-chk-'+lbl+'" '+chk+' onchange="cmsSizeToggle(\''+lbl+'\')">'
+      +'<span>'+lbl+'</span></label>'
+      +'<input type="number" id="cms-sz-price-'+lbl+'" class="cms-size-price" placeholder="Price (GHC)" value="'+escAttr(String(price))+'" style="'+display+'">'
+      +'</div>';
+  }).join('');
   document.getElementById('cmsModalTitle').textContent=isNew?'New Print':'Edit Print';
   document.getElementById('cmsModalSub').textContent=isNew?'Add a new print to the shop.':'Changes update the shop listing.';
   document.getElementById('cmsModalBody').innerHTML=
     '<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div></div>'
-    +'<div class="cms-field" style="margin-top:16px"><label>Image</label>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Available Sizes <span class="opt">(check each size you offer)</span></label>'
+      +'<div class="cms-sizes-wrap">'+sizeRows+'</div></div>'
+    +'<div class="cms-field"><label>Image</label>'
       +'<div class="img-upload-row"><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-p-img\',\'cms-p-upload-status\')"></label></div>'
       +'<div class="cms-status" id="cms-p-upload-status"></div></div>'
@@ -3742,11 +3765,27 @@ function cmsOpenPrintEdit(idx){
   cmsOpenModal();
 }
 
+function cmsSizeToggle(lbl){
+  var chk=document.getElementById('cms-sz-chk-'+lbl);
+  var price=document.getElementById('cms-sz-price-'+lbl);
+  if(price) price.style.display=chk&&chk.checked?'':'none';
+}
+
 function cmsSavePrint(idx,printId){
   var st=document.getElementById('cms-p-status'); st.className='cms-status'; st.textContent='Saving…';
+  // Collect sizes
+  var SIZE_LABELS=['A4','A3','A2','A1'];
+  var sizes=[];
+  SIZE_LABELS.forEach(function(lbl){
+    var chk=document.getElementById('cms-sz-chk-'+lbl);
+    if(chk&&chk.checked){
+      var priceVal=parseFloat((document.getElementById('cms-sz-price-'+lbl)||{}).value)||0;
+      sizes.push({label:lbl,price:priceVal});
+    }
+  });
   var u={id:printId||('s'+Date.now()),title:document.getElementById('cms-p-title').value.trim(),
     series:document.getElementById('cms-p-series').value.trim(),edition:document.getElementById('cms-p-edition').value.trim(),
-    img:document.getElementById('cms-p-img').value.trim()};
+    img:document.getElementById('cms-p-img').value.trim(),sizes:sizes};
   if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
   var prints=(_cmsData.prints&&_cmsData.prints.prints)?_cmsData.prints.prints.slice():[];
   if(idx===null){prints.push(u);}else{prints[idx]=u;}
