@@ -4077,7 +4077,7 @@ function cmsAiSuggest(base64){
   var titleEl=document.getElementById('cms-ph-ai-title');
   var descEl=document.getElementById('cms-ph-ai-desc');
   box.className='cms-ai-box visible';
-  titleEl.innerHTML='<span class="cms-ai-loading">Claude &amp; Grok are thinking…</span>';
+  titleEl.innerHTML='<span class="cms-ai-loading">Thinking…</span>';
   descEl.textContent='';
   fetch('/api/ai-suggest?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({image:base64,mimeType:'image/jpeg'})})

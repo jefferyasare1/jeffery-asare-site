@@ -849,7 +849,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   <a id="mmPortBtn">Portfolio</a>
   <a id="mmShopBtn">Shop</a>
   <a id="mmContactBtn">Contact</a>
-  <span class="mobile-menu-foot">Jeffery Asare Â· Accra, Ghana</span>
+  <span class="mobile-menu-foot">Jeffery Asare · Accra, Ghana</span>
 </div>
 
 <!-- LIGHTBOX -->
@@ -867,9 +867,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
     <div class="lb-title" id="lbTitle"></div>
     <div class="lb-pix-meta">
       <span class="lb-series" id="lbSeries"></span>
-      <span class="lb-pix-sep">Â·</span>
+      <span class="lb-pix-sep">·</span>
       <span class="lb-pix-loc" id="lbLoc"></span>
-      <span class="lb-pix-sep">Â·</span>
+      <span class="lb-pix-sep">·</span>
       <span class="lb-pix-date" id="lbDate"></span>
     </div>
   </div>
@@ -1593,7 +1593,7 @@ function renderPhotoOfWeek(){
   var startOfYear=new Date(now.getFullYear(),0,1);
   var weekOfYear=Math.ceil(((now-startOfYear)/86400000+startOfYear.getDay()+1)/7);
   // Populate editorial spread
-  document.getElementById("potwWeek").textContent="Photo of the Week Â· Week "+String(weekOfYear).padStart(2,"0")+" Â· "+now.getFullYear();
+  document.getElementById("potwWeek").textContent="Photo of the Week · Week "+String(weekOfYear).padStart(2,"0")+" · "+now.getFullYear();
   document.getElementById("potwTitle").textContent=photo.title||"";
   document.getElementById("potwLoc").textContent=photo.loc||"";
   document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
@@ -1711,7 +1711,7 @@ function renderShop(page){
       +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">â»</div>'
       +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
       +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
-      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;Â·&nbsp; or get in touch</p>'
+      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;·&nbsp; or get in touch</p>'
       +'</div>';
     return;
   }
@@ -1778,7 +1778,7 @@ function renderShop(page){
     info.textContent="Page "+(page+1)+" of "+totalPages;
     var nextBtn=document.createElement("button");
     nextBtn.className="shop-page-btn";
-    nextBtn.textContent="Next â";
+    nextBtn.textContent="Next →";
     nextBtn.disabled=(page>=totalPages-1);
     nextBtn.addEventListener("click",function(){ renderShop(page+1); window.scrollTo(0,0); });
     pag.appendChild(prevBtn);
@@ -1821,7 +1821,7 @@ if(cForm){
         } else { if(err) err.style.display="block"; }
       })
       .catch(function(){ if(err) err.style.display="block"; })
-      .finally(function(){ if(btn){ btn.textContent="Send message â"; btn.disabled=false; } });
+      .finally(function(){ if(btn){ btn.textContent="Send message →"; btn.disabled=false; } });
   });
 }
 
@@ -1911,8 +1911,8 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
   var EASE=0.05;       // lerp factor for parallax shift
   var TILT=10;         // max tilt degrees
   var TILT_EASE=0.08;  // tilt follows cursor with slight lag
-  var S_PORT=12;  // portfolio Â±% shift
-  var S_POTW=24;  // POTW Â±% shift
+  var S_PORT=12;  // portfolio ±% shift
+  var S_POTW=24;  // POTW ±% shift
 
   var cards=[];
   var potwSh=0,potwTgt=0;
@@ -1923,7 +1923,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     var baseB=null, baseG=null;
     window.addEventListener("deviceorientation",function(e){
       if(baseB===null){ baseB=e.beta||0; baseG=e.gamma||0; }
-      // clamp to Â±25Â° from neutral position
+      // clamp to ±25° from neutral position
       gyroTy=Math.max(-.5,Math.min(.5,(e.beta -baseB)/25));
       gyroTx=Math.max(-.5,Math.min(.5,(e.gamma-baseG)/25));
       usingGyro=true;
@@ -2184,7 +2184,7 @@ function _buildJournalList(posts){
     var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
     return '<div class="journal-post" data-jid="'+p.id+'">'
       +(p.img?'<img class="journal-post-thumb" src="'+p.img+'" alt="'+p.title+'" loading="lazy">':'')
-      +'<div class="journal-post-meta">'+p.series+' &nbsp;Â·&nbsp; '+dateStr+'</div>'
+      +'<div class="journal-post-meta">'+p.series+' &nbsp;·&nbsp; '+dateStr+'</div>'
       +'<div class="journal-post-title">'+p.title+'</div>'
       +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
       +'</div>';
@@ -2215,7 +2215,7 @@ function _openJournalPost(post, posts){
   }).join('');
   if(content) content.innerHTML =
     (post.img?'<img style="width:100%;max-height:400px;object-fit:cover;margin-bottom:1.5rem;display:block;" src="'+post.img+'" alt="'+post.title+'" loading="lazy">':'')
-    +'<div class="journal-body-meta">'+post.series+' &nbsp;Â·&nbsp; '+dateStr+'</div>'
+    +'<div class="journal-body-meta">'+post.series+' &nbsp;·&nbsp; '+dateStr+'</div>'
     +'<h1 class="journal-body-title">'+post.title+'</h1>'
     +'<div class="journal-body-text">'+bodyHtml+'</div>';
   window.scrollTo(0,0);
@@ -2740,7 +2740,7 @@ function renderCartItems(){
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
-      +'<div class="cart-item-sub">'+item.size+' &nbsp;Â·&nbsp; Qty '+item.qty+'</div>'
+      +'<div class="cart-item-sub">'+item.size+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
       +'<div class="cart-item-price">'+priceStr+'</div>'
       +'<button class="cart-item-remove" data-id="'+item.print.id+'" data-size="'+item.size+'" onclick="removeFromCart(this.dataset.id,this.dataset.size)">Remove</button>'
       +'</div></div>';
@@ -2926,7 +2926,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
   var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var dateStr=months[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();
   var uniqueNum=String(Math.floor(1000+Math.random()*9000));
-  var coaRef="COA-"+uniqueNum+" Â· "+now.getFullYear();
+  var coaRef="COA-"+uniqueNum+" · "+now.getFullYear();
   var isSingle=items.length===1;
   var certDataArr=[]; // collects per-print data; email fires on Print click
 
@@ -3435,7 +3435,7 @@ function protectImages(){
   document.querySelectorAll('img').forEach(function(img){
     img.setAttribute('draggable','false');
     img.setAttribute('data-pin-nopin','true');
-    img.setAttribute('data-pin-description','Â© Jeffery Asare. All rights reserved');
+    img.setAttribute('data-pin-description','© Jeffery Asare. All rights reserved');
   });
 }
 protectImages();
