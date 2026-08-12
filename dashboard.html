@@ -374,10 +374,10 @@
     /* AI suggestion box */
     .cms-ai-box{margin-top:12px;padding:14px 16px;background:#f0ede8;border:1px solid #ddd8d0;border-radius:var(--rb);display:none;}
     .cms-ai-box.visible{display:block;}
-    .cms-ai-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-    .cms-ai-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
-    .cms-ai-desc{font-size:12px;color:#555;line-height:1.55;margin-bottom:12px;}
-    .cms-ai-apply{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:var(--rb);cursor:pointer;}
+    .cms-ai-header{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .cms-ai-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;min-height:18px;}
+    .cms-ai-desc{font-size:12px;color:#555;line-height:1.6;margin-bottom:12px;min-height:34px;}
+    .cms-ai-apply{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:var(--rb);cursor:pointer;font-family:var(--sans);}
     .cms-ai-apply:hover{background:#374151;}
     .cms-ai-loading{font-size:12px;color:var(--muted);font-style:italic;}
     /* Image upload */
@@ -3875,7 +3875,7 @@ function cmsOpenPhotoEdit(idx){
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-ph-img\',\'cms-ph-upload-status\',true)"></label></div>'
       +'<div class="cms-status" id="cms-ph-upload-status"></div>'
       +'<div class="cms-ai-box" id="cms-ph-ai-box">'
-        +'<div class="cms-ai-label">✦ AI Title Suggestion</div>'
+        +'<div class="cms-ai-header">✦ AI Suggestion</div>'
         +'<div class="cms-ai-title" id="cms-ph-ai-title"></div>'
         +'<div class="cms-ai-desc" id="cms-ph-ai-desc"></div>'
         +'<button class="cms-ai-apply" onclick="cmsApplyAiSuggestion()">Apply to fields</button>'
@@ -4071,13 +4071,13 @@ function cmsUploadImg(input,targetId,statusId,enableAi,forceName){
   });
 }
 
-// Call /api/ai-suggest and show result in the AI box
+// Call /api/ai-suggest — Claude + Grok run in parallel on the server, synthesised into one result
 function cmsAiSuggest(base64){
   var box=document.getElementById('cms-ph-ai-box'); if(!box) return;
   var titleEl=document.getElementById('cms-ph-ai-title');
   var descEl=document.getElementById('cms-ph-ai-desc');
   box.className='cms-ai-box visible';
-  titleEl.innerHTML='<span class="cms-ai-loading">Thinking…</span>';
+  titleEl.innerHTML='<span class="cms-ai-loading">Claude &amp; Grok are thinking…</span>';
   descEl.textContent='';
   fetch('/api/ai-suggest?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({image:base64,mimeType:'image/jpeg'})})
@@ -4087,24 +4087,22 @@ function cmsAiSuggest(base64){
         titleEl.textContent=d.title||'';
         descEl.textContent=d.description||'';
       } else {
-        titleEl.textContent='Could not suggest a title.';
-        descEl.textContent=d.error||'';
+        titleEl.innerHTML='<span style="color:var(--red)">'+escH(d.error||'Could not generate suggestion')+'</span>';
+        descEl.textContent='';
       }
     })
     .catch(function(err){
-      titleEl.textContent='AI error: '+err.message;
+      titleEl.innerHTML='<span style="color:var(--red)">'+escH(err.message)+'</span>';
       descEl.textContent='';
     });
 }
 
-// Copy AI suggestion into the title + description fields
+// Copy the synthesised suggestion into the title + description fields
 function cmsApplyAiSuggestion(){
-  var titleEl=document.getElementById('cms-ph-ai-title');
-  var descEl=document.getElementById('cms-ph-ai-desc');
-  var t=titleEl?titleEl.textContent.trim():'';
-  var d=descEl?descEl.textContent.trim():'';
-  if(t){var f=document.getElementById('cms-ph-title');if(f)f.value=t;}
-  if(d){var g=document.getElementById('cms-ph-desc');if(g)g.value=d;}
+  var t=(document.getElementById('cms-ph-ai-title')||{}).textContent||'';
+  var d=(document.getElementById('cms-ph-ai-desc')||{}).textContent||'';
+  if(t.trim()){var f=document.getElementById('cms-ph-title');if(f)f.value=t.trim();}
+  if(d.trim()){var g=document.getElementById('cms-ph-desc');if(g)g.value=d.trim();}
 }
 
 // ── Shared API write ────────────────────────────────────────────
