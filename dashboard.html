@@ -1580,7 +1580,7 @@ function anLoad(days){
           orderBy: [count_DESC]
         ) {
           count
-          dimensions { requestUrl }
+          dimensions { requestPath }
         }
         countries: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
@@ -1628,10 +1628,8 @@ function anLoad(days){
 
     // ── Pages ──
     anRenderRows('an-pages', acct.pages, function(r){
-      var raw = (r.dimensions && (r.dimensions.requestUrl || r.dimensions.requestPath)) || '/';
-      // Strip domain, keep path+query, shorten to 50 chars
-      try { raw = new URL(raw).pathname + (new URL(raw).search || ''); } catch(e){}
-      if(raw.length > 50) raw = raw.slice(0, 47) + '…';
+      var raw = (r.dimensions && r.dimensions.requestPath) || '/';
+      if(raw.length > 60) raw = raw.slice(0, 57) + '…';
       return { label: raw, value: r.count };
     });
 
