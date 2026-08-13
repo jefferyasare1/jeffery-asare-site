@@ -3754,6 +3754,7 @@ function cmsOpenPrintEdit(idx){
     '<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div></div>'
+    +'<div class="cms-field" style="margin-top:16px"><label>Description <span class="opt">(shown on print detail)</span></label><textarea id="cms-p-desc" rows="3" style="width:100%;border:1.5px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);resize:vertical;">'+escH(print.desc||'')+'</textarea></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Available Sizes <span class="opt">(check each size you offer)</span></label>'
       +'<div class="cms-sizes-wrap">'+sizeRows+'</div></div>'
     +'<div class="cms-field"><label>Image</label>'
@@ -3785,6 +3786,7 @@ function cmsSavePrint(idx,printId){
   });
   var u={id:printId||('s'+Date.now()),title:document.getElementById('cms-p-title').value.trim(),
     series:document.getElementById('cms-p-series').value.trim(),edition:document.getElementById('cms-p-edition').value.trim(),
+    desc:(document.getElementById('cms-p-desc')||{}).value&&document.getElementById('cms-p-desc').value.trim()||'',
     img:document.getElementById('cms-p-img').value.trim(),sizes:sizes};
   if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
   var prints=(_cmsData.prints&&_cmsData.prints.prints)?_cmsData.prints.prints.slice():[];
