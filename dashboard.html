@@ -558,6 +558,10 @@
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6l-4 3V5a1 1 0 0 1 1-1Z"/></svg>
       Messages <span class="sn-badge" id="sn-messages-badge" style="display:none;"></span>
     </button>
+    <button class="sn-item" id="sn-reviews" onclick="switchTab('reviews')">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="10 2 12.4 7.5 18.5 8.2 14 12.3 15.3 18.3 10 15.4 4.7 18.3 6 12.3 1.5 8.2 7.6 7.5"/></svg>
+      Reviews <span class="sn-badge" id="sn-reviews-badge" style="display:none;"></span>
+    </button>
   </div>
   <div class="sn-bottom">
     <button class="sn-item" id="sn-clients" onclick="switchTab('clients')">
@@ -1137,6 +1141,25 @@
     </div>
   </div>
 
+  <!-- ── REVIEWS PANEL ── -->
+  <div class="panel" id="panel-reviews">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <h2 class="panel-title" style="margin-bottom:4px;">Reviews</h2>
+        <p class="panel-sub" style="margin-bottom:0;">Approve submissions before they go live on the site.</p>
+      </div>
+      <button class="btn-card" onclick="revInit(true)" style="font-size:11px;padding:6px 12px;">↻ Refresh</button>
+    </div>
+
+    <!-- Pending -->
+    <div class="section-label" style="margin-top:0;">Pending approval <span class="sn-badge" id="rev-pending-count" style="display:none;margin-left:6px;"></span></div>
+    <div id="rev-pending-list"><div class="aq-empty">Loading…</div></div>
+
+    <!-- Approved -->
+    <div class="section-label">Live on site</div>
+    <div id="rev-approved-list"><div class="aq-empty">Loading…</div></div>
+  </div>
+
 </div><!-- /page -->
 </div><!-- /dash-main -->
 </div><!-- /dash-layout -->
@@ -1358,6 +1381,149 @@ function switchTab(name){
   if(name === 'newsletter') nlInit();
   if(name === 'messages') msgInit();
   if(name === 'analytics') anInit();
+  if(name === 'reviews') revInit();
+}
+
+// ══════════════════════════════════════════════════════════════
+// REVIEWS
+// ══════════════════════════════════════════════════════════════
+var _revLoaded = false;
+var _revPending = [], _revApproved = [], _revPendingSha = null, _revApprovedSha = null;
+
+function revInit(force){
+  if(_revLoaded && !force) return;
+  _revLoaded = true;
+  document.getElementById('rev-pending-list').innerHTML = '<div class="aq-empty">Loading…</div>';
+  document.getElementById('rev-approved-list').innerHTML = '<div class="aq-empty">Loading…</div>';
+
+  Promise.all([
+    fetch(cmsApiUrl('pending-reviews')).then(function(r){return r.json();}),
+    fetch(cmsApiUrl('reviews')).then(function(r){return r.json();})
+  ]).then(function(results){
+    var pRes = results[0], aRes = results[1];
+    _revPending  = (pRes.ok && pRes.content && pRes.content.reviews)  ? pRes.content.reviews  : [];
+    _revApproved = (aRes.ok && aRes.content && aRes.content.reviews)  ? aRes.content.reviews  : [];
+    _revPendingSha  = pRes.sha  || null;
+    _revApprovedSha = aRes.sha  || null;
+    revRender();
+  }).catch(function(){
+    document.getElementById('rev-pending-list').innerHTML  = '<div class="aq-empty" style="color:var(--red)">Failed to load. Try refreshing.</div>';
+    document.getElementById('rev-approved-list').innerHTML = '<div class="aq-empty" style="color:var(--red)">Failed to load.</div>';
+  });
+}
+
+function revStars(n){ return '★'.repeat(n)+'☆'.repeat(5-n); }
+
+function revRender(){
+  // Badge
+  var badge = document.getElementById('rev-pending-count');
+  var snBadge = document.getElementById('sn-reviews-badge');
+  if(_revPending.length){
+    if(badge){ badge.textContent=_revPending.length; badge.style.display=''; }
+    if(snBadge){ snBadge.textContent=_revPending.length; snBadge.style.display=''; }
+  } else {
+    if(badge) badge.style.display='none';
+    if(snBadge) snBadge.style.display='none';
+  }
+
+  // Pending
+  var pel = document.getElementById('rev-pending-list');
+  if(!_revPending.length){
+    pel.innerHTML='<div class="aq-empty">No pending reviews.</div>';
+  } else {
+    pel.innerHTML = _revPending.map(function(r,i){
+      return '<div class="cms-item" style="align-items:flex-start;flex-direction:column;gap:10px;padding:14px 16px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">'
+          +'<div>'
+            +'<div class="aq-name">'+escH(r.name)+'</div>'
+            +'<div style="font-size:13px;color:#c8a870;letter-spacing:1px;margin:3px 0 2px;">'+revStars(r.rating)+'</div>'
+            +'<div class="aq-print" style="font-size:11px;color:#bbb;">'+escH(r.date||'')+'</div>'
+          +'</div>'
+          +'<div style="display:flex;gap:8px;flex-shrink:0;">'
+            +'<button class="btn-add" style="font-size:10px;padding:6px 14px;" onclick="revApprove('+i+')">Approve</button>'
+            +'<button class="btn-card danger" style="font-size:10px;padding:6px 12px;" onclick="revReject('+i+')">Reject</button>'
+          +'</div>'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.65;border-left:2px solid var(--rule);padding-left:12px;">'+escH(r.message)+'</div>'
+      +'</div>';
+    }).join('');
+  }
+
+  // Approved
+  var ael = document.getElementById('rev-approved-list');
+  if(!_revApproved.length){
+    ael.innerHTML='<div class="aq-empty">No approved reviews yet.</div>';
+  } else {
+    ael.innerHTML = _revApproved.slice().reverse().map(function(r,i){
+      var realIdx = _revApproved.length - 1 - i;
+      return '<div class="cms-item" style="align-items:flex-start;flex-direction:column;gap:8px;padding:14px 16px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">'
+          +'<div>'
+            +'<div class="aq-name">'+escH(r.name)+'</div>'
+            +'<div style="font-size:13px;color:#c8a870;letter-spacing:1px;margin:3px 0 2px;">'+revStars(r.rating)+'</div>'
+            +'<div class="aq-print" style="font-size:11px;color:#bbb;">'+escH(r.date||'')+'</div>'
+          +'</div>'
+          +'<button class="btn-card danger" style="font-size:10px;padding:6px 12px;" onclick="revDelete('+realIdx+')">Remove</button>'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.65;border-left:2px solid var(--rule);padding-left:12px;">'+escH(r.message)+'</div>'
+      +'</div>';
+    }).join('');
+  }
+}
+
+function revApprove(idx){
+  var review = _revPending[idx];
+  if(!review) return;
+  // Move from pending → approved
+  var newPending  = _revPending.slice();  newPending.splice(idx, 1);
+  var newApproved = _revApproved.concat([review]);
+
+  _savePendingAndApproved(newPending, newApproved, function(err){
+    if(err){ showDashModal('Could not approve: '+err); return; }
+    _revPending  = newPending;
+    _revApproved = newApproved;
+    revRender();
+  });
+}
+
+function revReject(idx){
+  var review = _revPending[idx];
+  if(!review) return;
+  showDashConfirm('Reject review from "'+review.name+'"? It will be permanently deleted.', 'Reject', function(){
+    var newPending = _revPending.slice(); newPending.splice(idx, 1);
+    cmsPut('pending-reviews', {reviews: newPending}, function(err, sha){
+      if(err){ showDashModal('Could not reject: '+err); return; }
+      _revPending = newPending;
+      if(sha) _revPendingSha = sha;
+      revRender();
+    });
+  });
+}
+
+function revDelete(idx){
+  var review = _revApproved[idx];
+  if(!review) return;
+  showDashConfirm('Remove "'+review.name+'"\'s review from the live site?', 'Remove', function(){
+    var newApproved = _revApproved.slice(); newApproved.splice(idx, 1);
+    cmsPut('reviews', {reviews: newApproved}, function(err, sha){
+      if(err){ showDashModal('Could not remove: '+err); return; }
+      _revApproved = newApproved;
+      if(sha) _revApprovedSha = sha;
+      revRender();
+    });
+  });
+}
+
+function _savePendingAndApproved(pending, approved, cb){
+  cmsPut('pending-reviews', {reviews: pending}, function(err, sha){
+    if(err){ cb(err); return; }
+    if(sha) _revPendingSha = sha;
+    cmsPut('reviews', {reviews: approved}, function(err2, sha2){
+      if(err2){ cb(err2); return; }
+      if(sha2) _revApprovedSha = sha2;
+      cb(null);
+    });
+  });
 }
 
 // ══════════════════════════════════════════════════════════════

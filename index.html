@@ -813,6 +813,40 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .currency-toggle button{background:none;border:none;padding:.35rem .9rem;font-size:11px;letter-spacing:.06em;font-family:var(--sans);cursor:pointer;color:var(--muted);transition:all .15s;}
 .currency-toggle button.cur-active{background:var(--ink);color:#fff;border-radius:999px;}
 .shop-controls{display:flex;align-items:center;justify-content:flex-end;padding:.5rem var(--pad) 1.5rem;}
+/* ── REVIEWS PAGE ── */
+.reviews-wrap{max-width:860px;margin:0 auto;padding:3rem var(--pad) 5rem;}
+.reviews-header{margin-bottom:3rem;}
+.reviews-header h1{font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin-bottom:.5rem;}
+.reviews-header p{font-size:13px;color:var(--muted);line-height:1.8;max-width:480px;}
+.review-cards{display:flex;flex-direction:column;gap:1.5rem;margin-bottom:3.5rem;}
+.review-card{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:1.5rem 1.8rem;}
+.review-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.8rem;}
+.review-stars{color:#c8a870;font-size:15px;letter-spacing:2px;line-height:1;}
+.review-name{font-size:14px;font-weight:600;color:var(--ink);}
+.review-date{font-size:11px;color:#bbb;margin-top:2px;}
+.review-msg{font-size:13px;color:#444;line-height:1.75;}
+.reviews-empty{text-align:center;padding:3rem 0;color:var(--muted);font-size:13px;}
+/* Submission form */
+.review-form-wrap{border-top:1px solid var(--rule);padding-top:2.5rem;}
+.review-form-wrap h2{font-family:var(--title);font-size:1.4rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.4rem;}
+.review-form-wrap p{font-size:12px;color:var(--muted);margin-bottom:1.8rem;}
+.star-picker{display:flex;gap:6px;margin-bottom:1.4rem;}
+.star-picker button{background:none;border:none;font-size:24px;cursor:pointer;padding:0;line-height:1;color:#ddd;transition:color .15s;}
+.star-picker button.lit{color:#c8a870;}
+.review-field{margin-bottom:1.2rem;}
+.review-field label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.review-field input,.review-field textarea{display:block;width:100%;border:1.5px solid var(--rule);padding:10px 13px;font-size:14px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:6px;transition:border-color .15s;}
+.review-field input:focus,.review-field textarea:focus{border-color:var(--ink);}
+.review-field textarea{resize:vertical;min-height:100px;}
+.review-submit{display:inline-flex;align-items:center;gap:.5rem;background:var(--ink);color:#fff;border:none;border-radius:999px;padding:.7rem 1.8rem;font-size:13px;font-family:var(--sans);cursor:pointer;transition:opacity .2s;}
+.review-submit:hover{opacity:.8;}
+.review-submit:disabled{opacity:.5;cursor:default;}
+.review-form-status{font-size:12px;margin-top:.9rem;min-height:16px;}
+.review-form-status.ok{color:#166534;}
+.review-form-status.err{color:#991b1b;}
+html.darkroom .review-card{background:#181614;border-color:#2e2a26;}
+html.darkroom .review-msg{color:#b0a89e;}
+html.darkroom .review-field input,html.darkroom .review-field textarea{background:#1a1814;border-color:#2e2a26;color:#e0d8cc;}
 </style>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -848,6 +882,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   <a id="mmAboutBtn">About</a>
   <a id="mmPortBtn">Portfolio</a>
   <a id="mmShopBtn">Shop</a>
+  <a id="mmReviewsBtn">Reviews</a>
   <a id="mmContactBtn">Contact</a>
   <span class="mobile-menu-foot">Jeffery Asare · Accra, Ghana</span>
 </div>
@@ -879,7 +914,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-home" class="page active">
   <nav style="color:#fff;">
     <span class="nav-logo" id="homeLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="homeAboutBtn">About</a></li><li><a id="homePortBtn">Portfolio</a></li><li><a id="homeShopBtn">Shop</a></li><li><a id="homeContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="homeAboutBtn">About</a></li><li><a id="homePortBtn">Portfolio</a></li><li><a id="homeShopBtn">Shop</a></li><li><a id="homeReviewsBtn">Reviews</a></li><li><a id="homeContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="homeHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </nav>
   <div class="hero">
@@ -945,7 +980,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-portfolio" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="portLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="portAboutBtn">About</a></li><li><a class="active-link">Portfolio</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="portAboutBtn">About</a></li><li><a class="active-link">Portfolio</a></li><li><a id="portShopBtn">Shop</a></li><li><a id="portReviewsBtn">Reviews</a></li><li><a id="portContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="portHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <!-- POTW EDITORIAL SPREAD -->
@@ -983,7 +1018,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-detail" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="detailLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="detailAboutBtn">About</a></li><li><a id="detailPortBtn">Portfolio</a></li><li><a id="detailShopBtn">Shop</a></li><li><a id="detailContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="detailAboutBtn">About</a></li><li><a id="detailPortBtn">Portfolio</a></li><li><a id="detailShopBtn">Shop</a></li><li><a id="detailReviewsBtn">Reviews</a></li><li><a id="detailContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="detailBackBtn">&#8592; Back</button>
   <div id="detailImgWrap"></div>
@@ -1007,7 +1042,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-about" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="aboutLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a class="active-link">About</a></li><li><a id="aboutPortBtn">Portfolio</a></li><li><a id="aboutShopBtn">Shop</a></li><li><a id="aboutContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a class="active-link">About</a></li><li><a id="aboutPortBtn">Portfolio</a></li><li><a id="aboutShopBtn">Shop</a></li><li><a id="aboutReviewsBtn">Reviews</a></li><li><a id="aboutContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="aboutHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="about-hero">
@@ -1073,7 +1108,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-shop" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="shopLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="shopAboutBtn">About</a></li><li><a id="shopPortBtn">Portfolio</a></li><li><a class="active-link">Shop</a></li><li><a id="shopContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="shopAboutBtn">About</a></li><li><a id="shopPortBtn">Portfolio</a></li><li><a class="active-link">Shop</a></li><li><a id="shopReviewsBtn">Reviews</a></li><li><a id="shopContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="shopHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="page-header">
@@ -1089,7 +1124,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-contact" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="contactLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="contactAboutBtn">About</a></li><li><a id="contactPortBtn">Portfolio</a></li><li><a id="contactShopBtn">Shop</a></li><li><a class="active-link">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="contactAboutBtn">About</a></li><li><a id="contactPortBtn">Portfolio</a></li><li><a id="contactShopBtn">Shop</a></li><li><a id="contactReviewsBtn">Reviews</a></li><li><a class="active-link">Contact</a></li></ul>
     <button class="ham-btn" id="contactHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="contact-body">
@@ -1134,7 +1169,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-terms" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="termsLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="termsAboutBtn">About</a></li><li><a id="termsPortBtn">Portfolio</a></li><li><a id="termsShopBtn">Shop</a></li><li><a id="termsContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="termsAboutBtn">About</a></li><li><a id="termsPortBtn">Portfolio</a></li><li><a id="termsShopBtn">Shop</a></li><li><a id="termsReviewsBtn">Reviews</a></li><li><a id="termsContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="termsHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="terms-wrap">
@@ -1158,7 +1193,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-privacy" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="privLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="privAboutBtn">About</a></li><li><a id="privPortBtn">Portfolio</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="privAboutBtn">About</a></li><li><a id="privPortBtn">Portfolio</a></li><li><a id="privShopBtn">Shop</a></li><li><a id="privReviewsBtn">Reviews</a></li><li><a id="privContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="privHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="terms-wrap">
@@ -1183,7 +1218,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-journal" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="journLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="journAboutBtn">About</a></li><li><a id="journPortBtn">Portfolio</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="journAboutBtn">About</a></li><li><a id="journPortBtn">Portfolio</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journReviewsBtn">Reviews</a></li><li><a id="journContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="journHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <!-- Post list view -->
@@ -1211,7 +1246,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 <div id="page-print-detail" class="page">
   <div class="inner-nav">
     <span class="nav-logo" id="pdLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
-    <ul class="nav-links"><li><a id="pdAboutBtn">About</a></li><li><a id="pdPortBtn">Portfolio</a></li><li><a id="pdShopBtn">Shop</a></li><li><a id="pdContactBtn">Contact</a></li></ul>
+    <ul class="nav-links"><li><a id="pdAboutBtn">About</a></li><li><a id="pdPortBtn">Portfolio</a></li><li><a id="pdShopBtn">Shop</a></li><li><a id="pdReviewsBtn">Reviews</a></li><li><a id="pdContactBtn">Contact</a></li></ul>
   </div>
   <button class="detail-back" id="pdBackBtn">&#8592; Back to Shop</button>
   <div class="print-detail-grid">
@@ -1429,7 +1464,7 @@ var PRINTS = [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
-var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy',journal:'/?page=journal'};
+var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy',journal:'/?page=journal',reviews:'/?page=reviews'};
 
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
@@ -1451,6 +1486,7 @@ function navigate(page) {
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
     if (page==="shop") { renderShop(0); }
     if (page==="journal") { renderJournal(); }
+    if (page==="reviews") { renderReviews(); }
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
@@ -1460,15 +1496,16 @@ function navigate(page) {
 
 function bind(id,page){ var el=document.getElementById(id); if(el) el.addEventListener("click",function(){ navigate(page); }); }
 
-bind("homeLogoBtn","home");bind("homePortBtn","portfolio");bind("homeAboutBtn","about");bind("homeShopBtn","shop");bind("homeContactBtn","contact");bind("heroViewBtn","portfolio");
-bind("portLogoBtn","home");bind("portAboutBtn","about");bind("portShopBtn","shop");bind("portContactBtn","contact");
-bind("detailLogoBtn","home");bind("detailPortBtn","portfolio");bind("detailAboutBtn","about");bind("detailShopBtn","shop");bind("detailContactBtn","contact");bind("detailBackBtn","portfolio");bind("detailPrintBtn","shop");
-bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn","shop");bind("aboutContactBtn","contact");bind("aboutViewPortBtn","portfolio");bind("aboutGetInTouchBtn","contact");bind("aboutShopPrintsBtn","shop");
-bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","about");bind("shopContactBtn","contact");
-bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");
-bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
-bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");bind("privBackBtn","home");
-bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journContactBtn","contact");bind("journBackBtn","home");
+bind("homeLogoBtn","home");bind("homePortBtn","portfolio");bind("homeAboutBtn","about");bind("homeShopBtn","shop");bind("homeReviewsBtn","reviews");bind("homeContactBtn","contact");bind("heroViewBtn","portfolio");
+bind("portLogoBtn","home");bind("portAboutBtn","about");bind("portShopBtn","shop");bind("portReviewsBtn","reviews");bind("portContactBtn","contact");
+bind("detailLogoBtn","home");bind("detailPortBtn","portfolio");bind("detailAboutBtn","about");bind("detailShopBtn","shop");bind("detailReviewsBtn","reviews");bind("detailContactBtn","contact");bind("detailBackBtn","portfolio");bind("detailPrintBtn","shop");
+bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn","shop");bind("aboutReviewsBtn","reviews");bind("aboutContactBtn","contact");bind("aboutViewPortBtn","portfolio");bind("aboutGetInTouchBtn","contact");bind("aboutShopPrintsBtn","shop");
+bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","about");bind("shopReviewsBtn","reviews");bind("shopContactBtn","contact");
+bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");bind("contactReviewsBtn","reviews");
+bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsReviewsBtn","reviews");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
+bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privReviewsBtn","reviews");bind("privContactBtn","contact");bind("privBackBtn","home");
+bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journReviewsBtn","reviews");bind("journContactBtn","contact");bind("journBackBtn","home");
+bind("reviewsLogoBtn","home");bind("reviewsPortBtn","portfolio");bind("reviewsAboutBtn","about");bind("reviewsShopBtn","shop");bind("reviewsContactBtn","contact");
 bind("pdLogoBtn","home");bind("pdPortBtn","portfolio");bind("pdAboutBtn","about");bind("pdShopBtn","shop");bind("pdContactBtn","contact");bind("pdBackBtn","shop");
 
 // ============================================================
@@ -2077,7 +2114,7 @@ function closeMobileMenu(){
 });
 var mmCloseBtn=document.getElementById("mobileMenuClose");
 if(mmCloseBtn) mmCloseBtn.addEventListener("click",closeMobileMenu);
-var MM_NAV={mmPortBtn:"portfolio",mmAboutBtn:"about",mmShopBtn:"shop",mmContactBtn:"contact"};
+var MM_NAV={mmPortBtn:"portfolio",mmAboutBtn:"about",mmShopBtn:"shop",mmReviewsBtn:"reviews",mmContactBtn:"contact"};
 Object.keys(MM_NAV).forEach(function(id){
   var el=document.getElementById(id);
   if(!el) return;
@@ -2163,6 +2200,97 @@ document.querySelectorAll(".newsletter-btn").forEach(function(btn){
 // JOURNAL
 // ===========================================================
 var _journalData = null;
+
+// ============================================================
+// REVIEWS
+// ============================================================
+var _reviewsLoaded = false;
+
+function renderReviews(){
+  if(_reviewsLoaded) return;
+  _reviewsLoaded = true;
+  fetch('/_data/reviews.json')
+    .then(function(r){ return r.ok ? r.json() : {reviews:[]}; })
+    .then(function(d){ _buildReviewCards(d.reviews||[]); })
+    .catch(function(){ _buildReviewCards([]); });
+  // Init star picker
+  _initStarPicker();
+}
+
+function _buildReviewCards(reviews){
+  var el = document.getElementById('reviewCardsList');
+  if(!el) return;
+  if(!reviews.length){
+    el.innerHTML = '<div class="reviews-empty"><p>No reviews yet — be the first to share your experience.</p></div>';
+    return;
+  }
+  function stars(n){ return '★'.repeat(n)+'☆'.repeat(5-n); }
+  function fmtDate(d){ try{ return new Date(d).toLocaleDateString('en-GB',{year:'numeric',month:'long'}); }catch(e){ return d||''; } }
+  el.innerHTML = reviews.slice().reverse().map(function(r){
+    return '<div class="review-card">'
+      +'<div class="review-card-top">'
+        +'<div>'
+          +'<div class="review-name">'+escH(r.name)+'</div>'
+          +'<div class="review-date">'+fmtDate(r.date)+'</div>'
+        +'</div>'
+        +'<div class="review-stars" aria-label="'+r.rating+' out of 5 stars">'+stars(r.rating)+'</div>'
+      +'</div>'
+      +'<div class="review-msg">'+escH(r.message)+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+var _selectedRating = 5;
+
+function _initStarPicker(){
+  var picker = document.getElementById('starPicker');
+  if(!picker) return;
+  var btns = picker.querySelectorAll('button');
+  function paint(n){
+    btns.forEach(function(b,i){ b.classList.toggle('lit', i < n); });
+  }
+  paint(_selectedRating);
+  btns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      _selectedRating = parseInt(btn.dataset.star);
+      paint(_selectedRating);
+    });
+    btn.addEventListener('mouseover',function(){ paint(parseInt(btn.dataset.star)); });
+    btn.addEventListener('mouseout', function(){ paint(_selectedRating); });
+  });
+}
+
+function submitReview(){
+  var name    = (document.getElementById('reviewName')||{}).value||'';
+  var msg     = (document.getElementById('reviewMsg')||{}).value||'';
+  var honey   = (document.getElementById('reviewHoneypot')||{}).value||'';
+  var status  = document.getElementById('reviewFormStatus');
+  var btn     = document.getElementById('reviewSubmitBtn');
+  name = name.trim(); msg = msg.trim();
+  if(!name){ if(status){ status.className='review-form-status err'; status.textContent='Please enter your name.'; } return; }
+  if(!msg){  if(status){ status.className='review-form-status err'; status.textContent='Please write a short review.'; } return; }
+  if(btn){ btn.disabled=true; btn.textContent='Submitting…'; }
+  if(status){ status.className='review-form-status'; status.textContent=''; }
+  fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:name,rating:_selectedRating,message:msg,website:honey})})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.ok){
+        if(status){ status.className='review-form-status ok'; status.textContent='Thank you! Your review will appear once approved.'; }
+        if(btn){ btn.textContent='Submitted ✓'; }
+        document.getElementById('reviewName').value='';
+        document.getElementById('reviewMsg').value='';
+        _selectedRating=5; _initStarPicker();
+      } else {
+        if(status){ status.className='review-form-status err'; status.textContent=d.error||'Something went wrong. Try again.'; }
+        if(btn){ btn.disabled=false; btn.textContent='Submit review'; }
+      }
+    })
+    .catch(function(){
+      if(status){ status.className='review-form-status err'; status.textContent='Network error — please try again.'; }
+      if(btn){ btn.disabled=false; btn.textContent='Submit review'; }
+    });
+}
 
 function renderJournal(){
   if(_journalData){ _buildJournalList(_journalData.posts); return; }
@@ -3448,6 +3576,43 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
 
 }); // end DOMContentLoaded
 </script>
+
+<!-- REVIEWS -->
+<div id="page-reviews" class="page">
+  <div class="inner-nav">
+    <span class="nav-logo" id="reviewsLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
+    <ul class="nav-links"><li><a id="reviewsAboutBtn">About</a></li><li><a id="reviewsPortBtn">Portfolio</a></li><li><a id="reviewsShopBtn">Shop</a></li><li><a class="active-link">Reviews</a></li><li><a id="reviewsContactBtn">Contact</a></li></ul>
+    <button class="ham-btn" id="reviewsHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <div class="reviews-wrap">
+    <div class="reviews-header">
+      <h1>What collectors say</h1>
+      <p>Reviews from people who have purchased prints or commissioned work. Every voice here is real.</p>
+    </div>
+    <div class="review-cards" id="reviewCardsList"></div>
+    <!-- Submission form -->
+    <div class="review-form-wrap">
+      <h2>Leave a review</h2>
+      <p>Bought a print or worked with Jeffery? Share your experience.</p>
+      <!-- Honeypot — hidden from humans, filled by bots -->
+      <input type="text" id="reviewHoneypot" name="website" style="display:none;position:absolute;left:-9999px;" tabindex="-1" autocomplete="off">
+      <div class="review-field">
+        <label>Your rating</label>
+        <div class="star-picker" id="starPicker">
+          <button type="button" data-star="1" aria-label="1 star">★</button>
+          <button type="button" data-star="2" aria-label="2 stars">★</button>
+          <button type="button" data-star="3" aria-label="3 stars">★</button>
+          <button type="button" data-star="4" aria-label="4 stars">★</button>
+          <button type="button" data-star="5" aria-label="5 stars">★</button>
+        </div>
+      </div>
+      <div class="review-field"><label>Your name</label><input type="text" id="reviewName" placeholder="e.g. Ama Owusu" maxlength="80"></div>
+      <div class="review-field"><label>Your review</label><textarea id="reviewMsg" placeholder="Tell others about your experience…" maxlength="800"></textarea></div>
+      <button class="review-submit" id="reviewSubmitBtn" onclick="submitReview()">Submit review</button>
+      <div class="review-form-status" id="reviewFormStatus"></div>
+    </div>
+  </div>
+</div>
 
 <!-- CERTIFICATE OF AUTHENTICITY MODAL — content injected by openCert() -->
 <div class="cert-modal-overlay" id="certModalOverlay">
