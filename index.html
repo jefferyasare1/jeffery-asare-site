@@ -86,7 +86,7 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .filter-btn:hover:not(.active){border-color:#bbb;color:var(--ink);}
 #series-intro{overflow:hidden;max-height:0;transition:max-height .5s ease,padding .5s ease;padding:0 var(--pad);}
-#series-intro.open{max-height:60px;padding:.4rem var(--pad) 0;}
+#series-intro.open{max-height:100px;padding:.5rem var(--pad) 0;}
 #series-intro span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-style:italic;opacity:0;transform:translateY(8px);transition:opacity .6s ease .15s,transform .6s ease .15s;}
 #series-intro.open span{opacity:1;transform:translateY(0);}
 .potw{padding:1.4rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
@@ -1682,11 +1682,26 @@ function renderPhotoOfWeek(){
 // SERIES MOOD INTROS
 // ============================================================
 var SERIES_INTROS={
-  "random-stories":"Ordinary moments. Unscripted, unrepeatable.",
-  "portraits":"Every face holds a story it never chose to tell.",
-  "eclipse":"The self, obscured — searching for its own light."
+  "random-stories":"Made in passing — at the beach, the market, between one place and the next. Nothing was set up. Half of them I almost missed.",
+  "portraits":"I try not to ask for much. Just a little stillness, and whatever light is already in the room.",
+  "eclipse":"A studio, one lamp, nothing else. I wanted to see what the body becomes when the light decides what to keep.",
+  "abstract":"Colour, pattern, texture — things that were already there. You just have to stop trying to take in everything at once."
 };
 var _introTimer=null;
+
+function _showSeriesIntro(filter){
+  var el=document.getElementById("series-intro");
+  var txt=document.getElementById("seriesIntroText");
+  if(!el||!txt) return;
+  var copy=SERIES_INTROS[filter]||"";
+  if(copy){
+    txt.textContent=copy;
+    el.classList.add("open");
+  } else {
+    el.classList.remove("open");
+    setTimeout(function(){ txt.textContent=""; },500);
+  }
+}
 
 // after render, kick reveal
 var fb=document.getElementById("filterBar");
@@ -1694,6 +1709,7 @@ if(fb){ fb.addEventListener("click",function(e){
   var btn=e.target.closest(".filter-btn"); if(!btn) return;
   document.querySelectorAll(".filter-btn").forEach(function(b){ b.classList.remove("active"); });
   btn.classList.add("active");
+  _showSeriesIntro(btn.dataset.filter);
   renderPortfolio(btn.dataset.filter, true);
 }); }
 

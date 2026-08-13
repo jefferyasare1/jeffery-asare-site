@@ -1558,9 +1558,9 @@ function anLoad(days){
     document.getElementById(id).innerHTML = '<div class="an-loading">Loading…</div>';
   });
 
-  // date range
-  var end   = new Date();
-  var start = new Date(); start.setDate(start.getDate() - days);
+  // date range — end is tomorrow so today's events are fully captured
+  var end   = new Date(); end.setDate(end.getDate() + 1);
+  var start = new Date(); start.setDate(start.getDate() - days + 1);
   function fmt(d){ return d.toISOString().slice(0,10); }
 
   var query = `{
