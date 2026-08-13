@@ -913,11 +913,37 @@
 
     <!-- Journal panel -->
     <div class="cms-panel active" id="cms-panel-journal">
-      <div class="cms-list-header">
-        <div class="cms-list-title">Field Notes</div>
-        <button class="btn-add" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
+      <div class="port-subtabs">
+        <button class="port-subtab active" onclick="cmsShowJournalView('posts')">Posts</button>
+        <button class="port-subtab" onclick="cmsShowJournalView('drafts')">Drafts</button>
+        <button class="port-subtab" onclick="cmsShowJournalView('archive')">Archive</button>
       </div>
-      <div id="cms-journal-list"><div class="empty-state"><p>Loading posts…</p></div></div>
+      <!-- Posts sub-view -->
+      <div id="journ-view-posts">
+        <div class="cms-list-header">
+          <div class="cms-list-title">Field Notes</div>
+          <button class="btn-add" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
+        </div>
+        <div id="cms-journal-list"><div class="empty-state"><p>Loading posts…</p></div></div>
+      </div>
+      <!-- Drafts sub-view -->
+      <div id="journ-view-drafts" style="display:none">
+        <div class="cms-list-header" style="margin-bottom:8px;">
+          <div class="cms-list-title">Drafts</div>
+          <button class="btn-add" onclick="cmsLoadJournalStatusView('draft',true)" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;">⟳ Reload</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Not visible on the site until published.</p>
+        <div id="journ-drafts-list"></div>
+      </div>
+      <!-- Archive sub-view -->
+      <div id="journ-view-archive" style="display:none">
+        <div class="cms-list-header" style="margin-bottom:8px;">
+          <div class="cms-list-title">Archive</div>
+          <button class="btn-add" onclick="cmsLoadJournalStatusView('archived',true)" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;">⟳ Reload</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Archived posts are kept here but not shown on the site.</p>
+        <div id="journ-archive-list"></div>
+      </div>
     </div>
 
     <!-- Prints panel -->
@@ -3879,23 +3905,96 @@ function cmsLoad(which){
 }
 
 // ── Journal ─────────────────────────────────────────────────────
+var _journalStatusCache={};
+
 function cmsRenderJournal(){
   var el=document.getElementById('cms-journal-list'); if(!el) return;
-  var posts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  var allPosts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  var posts=allPosts.map(function(p,i){return{p:p,origIdx:i};}).filter(function(o){return !o.p.status||o.p.status==='live';});
   if(!posts.length){ el.innerHTML='<div class="empty-state"><p>No posts yet. Add one above.</p></div>'; return; }
-  el.innerHTML=posts.map(function(p,i){
+  el.innerHTML=posts.map(function(o,i){
+    var p=o.p,origIdx=o.origIdx;
     return '<div class="cms-item">'
       +'<div class="cms-item-reorder">'
-        +'<button class="btn-reorder" onclick="cmsMoveJournal('+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
-        +'<button class="btn-reorder" onclick="cmsMoveJournal('+i+',1)"'+(i===posts.length-1?' disabled':'')+'>↓</button>'
+        +'<button class="btn-reorder" onclick="cmsMoveJournal('+origIdx+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
+        +'<button class="btn-reorder" onclick="cmsMoveJournal('+origIdx+',1)"'+(i===posts.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
       +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
         +'<div class="cms-item-meta">'+escH(p.series||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div></div>'
       +'<div class="cms-item-actions">'
-        +'<button class="btn-card" onclick="cmsOpenJournalEdit('+i+')">Edit</button>'
-        +'<button class="btn-card danger" onclick="cmsDeleteJournal('+i+')">Delete</button>'
+        +'<button class="btn-card" onclick="cmsOpenJournalEdit('+origIdx+')">Edit</button>'
+        +'<button class="btn-card" onclick="cmsJournalSetStatus('+origIdx+',\'archived\')">Archive</button>'
+        +'<button class="btn-card danger" onclick="cmsDeleteJournal('+origIdx+')">Delete</button>'
       +'</div></div>';
   }).join('');
+}
+
+function cmsShowJournalView(view){
+  ['posts','drafts','archive'].forEach(function(v){
+    document.getElementById('journ-view-'+v).style.display=v===view?'':'none';
+  });
+  document.querySelectorAll('#cms-panel-journal .port-subtab').forEach(function(btn,i){
+    btn.classList.toggle('active',['posts','drafts','archive'][i]===view);
+  });
+  if(view==='drafts')  cmsLoadJournalStatusView('draft');
+  if(view==='archive') cmsLoadJournalStatusView('archived');
+}
+
+function cmsLoadJournalStatusView(status,force){
+  var listId=status==='draft'?'journ-drafts-list':'journ-archive-list';
+  var el=document.getElementById(listId); if(!el) return;
+  if(_journalStatusCache[status]&&!force){cmsRenderJournalStatusView(status);return;}
+  if(_cmsData.journal){_journalStatusCache[status]=true;cmsRenderJournalStatusView(status);return;}
+  el.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+  cmsLoad('journal');
+}
+
+function cmsRenderJournalStatusView(status){
+  var listId=status==='draft'?'journ-drafts-list':'journ-archive-list';
+  var el=document.getElementById(listId); if(!el) return;
+  var allPosts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  var filtered=allPosts.map(function(p,i){return{p:p,origIdx:i};}).filter(function(o){return o.p.status===status;});
+  if(!filtered.length){el.innerHTML='<div class="empty-state"><p>No '+(status==='draft'?'drafts':'archived posts')+'.</p></div>';return;}
+  el.innerHTML=filtered.map(function(o){
+    var p=o.p,origIdx=o.origIdx;
+    var badge=status==='draft'?'<span class="status-badge draft">Draft</span>':'<span class="status-badge archived">Archived</span>';
+    return '<div class="cms-item">'
+      +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(p.series||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+badge+'</div></div>'
+      +'<div class="cms-item-actions">'
+        +'<button class="btn-card" onclick="cmsOpenJournalEdit('+origIdx+')">Edit</button>'
+        +'<button class="btn-card" onclick="cmsJournalSetStatusDirect('+origIdx+',\'live\')">'+(status==='draft'?'Publish':'Restore')+'</button>'
+        +(status==='draft'?'<button class="btn-card" onclick="cmsJournalSetStatusDirect('+origIdx+',\'archived\')">Archive</button>':'')
+        +'<button class="btn-card danger" onclick="cmsDeleteJournal('+origIdx+')">Delete</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function cmsJournalSetStatus(origIdx,newStatus){
+  var posts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  var p=posts[origIdx]; if(!p) return;
+  var label=newStatus==='archived'?'Archive':'Restore';
+  showDashConfirm(label+' "'+p.title+'"?',label,function(){
+    var np=posts.slice(); np[origIdx]=Object.assign({},p,{status:newStatus});
+    var nc={posts:np};
+    cmsPut('journal',nc,function(err,sha){
+      if(err){showDashModal('Could not update: '+err);return;}
+      _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; _journalStatusCache={}; cmsRenderJournal();
+    });
+  });
+}
+
+function cmsJournalSetStatusDirect(origIdx,newStatus){
+  var posts=(_cmsData.journal&&_cmsData.journal.posts)||[];
+  var p=posts[origIdx]; if(!p) return;
+  var np=posts.slice(); np[origIdx]=Object.assign({},p,{status:newStatus});
+  var nc={posts:np};
+  cmsPut('journal',nc,function(err,sha){
+    if(err){showDashModal('Could not update: '+err);return;}
+    _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; _journalStatusCache={};
+    cmsRenderJournal();
+    cmsRenderJournalStatusView(newStatus==='live'?(p.status||'draft'):'archived');
+  });
 }
 
 function cmsMoveJournal(idx,dir){
@@ -3917,24 +4016,26 @@ function cmsOpenJournalEdit(idx){
     +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-j-series" value="'+escAttr(post.series||'')+'"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
-    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\')">Save &amp; Publish</button>'
+    +'<div class="cms-save-row"><button style="background:none;border:1px solid var(--rule);color:var(--ink);padding:11px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans)" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'draft\')">Save as Draft</button>'
+    +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'live\')">Save &amp; Publish</button>'
     +'<div class="cms-status" id="cms-j-status"></div></div>';
   cmsOpenModal();
 }
 
-function cmsSaveJournal(idx,postId){
+function cmsSaveJournal(idx,postId,saveStatus){
   var st=document.getElementById('cms-j-status'); st.className='cms-status'; st.textContent='Saving…';
   var u={id:postId||('j'+Date.now()),title:document.getElementById('cms-j-title').value.trim(),
     date:document.getElementById('cms-j-date').value,series:document.getElementById('cms-j-series').value.trim(),
     excerpt:document.getElementById('cms-j-excerpt').value.trim(),body:document.getElementById('cms-j-body').value.trim(),img:''};
+  if(saveStatus) u.status=saveStatus;
   if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
   var posts=(_cmsData.journal&&_cmsData.journal.posts)?_cmsData.journal.posts.slice():[];
   if(idx===null){posts.unshift(u);}else{posts[idx]=u;}
   var nc={posts:posts};
   cmsPut('journal',nc,function(err,sha){
     if(err){st.className='cms-status err';st.textContent=err;return;}
-    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
-    _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; cmsRenderJournal(); setTimeout(cmsCloseModal,1400);
+    st.className='cms-status ok';st.textContent=saveStatus==='draft'?'Saved as draft ✓':'Saved ✓ — live in ~2 min';
+    _cmsData.journal=nc; if(sha)_cmsSha.journal=sha; _journalStatusCache={}; cmsRenderJournal(); setTimeout(cmsCloseModal,1400);
   });
 }
 

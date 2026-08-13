@@ -2375,6 +2375,7 @@ function renderJournal(){
 }
 
 function _buildJournalList(posts){
+  posts = posts.filter(function(p){ return !p.status || p.status === 'live'; });
   var wrap = document.getElementById('journalListWrap');
   var el = document.getElementById('journalList');
   var postWrap = document.getElementById('journalPostWrap');
