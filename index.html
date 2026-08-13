@@ -3702,11 +3702,15 @@ fetch('/_data/settings/general.json')
   })
   .catch(function(){});
 
-// Load portfolio page text
+// Load portfolio page text + series intros
 fetch('/_data/settings/portfolio-page.json')
   .then(function(r){ return r.json(); })
   .then(function(s){
     if(s.portfolio_desc){ var el=document.getElementById('portfolioDesc'); if(el) el.textContent=s.portfolio_desc; }
+    if(s.series_eclipse)       SERIES_INTROS['eclipse']        = s.series_eclipse;
+    if(s.series_portraits)     SERIES_INTROS['portraits']      = s.series_portraits;
+    if(s.series_random_stories)SERIES_INTROS['random-stories'] = s.series_random_stories;
+    if(s.series_abstract)      SERIES_INTROS['abstract']       = s.series_abstract;
   }).catch(function(){});
 
 // Load about page text

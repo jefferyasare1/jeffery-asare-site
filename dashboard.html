@@ -967,7 +967,12 @@
           <div class="cms-section-title">Portfolio</div><span class="cms-chevron">▼</span>
         </div>
         <div class="cms-section-body">
-          <div class="cms-field"><label>Portfolio description</label><textarea id="st-portfolio-desc" rows="4"></textarea></div>
+          <div class="cms-field"><label>Portfolio intro text</label><textarea id="st-portfolio-desc" rows="4"></textarea></div>
+          <div class="cms-field" style="margin-top:20px"><label style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">Gallery Descriptions</label></div>
+          <div class="cms-field"><label>Eclipse of the Self</label><textarea id="st-series-eclipse" rows="4"></textarea></div>
+          <div class="cms-field"><label>Portraits</label><textarea id="st-series-portraits" rows="4"></textarea></div>
+          <div class="cms-field"><label>Random Stories</label><textarea id="st-series-random" rows="4"></textarea></div>
+          <div class="cms-field"><label>Abstract</label><textarea id="st-series-abstract" rows="3"></textarea></div>
           <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSitePortfolio()">Save</button><div class="cms-status" id="cms-portfolio-status"></div></div>
         </div>
       </div>
@@ -4197,7 +4202,8 @@ function cmsSiteLoad(fileKey,cb){
 
 function cmsSiteInit(){
   [['settings/general',cmsSitePopulateHero],['settings/about-page',cmsSitePopulateAbout],
-   ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact]]
+   ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact],
+   ['settings/portfolio-page',cmsSitePopulatePortfolio]]
   .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){if(!err)pair[1](data);});});
 }
 
@@ -4206,7 +4212,6 @@ function cmsSitePopulateHero(d){
   function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
   set('st-hero-line1',d.hero_line1); set('st-hero-line2',d.hero_line2); set('st-hero-desc',d.hero_desc);
   set('st-about-photo',d.about_photo); set('st-contact-photo',d.contact_photo);
-  set('st-portfolio-desc',d.portfolio_desc);
   var wrap=document.getElementById('st-hero-imgs');
   if(wrap) wrap.innerHTML=[1,2,3,4,5].map(function(n){
     return '<div class="cms-field"><label>Hero image '+n+'</label>'
@@ -4214,6 +4219,16 @@ function cmsSitePopulateHero(d){
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'st-hero'+n+'\',\'st-hero'+n+'-status\')"></label></div>'
       +'<div class="cms-status" id="st-hero'+n+'-status"></div></div>';
   }).join('');
+}
+
+function cmsSitePopulatePortfolio(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-portfolio-desc',d.portfolio_desc);
+  set('st-series-eclipse',d.series_eclipse);
+  set('st-series-portraits',d.series_portraits);
+  set('st-series-random',d.series_random_stories);
+  set('st-series-abstract',d.series_abstract);
 }
 
 function cmsSitePopulateAbout(d){
@@ -4254,11 +4269,14 @@ function cmsSaveSiteHero(){
   },'cms-hero-status');
 }
 function cmsSaveSitePortfolio(){
-  cmsSiteSave('settings/general',function(){
-    var d={hero_line1:g('st-hero-line1'),hero_line2:g('st-hero-line2'),hero_desc:g('st-hero-desc'),about_photo:g('st-about-photo'),contact_photo:g('st-contact-photo')};
-    [1,2,3,4,5].forEach(function(n){d['hero'+n]=g('st-hero'+n);});
-    d.portfolio_desc=g('st-portfolio-desc');
-    return d;
+  cmsSiteSave('settings/portfolio-page',function(){
+    return{
+      portfolio_desc:g('st-portfolio-desc'),
+      series_eclipse:g('st-series-eclipse'),
+      series_portraits:g('st-series-portraits'),
+      series_random_stories:g('st-series-random'),
+      series_abstract:g('st-series-abstract')
+    };
   },'cms-portfolio-status');
 }
 function cmsSaveSiteAbout(){
