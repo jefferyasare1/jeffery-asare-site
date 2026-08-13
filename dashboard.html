@@ -685,6 +685,7 @@
     <div class="an-header">
       <span class="an-title">Analytics</span>
       <div class="an-range">
+        <button id="an-btn-1" onclick="anLoad(1)">Today</button>
         <button id="an-btn-7" class="active" onclick="anLoad(7)">7 days</button>
         <button id="an-btn-30" onclick="anLoad(30)">30 days</button>
       </div>
@@ -1579,7 +1580,7 @@ function anLoad(days){
           orderBy: [count_DESC]
         ) {
           count
-          dimensions { requestPath }
+          dimensions { requestUrl }
         }
         countries: rumPageloadEventsAdaptiveGroups(
           filter: {AND: [{date_geq: "${fmt(start)}"},{date_leq: "${fmt(end)}"},{siteTag: "${AN_SITE}"}]}
@@ -1627,17 +1628,21 @@ function anLoad(days){
 
     // ── Pages ──
     anRenderRows('an-pages', acct.pages, function(r){
-      return { label: r.dimensions.requestPath || '/', value: r.count };
+      var raw = (r.dimensions && (r.dimensions.requestUrl || r.dimensions.requestPath)) || '/';
+      // Strip domain, keep path+query, shorten to 50 chars
+      try { raw = new URL(raw).pathname + (new URL(raw).search || ''); } catch(e){}
+      if(raw.length > 50) raw = raw.slice(0, 47) + '…';
+      return { label: raw, value: r.count };
     });
 
     // ── Countries ──
     anRenderRows('an-countries', acct.countries, function(r){
-      return { label: r.dimensions.countryName || 'Unknown', value: r.sum.visits };
+      return { label: (r.dimensions && r.dimensions.countryName) || 'Unknown', value: r.sum.visits };
     });
 
     // ── Referrers ──
     anRenderRows('an-referrers', acct.referrers, function(r){
-      return { label: r.dimensions.refererHost || 'Direct', value: r.sum.visits };
+      return { label: (r.dimensions && r.dimensions.refererHost) || 'Direct', value: r.sum.visits };
     });
   })
   .catch(function(err){

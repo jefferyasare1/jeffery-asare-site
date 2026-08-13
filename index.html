@@ -86,11 +86,10 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .filter-btn:hover:not(.active){border-color:#bbb;color:var(--ink);}
 #series-intro{overflow:hidden;max-height:0;transition:max-height .6s ease,padding .6s ease;padding:0 var(--pad);text-align:center;}
-#series-intro.open{max-height:320px;padding:2rem var(--pad) 1.75rem;border-top:0.5px solid var(--rule);}
-#series-intro .si-quote{display:block;font-size:clamp(1rem,1.8vw,1.15rem);font-style:italic;color:var(--ink);line-height:1.7;max-width:560px;margin:0 auto .9rem;opacity:0;transform:translateY(10px);transition:opacity .65s ease .1s,transform .65s ease .1s;}
+#series-intro.open{max-height:200px;padding:1.2rem var(--pad) 1.2rem;border-top:0.5px solid var(--rule);}
+#series-intro .si-quote{display:block;font-size:13px;color:var(--muted);line-height:1.8;max-width:560px;margin:0 auto;opacity:0;transform:translateY(10px);transition:opacity .65s ease .1s,transform .65s ease .1s;}
 #series-intro.open .si-quote{opacity:1;transform:translateY(0);}
-#series-intro .si-name{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);opacity:0;transform:translateY(6px);transition:opacity .5s ease .38s,transform .5s ease .38s;}
-#series-intro.open .si-name{opacity:1;transform:translateY(0);}
+#series-intro .si-name{display:none;}
 .potw{padding:1.4rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
 .potw-label{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
 .potw-inner{display:flex;gap:1rem;align-items:center;}
@@ -160,8 +159,7 @@ html.darkroom .shop-view-btn:hover{background:#c8c0b4;color:#0d0d0d;border-color
 html.darkroom .mini-footer{border-color:#242220;}
 html.darkroom .field-input,html.darkroom .field-select,html.darkroom .field-textarea{background:#1a1816;border-color:#242220;color:#c8c0b4;}
 html.darkroom .field-input::placeholder,html.darkroom .field-textarea::placeholder{color:#383430;}
-html.darkroom #series-intro .si-quote{color:#c8c0b4;}
-html.darkroom #series-intro .si-name{color:#585450;}
+html.darkroom #series-intro .si-quote{color:#585450;}
 html.darkroom .potw{background:#0d0d0d;border-color:#242220;}
 html.darkroom .about-cols{border-color:#242220;}
 html.darkroom .about-cta{border-color:#242220;}
