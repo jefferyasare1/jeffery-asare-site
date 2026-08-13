@@ -86,7 +86,7 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .filter-btn:hover:not(.active){border-color:#bbb;color:var(--ink);}
 #series-intro{overflow:hidden;max-height:0;transition:max-height .5s ease,padding .5s ease;padding:0 var(--pad);}
-#series-intro.open{max-height:100px;padding:.5rem var(--pad) 0;}
+#series-intro.open{max-height:200px;padding:.5rem var(--pad) 0;}
 #series-intro span{display:block;font-size:13px;letter-spacing:.04em;color:var(--muted);font-style:italic;opacity:0;transform:translateY(8px);transition:opacity .6s ease .15s,transform .6s ease .15s;}
 #series-intro.open span{opacity:1;transform:translateY(0);}
 .potw{padding:1.4rem var(--pad);background:#fafaf8;border-top:1px solid var(--rule);}
@@ -1682,9 +1682,9 @@ function renderPhotoOfWeek(){
 // SERIES MOOD INTROS
 // ============================================================
 var SERIES_INTROS={
-  "random-stories":"Made in passing — at the beach, the market, between one place and the next. Nothing was set up. Half of them I almost missed.",
-  "portraits":"I try not to ask for much. Just a little stillness, and whatever light is already in the room.",
-  "eclipse":"A studio, one lamp, nothing else. I wanted to see what the body becomes when the light decides what to keep.",
+  "random-stories":"These don't belong to one place. They were made wherever I happened to be — moving through, passing through, just there. The only thing they have in common is that I almost didn't take them.",
+  "portraits":"Most people have a face they give the camera. These aren't those. A portrait only works for a second — before that, there's too much self-consciousness, after that it's gone. These are from that second. Wherever I could find it, whoever was willing to stay still long enough.",
+  "eclipse":"Everyone carries a quieter version of themselves — calmer, more real, harder to reach. Most of the time, everything else is too loud for it to surface. This series was about creating the conditions where it could. Unusual setups, close distances, real stillness — and subjects willing to sit inside that with me. The work that came back was unlike anything I'd made before. Quiet on the surface. The loudest frames I've ever shot.",
   "abstract":"Colour, pattern, texture — things that were already there. You just have to stop trying to take in everything at once."
 };
 var _introTimer=null;
