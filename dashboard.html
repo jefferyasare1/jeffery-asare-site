@@ -3917,7 +3917,7 @@ function cmsOpenJournalEdit(idx){
     +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-j-series" value="'+escAttr(post.series||'')+'"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
-    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+','+JSON.stringify(post.id)+')">Save &amp; Publish</button>'
+    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\')">Save &amp; Publish</button>'
     +'<div class="cms-status" id="cms-j-status"></div></div>';
   cmsOpenModal();
 }
@@ -4005,7 +4005,7 @@ function cmsOpenPrintEdit(idx){
       +'<div class="img-upload-row"><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-p-img\',\'cms-p-upload-status\')"></label></div>'
       +'<div class="cms-status" id="cms-p-upload-status"></div></div>'
-    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePrint('+JSON.stringify(idx)+','+JSON.stringify(print.id||'')+')">Save &amp; Publish</button>'
+    +'<div class="cms-save-row"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePrint('+JSON.stringify(idx)+',\''+escAttr(print.id||'')+'\')">Save &amp; Publish</button>'
     +'<div class="cms-status" id="cms-p-status"></div></div>';
   cmsOpenModal();
 }
