@@ -1493,7 +1493,7 @@ var PRINTS = [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
-var _pageUrlMap = {home:'/',portfolio:'/?page=portfolio',shop:'/?page=shop',about:'/?page=about',contact:'/?page=contact',terms:'/?page=terms',privacy:'/?page=privacy',journal:'/?page=journal'};
+var _pageUrlMap = {home:'/',portfolio:'/portfolio',shop:'/shop',about:'/about',contact:'/contact',terms:'/terms',privacy:'/privacy',journal:'/journal'};
 
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
@@ -3566,17 +3566,23 @@ fetch('/_data/settings/series.json')
   .catch(function(){ renderPortfolio('all'); });
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
-// Deep link: ?print=s1 opens that print; ?page=shop goes to that section
+// Deep link: ?print=s1 opens that print; /portfolio or ?page=portfolio goes to that section
 (function(){
   var params=new URLSearchParams(window.location.search);
   var pid=params.get('print');
-  var pg=params.get('page');
+  var pg=params.get('page'); // legacy query-param support
+  // Real-path routing: /portfolio → 'portfolio', /shop → 'shop', etc.
+  var _pathPageMap={'/portfolio':'portfolio','/shop':'shop','/about':'about','/contact':'contact','/terms':'terms','/privacy':'privacy','/journal':'journal'};
+  var pathPg=_pathPageMap[window.location.pathname];
   if(pid){
     var matchPrint=PRINTS.find(function(p){ return p.id===pid; });
     if(matchPrint){
       history.replaceState({print:matchPrint.id}, matchPrint.title+' — Jeffery Asare', '?print='+matchPrint.id);
       navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400);
     }
+  } else if(pathPg){
+    history.replaceState({page:pathPg}, '', _pageUrlMap[pathPg]);
+    navigate(pathPg);
   } else if(pg && _pageUrlMap[pg]){
     history.replaceState({page:pg}, '', _pageUrlMap[pg]);
     navigate(pg);

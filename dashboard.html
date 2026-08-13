@@ -405,7 +405,13 @@
     .series-btn.active{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1);}
     .series-btn:hover:not(.active){color:var(--ink);background:rgba(255,255,255,.6);}
     /* Site text sections */
-    .cms-section{margin-bottom:36px;padding-bottom:32px;border-bottom:1px solid var(--rule);}
+    .cms-section{margin-bottom:0;border-bottom:1px solid var(--rule);}
+    .cms-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:14px 0;user-select:none;}
+    .cms-section-header .cms-section-title{margin-bottom:0;font-size:12px;}
+    .cms-chevron{font-size:10px;color:var(--muted);transition:transform .22s;flex-shrink:0;}
+    .cms-section.open .cms-chevron{transform:rotate(180deg);}
+    .cms-section-body{display:none;padding-bottom:24px;}
+    .cms-section.open .cms-section-body{display:block;}
     .cms-section:last-child{border-bottom:none;margin-bottom:0;}
     .cms-section-title{font-size:13px;font-weight:600;letter-spacing:-.01em;margin-bottom:16px;color:var(--ink);}
     /* Thumbnail in CMS list */
@@ -934,64 +940,91 @@
 
     <!-- Site Text panel -->
     <div class="cms-panel" id="cms-panel-site">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:28px;">Edit the text and images shown across your site. Each section saves independently.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Edit the text and images shown across your site. Each page saves independently.</p>
 
-      <!-- Hero -->
+      <!-- Home -->
       <div class="cms-section">
-        <div class="cms-section-title">Home Page Hero</div>
-        <div class="cms-grid2">
-          <div class="cms-field" style="margin-bottom:0"><label>Headline line 1</label><input type="text" id="st-hero-line1"></div>
-          <div class="cms-field" style="margin-bottom:0"><label>Headline line 2</label><input type="text" id="st-hero-line2"></div>
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Home</div><span class="cms-chevron">▼</span>
         </div>
-        <div class="cms-field" style="margin-top:12px"><label>Tagline</label><textarea id="st-hero-desc" rows="2"></textarea></div>
-        <div class="cms-section-title" style="font-size:11px;color:var(--muted);font-weight:600;margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;">Hero Images (1–5)</div>
-        <div id="st-hero-imgs"></div>
-        <div class="cms-field"><label>About portrait photo</label><div class="img-upload-row"><input type="text" id="st-about-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-about-photo','st-about-photo-status',false,'about-portrait.jpg')"></label></div><div class="cms-status" id="st-about-photo-status"></div></div>
-        <div class="cms-field"><label>Contact page photo</label><div class="img-upload-row"><input type="text" id="st-contact-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-contact-photo','st-contact-photo-status',false,'contact-photo.jpg')"></label></div><div class="cms-status" id="st-contact-photo-status"></div></div>
-        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteHero()">Save Hero &amp; Images</button><div class="cms-status" id="cms-hero-status"></div></div>
+        <div class="cms-section-body">
+          <div class="cms-grid2">
+            <div class="cms-field" style="margin-bottom:0"><label>Headline line 1</label><input type="text" id="st-hero-line1"></div>
+            <div class="cms-field" style="margin-bottom:0"><label>Headline line 2</label><input type="text" id="st-hero-line2"></div>
+          </div>
+          <div class="cms-field" style="margin-top:12px"><label>Tagline</label><textarea id="st-hero-desc" rows="2"></textarea></div>
+          <div class="cms-section-title" style="font-size:11px;color:var(--muted);font-weight:600;margin:16px 0 8px;letter-spacing:.06em;text-transform:uppercase;">Hero Images (1–5)</div>
+          <div id="st-hero-imgs"></div>
+          <div class="cms-field"><label>About portrait photo</label><div class="img-upload-row"><input type="text" id="st-about-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-about-photo','st-about-photo-status',false,'about-portrait.jpg')"></label></div><div class="cms-status" id="st-about-photo-status"></div></div>
+          <div class="cms-field"><label>Contact page photo</label><div class="img-upload-row"><input type="text" id="st-contact-photo" placeholder="URL or /filename.jpg"><label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,'st-contact-photo','st-contact-photo-status',false,'contact-photo.jpg')"></label></div><div class="cms-status" id="st-contact-photo-status"></div></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteHero()">Save</button><div class="cms-status" id="cms-hero-status"></div></div>
+        </div>
+      </div>
+
+      <!-- Portfolio -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Portfolio</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <div class="cms-field"><label>Portfolio description</label><textarea id="st-portfolio-desc" rows="4"></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSitePortfolio()">Save</button><div class="cms-status" id="cms-portfolio-status"></div></div>
+        </div>
       </div>
 
       <!-- About -->
       <div class="cms-section">
-        <div class="cms-section-title">About Page</div>
-        <div class="cms-field"><label>Bio — paragraph 1</label><textarea id="st-bio1" rows="3"></textarea></div>
-        <div class="cms-field"><label>Bio — paragraph 2</label><textarea id="st-bio2" rows="3"></textarea></div>
-        <div class="cms-field"><label>Bio — paragraph 3</label><textarea id="st-bio3" rows="3"></textarea></div>
-        <div class="cms-field"><label>Bio — paragraph 4</label><textarea id="st-bio4" rows="3"></textarea></div>
-        <div class="cms-field"><label>Bio — paragraph 5</label><textarea id="st-bio5" rows="3"></textarea></div>
-        <div class="cms-field"><label>Portrait caption</label><input type="text" id="st-about-caption"></div>
-        <div class="cms-field"><label>Location heading</label><input type="text" id="st-loc-heading"></div>
-        <div class="cms-field"><label>Location — paragraph 1</label><textarea id="st-loc-p1" rows="2"></textarea></div>
-        <div class="cms-field"><label>Location — paragraph 2</label><textarea id="st-loc-p2" rows="2"></textarea></div>
-        <div class="cms-field"><label>Location — paragraph 3</label><textarea id="st-loc-p3" rows="2"></textarea></div>
-        <div class="cms-field"><label>Philosophy heading</label><input type="text" id="st-phil-heading"></div>
-        <div class="cms-field"><label>Philosophy — paragraph 1</label><textarea id="st-phil-p1" rows="3"></textarea></div>
-        <div class="cms-field"><label>Philosophy — paragraph 2</label><textarea id="st-phil-p2" rows="3"></textarea></div>
-        <div class="cms-field"><label>Philosophy — paragraph 3</label><textarea id="st-phil-p3" rows="3"></textarea></div>
-        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteAbout()">Save About Text</button><div class="cms-status" id="cms-about-status"></div></div>
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">About</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <div class="cms-field"><label>Bio — paragraph 1</label><textarea id="st-bio1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Bio — paragraph 2</label><textarea id="st-bio2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Bio — paragraph 3</label><textarea id="st-bio3" rows="3"></textarea></div>
+          <div class="cms-field"><label>Bio — paragraph 4</label><textarea id="st-bio4" rows="3"></textarea></div>
+          <div class="cms-field"><label>Bio — paragraph 5</label><textarea id="st-bio5" rows="3"></textarea></div>
+          <div class="cms-field"><label>Portrait caption</label><input type="text" id="st-about-caption"></div>
+          <div class="cms-field"><label>Location heading</label><input type="text" id="st-loc-heading"></div>
+          <div class="cms-field"><label>Location — paragraph 1</label><textarea id="st-loc-p1" rows="2"></textarea></div>
+          <div class="cms-field"><label>Location — paragraph 2</label><textarea id="st-loc-p2" rows="2"></textarea></div>
+          <div class="cms-field"><label>Location — paragraph 3</label><textarea id="st-loc-p3" rows="2"></textarea></div>
+          <div class="cms-field"><label>Philosophy heading</label><input type="text" id="st-phil-heading"></div>
+          <div class="cms-field"><label>Philosophy — paragraph 1</label><textarea id="st-phil-p1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Philosophy — paragraph 2</label><textarea id="st-phil-p2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Philosophy — paragraph 3</label><textarea id="st-phil-p3" rows="3"></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteAbout()">Save</button><div class="cms-status" id="cms-about-status"></div></div>
+        </div>
       </div>
 
       <!-- Shop -->
       <div class="cms-section">
-        <div class="cms-section-title">Shop Page</div>
-        <div class="cms-field"><label>Page title</label><input type="text" id="st-shop-title"></div>
-        <div class="cms-field"><label>Description</label><textarea id="st-shop-desc" rows="2"></textarea></div>
-        <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteShop()">Save Shop Text</button><div class="cms-status" id="cms-shop-status"></div></div>
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Shop</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <div class="cms-field"><label>Page title</label><input type="text" id="st-shop-title"></div>
+          <div class="cms-field"><label>Description</label><textarea id="st-shop-desc" rows="2"></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteShop()">Save</button><div class="cms-status" id="cms-shop-status"></div></div>
+        </div>
       </div>
 
       <!-- Contact -->
       <div class="cms-section">
-        <div class="cms-section-title">Contact Page</div>
-        <div class="cms-field"><label>Intro text</label><textarea id="st-contact-sub" rows="2"></textarea></div>
-        <div class="cms-grid2">
-          <div class="cms-field" style="margin-bottom:0"><label>Email address</label><input type="text" id="st-contact-email"></div>
-          <div class="cms-field" style="margin-bottom:0"><label>Response time note</label><input type="text" id="st-contact-response" placeholder="Typically within 24 hours"></div>
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Contact</div><span class="cms-chevron">▼</span>
         </div>
-        <div class="cms-grid2" style="margin-top:12px">
-          <div class="cms-field" style="margin-bottom:0"><label>Instagram handle</label><input type="text" id="st-instagram-handle" placeholder="@jeffasare"></div>
-          <div class="cms-field" style="margin-bottom:0"><label>Instagram URL</label><input type="text" id="st-instagram-url"></div>
+        <div class="cms-section-body">
+          <div class="cms-field"><label>Intro text</label><textarea id="st-contact-sub" rows="2"></textarea></div>
+          <div class="cms-grid2">
+            <div class="cms-field" style="margin-bottom:0"><label>Email address</label><input type="text" id="st-contact-email"></div>
+            <div class="cms-field" style="margin-bottom:0"><label>Response time note</label><input type="text" id="st-contact-response" placeholder="Typically within 24 hours"></div>
+          </div>
+          <div class="cms-grid2" style="margin-top:12px">
+            <div class="cms-field" style="margin-bottom:0"><label>Instagram handle</label><input type="text" id="st-instagram-handle" placeholder="@jeffasare"></div>
+            <div class="cms-field" style="margin-bottom:0"><label>Instagram URL</label><input type="text" id="st-instagram-url"></div>
+          </div>
+          <div class="cms-save-row" style="margin-top:20px"><button class="btn-card primary" onclick="cmsSaveSiteContact()">Save</button><div class="cms-status" id="cms-contact-status"></div></div>
         </div>
-        <div class="cms-save-row" style="margin-top:20px"><button class="btn-card primary" onclick="cmsSaveSiteContact()">Save Contact Info</button><div class="cms-status" id="cms-contact-status"></div></div>
       </div>
 
     </div><!-- /cms-panel-site -->
@@ -4173,6 +4206,7 @@ function cmsSitePopulateHero(d){
   function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
   set('st-hero-line1',d.hero_line1); set('st-hero-line2',d.hero_line2); set('st-hero-desc',d.hero_desc);
   set('st-about-photo',d.about_photo); set('st-contact-photo',d.contact_photo);
+  set('st-portfolio-desc',d.portfolio_desc);
   var wrap=document.getElementById('st-hero-imgs');
   if(wrap) wrap.innerHTML=[1,2,3,4,5].map(function(n){
     return '<div class="cms-field"><label>Hero image '+n+'</label>'
@@ -4218,6 +4252,14 @@ function cmsSaveSiteHero(){
     [1,2,3,4,5].forEach(function(n){d['hero'+n]=g('st-hero'+n);});
     return d;
   },'cms-hero-status');
+}
+function cmsSaveSitePortfolio(){
+  cmsSiteSave('settings/general',function(){
+    var d={hero_line1:g('st-hero-line1'),hero_line2:g('st-hero-line2'),hero_desc:g('st-hero-desc'),about_photo:g('st-about-photo'),contact_photo:g('st-contact-photo')};
+    [1,2,3,4,5].forEach(function(n){d['hero'+n]=g('st-hero'+n);});
+    d.portfolio_desc=g('st-portfolio-desc');
+    return d;
+  },'cms-portfolio-status');
 }
 function cmsSaveSiteAbout(){
   cmsSiteSave('settings/about-page',function(){
