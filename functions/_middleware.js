@@ -1,26 +1,23 @@
 /**
  * Cloudflare Pages Middleware — SPA fallback
  *
- * Serves index.html for any route that isn't a static asset or API call,
- * so that page reloads on /portfolio, /shop, /about etc. work correctly.
+ * Lets Cloudflare try to serve the request normally first.
+ * If nothing matches (404), serves index.html so that /portfolio,
+ * /shop, /about etc. work on reload without a 404.
  */
 
 export async function onRequest(context) {
-  const url = new URL(context.request.url);
-  const path = url.pathname;
+  // Let Cloudflare attempt to serve the request as-is
+  // (static asset, or a matching Pages Function like /api/*)
+  const response = await context.next();
 
-  // Pass API calls straight through to their functions
-  if (path.startsWith('/api/')) {
-    return context.next();
+  // If the asset exists, return it directly
+  if (response.status !== 404) {
+    return response;
   }
 
-  // Pass anything with a file extension through (images, JS, CSS, JSON, etc.)
-  if (/\.\w+$/.test(path)) {
-    return context.next();
-  }
-
-  // For all other paths (/portfolio, /shop, /about …) serve index.html
-  // while keeping the original URL in the browser
-  const indexUrl = new URL('/index.html', url.origin);
-  return context.env.ASSETS.fetch(new Request(indexUrl.toString(), context.request));
+  // No matching file — serve index.html for SPA routing
+  return context.env.ASSETS.fetch(
+    new Request(new URL('/index.html', context.request.url).toString(), { method: 'GET' })
+  );
 }
