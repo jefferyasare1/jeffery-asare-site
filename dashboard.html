@@ -411,6 +411,14 @@
     .cms-chevron{font-size:10px;color:var(--muted);transition:transform .22s;flex-shrink:0;}
     .cms-section.open .cms-chevron{transform:rotate(180deg);}
     .cms-section-body{display:none;padding-bottom:24px;}
+    /* Portfolio sub-tabs */
+    .port-subtabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--rule);}
+    .port-subtab{padding:8px 14px;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--sans);transition:color .15s,border-color .15s;border-radius:0;margin-bottom:-1px;}
+    .port-subtab:hover{color:var(--ink);}
+    .port-subtab.active{color:var(--ink);font-weight:600;border-bottom-color:var(--ink);}
+    .status-badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+    .status-badge.draft{background:#fff3cd;color:#856404;}
+    .status-badge.archived{background:#e9ecef;color:#6c757d;}
     .cms-section.open .cms-section-body{display:block;}
     .cms-section:last-child{border-bottom:none;margin-bottom:0;}
     .cms-section-title{font-size:13px;font-weight:600;letter-spacing:-.01em;margin-bottom:16px;color:var(--ink);}
@@ -923,19 +931,48 @@
 
     <!-- Portfolio panel -->
     <div class="cms-panel" id="cms-panel-portfolio">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <p style="font-size:13px;color:var(--muted);margin:0;">Select a series to manage its photos.</p>
-        <button class="btn-add" onclick="cmsAddSeries()" style="font-size:11px;padding:5px 12px;">+ New Series</button>
+      <div class="port-subtabs">
+        <button class="port-subtab active" onclick="cmsShowPortfolioView('series')">Series</button>
+        <button class="port-subtab" onclick="cmsShowPortfolioView('drafts')">Drafts</button>
+        <button class="port-subtab" onclick="cmsShowPortfolioView('archive')">Archive</button>
       </div>
-      <div class="series-selector" id="cms-series-selector"></div>
-      <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
-        <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn-add" onclick="cmsReloadSeries()" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;" title="Refresh photos from server">⟳ Reload</button>
-          <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+
+      <!-- Series view -->
+      <div id="port-view-series">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <p style="font-size:13px;color:var(--muted);margin:0;">Select a series to manage its photos.</p>
+          <button class="btn-add" onclick="cmsAddSeries()" style="font-size:11px;padding:5px 12px;">+ New Series</button>
         </div>
+        <div class="series-selector" id="cms-series-selector"></div>
+        <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
+          <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn-add" onclick="cmsReloadSeries()" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;" title="Refresh photos from server">⟳ Reload</button>
+            <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+          </div>
+        </div>
+        <div id="cms-portfolio-list"></div>
       </div>
-      <div id="cms-portfolio-list"></div>
+
+      <!-- Drafts view -->
+      <div id="port-view-drafts" style="display:none;">
+        <div class="cms-list-header" style="margin-bottom:8px;">
+          <div class="cms-list-title">Drafts</div>
+          <button class="btn-add" onclick="cmsLoadStatusView('draft',true)" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;">⟳ Reload</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Not visible on the site until published.</p>
+        <div id="port-drafts-list"></div>
+      </div>
+
+      <!-- Archive view -->
+      <div id="port-view-archive" style="display:none;">
+        <div class="cms-list-header" style="margin-bottom:8px;">
+          <div class="cms-list-title">Archive</div>
+          <button class="btn-add" onclick="cmsLoadStatusView('archived',true)" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;">⟳ Reload</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Archived photos are kept here but not shown on the site.</p>
+        <div id="port-archive-list"></div>
+      </div>
     </div>
 
     <!-- Site Text panel -->
@@ -4085,29 +4122,32 @@ function cmsSelectSeries(slug){
 
 function cmsRenderPortfolio(slug){
   var el=document.getElementById('cms-portfolio-list'); if(!el) return;
-  var photos=_portfolioData[slug]||[];
+  var allPhotos=_portfolioData[slug]||[];
+  var photos=allPhotos.filter(function(p){ return !p.status||p.status==='live'; });
   if(!photos.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📷</div><p>No photos yet. Add one above.</p></div>';return;}
   el.innerHTML=photos.map(function(p,i){
+    var origIdx=allPhotos.indexOf(p);
     var isHidden=!!p.hidden;
     var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2" style="'+(isHidden?'opacity:.35;filter:grayscale(60%)':'')+'">':'<div class="img-preview"></div>';
     return '<div class="cms-item" style="'+(isHidden?'opacity:.6':'')+'">'
       +'<div class="cms-item-reorder">'
-        +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
-        +'<button class="btn-reorder" onclick="cmsMovePhoto(\''+slug+'\','+i+',1)"'+(i===photos.length-1?' disabled':'')+'>↓</button>'
+        +'<button class="btn-reorder" onclick="cmsMovePhotoLive(\''+slug+'\','+origIdx+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
+        +'<button class="btn-reorder" onclick="cmsMovePhotoLive(\''+slug+'\','+origIdx+',1)"'+(i===photos.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
       +thumb
       +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+(isHidden?' <span style="font-size:10px;color:#bbb;font-weight:400">(hidden)</span>':'')+'</div>'
         +'<div class="cms-item-meta">'+escH(p.loc||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div></div>'
       +'<div class="cms-item-actions">'
-        +'<button class="btn-card" onclick="cmsOpenPhotoEdit('+i+')">Edit</button>'
-        +'<button class="btn-card" onclick="cmsToggleHide(\''+slug+'\','+i+')">'+(isHidden?'Show':'Hide')+'</button>'
-        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+slug+'\','+i+')">Remove</button>'
+        +'<button class="btn-card" onclick="cmsOpenPhotoEdit('+origIdx+')">Edit</button>'
+        +'<button class="btn-card" onclick="cmsToggleHide(\''+slug+'\','+origIdx+')">'+(isHidden?'Show':'Hide')+'</button>'
+        +'<button class="btn-card" onclick="cmsSetPhotoStatus(\''+slug+'\','+origIdx+',\'archived\')">Archive</button>'
+        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+slug+'\','+origIdx+')">Delete</button>'
       +'</div></div>';
   }).join('');
 }
 
-function cmsOpenPhotoEdit(idx){
-  var slug=_portfolioCurrent; if(!slug) return;
+function cmsOpenPhotoEdit(idx,slugOverride){
+  var slug=slugOverride||_portfolioCurrent; if(!slug) return;
   var isNew=(idx===null);
   var photos=_portfolioData[slug]||[];
   var p=isNew?{title:'',loc:'Accra, Ghana',date:new Date().getFullYear()+'.01',img:'',desc:'',device:'iPhone',format:'ProRAW',edited_in:'Lightroom Mobile'}:(photos[idx]||{});
@@ -4130,17 +4170,22 @@ function cmsOpenPhotoEdit(idx){
       +'</div></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Device</label><input type="text" id="cms-ph-device" value="'+escAttr(p.device||'iPhone')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Edited in</label><input type="text" id="cms-ph-edited" value="'+escAttr(p.edited_in||'Lightroom Mobile')+'"></div></div>'
-    +'<div class="cms-save-row" style="margin-top:20px"><button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePhoto('+JSON.stringify(idx)+',\''+escAttr(slug)+'\')">Save &amp; Publish</button>'
+    +'<div class="cms-save-row" style="margin-top:20px">'
+    +'<button class="btn-card" style="padding:11px 20px" onclick="cmsSavePhoto('+JSON.stringify(idx)+',\''+escAttr(slug)+'\',\'draft\')">Save as Draft</button>'
+    +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSavePhoto('+JSON.stringify(idx)+',\''+escAttr(slug)+'\',\'live\')">Save &amp; Publish</button>'
     +'<div class="cms-status" id="cms-ph-status"></div></div>';
   cmsOpenModal();
 }
 
-function cmsSavePhoto(idx,slug){
+function cmsSavePhoto(idx,slug,saveStatus){
   var st=document.getElementById('cms-ph-status'); st.className='cms-status'; st.textContent='Saving…';
+  var existing=(idx!==null&&_portfolioData[slug])?(_portfolioData[slug][idx]||{}):{};
+  var status=saveStatus||(existing.status||'live');
   var u={title:document.getElementById('cms-ph-title').value.trim(),loc:document.getElementById('cms-ph-loc').value.trim(),
     date:document.getElementById('cms-ph-date').value.trim(),desc:document.getElementById('cms-ph-desc').value.trim(),
     img:document.getElementById('cms-ph-img').value.trim(),device:document.getElementById('cms-ph-device').value.trim(),
-    format:'ProRAW',edited_in:document.getElementById('cms-ph-edited').value.trim()};
+    format:'ProRAW',edited_in:document.getElementById('cms-ph-edited').value.trim(),
+    hidden:existing.hidden||false,status:status};
   if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
   var photos=(_portfolioData[slug]||[]).slice();
   if(idx===null){photos.push(u);}else{photos[idx]=u;}
@@ -4148,14 +4193,30 @@ function cmsSavePhoto(idx,slug){
   var nc={label:s?s.label:slug,slug:slug,photos:photos};
   ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
     if(err){st.className='cms-status err';st.textContent=err;return;}
-    st.className='cms-status ok';st.textContent='Saved ✓ — live in ~2 min';
+    st.className='cms-status ok';
+    st.textContent=status==='draft'?'Saved as draft ✓':'Saved ✓ — live in ~2 min';
     _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha;
+    delete _statusViewCache[status];
     cmsRenderPortfolio(slug); setTimeout(cmsCloseModal,1400);
   });
 }
 
 function cmsMovePhoto(slug,idx,dir){
   var photos=(_portfolioData[slug]||[]).slice(),ni=idx+dir;
+  if(ni<0||ni>=photos.length) return;
+  var t=photos[idx]; photos[idx]=photos[ni]; photos[ni]=t;
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:photos};
+  ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+    if(err){showDashModal('Reorder failed: '+err);return;}
+    _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha; cmsRenderPortfolio(slug);
+  });
+}
+
+function cmsMovePhotoLive(slug,idx,dir){
+  var photos=(_portfolioData[slug]||[]).slice();
+  var ni=idx+dir;
+  while(ni>=0&&ni<photos.length&&photos[ni].status&&photos[ni].status!=='live') ni+=dir;
   if(ni<0||ni>=photos.length) return;
   var t=photos[idx]; photos[idx]=photos[ni]; photos[ni]=t;
   var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
@@ -4188,6 +4249,127 @@ function cmsToggleHide(slug,idx){
     if(err){showDashModal('Could not update: '+err);return;}
     _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha; cmsRenderPortfolio(slug);
   });
+}
+
+// ── Portfolio sub-views ────────────────────────────────────────────────────
+function cmsShowPortfolioView(view){
+  ['series','drafts','archive'].forEach(function(v){
+    var el=document.getElementById('port-view-'+v);
+    if(el) el.style.display=(v===view?'':'none');
+  });
+  document.querySelectorAll('.port-subtab').forEach(function(btn,i){
+    var views=['series','drafts','archive'];
+    btn.classList.toggle('active',views[i]===view);
+  });
+  if(view==='drafts')  cmsLoadStatusView('draft');
+  if(view==='archive') cmsLoadStatusView('archived');
+}
+
+var _statusViewCache={};
+
+function cmsSetPhotoStatus(slug,idx,newStatus){
+  var photos=(_portfolioData[slug]||[]).slice();
+  var p=photos[idx]; if(!p) return;
+  var label=escH(p.title||'this photo');
+  var actionLabel=newStatus==='archived'?'Archive':'Restore';
+  showDashConfirm(actionLabel+' "'+p.title+'"?',actionLabel,function(){
+    photos[idx]=Object.assign({},p,{status:newStatus});
+    var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+    var nc={label:s?s.label:slug,slug:slug,photos:photos};
+    ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+      if(err){showDashModal('Could not update: '+err);return;}
+      _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha;
+      _statusViewCache={};
+      cmsRenderPortfolio(slug);
+    });
+  });
+}
+
+function cmsSetPhotoStatusDirect(slug,idx,newStatus){
+  var photos=(_portfolioData[slug]||[]).slice();
+  var p=photos[idx]; if(!p) return;
+  photos[idx]=Object.assign({},p,{status:newStatus});
+  var s=_seriesList&&_seriesList.find(function(x){return x.slug===slug;});
+  var nc={label:s?s.label:slug,slug:slug,photos:photos};
+  ghFreshPut('portfolio/'+slug,nc,function(err,newSha){
+    if(err){showDashModal('Could not update: '+err);return;}
+    _portfolioData[slug]=photos; if(newSha)_portfolioSha[slug]=newSha;
+    _statusViewCache={};
+    cmsRenderPortfolio(slug);
+    var draftVisible=document.getElementById('port-view-drafts')&&document.getElementById('port-view-drafts').style.display!=='none';
+    var archiveVisible=document.getElementById('port-view-archive')&&document.getElementById('port-view-archive').style.display!=='none';
+    if(draftVisible)   cmsRenderStatusView('draft');
+    if(archiveVisible) cmsRenderStatusView('archived');
+  });
+}
+
+function cmsLoadStatusView(status,force){
+  var listId=status==='draft'?'port-drafts-list':'port-archive-list';
+  var el=document.getElementById(listId); if(!el) return;
+  if(!force&&_statusViewCache[status]){ cmsRenderStatusView(status); return; }
+  el.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+  function proceed(){
+    if(!_seriesList||!_seriesList.length){
+      el.innerHTML='<div class="empty-state"><p>No series found.</p></div>'; return;
+    }
+    var pending=_seriesList.length;
+    function done(){ pending--; if(!pending) cmsRenderStatusView(status); }
+    _seriesList.forEach(function(s){
+      if(_portfolioLoaded[s.slug]&&!force){ done(); return; }
+      fetch(cmsApiUrl('portfolio/'+s.slug))
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.ok){ _portfolioSha[s.slug]=d.sha; _portfolioData[s.slug]=(d.content&&d.content.photos)||[]; _portfolioLoaded[s.slug]=true; }
+        })
+        .catch(function(){})
+        .then(done);
+    });
+  }
+  if(!_seriesList){
+    fetch(cmsApiUrl('settings/series'))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){ _seriesList=(d.content&&d.content.series)||[]; _seriesSha=d.sha; }
+        proceed();
+      })
+      .catch(function(){ el.innerHTML='<p style="color:var(--red);font-size:12px;padding:16px 0;">Error loading series.</p>'; });
+  } else { proceed(); }
+}
+
+function cmsRenderStatusView(status){
+  var listId=status==='draft'?'port-drafts-list':'port-archive-list';
+  var el=document.getElementById(listId); if(!el) return;
+  var items=[];
+  (_seriesList||[]).forEach(function(s){
+    (_portfolioData[s.slug]||[]).forEach(function(p,i){
+      if(p.status===status) items.push({slug:s.slug,seriesLabel:s.label,idx:i,photo:p});
+    });
+  });
+  _statusViewCache[status]=true;
+  if(!items.length){
+    var icon=status==='draft'?'✏️':'📦';
+    var msg=status==='draft'?'No drafts yet.':'No archived photos.';
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">'+icon+'</div><p>'+msg+'</p></div>';
+    return;
+  }
+  el.innerHTML=items.map(function(item){
+    var p=item.photo;
+    var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2">':'<div class="img-preview"></div>';
+    var restoreBtn=status==='draft'
+      ?'<button class="btn-card" onclick="cmsSetPhotoStatusDirect(\''+escAttr(item.slug)+'\','+item.idx+',\'live\')">Publish</button>'
+      :'<button class="btn-card" onclick="cmsSetPhotoStatusDirect(\''+escAttr(item.slug)+'\','+item.idx+',\'live\')">Restore</button>';
+    return '<div class="cms-item">'
+      +thumb
+      +'<div class="cms-item-body">'
+        +'<div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
+        +'<div class="cms-item-meta">'+escH(item.seriesLabel)+' &nbsp;·&nbsp; '+escH(p.loc||'')+(p.date?' &nbsp;·&nbsp; '+p.date:'')+'</div>'
+      +'</div>'
+      +'<div class="cms-item-actions">'
+        +'<button class="btn-card" onclick="cmsOpenPhotoEdit('+item.idx+',\''+escAttr(item.slug)+'\')">Edit</button>'
+        +restoreBtn
+        +'<button class="btn-card danger" onclick="cmsDeletePhoto(\''+escAttr(item.slug)+'\','+item.idx+')">Delete</button>'
+      +'</div></div>';
+  }).join('');
 }
 
 // ── Site Text ────────────────────────────────────────────────────

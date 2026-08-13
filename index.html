@@ -3546,7 +3546,7 @@ fetch('/_data/settings/series.json')
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(sd){
           if(!sd || !Array.isArray(sd.photos)) return [];
-          return sd.photos.map(function(p){ return Object.assign({},p,{series:s.slug}); });
+          return sd.photos.filter(function(p){ return !p.status||p.status==='live'; }).map(function(p){ return Object.assign({},p,{series:s.slug}); });
         })
         .catch(function(){ return []; });
     }));
