@@ -104,13 +104,15 @@
     },
     {
       "title": "The Herdsman",
-      "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/random-stories/rs-the-herdsman.jpg",
+      "loc": "Tamale, Ghana",
+      "date": "2023.06",
       "desc": "Distance is not only physical. The near thing can be the furthest away.",
-      "device": "iPhone",
+      "img": "/images/portfolio/random-stories/rs-the-herdsman.jpg",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Something Worth Rewinding",
