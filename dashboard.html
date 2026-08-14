@@ -5019,7 +5019,9 @@ syncFromSheet();
   }
   function _fabShow(){
     var area=document.getElementById('mobFabArea'), btn=document.getElementById('mobFabBtn');
-    if(area) area.classList.remove('fab-hidden');
+    // Only animate back if the FAB was actually hidden
+    if(!area || !area.classList.contains('fab-hidden')) return;
+    area.classList.remove('fab-hidden');
     if(btn){
       btn.classList.remove('spinning');
       btn.classList.add('spinning-in');
@@ -5043,11 +5045,22 @@ syncFromSheet();
     _openFab(); // portfolio multi-action: show submenu
   };
 
-  // Restore FAB when any dialog closes
-  var _origClose = window.closeModal;
-  if(_origClose) window.closeModal = function(){ _origClose(); _fabShow(); };
-  var _origCmsClose = window.cmsCloseModal;
-  if(_origCmsClose) window.cmsCloseModal = function(){ _origCmsClose(); _fabShow(); };
+  // Restore FAB when any dialog closes — MutationObserver watches for .open removal
+  // (wrapping closeModal/cmsCloseModal doesn't work because addEventListener captures
+  //  the original function reference before our wrapper runs)
+  (function(){
+    function _watch(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          if(m.attributeName === 'class' && !el.classList.contains('open')) _fabShow();
+        });
+      }).observe(el, { attributes: true });
+    }
+    _watch('addOrderOverlay');
+    _watch('cmsModal');
+  })();
 
   function _openFab(){
     _fabOpen=true;
