@@ -2326,12 +2326,24 @@ function submitReview(){
     });
 }
 
-function renderJournal(){
-  if(_journalData){ _buildJournalList(_journalData.posts); return; }
+function renderJournal(openSlug){
+  function afterLoad(posts){
+    var live=posts.filter(function(p){ return !p.status||p.status==='live'; });
+    if(openSlug){
+      var target=live.find(function(p){ return _journalSlug(p)===openSlug; });
+      if(target){ _buildJournalList(posts); _openJournalPost(target,live); return; }
+    }
+    _buildJournalList(posts);
+  }
+  if(_journalData){ afterLoad(_journalData.posts); return; }
   fetch('/_data/journal.json')
     .then(function(r){ return r.ok ? r.json() : {posts:[]}; })
-    .then(function(d){ _journalData = d; _buildJournalList(d.posts); })
-    .catch(function(){ _buildJournalList([]); });
+    .then(function(d){ _journalData=d; afterLoad(d.posts); })
+    .catch(function(){ afterLoad([]); });
+}
+
+function _journalSlug(post){
+  return (post.title||post.id).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
 function _readingTime(body){
@@ -2401,8 +2413,9 @@ function _openJournalPost(post, posts){
   if(backBtn){
     backBtn.onclick = function(){ _buildJournalList(posts); window.scrollTo(0,0); };
   }
-  // Push history so browser back button returns to the journal list, not a previous page
-  history.pushState({page:'journal', journalList:true}, post.title+' — Jeffery Asare', '/journal');
+  // Give this post its own URL
+  var slug=_journalSlug(post);
+  history.pushState({page:'journal', journalSlug:slug}, post.title+' — Field Notes — Jeffery Asare', '/journal/'+slug);
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   var bodyHtml = post.body.split('\n\n').map(function(para){
@@ -3579,7 +3592,9 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
   var pg=params.get('page'); // legacy query-param support
   // Real-path routing: /portfolio → 'portfolio', /shop → 'shop', etc.
   var _pathPageMap={'/portfolio':'portfolio','/shop':'shop','/about':'about','/contact':'contact','/terms':'terms','/privacy':'privacy','/journal':'journal'};
-  var pathPg=_pathPageMap[window.location.pathname];
+  // Deep-link to a specific journal post: /journal/some-slug
+  var _journalDeepLink=window.location.pathname.match(/^\/journal\/([a-z0-9][a-z0-9\-]*)$/);
+  var pathPg=_journalDeepLink?'journal':_pathPageMap[window.location.pathname];
   if(pid){
     var matchPrint=PRINTS.find(function(p){ return p.id===pid; });
     if(matchPrint){
@@ -3587,8 +3602,14 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
       navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400);
     }
   } else if(pathPg){
-    history.replaceState({page:pathPg}, '', _pageUrlMap[pathPg]);
-    navigate(pathPg);
+    if(_journalDeepLink){
+      history.replaceState({page:'journal',journalSlug:_journalDeepLink[1]},'',window.location.pathname);
+      navigate('journal');
+      renderJournal(_journalDeepLink[1]);
+    } else {
+      history.replaceState({page:pathPg},'',_pageUrlMap[pathPg]);
+      navigate(pathPg);
+    }
   } else if(pg && _pageUrlMap[pg]){
     history.replaceState({page:pg}, '', _pageUrlMap[pg]);
     navigate(pg);
@@ -3601,8 +3622,13 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 window.addEventListener('popstate', function(e){
   var s = e.state;
   if(!s){ _navFromHistory=true; navigate('home'); return; }
+  if(s.journalSlug){
+    // Browser back/forward to a specific journal post
+    renderJournal(s.journalSlug);
+    return;
+  }
   if(s.journalList){
-    // Browser back from inside a journal post — return to the list view
+    // Browser back to the journal list
     var postWrap=document.getElementById('journalPostWrap');
     var listWrap=document.getElementById('journalListWrap');
     if(postWrap) postWrap.style.display='none';
