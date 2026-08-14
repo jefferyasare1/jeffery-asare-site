@@ -5096,6 +5096,31 @@ syncFromSheet();
   if(window.innerWidth <= 700) mobNavOpen();
 })();
 
+// ── Swipe to navigate: right → open menu, left → close menu ──
+(function(){
+  var _tx = 0, _ty = 0, _active = false;
+
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1){ _active = false; return; }
+    _tx = e.touches[0].clientX;
+    _ty = e.touches[0].clientY;
+    _active = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e){
+    if(!_active || e.changedTouches.length !== 1) return;
+    _active = false;
+    var dx = e.changedTouches[0].clientX - _tx;
+    var dy = e.changedTouches[0].clientY - _ty;
+    // Needs 60px horizontal, and must be more horizontal than vertical
+    if(Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.65) return;
+    var overlay = document.getElementById('mobNavOverlay');
+    var isOpen = overlay && overlay.classList.contains('open');
+    if(dx > 0 && !isOpen) mobNavOpen();   // swipe right → open menu
+    if(dx < 0 && isOpen)  mobNavClose();  // swipe left  → close menu
+  }, { passive: true });
+})();
+
 // ── Prevent zoom on iOS (Safari ignores user-scalable=no since iOS 10) ──
 (function(){
   // Block pinch-to-zoom
