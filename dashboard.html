@@ -612,12 +612,13 @@
       .mob-nav-alert:empty{display:none;}
       @keyframes mob-alert-blink{0%,100%{opacity:1;}50%{opacity:.45;}}
       /* FAB */
-      .mob-fab-area{position:fixed;bottom:26px;right:20px;z-index:400;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
-      .mob-fab-secondary-list{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
-      .mob-fab-secondary{display:flex;align-items:center;gap:8px;}
-      .mob-fab-lbl{font-size:11px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:var(--rb);padding:7px 13px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.1);cursor:pointer;font-family:var(--sans);}
-      .mob-fab-lbl:hover{background:#f5f0ea;}
-      .mob-fab{width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.22);}
+      .mob-fab-area{position:fixed;bottom:28px;right:22px;z-index:400;display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
+      .mob-fab-secondary-list{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+      .mob-fab-secondary{display:flex;align-items:center;}
+      .mob-fab-lbl{font-size:12px;font-weight:600;letter-spacing:.01em;color:#fff;background:#111;border:none;border-radius:50px;padding:11px 22px;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.28);cursor:pointer;font-family:var(--sans);-webkit-tap-highlight-color:transparent;transition:transform .12s;}
+      .mob-fab-lbl:active{transform:scale(.95);}
+      .mob-fab{width:58px;height:58px;border-radius:50%;background:#111;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.14),0 6px 22px rgba(0,0,0,.3),0 18px 44px rgba(0,0,0,.12);-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .15s;}
+      .mob-fab:active{transform:scale(.91);box-shadow:0 1px 4px rgba(0,0,0,.18);}
       .mob-fab svg{transition:transform .22s;}
       .mob-fab.open svg{transform:rotate(45deg);}
       /* Content */
