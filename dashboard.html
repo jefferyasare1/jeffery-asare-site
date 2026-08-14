@@ -581,6 +581,8 @@
 
     /* ── Mobile-only elements hidden on desktop ── */
     .mob-header,.mob-nav-overlay,.mob-fab-area{display:none;}
+    /* ── Buttons replaced by FAB on mobile (hidden on mobile, shown on desktop) ── */
+    @media(max-width:700px){.mob-fab-only{display:none;}}
 
     /* ── Mobile: full layout override ── */
     @media(max-width:700px){
@@ -769,7 +771,7 @@
           <div class="orders-title">Orders</div>
           <div style="display:flex;gap:.5rem;align-items:center;">
             <button class="btn-sync" onclick="exportCSV()" style="font-size:11px;padding:.35rem .75rem;">Export CSV</button>
-            <button class="btn-add" id="openAddOrder">+ New Order</button>
+            <button class="btn-add mob-fab-only" id="openAddOrder">+ New Order</button>
           </div>
         </div>
 
@@ -1059,7 +1061,7 @@
       <div id="journ-view-posts">
         <div class="cms-list-header">
           <div class="cms-list-title">Field Notes</div>
-          <button class="btn-add" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
+          <button class="btn-add mob-fab-only" onclick="cmsOpenJournalEdit(null)">+ New Post</button>
         </div>
         <div id="cms-journal-list"><div class="empty-state"><p>Loading posts…</p></div></div>
       </div>
@@ -1087,7 +1089,7 @@
     <div class="cms-panel" id="cms-panel-prints">
       <div class="cms-list-header">
         <div class="cms-list-title">Prints Catalogue</div>
-        <button class="btn-add" onclick="cmsOpenPrintEdit(null)">+ New Print</button>
+        <button class="btn-add mob-fab-only" onclick="cmsOpenPrintEdit(null)">+ New Print</button>
       </div>
       <div id="cms-prints-list"><div class="empty-state"><p>Loading prints…</p></div></div>
     </div>
@@ -1104,14 +1106,14 @@
       <div id="port-view-series">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <p style="font-size:13px;color:var(--muted);margin:0;">Select a series to manage its photos.</p>
-          <button class="btn-add" onclick="cmsAddSeries()" style="font-size:11px;padding:5px 12px;">+ New Series</button>
+          <button class="btn-add mob-fab-only" onclick="cmsAddSeries()" style="font-size:11px;padding:5px 12px;">+ New Series</button>
         </div>
         <div class="series-selector" id="cms-series-selector"></div>
         <div class="cms-list-header" id="cms-portfolio-header" style="display:none;">
           <div class="cms-list-title" id="cms-portfolio-series-title">Photos</div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button class="btn-add" onclick="cmsReloadSeries()" style="background:none;color:var(--muted);border:1px solid var(--rule);font-size:11px;padding:5px 10px;" title="Refresh photos from server">⟳ Reload</button>
-            <button class="btn-add" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
+            <button class="btn-add mob-fab-only" onclick="cmsOpenPhotoEdit(null)">+ New Photo</button>
           </div>
         </div>
         <div id="cms-portfolio-list"></div>
@@ -4930,6 +4932,9 @@ syncFromSheet();
 (function(){
   var _tab = 'orders';
   var _fabOpen = false;
+  var _cmsSection = 'journal';   // which CMS sub-panel is active
+  var _journalView = 'posts';    // which journal sub-view is active
+  var _portfolioView = 'series'; // which portfolio sub-view is active
 
   var _names = {
     orders:'Orders', waitlist:'Waitlist', content:'Content', workflow:'Workflow',
@@ -4937,18 +4942,38 @@ syncFromSheet();
     clients:'Clients', analytics:'Analytics'
   };
 
-  // Context-aware FAB actions per section
-  var _actions = {
-    orders:     [{ label:'+ New Order',        fn:function(){ var b=document.getElementById('openAddOrder'); if(b) b.click(); mobFabClose(); }}],
-    content:    [
-      { label:'+ New Journal Post', fn:function(){ cmsOpenJournalEdit(null); mobFabClose(); }},
-      { label:'+ New Print',        fn:function(){ cmsOpenPrintEdit(null);   mobFabClose(); }},
-      { label:'+ New Photo',        fn:function(){ cmsOpenPhotoEdit(null);   mobFabClose(); }}
-    ],
-    newsletter: [{ label:'Compose newsletter',  fn:function(){ var b=document.getElementById('nl-compose-btn'); if(b) b.click(); mobFabClose(); }}],
-    reviews:    [{ label:'↻ Refresh',           fn:function(){ revInit(true);  mobFabClose(); }}],
-    analytics:  [{ label:'↻ Refresh',           fn:function(){ anInit(true);   mobFabClose(); }}]
-  };
+  // Returns the right actions for the current state, or null if FAB should hide
+  function _getActions(){
+    if(_tab === 'orders'){
+      return [{ label:'+ New Order', fn:function(){
+        var o=document.getElementById('addOrderOverlay');
+        if(o) o.classList.add('open');
+        setTimeout(function(){ var n=document.getElementById('ao-name'); if(n) n.focus(); },50);
+        mobFabClose();
+      }}];
+    }
+    if(_tab === 'content'){
+      if(_cmsSection === 'journal' && _journalView === 'posts'){
+        return [{ label:'+ New Post', fn:function(){ cmsOpenJournalEdit(null); mobFabClose(); }}];
+      }
+      if(_cmsSection === 'prints'){
+        return [{ label:'+ New Print', fn:function(){ cmsOpenPrintEdit(null); mobFabClose(); }}];
+      }
+      if(_cmsSection === 'portfolio' && _portfolioView === 'series'){
+        return [
+          { label:'+ New Series', fn:function(){ cmsAddSeries(); mobFabClose(); }},
+          { label:'+ New Photo',  fn:function(){ cmsOpenPhotoEdit(null); mobFabClose(); }}
+        ];
+      }
+    }
+    return null; // no FAB for this state
+  }
+
+  function _updateFab(){
+    mobFabClose();
+    var area=document.getElementById('mobFabArea');
+    if(area) area.style.display = _getActions() ? '' : 'none';
+  }
 
   window.mobNavOpen = function(){
     var o=document.getElementById('mobNavOverlay'), b=document.getElementById('mobSectionBtn');
@@ -4970,9 +4995,7 @@ syncFromSheet();
       var n=document.getElementById('mn-'+t);
       if(n) n.classList.toggle('dim', t!==tab);
     });
-    mobFabClose();
-    var area=document.getElementById('mobFabArea');
-    if(area) area.style.display = _actions[tab] ? '' : 'none';
+    _updateFab();
   }
 
   window.mobFabToggle = function(){ _fabOpen ? mobFabClose() : _openFab(); };
@@ -4981,7 +5004,7 @@ syncFromSheet();
     _fabOpen=true;
     var btn=document.getElementById('mobFabBtn'), list=document.getElementById('mobFabSecondary');
     if(btn){ btn.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
-    var acts=_actions[_tab]||[];
+    var acts=_getActions()||[];
     if(list){
       list.innerHTML=acts.map(function(a,i){
         return '<div class="mob-fab-secondary">'
@@ -4995,13 +5018,33 @@ syncFromSheet();
     }
   }
 
-  window._mobExec = function(i){ var a=(_actions[_tab]||[])[i]; if(a) a.fn(); };
+  window._mobExec = function(i){ var a=(_getActions()||[])[i]; if(a) a.fn(); };
 
   window.mobFabClose = function(){
     _fabOpen=false;
     var btn=document.getElementById('mobFabBtn'), list=document.getElementById('mobFabSecondary');
     if(btn){ btn.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
     if(list) list.style.display='none';
+  };
+
+  // Track active CMS sub-panel
+  document.querySelectorAll('.cms-sidenav-item').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      _cmsSection = btn.dataset.cms;
+      _updateFab();
+    });
+  });
+
+  // Track journal sub-view
+  var _origJV = window.cmsShowJournalView;
+  if(_origJV) window.cmsShowJournalView = function(view){
+    _journalView = view; _origJV(view); _updateFab();
+  };
+
+  // Track portfolio sub-view
+  var _origPV = window.cmsShowPortfolioView;
+  if(_origPV) window.cmsShowPortfolioView = function(view){
+    _portfolioView = view; _origPV(view); _updateFab();
   };
 
   // Wrap switchTab to keep mobile header in sync
