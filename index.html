@@ -2362,8 +2362,10 @@ function _openJournalPost(post, posts){
   if(wrap) wrap.style.display = 'none';
   if(postWrap) postWrap.style.display = '';
   if(backBtn){
-    backBtn.onclick = function(){ _buildJournalList(posts); };
+    backBtn.onclick = function(){ _buildJournalList(posts); window.scrollTo(0,0); };
   }
+  // Push history so browser back button returns to the journal list, not a previous page
+  history.pushState({page:'journal', journalList:true}, post.title+' — Jeffery Asare', '/journal');
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   var bodyHtml = post.body.split('\n\n').map(function(para){
@@ -3546,6 +3548,15 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 window.addEventListener('popstate', function(e){
   var s = e.state;
   if(!s){ _navFromHistory=true; navigate('home'); return; }
+  if(s.journalList){
+    // Browser back from inside a journal post — return to the list view
+    var postWrap=document.getElementById('journalPostWrap');
+    var listWrap=document.getElementById('journalListWrap');
+    if(postWrap) postWrap.style.display='none';
+    if(listWrap) listWrap.style.display='';
+    window.scrollTo(0,0);
+    return;
+  }
   if(s.print){
     var p=PRINTS.find(function(x){ return x.id===s.print; });
     _navFromHistory=true;
