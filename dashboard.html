@@ -578,6 +578,73 @@
       .btn-card{font-size:10px;padding:6px 10px;}
       .card-compact{padding:12px 14px;}
     }
+
+    /* ── Mobile-only elements hidden on desktop ── */
+    .mob-header,.mob-nav-overlay,.mob-fab-area{display:none;}
+
+    /* ── Mobile: full layout override ── */
+    @media(max-width:700px){
+      .dash-sidebar{display:none;}
+      .dash-layout{flex-direction:column;}
+      /* Mobile header */
+      .mob-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;background:#fff;border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:200;}
+      .mob-section-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:var(--sans);padding:0;}
+      .mob-section-name{font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--ink);}
+      .mob-section-chevron{color:var(--muted);transition:transform .2s;}
+      .mob-section-btn.open .mob-section-chevron{transform:rotate(180deg);}
+      .mob-date{font-size:11px;color:var(--muted);}
+      /* Full-screen nav overlay */
+      .mob-nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:600;padding:36px 28px;flex-direction:column;justify-content:center;}
+      .mob-nav-overlay.open{display:flex;}
+      .mob-nav-close{position:absolute;top:20px;right:20px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;font-family:var(--sans);line-height:1;padding:4px;}
+      .mob-nav-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:22px;}
+      .mob-nav-list{display:flex;flex-direction:column;}
+      .mob-nav-item{display:flex;align-items:baseline;gap:14px;padding:12px 0;border:none;border-bottom:1px solid var(--rule);background:none;cursor:pointer;font-family:var(--sans);text-align:left;width:100%;}
+      .mob-nav-item:last-child{border-bottom:none;}
+      .mob-nav-num{font-size:11px;color:var(--muted);width:22px;flex-shrink:0;}
+      .mob-nav-name{font-size:26px;font-weight:700;letter-spacing:-.04em;color:var(--ink);line-height:1.1;}
+      .mob-nav-name.dim{color:var(--muted);}
+      .mob-nav-alert{font-size:10px;color:#b91c1c;margin-left:auto;font-weight:500;white-space:nowrap;padding-left:8px;}
+      /* FAB */
+      .mob-fab-area{position:fixed;bottom:26px;right:20px;z-index:400;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+      .mob-fab-secondary-list{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+      .mob-fab-secondary{display:flex;align-items:center;gap:8px;}
+      .mob-fab-lbl{font-size:11px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:var(--rb);padding:7px 13px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.1);cursor:pointer;font-family:var(--sans);}
+      .mob-fab-lbl:hover{background:#f5f0ea;}
+      .mob-fab{width:52px;height:52px;border-radius:50%;background:var(--ink);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.22);}
+      .mob-fab svg{transition:transform .22s;}
+      .mob-fab.open svg{transform:rotate(45deg);}
+      /* Content */
+      .dash-main .page{padding:16px 16px 100px;}
+      .page-greeting{font-size:28px;letter-spacing:-.02em;}
+      .sync-bar{flex-wrap:wrap;gap:8px;}
+      .orders-header{flex-wrap:wrap;gap:8px;}
+      #orders-layout{flex-direction:column;}
+      #orders-sidebar{width:100%;position:static;margin-top:20px;}
+      .tabs{margin-bottom:20px;overflow-x:auto;}
+      .tab{padding:8px 12px;font-size:12px;}
+      .tab-group-label{padding:0 10px 5px;font-size:8px;}
+      .cms-layout{flex-direction:column;}
+      .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:flex;flex-direction:row;overflow-x:auto;padding-bottom:0;}
+      .cms-sidenav-item{width:auto;white-space:nowrap;padding:8px 16px;border-left:none;border-bottom:2px solid transparent;text-align:center;}
+      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:var(--ink);background:transparent;}
+      .cms-content-area{padding:16px 0 0;}
+      .cms-grid2{grid-template-columns:1fr;}
+      .nl-compose{grid-template-columns:1fr;}
+      .nl-preview-wrap{display:none;}
+      .nl-cta-row{grid-template-columns:1fr;}
+      .nl-stat-row{gap:8px;}
+      #cmsModal{padding:0;align-items:flex-end;overflow-y:hidden;}
+      .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
+      .modal-overlay{padding:0;align-items:flex-end;}
+      .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
+      .cms-save-row{flex-wrap:wrap;}
+      .cms-item{flex-wrap:wrap;gap:8px;}
+      .cms-item-actions{margin-left:0;width:100%;display:flex;flex-wrap:wrap;gap:6px;}
+      .cms-list-header{flex-wrap:wrap;gap:8px;}
+      .stat-grid{grid-template-columns:1fr 1fr;}
+      .port-subtabs{overflow-x:auto;}
+    }
   </style>
 </head>
 <body>
@@ -597,6 +664,15 @@
 <script>if(sessionStorage.getItem('ja_admin_auth')!=='1'){document.getElementById('pw-gate').style.display='flex';}</script>
 
 <div class="dash-layout">
+
+<!-- ── Mobile header ── -->
+<div class="mob-header" id="mobHeader">
+  <button class="mob-section-btn" id="mobSectionBtn" onclick="mobNavOpen()">
+    <span class="mob-section-name" id="mobSectionName">Orders</span>
+    <svg class="mob-section-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 8 10 13 15 8"/></svg>
+  </button>
+  <span class="mob-date" id="mobDate"></span>
+</div>
 
 <!-- ── Sidebar nav ── -->
 <nav class="dash-sidebar" aria-label="Dashboard navigation">
@@ -1325,6 +1401,32 @@
 
 </div><!-- /page -->
 </div><!-- /dash-main -->
+
+<!-- ── Mobile: full-screen nav overlay ── -->
+<div class="mob-nav-overlay" id="mobNavOverlay" role="dialog" aria-modal="true" aria-label="Navigation">
+  <button class="mob-nav-close" onclick="mobNavClose()" aria-label="Close">✕</button>
+  <p class="mob-nav-label">Go to</p>
+  <div class="mob-nav-list">
+    <button class="mob-nav-item" onclick="mobNavGo('orders')"><span class="mob-nav-num">01</span><span class="mob-nav-name" id="mn-orders">Orders</span><span class="mob-nav-alert" id="mn-alert-orders"></span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('waitlist')"><span class="mob-nav-num">02</span><span class="mob-nav-name dim" id="mn-waitlist">Waitlist</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('content')"><span class="mob-nav-num">03</span><span class="mob-nav-name dim" id="mn-content">Content</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('workflow')"><span class="mob-nav-num">04</span><span class="mob-nav-name dim" id="mn-workflow">Workflow</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('newsletter')"><span class="mob-nav-num">05</span><span class="mob-nav-name dim" id="mn-newsletter">Newsletter</span><span class="mob-nav-alert" id="mn-alert-newsletter"></span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('messages')"><span class="mob-nav-num">06</span><span class="mob-nav-name dim" id="mn-messages">Messages</span><span class="mob-nav-alert" id="mn-alert-messages"></span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('reviews')"><span class="mob-nav-num">07</span><span class="mob-nav-name dim" id="mn-reviews">Reviews</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('clients')"><span class="mob-nav-num">08</span><span class="mob-nav-name dim" id="mn-clients">Clients</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('analytics')"><span class="mob-nav-num">09</span><span class="mob-nav-name dim" id="mn-analytics">Analytics</span></button>
+  </div>
+</div>
+
+<!-- ── Mobile: FAB ── -->
+<div class="mob-fab-area" id="mobFabArea">
+  <div class="mob-fab-secondary-list" id="mobFabSecondary" style="display:none;"></div>
+  <button class="mob-fab" id="mobFabBtn" onclick="mobFabToggle()" aria-label="Quick actions" aria-expanded="false">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+  </button>
+</div>
+
 </div><!-- /dash-layout -->
 
 <!-- ════════════════════════════════════
@@ -4822,6 +4924,119 @@ syncFromSheet();
   });
   // Focus password input on load
   document.getElementById('pw-input').focus();
+})();
+
+// ── Mobile nav & FAB ─────────────────────────────────────────
+(function(){
+  var _tab = 'orders';
+  var _fabOpen = false;
+
+  var _names = {
+    orders:'Orders', waitlist:'Waitlist', content:'Content', workflow:'Workflow',
+    newsletter:'Newsletter', messages:'Messages', reviews:'Reviews',
+    clients:'Clients', analytics:'Analytics'
+  };
+
+  // Context-aware FAB actions per section
+  var _actions = {
+    orders:     [{ label:'+ New Order',        fn:function(){ var b=document.getElementById('openAddOrder'); if(b) b.click(); mobFabClose(); }}],
+    content:    [
+      { label:'+ New Journal Post', fn:function(){ cmsOpenJournalEdit(null); mobFabClose(); }},
+      { label:'+ New Print',        fn:function(){ cmsOpenPrintEdit(null);   mobFabClose(); }},
+      { label:'+ New Photo',        fn:function(){ cmsOpenPhotoEdit(null);   mobFabClose(); }}
+    ],
+    newsletter: [{ label:'Compose newsletter',  fn:function(){ var b=document.getElementById('nl-compose-btn'); if(b) b.click(); mobFabClose(); }}],
+    reviews:    [{ label:'↻ Refresh',           fn:function(){ revInit(true);  mobFabClose(); }}],
+    analytics:  [{ label:'↻ Refresh',           fn:function(){ anInit(true);   mobFabClose(); }}]
+  };
+
+  window.mobNavOpen = function(){
+    var o=document.getElementById('mobNavOverlay'), b=document.getElementById('mobSectionBtn');
+    if(o){ o.classList.add('open'); document.body.style.overflow='hidden'; }
+    if(b) b.classList.add('open');
+  };
+  window.mobNavClose = function(){
+    var o=document.getElementById('mobNavOverlay'), b=document.getElementById('mobSectionBtn');
+    if(o){ o.classList.remove('open'); document.body.style.overflow=''; }
+    if(b) b.classList.remove('open');
+  };
+  window.mobNavGo = function(tab){ mobNavClose(); switchTab(tab); };
+
+  function _updateHeader(tab){
+    _tab = tab;
+    var el=document.getElementById('mobSectionName');
+    if(el) el.textContent = _names[tab]||tab;
+    Object.keys(_names).forEach(function(t){
+      var n=document.getElementById('mn-'+t);
+      if(n) n.classList.toggle('dim', t!==tab);
+    });
+    mobFabClose();
+    var area=document.getElementById('mobFabArea');
+    if(area) area.style.display = _actions[tab] ? '' : 'none';
+  }
+
+  window.mobFabToggle = function(){ _fabOpen ? mobFabClose() : _openFab(); };
+
+  function _openFab(){
+    _fabOpen=true;
+    var btn=document.getElementById('mobFabBtn'), list=document.getElementById('mobFabSecondary');
+    if(btn){ btn.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
+    var acts=_actions[_tab]||[];
+    if(list){
+      list.innerHTML=acts.map(function(a,i){
+        return '<div class="mob-fab-secondary">'
+          +'<button class="mob-fab-lbl" onclick="window._mobExec('+i+')">'+a.label+'</button>'
+          +'</div>';
+      }).join('');
+      list.style.display='flex';
+      list.style.flexDirection='column';
+      list.style.alignItems='flex-end';
+      list.style.gap='8px';
+    }
+  }
+
+  window._mobExec = function(i){ var a=(_actions[_tab]||[])[i]; if(a) a.fn(); };
+
+  window.mobFabClose = function(){
+    _fabOpen=false;
+    var btn=document.getElementById('mobFabBtn'), list=document.getElementById('mobFabSecondary');
+    if(btn){ btn.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    if(list) list.style.display='none';
+  };
+
+  // Wrap switchTab to keep mobile header in sync
+  var _orig=switchTab;
+  switchTab=function(name){
+    _orig(name);
+    var display=(name==='actions'||name==='ship'||name==='coa'||name==='followup')?'orders':name;
+    _updateHeader(display);
+  };
+
+  // Set date in header
+  (function(){
+    var el=document.getElementById('mobDate'); if(!el) return;
+    var d=new Date();
+    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    el.textContent=days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()];
+  })();
+
+  // Mirror badge counts into the overlay after data loads
+  function _syncAlerts(){
+    [['sn-orders-badge','mn-alert-orders'],
+     ['sn-newsletter-badge','mn-alert-newsletter'],
+     ['sn-messages-badge','mn-alert-messages']].forEach(function(pair){
+      var src=document.getElementById(pair[0]), tgt=document.getElementById(pair[1]);
+      if(src&&tgt&&src.style.display!=='none'&&src.textContent) tgt.textContent=src.textContent;
+    });
+  }
+  setTimeout(_syncAlerts,2500);
+
+  // Close overlay on Escape
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') mobNavClose(); });
+
+  // Initial state
+  _updateHeader('orders');
 })();
 </script>
 </body>
