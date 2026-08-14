@@ -5095,6 +5095,25 @@ syncFromSheet();
   // On mobile, open the nav menu immediately so the user lands on it
   if(window.innerWidth <= 700) mobNavOpen();
 })();
+
+// ── Prevent zoom on iOS (Safari ignores user-scalable=no since iOS 10) ──
+(function(){
+  // Block pinch-to-zoom
+  document.addEventListener('touchmove', function(e){
+    if(e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+  // Block double-tap zoom
+  var _lastTap = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if(now - _lastTap < 300) e.preventDefault();
+    _lastTap = now;
+  }, false);
+  // Block Safari gesture events (pinch/rotate)
+  document.addEventListener('gesturestart',  function(e){ e.preventDefault(); }, false);
+  document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, false);
+  document.addEventListener('gestureend',    function(e){ e.preventDefault(); }, false);
+})();
 </script>
 </body>
 </html>
