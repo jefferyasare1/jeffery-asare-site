@@ -520,47 +520,63 @@
 
     /* ── Mobile ── */
     @media(max-width:700px){
-      /* Bottom nav bar */
+      /* ── Bottom nav bar ── */
       .dash-layout{flex-direction:column;padding-bottom:64px;}
-      .dash-sidebar{width:100%;height:auto;position:fixed;bottom:0;left:0;right:0;top:auto;flex-direction:row;border-right:none;border-top:1px solid var(--rule);padding:0;z-index:500;background:#fff;overflow-x:auto;overflow-y:visible;justify-content:space-around;gap:0;}
-      .sn-logo,.sn-label,.sn-divider,.sn-bottom{display:none;}
-      .sn-item{flex-direction:column;gap:3px;padding:8px 10px;font-size:9px;letter-spacing:.03em;border-radius:0;margin:0;min-width:52px;justify-content:center;align-items:center;border-left:none;border-top:2px solid transparent;}
+      .dash-sidebar{width:100%;height:auto;position:fixed;bottom:0;left:0;right:0;top:auto;flex-direction:row;border-right:none;border-top:1px solid var(--rule);padding:0;z-index:500;background:#fff;overflow-x:auto;overflow-y:visible;gap:0;}
+      /* Flatten group wrapper divs so all nav items form one row */
+      .dash-sidebar > div{display:contents;}
+      /* Hide logo and divider with higher specificity to beat display:contents */
+      .dash-sidebar > .sn-logo,.dash-sidebar > .sn-divider{display:none;}
+      /* Labels are spans (not direct div children) so plain rule works fine */
+      .sn-label{display:none;}
+      .sn-item{flex-direction:column;gap:2px;padding:8px 14px;font-size:9px;letter-spacing:.03em;border-radius:0;margin:0;width:auto;white-space:nowrap;justify-content:center;align-items:center;border-left:none;border-top:2px solid transparent;}
       .sn-item.active{background:transparent;border-top-color:var(--ink);color:var(--ink);}
       .sn-item svg{width:18px;height:18px;}
       .sn-badge{margin-left:0;margin-top:2px;}
-      /* Main content */
+      /* ── Main content ── */
       .dash-main .page{padding:16px 16px 32px;}
-      /* Top tabs */
+      /* Greeting */
+      .page-greeting{font-size:28px;letter-spacing:-.02em;}
+      /* Sync bar */
+      .sync-bar{flex-wrap:wrap;gap:8px;}
+      /* Orders header row */
+      .orders-header{flex-wrap:wrap;gap:8px;}
+      /* Orders split layout → stack vertically */
+      #orders-layout{flex-direction:column;}
+      #orders-sidebar{width:100%;position:static;margin-top:20px;}
+      /* ── Top tabs ── */
       .tabs{margin-bottom:20px;gap:0;}
       .tab{padding:8px 12px;font-size:12px;}
       .tab-group-label{padding:0 10px 5px;font-size:8px;}
-      /* CMS secondary nav → horizontal tabs */
+      /* ── CMS secondary nav → horizontal scroll tabs ── */
       .cms-layout{flex-direction:column;}
       .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:flex;flex-direction:row;overflow-x:auto;padding-bottom:0;}
       .cms-sidenav-item{width:auto;white-space:nowrap;padding:8px 16px;border-left:none;border-bottom:2px solid transparent;text-align:center;}
       .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:var(--ink);background:transparent;}
       .cms-content-area{padding:16px 0 0;}
-      /* Grids → stack */
+      /* ── Grids → stack ── */
       .cms-grid2{grid-template-columns:1fr;}
       .nl-compose{grid-template-columns:1fr;}
       .nl-preview-wrap{display:none;}
       .nl-cta-row{grid-template-columns:1fr;}
       .nl-stat-row{gap:8px;}
-      /* Modals → bottom sheet */
+      /* ── Modals → bottom sheet ── */
       #cmsModal{padding:0;align-items:flex-end;overflow-y:hidden;}
       .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
       .modal-overlay{padding:0;align-items:flex-end;}
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
-      /* Save row wrap */
+      /* ── Save row / CMS items ── */
       .cms-save-row{flex-wrap:wrap;}
-      /* CMS list items */
       .cms-item{flex-wrap:wrap;gap:8px;}
       .cms-item-actions{margin-left:0;width:100%;display:flex;flex-wrap:wrap;gap:6px;}
       .cms-list-header{flex-wrap:wrap;gap:8px;}
-      /* Analytics */
+      /* ── Analytics ── */
       .stat-grid{grid-template-columns:1fr 1fr;}
-      /* Port sub-tabs scroll */
+      /* ── Port sub-tabs scroll ── */
       .port-subtabs{overflow-x:auto;}
+      /* ── Order card buttons ── */
+      .btn-card{font-size:10px;padding:6px 10px;}
+      .card-compact{padding:12px 14px;}
     }
   </style>
 </head>
