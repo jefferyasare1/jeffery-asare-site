@@ -13,7 +13,7 @@
     }
   })();
   </script>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <title>Dashboard | Jeffery Asare</title>
   <style>
     /* ── Password gate ── */
@@ -599,6 +599,8 @@
       .mob-nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:600;padding:36px 28px;flex-direction:column;justify-content:center;}
       .mob-nav-overlay.open{display:flex;}
       .mob-nav-close{position:absolute;top:20px;right:20px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;font-family:var(--sans);line-height:1;padding:4px;}
+      .mob-nav-logo{margin-bottom:32px;}
+      .mob-nav-logo img{height:22px;width:auto;display:block;opacity:.8;}
       .mob-nav-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:22px;}
       .mob-nav-list{display:flex;flex-direction:column;}
       .mob-nav-item{display:flex;align-items:baseline;gap:14px;padding:12px 0;border:none;border-bottom:1px solid var(--rule);background:none;cursor:pointer;font-family:var(--sans);text-align:left;width:100%;}
@@ -606,7 +608,9 @@
       .mob-nav-num{font-size:11px;color:var(--muted);width:22px;flex-shrink:0;}
       .mob-nav-name{font-size:26px;font-weight:700;letter-spacing:-.04em;color:var(--ink);line-height:1.1;}
       .mob-nav-name.dim{color:var(--muted);}
-      .mob-nav-alert{font-size:10px;color:#b91c1c;margin-left:auto;font-weight:500;white-space:nowrap;padding-left:8px;}
+      .mob-nav-alert{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:50px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;margin-left:auto;white-space:nowrap;animation:mob-alert-blink 1.4s ease-in-out infinite;}
+      .mob-nav-alert:empty{display:none;}
+      @keyframes mob-alert-blink{0%,100%{opacity:1;}50%{opacity:.45;}}
       /* FAB */
       .mob-fab-area{position:fixed;bottom:26px;right:20px;z-index:400;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
       .mob-fab-secondary-list{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
@@ -1407,6 +1411,7 @@
 <!-- ── Mobile: full-screen nav overlay ── -->
 <div class="mob-nav-overlay" id="mobNavOverlay" role="dialog" aria-modal="true" aria-label="Navigation">
   <button class="mob-nav-close" onclick="mobNavClose()" aria-label="Close">✕</button>
+  <div class="mob-nav-logo"><img src="/images/ui/logo-name.png" alt="Jeffery Asare"></div>
   <p class="mob-nav-label">Go to</p>
   <div class="mob-nav-list">
     <button class="mob-nav-item" onclick="mobNavGo('orders')"><span class="mob-nav-num">01</span><span class="mob-nav-name" id="mn-orders">Orders</span><span class="mob-nav-alert" id="mn-alert-orders"></span></button>
@@ -4998,7 +5003,13 @@ syncFromSheet();
     _updateFab();
   }
 
-  window.mobFabToggle = function(){ _fabOpen ? mobFabClose() : _openFab(); };
+  window.mobFabToggle = function(){
+    if(_fabOpen){ mobFabClose(); return; }
+    var acts = _getActions()||[];
+    // Single-action FABs fire immediately — no submenu needed
+    if(acts.length === 1){ acts[0].fn(); return; }
+    _openFab();
+  };
 
   function _openFab(){
     _fabOpen=true;
