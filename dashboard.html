@@ -565,6 +565,10 @@
       .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
       .modal-overlay{padding:0;align-items:flex-end;}
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
+      /* FAB origin: scale up from bottom-right where the FAB lives (right:51px, bottom:0) */
+      .modal-overlay.open .modal,
+      #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) 100%;animation:fab-dialog-in .38s cubic-bezier(.34,1.35,.64,1) both;}
+      @keyframes fab-dialog-in{from{transform:scale(.05);opacity:0;}to{transform:scale(1);opacity:1;}}
       /* ── Save row / CMS items ── */
       .cms-save-row{flex-wrap:wrap;}
       .cms-item{flex-wrap:wrap;gap:8px;}
