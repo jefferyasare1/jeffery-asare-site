@@ -579,6 +579,8 @@
         0%  {transform:scale(1);opacity:1;}
         100%{transform:scale(.35);opacity:0;}
       }
+      /* ── Close buttons: sticky so they don't scroll away ── */
+      .modal-close,.cms-modal-close{position:sticky;top:8px;float:right;z-index:10;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.1);}
       /* ── Save row / CMS items ── */
       .cms-save-row{flex-wrap:wrap;}
       .cms-item{flex-wrap:wrap;gap:8px;}
@@ -5014,12 +5016,12 @@ syncFromSheet();
 
   window.mobNavOpen = function(){
     var o=document.getElementById('mobNavOverlay'), b=document.getElementById('mobSectionBtn');
-    if(o){ o.classList.add('open'); document.body.style.overflow='hidden'; }
+    if(o){ o.classList.add('open'); }
     if(b) b.classList.add('open');
   };
   window.mobNavClose = function(){
     var o=document.getElementById('mobNavOverlay'), b=document.getElementById('mobSectionBtn');
-    if(o){ o.classList.remove('open'); document.body.style.overflow=''; }
+    if(o){ o.classList.remove('open'); }
     if(b) b.classList.remove('open');
   };
   window.mobNavGo = function(tab){ mobNavClose(); switchTab(tab); };
