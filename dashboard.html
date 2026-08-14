@@ -5036,8 +5036,8 @@ syncFromSheet();
       // Spin the FAB, open the dialog after spin peaks, then hide FAB
       var btn=document.getElementById('mobFabBtn');
       if(btn) btn.classList.add('spinning');
-      // Dialog starts at 100ms — FAB still mid-spin so they overlap briefly
-      setTimeout(function(){ acts[0].fn(); }, 100);
+      // Dialog starts at 130ms — FAB still mid-spin so they overlap briefly
+      setTimeout(function(){ acts[0].fn(); }, 130);
       // FAB hides at 160ms — just before its spin fully completes
       setTimeout(function(){ _fabHide(); }, 160);
       return;
