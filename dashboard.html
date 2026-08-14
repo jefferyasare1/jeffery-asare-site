@@ -625,6 +625,9 @@
       .mob-fab:active{transform:scale(.91);box-shadow:0 1px 4px rgba(0,0,0,.18);}
       .mob-fab svg{transition:transform .22s;}
       .mob-fab.open svg{transform:rotate(45deg);}
+      .mob-fab.spinning{animation:mob-fab-spin-out .32s cubic-bezier(.4,0,.6,1) forwards;pointer-events:none;}
+      .mob-fab-area.fab-hidden{opacity:0;pointer-events:none;}
+      @keyframes mob-fab-spin-out{0%{transform:scale(1) rotate(0deg);opacity:1;}55%{transform:scale(1.12) rotate(180deg);opacity:.8;}100%{transform:scale(0) rotate(360deg);opacity:0;}}
       /* Content */
       .dash-main .page{padding:16px 16px 100px;}
       .page-greeting{font-size:28px;letter-spacing:-.02em;}
@@ -5008,13 +5011,37 @@ syncFromSheet();
     _updateFab();
   }
 
+  function _fabHide(){
+    var area=document.getElementById('mobFabArea');
+    if(area) area.classList.add('fab-hidden');
+  }
+  function _fabShow(){
+    var area=document.getElementById('mobFabArea'), btn=document.getElementById('mobFabBtn');
+    if(area) area.classList.remove('fab-hidden');
+    if(btn)  btn.classList.remove('spinning');
+  }
+
   window.mobFabToggle = function(){
     if(_fabOpen){ mobFabClose(); return; }
     var acts = _getActions()||[];
-    // Single-action FABs fire immediately — no submenu needed
-    if(acts.length === 1){ acts[0].fn(); return; }
-    _openFab();
+    if(acts.length === 1){
+      // Spin the FAB, open the dialog after spin peaks, then hide FAB
+      var btn=document.getElementById('mobFabBtn');
+      if(btn) btn.classList.add('spinning');
+      setTimeout(function(){
+        acts[0].fn();  // opens the dialog
+        _fabHide();
+      }, 220);
+      return;
+    }
+    _openFab(); // portfolio multi-action: show submenu
   };
+
+  // Restore FAB when any dialog closes
+  var _origClose = window.closeModal;
+  if(_origClose) window.closeModal = function(){ _origClose(); _fabShow(); };
+  var _origCmsClose = window.cmsCloseModal;
+  if(_origCmsClose) window.cmsCloseModal = function(){ _origCmsClose(); _fabShow(); };
 
   function _openFab(){
     _fabOpen=true;
