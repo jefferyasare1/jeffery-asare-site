@@ -1575,6 +1575,7 @@ function injectFooters(){
 // ============================================================
 var PH_C=["ph-warm","ph-cool","ph-mono","ph-red","ph-gold","ph-grn"];
 var MAX_DISPLAY=999;
+var _portfolioCmsLoaded=false;
 
 // Default series — replaced by CMS data when loaded
 var SERIES_LIST=[
@@ -1611,10 +1612,14 @@ function shuffleArray(arr){
 }
 
 function renderPortfolio(filter, animate){
-  var pool=filter==="all"?shuffleArray(PHOTOS):PHOTOS.filter(function(p){ return p.series===filter; });
-  var visible=pool.filter(function(p){ return p.title!=="Untitled" && !p.hidden; }).slice(0,MAX_DISPLAY);
   var grid=document.getElementById("photoGrid");
   if(!grid) return;
+  if(!_portfolioCmsLoaded){
+    grid.innerHTML='<div style="grid-column:1/-1;padding:4rem;text-align:center;color:var(--muted);font-size:13px;">Loading…</div>';
+    return;
+  }
+  var pool=filter==="all"?shuffleArray(PHOTOS):PHOTOS.filter(function(p){ return p.series===filter; });
+  var visible=pool.filter(function(p){ return p.title!=="Untitled" && !p.hidden; }).slice(0,MAX_DISPLAY);
 
   function doRender(){
     grid.innerHTML="";
@@ -3539,7 +3544,7 @@ injectFooters();
 fetch('/_data/settings/series.json')
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(d){
-    if(!d || !Array.isArray(d.series) || !d.series.length) return;
+    if(!d || !Array.isArray(d.series) || !d.series.length){ _portfolioCmsLoaded=true; renderPortfolio('all'); return; }
     SERIES_LIST = d.series;
     buildFilterBar();
     return Promise.all(d.series.map(function(s){
@@ -3561,10 +3566,11 @@ fetch('/_data/settings/series.json')
         tech:[["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]};
     });
     if(flat.length) PHOTOS=flat;
+    _portfolioCmsLoaded=true;
     renderPortfolio('all');
     renderPhotoOfWeek();
   })
-  .catch(function(){ renderPortfolio('all'); });
+  .catch(function(){ _portfolioCmsLoaded=true; renderPortfolio('all'); });
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Deep link: ?print=s1 opens that print; /portfolio or ?page=portfolio goes to that section
