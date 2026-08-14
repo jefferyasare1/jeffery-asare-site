@@ -5080,6 +5080,8 @@ syncFromSheet();
 
   // Initial state
   _updateHeader('orders');
+  // On mobile, open the nav menu immediately so the user lands on it
+  if(window.innerWidth <= 700) mobNavOpen();
 })();
 </script>
 </body>
