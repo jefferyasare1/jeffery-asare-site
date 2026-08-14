@@ -5065,6 +5065,8 @@ syncFromSheet();
     _orig(name);
     var display=(name==='actions'||name==='ship'||name==='coa'||name==='followup')?'orders':name;
     _updateHeader(display);
+    // On mobile the sidebar button click never fires, so trigger journal load manually
+    if(name === 'content' && typeof _cmsLoaded !== 'undefined' && !_cmsLoaded.journal) cmsLoad('journal');
   };
 
   // Set date in header
