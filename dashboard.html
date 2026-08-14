@@ -565,10 +565,20 @@
       .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
       .modal-overlay{padding:0;align-items:flex-end;}
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
-      /* FAB origin: scale up from bottom-right where the FAB lives (right:51px, bottom:0) */
+      /* FAB origin: bloom from FAB centre (right:51px, 57px above sheet bottom) */
       .modal-overlay.open .modal,
-      #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) 100%;animation:fab-dialog-in .38s cubic-bezier(.34,1.35,.64,1) both;}
-      @keyframes fab-dialog-in{from{transform:scale(.05);opacity:0;}to{transform:scale(1);opacity:1;}}
+      #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-in .38s cubic-bezier(0.16,1,0.3,1) both;}
+      .modal.closing,.cms-modal-box.closing{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-out .52s ease-in forwards;pointer-events:none;}
+      @keyframes fab-dialog-in{
+        0%  {transform:scale(.35);opacity:0;}
+        30% {transform:scale(1);}
+        60% {opacity:1;}
+        100%{transform:scale(1);opacity:1;}
+      }
+      @keyframes fab-dialog-out{
+        0%  {transform:scale(1);opacity:1;}
+        100%{transform:scale(.35);opacity:0;}
+      }
       /* ── Save row / CMS items ── */
       .cms-save-row{flex-wrap:wrap;}
       .cms-item{flex-wrap:wrap;gap:8px;}
@@ -627,7 +637,7 @@
       .mob-fab.open svg{transform:rotate(45deg);}
       .mob-fab.spinning{animation:mob-fab-spin-out .2s ease-in forwards;pointer-events:none;}
       .mob-fab.spinning-in{animation:mob-fab-spin-in .28s cubic-bezier(.34,1.35,.64,1) forwards;}
-      .mob-fab-area.fab-hidden{opacity:0;pointer-events:none;}
+      .mob-fab-area.fab-hidden{opacity:0;pointer-events:none;transition:opacity .1s ease;}
       @keyframes mob-fab-spin-out{0%{transform:scale(1) rotate(0deg);opacity:1;}100%{transform:scale(0) rotate(90deg);opacity:0;}}
       @keyframes mob-fab-spin-in{0%{transform:scale(0) rotate(180deg);opacity:0;}100%{transform:scale(1) rotate(0deg);opacity:1;}}
       /* Content */
@@ -3820,9 +3830,14 @@ document.getElementById('addOrderOverlay').addEventListener('click', function(e)
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
 
 function closeModal(){
-  document.getElementById('addOrderOverlay').classList.remove('open');
-  clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-price','ao-qty','ao-ref']);
-  setMsg('ao-status','','');
+  var box=document.querySelector('#addOrderOverlay .modal');
+  if(box) box.classList.add('closing');
+  setTimeout(function(){
+    document.getElementById('addOrderOverlay').classList.remove('open');
+    if(box) box.classList.remove('closing');
+    clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-price','ao-qty','ao-ref']);
+    setMsg('ao-status','','');
+  }, 480);
 }
 
 document.getElementById('ao-save').addEventListener('click', function(){
@@ -4895,7 +4910,14 @@ function cmsRenamePhoto(){
 
 // ── Modal helpers ───────────────────────────────────────────────
 function cmsOpenModal(){document.getElementById('cmsModal').classList.add('open');}
-function cmsCloseModal(){document.getElementById('cmsModal').classList.remove('open');}
+function cmsCloseModal(){
+  var box=document.querySelector('#cmsModal .cms-modal-box');
+  if(box) box.classList.add('closing');
+  setTimeout(function(){
+    document.getElementById('cmsModal').classList.remove('open');
+    if(box) box.classList.remove('closing');
+  }, 480);
+}
 document.getElementById('cmsModal').addEventListener('click',function(e){if(e.target===this)cmsCloseModal();});
 
 // ── Escape helpers ──────────────────────────────────────────────
@@ -5036,10 +5058,10 @@ syncFromSheet();
       // Spin the FAB, open the dialog after spin peaks, then hide FAB
       var btn=document.getElementById('mobFabBtn');
       if(btn) btn.classList.add('spinning');
-      // Dialog starts at 130ms — FAB still mid-spin so they overlap briefly
-      setTimeout(function(){ acts[0].fn(); }, 130);
-      // FAB hides at 160ms — just before its spin fully completes
-      setTimeout(function(){ _fabHide(); }, 160);
+      // Dialog blooms at 20ms — almost immediate, while FAB still spinning
+      setTimeout(function(){ acts[0].fn(); }, 20);
+      // FAB fades at 120ms — mid-animation overlap for seamless handoff
+      setTimeout(function(){ _fabHide(); }, 120);
       return;
     }
     _openFab(); // portfolio multi-action: show submenu
