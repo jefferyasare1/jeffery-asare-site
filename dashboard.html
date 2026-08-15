@@ -561,10 +561,10 @@
       .nl-cta-row{grid-template-columns:1fr;}
       .nl-stat-row{gap:8px;}
       /* ── Modals → bottom sheet ── */
-      #cmsModal{padding:0;align-items:flex-end;overflow-y:hidden;}
-      .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
-      .modal-overlay{padding:0;align-items:flex-end;}
-      .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
+      #cmsModal{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;overflow-y:hidden;}
+      .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
+      .modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
+      .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));max-width:100%;}
       /* FAB origin: bloom from FAB centre (right:51px, 57px above sheet bottom) */
       .modal-overlay.open .modal,
       #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-in .22s cubic-bezier(0.2,0,0,1) both;}
@@ -663,10 +663,10 @@
       .nl-preview-wrap{display:none;}
       .nl-cta-row{grid-template-columns:1fr;}
       .nl-stat-row{gap:8px;}
-      #cmsModal{padding:0;align-items:flex-end;overflow-y:hidden;}
-      .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;overflow-y:auto;margin:0;}
-      .modal-overlay{padding:0;align-items:flex-end;}
-      .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
+      #cmsModal{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;overflow-y:hidden;}
+      .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
+      .modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
+      .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));max-width:100%;}
       .cms-save-row{flex-wrap:wrap;}
       .cms-item{flex-wrap:wrap;gap:8px;}
       .cms-item-actions{margin-left:0;width:100%;display:flex;flex-wrap:wrap;gap:6px;}
@@ -2868,6 +2868,8 @@ function renderOrders(){
     var sc=document.getElementById('fc-ship-count');  if(sc)  sc.textContent = _toShip ? '('+_toShip+')' : '';
     var fc=document.getElementById('fc-fu-count');    if(fc)  fc.textContent = _toFu   ? '('+_toFu+')'   : '';
   })();
+  // Keep mobile nav overlay badge in sync after every render
+  if(typeof window.mobSyncAlerts === 'function') window.mobSyncAlerts();
   populateClientSelectors();
 
   if(queue) queue.innerHTML = buildActionQueue(orders);
@@ -5394,6 +5396,7 @@ syncFromSheet();
     }
   }
   setTimeout(_syncAlerts,2500);
+  window.mobSyncAlerts = _syncAlerts; // expose so renderOrders() can re-sync after each data update
   // Re-sync when messages are fetched
   var _origMsgRender = msgRender;
   msgRender = function(){ _origMsgRender(); _syncAlerts(); };
