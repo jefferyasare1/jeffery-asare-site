@@ -186,7 +186,7 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
           <div class="waitlist-heading" id="waitlistHeading">Join the waitlist</div>
           <div class="waitlist-sub" id="waitlistSub">Be the first to know when this edition comes back.</div>
           <div class="waitlist-row">
-            <input class="waitlist-input" type="email" id="waitlistEmail" placeholder="Your email address">
+            <input class="waitlist-input" type="email" id="waitlistEmail" placeholder="Your email address" onkeydown="if(event.key==='Enter'){event.preventDefault();submitWaitlist();}">
             <button class="waitlist-btn" id="waitlistBtn" onclick="submitWaitlist()">Notify me</button>
           </div>
           <div class="waitlist-success" id="waitlistSuccess"></div>
@@ -212,7 +212,6 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 emailjs.init('fTeaXZvU78Yu3TSVl');
 
 var PAYSTACK_KEY = 'pk_test_651689f8101656b8ac3ba9b7bbc496720b454bf2';
-var USD_RATE = 0.067;
 var DELIVERY_FEE_GHC = 80;
 var FORMSPREE = 'https://formspree.io/f/xwvdwaal';
 

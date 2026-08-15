@@ -45,24 +45,33 @@ export async function onRequestPost(context) {
   }
 
   // Forward the GraphQL query body to Cloudflare's API
-  const body = await context.request.text();
+  let body;
+  try { body = await context.request.text(); }
+  catch { return new Response(JSON.stringify({ error: 'Failed to read request body' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }); }
 
-  const cfResponse = await fetch('https://api.cloudflare.com/client/v4/graphql', {
-    method:  'POST',
-    headers: {
-      'Authorization': `Bearer ${CF_TOKEN}`,
-      'Content-Type':  'application/json',
-    },
-    body,
-  });
+  try {
+    const cfResponse = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_TOKEN}`,
+        'Content-Type':  'application/json',
+      },
+      body,
+    });
 
-  const data = await cfResponse.text();
+    const data = await cfResponse.text();
 
-  return new Response(data, {
-    status: cfResponse.status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...CORS_HEADERS,
-    },
-  });
+    return new Response(data, {
+      status: cfResponse.status,
+      headers: {
+        'Content-Type': 'application/json',
+        ...CORS_HEADERS,
+      },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'Analytics API unreachable: ' + (err.message || 'network error') }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    });
+  }
 }

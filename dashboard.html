@@ -455,14 +455,14 @@
     /* ── Sidebar layout ── */
     .dash-layout{display:flex;align-items:flex-start;}
     .dash-sidebar{width:210px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--rule);padding:16px 10px 20px;display:flex;flex-direction:column;}
-    .sn-logo{padding:0 6px;margin-bottom:20px;}
-    .sn-logo img{height:28px;width:auto;display:block;}
+    .sn-logo{padding:0 6px;margin-bottom:20px;border-bottom:1px solid var(--rule);padding-bottom:16px;}
+    .sn-logo img{height:32px;width:auto;display:block;}
     .dash-main{flex:1;min-width:0;}
     .page{max-width:none;padding:28px 36px 80px;}
     .sn-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#b0a89e;padding:0 8px;margin:0 0 5px;display:block;}
     .sn-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--rb);font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:2px;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;transition:color .12s,background .12s;}
     .sn-item:hover{color:var(--ink);background:rgba(0,0,0,.03);}
-    .sn-item.active{color:var(--ink);font-weight:600;background:#f0ebe3;}
+    .sn-item.active{color:var(--ink);font-weight:600;background:#f0ebe3;border-left:3px solid var(--ink);padding-left:5px;}
     .sn-badge{margin-left:auto;background:var(--ink);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;line-height:1.6;}
     .sn-badge.warn{background:#b45309;}
     .sn-divider{height:1px;background:var(--rule);margin:10px 2px;}
@@ -682,7 +682,7 @@
     .digest-row:first-child{padding-top:0;}
     .digest-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0;width:64px;padding-top:2px;}
     .digest-val{flex:1;color:var(--ink);}
-    .digest-pill{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:50px;margin:0 3px 2px 0;white-space:nowrap;}
+    .digest-pill{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:4px 10px;border-radius:50px;margin:0 4px 4px 0;white-space:nowrap;}
     .digest-pill.red{background:#fee2e2;color:#991b1b;}
     .digest-pill.amber{background:#fef3c7;color:#92400e;}
     .digest-pill.blue{background:#dbeafe;color:#1e40af;}
@@ -695,7 +695,7 @@
     .mob-nav-sub:empty{display:none;}
 
     /* ── Client score badges ── */
-    .client-score-badge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:50px;}
+    .client-score-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:50px;}
     .client-score-repeat{background:#dbeafe;color:#1e40af;}
     .client-score-risk{background:#fee2e2;color:#991b1b;}
     .client-score-vip{background:#fef9c3;color:#854d0e;}
@@ -3477,19 +3477,28 @@ function renderClients(){
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
   html += complete.map(function(o){
     var date = o.followDate ? fmtDate(o.followDate) : o.dateAdded ? fmtDate(o.dateAdded) : '';
-    var print = [o.printTitle, o.size].filter(Boolean).join(', ');
     // Score badges
     var badges = '';
     if(o._clientCount > 2)       badges += '<span class="client-score-badge client-score-vip">VIP ×'+o._clientCount+'</span> ';
     else if(o._clientCount > 1)  badges += '<span class="client-score-badge client-score-repeat">Repeat</span> ';
     if(o._daysSinceOrder > 120)  badges += '<span class="client-score-badge client-score-risk">At risk</span>';
-    return '<div style="background:#fff;border:1px solid var(--rule);border-radius:10px;padding:14px 16px;position:relative;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor=\'#c8c0b6\'" onmouseout="this.style.borderColor=\'var(--rule)\'" onclick="showClientModal(\''+o.id+'\')">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(o.buyerName)+'</div>'
-      +(badges ? '<div style="margin-bottom:6px;">'+badges+'</div>' : '')
-      +'<div style="font-size:11px;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(print)+'</div>'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;">'
-        +'<span style="font-size:10px;color:#b0a89e;">'+escH(o.country||'')+'</span>'
-        +'<span style="font-size:10px;color:#b0a89e;">'+escH(date)+'</span>'
+    // Thumbnail lookup
+    var prints = (_cmsData&&_cmsData.prints&&_cmsData.prints.prints)||[];
+    var match = prints.find(function(p){ return p.title&&o.printTitle&&p.title.toLowerCase()===o.printTitle.toLowerCase(); });
+    var imgSrc = (match&&match.img)||'';
+    var thumbHtml = imgSrc
+      ? '<img src="'+escH(imgSrc)+'" style="width:48px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--rule);display:block;" loading="lazy">'
+      : '<div style="width:48px;height:60px;border-radius:6px;flex-shrink:0;background:var(--rule);display:block;"></div>';
+    return '<div style="background:#fff;border:1px solid var(--rule);border-radius:10px;padding:12px 14px;position:relative;cursor:pointer;transition:border-color .15s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor=\'#c8c0b6\'" onmouseout="this.style.borderColor=\'var(--rule)\'" onclick="showClientModal(\''+o.id+'\')">'
+      + thumbHtml
+      +'<div style="flex:1;min-width:0;">'
+        +(badges ? '<div style="margin-bottom:5px;">'+badges+'</div>' : '')
+        +'<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(o.printTitle||'—')+(o.size?' <span style="font-weight:400;color:var(--muted);">· '+escH(o.size)+'</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(o.buyerName)+'</div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;">'
+          +'<span style="font-size:10px;color:#b0a89e;">'+escH(o.country||'')+'</span>'
+          +'<span style="font-size:10px;color:#b0a89e;">'+escH(date)+'</span>'
+        +'</div>'
       +'</div>'
     +'</div>';
   }).join('');

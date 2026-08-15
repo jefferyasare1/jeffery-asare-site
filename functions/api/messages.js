@@ -30,7 +30,12 @@ export async function onRequestGet(context) {
     'Accept': 'application/vnd.github+json',
   };
 
-  const getRes = await fetch(`${GH_API}/repos/${REPO}/contents/${FILE_PATH}`, { headers: ghHeaders });
+  let getRes;
+  try {
+    getRes = await fetch(`${GH_API}/repos/${REPO}/contents/${FILE_PATH}`, { headers: ghHeaders });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'GitHub unreachable: ' + (err.message || 'network error') }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  }
 
   if (!getRes.ok) {
     // No messages file yet → return empty list
@@ -40,7 +45,11 @@ export async function onRequestGet(context) {
     return new Response(JSON.stringify({ error: 'GitHub fetch error' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const fileData = await getRes.json();
-  const content = fromB64(fileData.content.replace(/\n/g, ''));
-  return new Response(content, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    const fileData = await getRes.json();
+    const content = fromB64(fileData.content.replace(/\n/g, ''));
+    return new Response(content, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'Failed to decode messages file' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
 }
