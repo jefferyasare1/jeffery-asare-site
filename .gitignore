@@ -20,3 +20,6 @@ npm-debug.log*
 # Editor backup files
 *.jpg~
 *.jpeg~
+
+# Utility scripts
+*.command
