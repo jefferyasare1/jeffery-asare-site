@@ -567,17 +567,18 @@
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:90vh;max-width:100%;}
       /* FAB origin: bloom from FAB centre (right:51px, 57px above sheet bottom) */
       .modal-overlay.open .modal,
-      #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-in .38s cubic-bezier(0.16,1,0.3,1) both;}
-      .modal.closing,.cms-modal-box.closing{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-out .52s ease-in forwards;pointer-events:none;}
+      #cmsModal.open .cms-modal-box{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-in .22s cubic-bezier(0.2,0,0,1) both;}
+      .modal.closing,.cms-modal-box.closing{transform-origin:calc(100% - 51px) calc(100% - 57px);animation:fab-dialog-out .28s cubic-bezier(0.4,0,1,1) forwards;pointer-events:none;}
       @keyframes fab-dialog-in{
-        0%  {transform:scale(.35);opacity:0;}
-        30% {transform:scale(1);}
-        60% {opacity:1;}
+        0%  {transform:scale(.4);opacity:0;}
+        40% {transform:scale(1);}
+        70% {opacity:1;}
         100%{transform:scale(1);opacity:1;}
       }
       @keyframes fab-dialog-out{
         0%  {transform:scale(1);opacity:1;}
-        100%{transform:scale(.35);opacity:0;}
+        40% {opacity:0;}
+        100%{transform:scale(.4);opacity:0;}
       }
       /* ── Close buttons: sticky so they don't scroll away ── */
       .modal-close,.cms-modal-close{position:sticky;top:8px;float:right;z-index:10;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.1);}
@@ -638,7 +639,7 @@
       .mob-fab svg{transition:transform .22s;}
       .mob-fab.open svg{transform:rotate(45deg);}
       .mob-fab.spinning{animation:mob-fab-spin-out .2s ease-in forwards;pointer-events:none;}
-      .mob-fab.spinning-in{animation:mob-fab-spin-in .28s cubic-bezier(.34,1.35,.64,1) forwards;}
+      .mob-fab.spinning-in{animation:mob-fab-spin-in .25s ease-out forwards;}
       .mob-fab-area.fab-hidden{opacity:0;pointer-events:none;transition:opacity .1s ease;}
       @keyframes mob-fab-spin-out{0%{transform:scale(1) rotate(0deg);opacity:1;}100%{transform:scale(0) rotate(90deg);opacity:0;}}
       @keyframes mob-fab-spin-in{0%{transform:scale(0) rotate(180deg);opacity:0;}100%{transform:scale(1) rotate(0deg);opacity:1;}}
@@ -3839,7 +3840,7 @@ function closeModal(){
     if(box) box.classList.remove('closing');
     clrFields(['ao-name','ao-email','ao-title','ao-size','ao-country','ao-price','ao-qty','ao-ref']);
     setMsg('ao-status','','');
-  }, 480);
+  }, 260);
 }
 
 document.getElementById('ao-save').addEventListener('click', function(){
@@ -4918,7 +4919,7 @@ function cmsCloseModal(){
   setTimeout(function(){
     document.getElementById('cmsModal').classList.remove('open');
     if(box) box.classList.remove('closing');
-  }, 480);
+  }, 260);
 }
 document.getElementById('cmsModal').addEventListener('click',function(e){if(e.target===this)cmsCloseModal();});
 
@@ -5049,7 +5050,7 @@ syncFromSheet();
     if(btn){
       btn.classList.remove('spinning');
       btn.classList.add('spinning-in');
-      setTimeout(function(){ btn.classList.remove('spinning-in'); }, 300);
+      setTimeout(function(){ btn.classList.remove('spinning-in'); }, 260);
     }
   }
 
