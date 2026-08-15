@@ -674,6 +674,31 @@
       .stat-grid{grid-template-columns:1fr 1fr;}
       .port-subtabs{overflow-x:auto;}
     }
+
+    /* ── Smart Digest Card ── */
+    #smartDigest{background:#faf9f7;border:1px solid var(--rule);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none;}
+    .digest-row{display:flex;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.5;}
+    .digest-row:last-child{border-bottom:none;padding-bottom:0;}
+    .digest-row:first-child{padding-top:0;}
+    .digest-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0;width:64px;padding-top:2px;}
+    .digest-val{flex:1;color:var(--ink);}
+    .digest-pill{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:50px;margin:0 3px 2px 0;white-space:nowrap;}
+    .digest-pill.red{background:#fee2e2;color:#991b1b;}
+    .digest-pill.amber{background:#fef3c7;color:#92400e;}
+    .digest-pill.blue{background:#dbeafe;color:#1e40af;}
+    .digest-pill.grey{background:#f3f4f6;color:#374151;}
+    .digest-pill.green{background:#dcfce7;color:#166534;}
+    .digest-trend{font-size:10px;color:var(--muted);}
+
+    /* ── Mobile nav sub-context ── */
+    .mob-nav-sub{font-size:10px;color:var(--muted);font-weight:500;line-height:1;align-self:center;white-space:nowrap;margin-right:8px;}
+    .mob-nav-sub:empty{display:none;}
+
+    /* ── Client score badges ── */
+    .client-score-badge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:50px;}
+    .client-score-repeat{background:#dbeafe;color:#1e40af;}
+    .client-score-risk{background:#fee2e2;color:#991b1b;}
+    .client-score-vip{background:#fef9c3;color:#854d0e;}
   </style>
 </head>
 <body>
@@ -780,6 +805,9 @@
         <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
       </div>
     </div>
+
+    <!-- Smart digest -->
+    <div id="smartDigest"></div>
 
     <!-- Alerts strip -->
     <div id="summaryStrip" style="margin-bottom:20px;">
@@ -1400,10 +1428,11 @@
         <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Reply to</div>
         <div id="msg-reply-to" style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:20px;"></div>
         <textarea id="msg-reply-body" rows="8" placeholder="Write your reply here..." style="width:100%;border:1.5px solid var(--rule);border-radius:6px;padding:12px 14px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;resize:vertical;line-height:1.7;outline:none;"></textarea>
-        <div style="display:flex;gap:10px;margin-top:14px;align-items:center;">
+        <div style="display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap;">
           <button class="btn-primary" id="msg-reply-send-btn" onclick="msgSendReply()" style="width:auto;padding:11px 22px;">Send Reply</button>
+          <button class="btn-card" id="msg-draft-btn" onclick="msgDraftReply()" title="Generate a draft reply using AI">✨ Draft</button>
           <button class="btn-card" onclick="msgCloseReply()">Cancel</button>
-          <div id="msg-reply-status" style="font-size:12px;color:var(--muted);margin-left:8px;"></div>
+          <div id="msg-reply-status" style="font-size:12px;color:var(--muted);margin-left:auto;max-width:200px;text-align:right;"></div>
         </div>
       </div>
     </div>
@@ -1437,12 +1466,12 @@
   <div class="mob-nav-logo"><img src="/images/ui/logo-name.png" alt="Jeffery Asare"></div>
   <p class="mob-nav-label">Go to</p>
   <div class="mob-nav-list">
-    <button class="mob-nav-item" onclick="mobNavGo('orders')"><span class="mob-nav-num">01</span><span class="mob-nav-name" id="mn-orders">Orders</span><span class="mob-nav-alert" id="mn-alert-orders"></span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('orders')"><span class="mob-nav-num">01</span><span class="mob-nav-name" id="mn-orders">Orders</span><span class="mob-nav-sub" id="mn-sub-orders"></span><span class="mob-nav-alert" id="mn-alert-orders"></span></button>
     <button class="mob-nav-item" onclick="mobNavGo('waitlist')"><span class="mob-nav-num">02</span><span class="mob-nav-name dim" id="mn-waitlist">Waitlist</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('content')"><span class="mob-nav-num">03</span><span class="mob-nav-name dim" id="mn-content">Content</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('workflow')"><span class="mob-nav-num">04</span><span class="mob-nav-name dim" id="mn-workflow">Workflow</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('newsletter')"><span class="mob-nav-num">05</span><span class="mob-nav-name dim" id="mn-newsletter">Newsletter</span><span class="mob-nav-alert" id="mn-alert-newsletter"></span></button>
-    <button class="mob-nav-item" onclick="mobNavGo('messages')"><span class="mob-nav-num">06</span><span class="mob-nav-name dim" id="mn-messages">Messages</span><span class="mob-nav-alert" id="mn-alert-messages"></span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('messages')"><span class="mob-nav-num">06</span><span class="mob-nav-name dim" id="mn-messages">Messages</span><span class="mob-nav-sub" id="mn-sub-messages"></span><span class="mob-nav-alert" id="mn-alert-messages"></span></button>
     <button class="mob-nav-item" onclick="mobNavGo('reviews')"><span class="mob-nav-num">07</span><span class="mob-nav-name dim" id="mn-reviews">Reviews</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('clients')"><span class="mob-nav-num">08</span><span class="mob-nav-name dim" id="mn-clients">Clients</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('analytics')"><span class="mob-nav-num">09</span><span class="mob-nav-name dim" id="mn-analytics">Analytics</span></button>
@@ -2489,6 +2518,91 @@ function renderStats(orders){
   }).join('<div style="width:1px;background:var(--rule);margin:10px 0;self-align:stretch;"></div>');
 }
 
+// ── Smart Digest Card ───────────────────────────────────────────
+function renderSmartDigest(orders){
+  var card = document.getElementById('smartDigest');
+  if(!card) return;
+
+  var now = new Date(); now.setHours(0,0,0,0);
+  var active = orders.filter(function(o){ return !o.followedUp && o.status !== 'done'; });
+  var overdue=0, dueWeek=0, toCoa=0, toShip=0, toFu=0;
+  active.forEach(function(o){
+    var s = getStatus(o);
+    if(s.urgency === 0) overdue++;
+    else if(s.urgency === 1) dueWeek++;
+    if(!o.coaSent) toCoa++;
+    else if(!o.shipped) toShip++;
+    else toFu++;
+  });
+
+  // Revenue this month vs last month
+  var tm = now.getMonth(), ty = now.getFullYear();
+  var lm = tm === 0 ? 11 : tm - 1, ly = tm === 0 ? ty - 1 : ty;
+  var thisMoRev = 0, lastMoRev = 0;
+  orders.forEach(function(o){
+    var d = new Date(o.dateAdded||0);
+    var amt = parsePrice(o.price||'') * (parseInt(o.qty)||1);
+    if(d.getMonth() === tm && d.getFullYear() === ty) thisMoRev += amt;
+    if(d.getMonth() === lm && d.getFullYear() === ly) lastMoRev += amt;
+  });
+  // Project month revenue based on how far through month we are
+  var dayOfMonth = now.getDate();
+  var daysInMonth = new Date(ty, tm+1, 0).getDate();
+  var pace = dayOfMonth > 0 ? Math.round(thisMoRev / dayOfMonth * daysInMonth) : 0;
+  var revTrend = '';
+  if(lastMoRev > 0){
+    var pct = Math.round(Math.abs(thisMoRev - lastMoRev) / lastMoRev * 100);
+    revTrend = ' <span class="digest-trend">'+(thisMoRev >= lastMoRev ? '↑' : '↓')+' '+pct+'% vs last mo</span>';
+  }
+
+  // Unread messages (use cached data)
+  var unreadMsgs = -1, unrepliedMsgs = 0;
+  if(_msgData !== null){
+    unreadMsgs = _msgData.filter(function(m){ return !m.read; }).length;
+    unrepliedMsgs = _msgData.filter(function(m){ return !m.replied; }).length;
+  }
+
+  // Repeat buyers (clients who ordered more than once)
+  var emailCounts = {};
+  orders.forEach(function(o){ var e=(o.buyerEmail||'').toLowerCase(); emailCounts[e]=(emailCounts[e]||0)+1; });
+  var repeatBuyers = Object.keys(emailCounts).filter(function(e){ return emailCounts[e] > 1; }).length;
+
+  // Build digest rows
+  var rows = '';
+
+  // Orders row
+  var pills = [];
+  if(overdue)  pills.push('<span class="digest-pill red">'+overdue+' overdue</span>');
+  if(dueWeek)  pills.push('<span class="digest-pill amber">'+dueWeek+' due this week</span>');
+  if(toCoa)    pills.push('<span class="digest-pill blue">'+toCoa+' COA pending</span>');
+  if(toShip)   pills.push('<span class="digest-pill blue">'+toShip+' to ship</span>');
+  if(toFu)     pills.push('<span class="digest-pill grey">'+toFu+' follow-up</span>');
+  if(!pills.length) pills.push('<span class="digest-pill green">All clear ✓</span>');
+  rows += '<div class="digest-row"><span class="digest-label">Orders</span><span class="digest-val">'+pills.join('')+'</span></div>';
+
+  // Revenue row
+  var revStr = '$'+Math.round(thisMoRev).toLocaleString('en-US');
+  if(dayOfMonth < daysInMonth - 3 && pace > thisMoRev){
+    revStr += ' · on pace for $'+Math.round(pace).toLocaleString('en-US');
+  }
+  rows += '<div class="digest-row"><span class="digest-label">Revenue</span><span class="digest-val"><strong>'+revStr+'</strong> this month'+revTrend+'</span></div>';
+
+  // Messages row (only if data loaded)
+  if(unreadMsgs >= 0){
+    var msgStr = unreadMsgs ? '<strong>'+unreadMsgs+'</strong> unread' : 'No unread';
+    if(unrepliedMsgs > unreadMsgs) msgStr += ' · '+unrepliedMsgs+' unreplied';
+    rows += '<div class="digest-row"><span class="digest-label">Messages</span><span class="digest-val">'+msgStr+'</span></div>';
+  }
+
+  // Clients row (show repeat buyer count)
+  if(repeatBuyers > 0){
+    rows += '<div class="digest-row"><span class="digest-label">Clients</span><span class="digest-val">'+repeatBuyers+' repeat buyer'+(repeatBuyers!==1?'s':'')+'</span></div>';
+  }
+
+  card.innerHTML = rows;
+  card.style.display = '';
+}
+
 // ── Edition Inventory Bar ────────────────────────────────────────
 var _printsCache = null;
 function getPrints(cb){
@@ -2734,6 +2848,7 @@ function renderOrders(){
 
   // Update stats, inventory, actions badge, sidebar, and To Do queues
   renderStats(orders);
+  renderSmartDigest(orders);
   renderInventory(orders);
   renderInvChips(orders);
   renderOrdersSidebar();
@@ -3009,6 +3124,8 @@ function msgInit(forceRefresh) {
       var unread = _msgData.filter(function(m){ return !m.read; }).length;
       var badge = document.getElementById('sn-messages-badge');
       if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+      // Refresh digest card now that message data is available
+      renderSmartDigest(loadOrders());
     })
     .catch(function(e){
       if (listEl) listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:#c00;font-size:13px;">Failed to load messages. Check your connection.</div>';
@@ -3131,17 +3248,79 @@ function msgSendReply() {
   });
 }
 
+// AI draft reply
+function msgDraftReply(){
+  var id = _msgOpenId;
+  if(!id) return;
+  var msg = (_msgData||[]).find(function(m){ return m.id === id; });
+  if(!msg) return;
+  var btn = document.getElementById('msg-draft-btn');
+  var statusEl = document.getElementById('msg-reply-status');
+  var bodyEl = document.getElementById('msg-reply-body');
+  if(btn){ btn.disabled = true; btn.textContent = 'Drafting…'; }
+  if(statusEl){ statusEl.textContent = ''; }
+  fetch('/api/draft-reply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: 'jA9kx2vP7m', name: msg.name, subject: msg.subject, message: msg.message })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.draft){
+      if(bodyEl) bodyEl.value = d.draft;
+      if(statusEl){ statusEl.textContent = 'Draft ready — review before sending.'; statusEl.style.color = '#166534'; }
+    } else {
+      if(statusEl){ statusEl.textContent = d.error || 'Could not generate draft.'; statusEl.style.color = '#c00'; }
+    }
+    if(btn){ btn.disabled = false; btn.textContent = '✨ Draft'; }
+  })
+  .catch(function(){
+    if(statusEl){ statusEl.textContent = 'Draft failed. Check connection.'; statusEl.style.color = '#c00'; }
+    if(btn){ btn.disabled = false; btn.textContent = '✨ Draft'; }
+  });
+}
+
 // Close reply modal on overlay click
 document.addEventListener('click', function(e){
   var overlay = document.getElementById('msg-reply-overlay');
   if (overlay && e.target === overlay) msgCloseReply();
 });
 
+// ── Client scoring ───────────────────────────────────────────────
+function _buildClientScores(allOrders){
+  var map = {};
+  var now = new Date();
+  allOrders.forEach(function(o){
+    var key = (o.buyerEmail||'').toLowerCase().trim();
+    if(!key) key = '__'+o.id;
+    if(!map[key]){
+      map[key] = { count:0, totalSpent:0, lastDate:null, name:o.buyerName, country:o.country };
+    }
+    map[key].count++;
+    map[key].totalSpent += parsePrice(o.price||'') * (parseInt(o.qty)||1);
+    var d = new Date(o.dateAdded||0);
+    if(!map[key].lastDate || d > map[key].lastDate) map[key].lastDate = d;
+  });
+  // Tag each order
+  allOrders.forEach(function(o){
+    var key = (o.buyerEmail||'').toLowerCase().trim();
+    if(!key) key = '__'+o.id;
+    var s = map[key];
+    o._clientCount  = s ? s.count  : 1;
+    o._clientSpent  = s ? s.totalSpent : 0;
+    // Days since last order (using this client's most recent order date)
+    var lastD = s && s.lastDate ? s.lastDate : new Date(o.dateAdded||0);
+    o._daysSinceOrder = Math.floor((now - lastD) / 86400000);
+  });
+  return map;
+}
+
 // ── Clients tab (completed orders) ──────────────────────────────
 function renderClients(){
   var panel = document.getElementById('clientsList');
   if(!panel) return;
-  var complete = loadOrders().filter(function(o){ return o.followedUp; });
+  var allOrders = loadOrders();
+  var complete = allOrders.filter(function(o){ return o.followedUp; });
   complete.sort(function(a,b){
     return new Date(b.followDate||b.dateAdded||0) - new Date(a.followDate||a.dateAdded||0);
   });
@@ -3151,16 +3330,41 @@ function renderClients(){
     return;
   }
 
-  var html = '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;">'
-    +'<span style="font-size:13px;font-weight:600;color:var(--ink);">'+complete.length+' clients</span>'
-    +'</div>';
+  // Score clients using full order history
+  _buildClientScores(allOrders);
+
+  // Insights strip above the grid — count unique buyers, not orders
+  var repeatEmails = {}, atRiskEmails = {}, seenRevEmails = {}, uniqueTotalRevenue = 0;
+  complete.forEach(function(o){
+    var key = (o.buyerEmail||o.id).toLowerCase().trim();
+    if(o._clientCount > 1 && key) repeatEmails[key] = true;
+    if(o._daysSinceOrder > 120 && key) atRiskEmails[key] = true;
+    if(!seenRevEmails[key]){ seenRevEmails[key]=true; uniqueTotalRevenue += o._clientSpent; }
+  });
+  var repeatCount = Object.keys(repeatEmails).length;
+  var atRiskCount = Object.keys(atRiskEmails).length;
+
+  var insightChips = '';
+  if(repeatCount) insightChips += '<span class="digest-pill blue">'+repeatCount+' repeat buyer'+(repeatCount!==1?'s':'')+'</span>';
+  if(atRiskCount) insightChips += '<span class="digest-pill amber">'+atRiskCount+' at risk (120+ days)</span>';
+  if(uniqueTotalRevenue > 0) insightChips += '<span class="digest-pill green">$'+Math.round(uniqueTotalRevenue).toLocaleString('en-US')+' lifetime value</span>';
+
+  var html = '<div style="margin-bottom:14px;">';
+  if(insightChips) html += '<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px;">'+insightChips+'</div>';
+  html += '<span style="font-size:12px;font-weight:600;color:var(--muted);">'+complete.length+' clients</span></div>';
 
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
   html += complete.map(function(o){
     var date = o.followDate ? fmtDate(o.followDate) : o.dateAdded ? fmtDate(o.dateAdded) : '';
     var print = [o.printTitle, o.size].filter(Boolean).join(', ');
+    // Score badges
+    var badges = '';
+    if(o._clientCount > 2)       badges += '<span class="client-score-badge client-score-vip">VIP ×'+o._clientCount+'</span> ';
+    else if(o._clientCount > 1)  badges += '<span class="client-score-badge client-score-repeat">Repeat</span> ';
+    if(o._daysSinceOrder > 120)  badges += '<span class="client-score-badge client-score-risk">At risk</span>';
     return '<div style="background:#fff;border:1px solid var(--rule);border-radius:10px;padding:14px 16px;position:relative;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor=\'#c8c0b6\'" onmouseout="this.style.borderColor=\'var(--rule)\'" onclick="showClientModal(\''+o.id+'\')">'
       +'<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(o.buyerName)+'</div>'
+      +(badges ? '<div style="margin-bottom:6px;">'+badges+'</div>' : '')
       +'<div style="font-size:11px;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(print)+'</div>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;">'
         +'<span style="font-size:10px;color:#b0a89e;">'+escH(o.country||'')+'</span>'
@@ -5153,16 +5357,46 @@ syncFromSheet();
     el.textContent=days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()];
   })();
 
-  // Mirror badge counts into the overlay after data loads
+  // Mirror badge counts + richer context into the overlay after data loads
   function _syncAlerts(){
+    // Badge counts
     [['sn-orders-badge','mn-alert-orders'],
      ['sn-newsletter-badge','mn-alert-newsletter'],
      ['sn-messages-badge','mn-alert-messages']].forEach(function(pair){
       var src=document.getElementById(pair[0]), tgt=document.getElementById(pair[1]);
       if(src&&tgt&&src.style.display!=='none'&&src.textContent) tgt.textContent=src.textContent;
     });
+
+    // Orders sub-context
+    var orders = loadOrders();
+    var active = orders.filter(function(o){ return !o.followedUp && o.status !== 'done'; });
+    var overdue = active.filter(function(o){ return getStatus(o).urgency === 0; }).length;
+    var dueWeek = active.filter(function(o){ return getStatus(o).urgency === 1; }).length;
+    var subOrders = document.getElementById('mn-sub-orders');
+    if(subOrders){
+      if(overdue)        subOrders.textContent = overdue+' overdue';
+      else if(dueWeek)   subOrders.textContent = dueWeek+' due soon';
+      else if(active.length) subOrders.textContent = active.length+' active';
+      else                   subOrders.textContent = '';
+    }
+
+    // Messages sub-context (only if already fetched)
+    if(_msgData !== null){
+      var unread = _msgData.filter(function(m){ return !m.read; }).length;
+      var unreplied = _msgData.filter(function(m){ return !m.replied; }).length;
+      var subMsgs = document.getElementById('mn-sub-messages');
+      if(subMsgs){
+        var parts = [];
+        if(unread) parts.push(unread+' unread');
+        if(unreplied > 0) parts.push(unreplied+' unreplied');
+        subMsgs.textContent = parts.join(' · ');
+      }
+    }
   }
   setTimeout(_syncAlerts,2500);
+  // Re-sync when messages are fetched
+  var _origMsgRender = msgRender;
+  msgRender = function(){ _origMsgRender(); _syncAlerts(); };
 
   // Close overlay on Escape
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') mobNavClose(); });
