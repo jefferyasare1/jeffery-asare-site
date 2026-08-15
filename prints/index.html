@@ -88,6 +88,22 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
 .site-footer{border-top:1px solid var(--rule);padding:1.5rem var(--pad);text-align:center;font-size:11px;color:var(--muted);letter-spacing:.06em;}
 .site-footer a{color:var(--muted);text-decoration:none;}
 .site-footer a:hover{color:var(--ink);}
+
+/* ── Geo shipping banner ── */
+.geo-ship{font-size:11px;color:var(--muted);background:var(--warm);border-radius:4px;padding:.45rem .8rem;margin-bottom:.75rem;line-height:1.6;display:none;}
+.geo-ship strong{color:var(--ink);}
+
+/* ── Waitlist form ── */
+.waitlist-wrap{margin-top:.85rem;}
+.waitlist-heading{font-size:14px;font-weight:600;margin-bottom:.25rem;}
+.waitlist-sub{font-size:12px;color:var(--muted);margin-bottom:.9rem;line-height:1.6;}
+.waitlist-row{display:flex;gap:.5rem;}
+.waitlist-input{flex:1;border:none;border-bottom:2px solid var(--ink);padding:.5rem 0;font-family:var(--sans);font-size:13px;color:var(--ink);background:transparent;outline:none;}
+.waitlist-input::placeholder{color:var(--muted);}
+.waitlist-btn{padding:.5rem 1.1rem;background:var(--ink);color:#fff;border:none;border-radius:4px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;}
+.waitlist-btn:hover{opacity:.8;}
+.waitlist-btn:disabled{opacity:.4;cursor:not-allowed;}
+.waitlist-success{font-size:12px;color:#166534;background:#dcfce7;border-radius:4px;padding:.5rem .8rem;margin-top:.6rem;display:none;}
 </style>
 </head>
 <body>
@@ -126,6 +142,9 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
         <div class="size-grid" id="sizeGrid"></div>
         <div class="size-price" id="priceDisplay"></div>
 
+        <!-- Geo shipping estimate -->
+        <div class="geo-ship" id="geoShipBanner"></div>
+
         <!-- Country -->
         <div class="form-field">
           <select id="buyCountry">
@@ -163,9 +182,15 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
 
       <div id="soldSection" style="display:none;">
         <div class="btn-sold">Sold Out</div>
-        <p style="font-size:12px;color:var(--muted);margin-top:.75rem;line-height:1.7;">
-          This edition is sold out. <a href="/#contact" style="color:var(--ink);">Contact Jeffery</a> to join the waiting list.
-        </p>
+        <div class="waitlist-wrap" id="waitlistWrap">
+          <div class="waitlist-heading" id="waitlistHeading">Join the waitlist</div>
+          <div class="waitlist-sub" id="waitlistSub">Be the first to know when this edition comes back.</div>
+          <div class="waitlist-row">
+            <input class="waitlist-input" type="email" id="waitlistEmail" placeholder="Your email address">
+            <button class="waitlist-btn" id="waitlistBtn" onclick="submitWaitlist()">Notify me</button>
+          </div>
+          <div class="waitlist-success" id="waitlistSuccess"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -262,6 +287,9 @@ fetch('/_data/prints.json')
     PRINT = match;
     renderPrint(match);
     renderRelated(d.prints, match);
+    saveRecentlyViewed(match);
+    loadSmartFeatures(match);
+    fetchGeoShipping(match);
   })
   .catch(function(){ window.location.href = '/#shop'; });
 
@@ -444,6 +472,97 @@ function renderRelated(allPrints, current){
           +'</a>';
       }).join('')
     +'</div></div>';
+}
+
+// ── Recently viewed tracking ──────────────────────────────────
+function saveRecentlyViewed(p){
+  try {
+    var key = 'ja_recently_viewed';
+    var list = JSON.parse(localStorage.getItem(key)||'[]');
+    var entry = { id: p.id||slugify(p.title), title: p.title, img: p.img||'', slug: slugify(p.title) };
+    list = list.filter(function(x){ return x.slug !== entry.slug; });
+    list.unshift(entry);
+    if(list.length > 4) list = list.slice(0,4);
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch(e){}
+}
+
+// ── Smart features text (waitlist headings etc.) ──────────────
+var _smartFeatures = null;
+function loadSmartFeatures(p){
+  fetch('/_data/settings/smart-features.json')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(cfg){
+      if(!cfg) return;
+      _smartFeatures = cfg;
+      if(p.soldOut && cfg.waitlist){
+        var w = cfg.waitlist;
+        var h = document.getElementById('waitlistHeading');
+        var s = document.getElementById('waitlistSub');
+        var btn = document.getElementById('waitlistBtn');
+        var inp = document.getElementById('waitlistEmail');
+        if(h && w.heading) h.textContent = w.heading;
+        if(s && w.subtext) s.textContent = w.subtext;
+        if(btn && w.cta) btn.textContent = w.cta;
+        if(inp && w.placeholder) inp.placeholder = w.placeholder;
+      }
+    })
+    .catch(function(){});
+}
+
+// ── Geo shipping estimate ─────────────────────────────────────
+function fetchGeoShipping(p){
+  if(p.soldOut) return; // no shipping info needed on sold-out page
+  var banner = document.getElementById('geoShipBanner');
+  if(!banner) return;
+  fetch('/api/geo')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || !d.name || !d.time) return;
+      banner.innerHTML = '&#x1F4E6; Ships to <strong>'+d.name+'</strong> in '+d.time;
+      banner.style.display = 'block';
+      // Also auto-select that country in the dropdown if it matches
+      var sel = document.getElementById('buyCountry');
+      var code = (d.country||'').toLowerCase();
+      if(sel && code && DELIVERY[code]){
+        sel.value = code;
+        // Trigger delivery note
+        sel.dispatchEvent(new Event('change'));
+      }
+    })
+    .catch(function(){});
+}
+
+// ── Waitlist submit ───────────────────────────────────────────
+function submitWaitlist(){
+  var emailEl = document.getElementById('waitlistEmail');
+  var btn = document.getElementById('waitlistBtn');
+  var successEl = document.getElementById('waitlistSuccess');
+  var email = (emailEl ? emailEl.value : '').trim();
+  if(!email || !email.includes('@')){ if(emailEl) emailEl.focus(); return; }
+  if(btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  var p = PRINT || {};
+  var successMsg = (_smartFeatures && _smartFeatures.waitlist && _smartFeatures.waitlist.success)
+    ? _smartFeatures.waitlist.success
+    : "You're on the list. I'll reach out as soon as it's available.";
+  fetch('/api/waitlist-submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, printTitle: p.title||'', printSlug: slugify(p.title||'') })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.ok){
+      if(successEl){ successEl.textContent = successMsg; successEl.style.display = 'block'; }
+      if(emailEl) emailEl.style.display = 'none';
+      if(btn) btn.style.display = 'none';
+    } else {
+      if(btn){ btn.disabled = false; btn.textContent = (_smartFeatures&&_smartFeatures.waitlist&&_smartFeatures.waitlist.cta)||'Notify me'; }
+    }
+  })
+  .catch(function(){
+    if(btn){ btn.disabled = false; btn.textContent = (_smartFeatures&&_smartFeatures.waitlist&&_smartFeatures.waitlist.cta)||'Notify me'; }
+  });
 }
 
 // ── Image protection ──────────────────────────────────────────

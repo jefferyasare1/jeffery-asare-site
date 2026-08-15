@@ -349,6 +349,24 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;}
 .footer-copy,.footer-loc{font-size:11px;}
 .footer-copy a{color:rgba(255,255,255,.4);text-decoration:underline;cursor:pointer;}
+/* ── Smart features ── */
+.shop-social-proof{font-size:11px;color:var(--muted);letter-spacing:.04em;padding:.5rem var(--pad) .2rem;text-align:center;}
+.recently-viewed-wrap{border-top:1px solid var(--rule);padding:2.5rem var(--pad) 1.5rem;}
+.recently-viewed-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.recently-viewed-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+@media(max-width:700px){.recently-viewed-grid{grid-template-columns:repeat(2,1fr);}}
+.recently-viewed-card{text-decoration:none;color:var(--ink);}
+.recently-viewed-img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:4px;background:var(--warm);display:block;}
+.recently-viewed-title{font-size:12px;font-weight:500;margin-top:.4rem;}
+.journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
+.journal-suggestions-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+@media(max-width:600px){.journal-suggestions-grid{grid-template-columns:1fr 1fr;}}
+.journal-suggestion-card{cursor:pointer;}
+.journal-suggestion-img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:4px;background:var(--warm);display:block;margin-bottom:.5rem;}
+.journal-suggestion-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:.2rem;}
+.journal-suggestion-meta{font-size:11px;color:var(--muted);}
+/* ── /Smart features ── */
 .mini-footer{border-top:1px solid var(--rule);padding:1.2rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
 .mini-footer-copy{font-size:11px;color:var(--muted);}
 .mini-footer-links{display:flex;gap:1.4rem;list-style:none;}
@@ -1129,7 +1147,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
   </div>
   <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" onclick="setCurrency('GHS')">GH&#8373;</button><button id="btnUSD" onclick="setCurrency('USD')">USD</button></div></div>
+  <div id="shopSocialProof" style="display:none;"></div>
   <div class="shop-list" id="shopList"></div>
+  <div id="recentlyViewedTray" style="display:none;"></div>
   <div id="shop-mini-footer"></div>
 </div>
 
@@ -1468,9 +1488,9 @@ function navigate(page) {
     window.scrollTo(0,0);
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
-    if (page==="shop") { renderShop(0); }
+    if (page==="shop") { renderShop(0); renderSocialProof(); renderRecentlyViewed(); }
     if (page==="journal") { renderJournal(); }
-    if (page==="contact") { renderReviews(); }
+    if (page==="contact") { renderReviews(); prefillContactFromUrl(); }
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
@@ -2441,9 +2461,135 @@ function _openJournalPost(post, posts){
         if(np) _openJournalPost(np, posts);
       });
     });
+    // Journal reading suggestions
+    _renderJournalSuggestions(post, posts, content);
   }
   window.scrollTo(0,0);
 }
+
+// ===========================================================
+// SMART FEATURES
+// ===========================================================
+
+// ── Contact prefill from ?for=PrintTitle URL param ──────────
+function prefillContactFromUrl(){
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var forPrint = params.get('for');
+    if(!forPrint) return;
+    var msgEl = document.getElementById('msgArea');
+    var ccEl = document.getElementById('charCount');
+    if(!msgEl || msgEl.value) return; // don't overwrite user input
+    var template = 'Hi Jeffery,\n\nI\'m interested in "'+forPrint+'" and would love to know more.';
+    // Try to load template from smart-features.json
+    fetch('/_data/settings/smart-features.json')
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(cfg){
+        var tmpl = (cfg && cfg.contact_prefill && cfg.contact_prefill.template)
+          ? cfg.contact_prefill.template
+          : 'Hi Jeffery,\n\nI\'m interested in "{print}" and would love to know more.';
+        var msg = tmpl.replace('{print}', forPrint);
+        if(msgEl && !msgEl.value){ msgEl.value = msg; if(ccEl) ccEl.textContent = msg.length; }
+      })
+      .catch(function(){
+        if(msgEl && !msgEl.value){ msgEl.value = template; if(ccEl) ccEl.textContent = template.length; }
+      });
+  } catch(e){}
+}
+
+// ── Social proof bar in shop ─────────────────────────────────
+function renderSocialProof(){
+  var el = document.getElementById('shopSocialProof');
+  if(!el) return;
+  fetch('/_data/social-proof.json')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || (!d.countries && !d.lastPurchaseDays)) { el.style.display='none'; return; }
+      if(d.show === false) { el.style.display='none'; return; }
+      var parts = [];
+      if(d.countries && d.countries > 1) parts.push('Collected by buyers in '+d.countries+' countries');
+      if(d.lastPurchaseDays !== undefined && d.lastPurchaseDays >= 0){
+        if(d.lastPurchaseDays === 0) parts.push('Last purchased today');
+        else if(d.lastPurchaseDays === 1) parts.push('Last purchased yesterday');
+        else parts.push('Last purchased '+d.lastPurchaseDays+' days ago');
+      }
+      if(!parts.length) { el.style.display='none'; return; }
+      el.innerHTML = '<div class="shop-social-proof">'+parts.join(' &nbsp;·&nbsp; ')+'</div>';
+      el.style.display = '';
+    })
+    .catch(function(){ el.style.display='none'; });
+}
+
+// ── Recently viewed prints tray ──────────────────────────────
+function renderRecentlyViewed(){
+  var tray = document.getElementById('recentlyViewedTray');
+  if(!tray) return;
+  var list;
+  try { list = JSON.parse(localStorage.getItem('ja_recently_viewed')||'[]'); } catch(e){ list=[]; }
+  // Filter to prints still in PRINTS array
+  var valid = list.filter(function(rv){
+    return PRINTS.some(function(p){ return p.title===rv.title; });
+  }).slice(0,4);
+  if(!valid.length){ tray.style.display='none'; return; }
+  var heading = 'Recently viewed';
+  // Try fetching heading from smart-features.json (use cached)
+  tray.innerHTML = '<div class="recently-viewed-wrap">'
+    +'<div class="recently-viewed-label">'+heading+'</div>'
+    +'<div class="recently-viewed-grid">'
+    +valid.map(function(rv){
+      return '<a class="recently-viewed-card" href="/prints/'+rv.slug+'">'
+        +(rv.img?'<img class="recently-viewed-img" src="'+rv.img+'" alt="'+rv.title+'" loading="lazy">':'<div class="recently-viewed-img" style="background:var(--warm);"></div>')
+        +'<div class="recently-viewed-title">'+rv.title+'</div>'
+        +'</a>';
+    }).join('')
+    +'</div></div>';
+  tray.style.display = '';
+}
+
+// ── Journal reading suggestions ──────────────────────────────
+function _renderJournalSuggestions(currentPost, allPosts, container){
+  if(!container) return;
+  var others = allPosts.filter(function(p){ return p.id !== currentPost.id; });
+  // Prefer same series, then random
+  var sameSeries = others.filter(function(p){ return p.series === currentPost.series; });
+  var picks = sameSeries.length >= 2 ? sameSeries.slice(0,3) : others.slice(0,3);
+  if(!picks.length) return;
+  var heading = 'You might also enjoy';
+  var html = '<div class="journal-suggestions">'
+    +'<div class="journal-suggestions-label">'+heading+'</div>'
+    +'<div class="journal-suggestions-grid">'
+    +picks.map(function(p){
+      var d=new Date(p.date);
+      var ds=d.toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric'});
+      return '<div class="journal-suggestion-card" data-sugid="'+p.id+'">'
+        +(p.img?'<img class="journal-suggestion-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">':'')
+        +'<div class="journal-suggestion-title">'+p.title+'</div>'
+        +'<div class="journal-suggestion-meta">'+p.series+' &middot; '+ds+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>';
+  var sugWrap = document.createElement('div');
+  sugWrap.innerHTML = html;
+  container.appendChild(sugWrap);
+  container.querySelectorAll('.journal-suggestion-card[data-sugid]').forEach(function(card){
+    card.addEventListener('click', function(){
+      var np = allPosts.find(function(p){ return p.id === card.dataset.sugid; });
+      if(np) _openJournalPost(np, allPosts);
+    });
+  });
+}
+
+// Check URL param on initial load (for direct links like /contact?for=Print)
+(function(){
+  if(window.location.pathname === '/contact' || window.location.search.indexOf('for=') !== -1){
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('for')){
+      setTimeout(function(){
+        if(typeof navigate === 'function') navigate('contact');
+      }, 300);
+    }
+  }
+})();
 
 // ===========================================================
 // PAGE TITLES

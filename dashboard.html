@@ -1095,6 +1095,7 @@
         <button class="cms-sidenav-item" data-cms="portfolio">Portfolio</button>
         <button class="cms-sidenav-item" data-cms="site">Site Text</button>
         <button class="cms-sidenav-item" data-cms="files">Files</button>
+        <button class="cms-sidenav-item" data-cms="smart">Smart</button>
       </nav>
 
       <!-- Content area -->
@@ -1314,6 +1315,104 @@
         </div>
       </div>
     </div><!-- /cms-panel-files -->
+
+    <!-- Smart Features panel -->
+    <div class="cms-panel" id="cms-panel-smart">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Control the smart features on your public site — geo shipping, waitlist text, social proof, and more. All changes save to <code style="font-size:11px;background:var(--warm);padding:1px 5px;border-radius:3px;">_data/settings/smart-features.json</code> on GitHub.</p>
+
+      <!-- Shipping times -->
+      <div class="cms-section open">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Shipping Estimates</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown automatically when a visitor lands on a print page. Based on their detected country.</p>
+          <div class="cms-grid2">
+            <div class="cms-field"><label>Ghana</label><input type="text" id="sf-ship-gh" placeholder="3–5 business days"></div>
+            <div class="cms-field"><label>Nigeria</label><input type="text" id="sf-ship-ng" placeholder="5–8 business days"></div>
+            <div class="cms-field"><label>United States</label><input type="text" id="sf-ship-us" placeholder="10–14 business days"></div>
+            <div class="cms-field"><label>United Kingdom</label><input type="text" id="sf-ship-gb" placeholder="7–10 business days"></div>
+            <div class="cms-field"><label>Germany</label><input type="text" id="sf-ship-de" placeholder="7–12 business days"></div>
+            <div class="cms-field"><label>France</label><input type="text" id="sf-ship-fr" placeholder="7–12 business days"></div>
+            <div class="cms-field"><label>Canada</label><input type="text" id="sf-ship-ca" placeholder="10–15 business days"></div>
+            <div class="cms-field"><label>Australia</label><input type="text" id="sf-ship-au" placeholder="12–18 business days"></div>
+            <div class="cms-field"><label>South Africa</label><input type="text" id="sf-ship-za" placeholder="8–12 business days"></div>
+            <div class="cms-field"><label>Kenya</label><input type="text" id="sf-ship-ke" placeholder="8–12 business days"></div>
+            <div class="cms-field"><label>International (default)</label><input type="text" id="sf-ship-default" placeholder="10–20 business days"></div>
+          </div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="sfSave()">Save shipping times</button><div class="cms-status" id="sf-ship-status"></div></div>
+        </div>
+      </div>
+
+      <!-- Waitlist text -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Sold-Out Waitlist Text</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shown on any print page where the edition is sold out.</p>
+          <div class="cms-field"><label>Heading</label><input type="text" id="sf-wl-heading" placeholder="Join the waitlist"></div>
+          <div class="cms-field"><label>Subtext</label><textarea id="sf-wl-subtext" rows="2" placeholder="Be the first to know when this edition comes back."></textarea></div>
+          <div class="cms-grid2">
+            <div class="cms-field"><label>Email placeholder</label><input type="text" id="sf-wl-placeholder" placeholder="Your email address"></div>
+            <div class="cms-field"><label>Button label</label><input type="text" id="sf-wl-cta" placeholder="Notify me"></div>
+          </div>
+          <div class="cms-field"><label>Success message</label><textarea id="sf-wl-success" rows="2" placeholder="You're on the list. I'll reach out as soon as it's available."></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="sfSave()">Save waitlist text</button><div class="cms-status" id="sf-wl-status"></div></div>
+        </div>
+      </div>
+
+      <!-- Contact prefill template -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Contact Prefill Message</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">When someone clicks a print and goes to Contact, their message is prefilled with this template. Use <code style="font-size:11px;background:var(--warm);padding:1px 4px;border-radius:2px;">{print}</code> where you want the print title.</p>
+          <div class="cms-field"><label>Message template</label><textarea id="sf-prefill-template" rows="4" placeholder="Hi Jeffery,&#10;&#10;I'm interested in &quot;{print}&quot; and would love to know more."></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="sfSave()">Save template</button><div class="cms-status" id="sf-prefill-status"></div></div>
+        </div>
+      </div>
+
+      <!-- Journal suggestions heading -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Journal &amp; Shop Headings</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <div class="cms-grid2">
+            <div class="cms-field"><label>Journal suggestions heading</label><input type="text" id="sf-journ-heading" placeholder="You might also enjoy"></div>
+            <div class="cms-field"><label>Recently viewed heading</label><input type="text" id="sf-rv-heading" placeholder="Recently viewed"></div>
+          </div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="sfSave()">Save headings</button><div class="cms-status" id="sf-headings-status"></div></div>
+        </div>
+      </div>
+
+      <!-- Social proof -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Social Proof Bar</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Shows a small bar in the shop like "Collected by buyers in 4 countries · Last purchased 2 days ago". Click Publish to compute from your orders.</p>
+          <div class="cms-field" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <label style="margin:0;font-weight:600;">Show social proof on site</label>
+            <input type="checkbox" id="sf-sp-show" style="width:auto;margin:0;">
+          </div>
+          <div class="cms-grid2">
+            <div class="cms-field"><label>Countries template</label><input type="text" id="sf-sp-template" placeholder="Collected by buyers in {countries} countries"></div>
+            <div class="cms-field"><label>Last purchase template</label><input type="text" id="sf-sp-last" placeholder="Last purchased {days} days ago"></div>
+          </div>
+          <div class="cms-save-row" style="flex-wrap:wrap;gap:10px;">
+            <button class="btn-card primary" onclick="sfSave()">Save settings</button>
+            <button class="btn-card" onclick="sfPublishSocialProof()" id="sf-sp-publish-btn">&#128202; Publish social proof now</button>
+            <div class="cms-status" id="sf-sp-status"></div>
+          </div>
+          <div id="sf-sp-preview" style="font-size:12px;color:var(--muted);margin-top:8px;display:none;"></div>
+        </div>
+      </div>
+
+    </div><!-- /cms-panel-smart -->
 
       </div><!-- /cms-content-area -->
     </div><!-- /cms-layout -->
@@ -2471,6 +2570,10 @@ function buildActionQueue(orders){
 }
 
 // ── Revenue parser ───────────────────────────────────────────────
+// GHS→USD conversion rate used for dashboard revenue totals.
+// Update this if the exchange rate shifts significantly.
+var DASH_GHS_TO_USD = 0.065; // ~1 GHS = $0.065 USD (approx)
+
 function parsePrice(str){
   if(!str) return 0;
   str = String(str).trim();
@@ -2479,8 +2582,24 @@ function parsePrice(str){
   var numStr = str.replace(/[^0-9.,]/g,'').replace(/,/g,'');
   var n = parseFloat(numStr) || 0;
   // Sanity cap: ignore pesewa amounts, test noise, or absurd values
-  if(isUSD) return (n >= 1 && n <= 2000) ? n : 0;
-  return (n >= 1 && n <= 20000) ? n : 0;
+  if(isUSD) return (n >= 1 && n <= 10000) ? n : 0;  // raised cap: prints can exceed $2k
+  return (n >= 1 && n <= 100000) ? n : 0;            // raised GHS cap accordingly
+}
+
+// Normalise any price string to USD.
+// GHS amounts are converted using DASH_GHS_TO_USD.
+// Use this for all revenue totals / lifetime value — never mix raw GHS + USD.
+function parsePriceUSD(str){
+  if(!str) return 0;
+  str = String(str).trim();
+  if(!/[0-9]/.test(str)) return 0;
+  var isUSD = str.indexOf('$') !== -1;
+  var numStr = str.replace(/[^0-9.,]/g,'').replace(/,/g,'');
+  var n = parseFloat(numStr) || 0;
+  if(isUSD) return (n >= 1 && n <= 10000) ? n : 0;
+  // GHS: convert to USD
+  var usd = n * DASH_GHS_TO_USD;
+  return (n >= 1 && n <= 100000) ? Math.round(usd * 100) / 100 : 0;
 }
 
 // ── Stats bar ────────────────────────────────────────────────────
@@ -2541,7 +2660,7 @@ function renderSmartDigest(orders){
   var thisMoRev = 0, lastMoRev = 0;
   orders.forEach(function(o){
     var d = new Date(o.dateAdded||0);
-    var amt = parsePrice(o.price||'') * (parseInt(o.qty)||1);
+    var amt = parsePriceUSD(o.price||'') * (parseInt(o.qty)||1);
     if(d.getMonth() === tm && d.getFullYear() === ty) thisMoRev += amt;
     if(d.getMonth() === lm && d.getFullYear() === ly) lastMoRev += amt;
   });
@@ -2581,9 +2700,9 @@ function renderSmartDigest(orders){
   rows += '<div class="digest-row"><span class="digest-label">Orders</span><span class="digest-val">'+pills.join('')+'</span></div>';
 
   // Revenue row
-  var revStr = '$'+Math.round(thisMoRev).toLocaleString('en-US');
+  var revStr = '~$'+Math.round(thisMoRev).toLocaleString('en-US')+' USD';
   if(dayOfMonth < daysInMonth - 3 && pace > thisMoRev){
-    revStr += ' · on pace for $'+Math.round(pace).toLocaleString('en-US');
+    revStr += ' · on pace for ~$'+Math.round(pace).toLocaleString('en-US');
   }
   rows += '<div class="digest-row"><span class="digest-label">Revenue</span><span class="digest-val"><strong>'+revStr+'</strong> this month'+revTrend+'</span></div>';
 
@@ -3299,7 +3418,7 @@ function _buildClientScores(allOrders){
       map[key] = { count:0, totalSpent:0, lastDate:null, name:o.buyerName, country:o.country };
     }
     map[key].count++;
-    map[key].totalSpent += parsePrice(o.price||'') * (parseInt(o.qty)||1);
+    map[key].totalSpent += parsePriceUSD(o.price||'') * (parseInt(o.qty)||1);
     var d = new Date(o.dateAdded||0);
     if(!map[key].lastDate || d > map[key].lastDate) map[key].lastDate = d;
   });
@@ -3349,7 +3468,7 @@ function renderClients(){
   var insightChips = '';
   if(repeatCount) insightChips += '<span class="digest-pill blue">'+repeatCount+' repeat buyer'+(repeatCount!==1?'s':'')+'</span>';
   if(atRiskCount) insightChips += '<span class="digest-pill amber">'+atRiskCount+' at risk (120+ days)</span>';
-  if(uniqueTotalRevenue > 0) insightChips += '<span class="digest-pill green">$'+Math.round(uniqueTotalRevenue).toLocaleString('en-US')+' lifetime value</span>';
+  if(uniqueTotalRevenue > 0) insightChips += '<span class="digest-pill green">~$'+Math.round(uniqueTotalRevenue).toLocaleString('en-US')+' lifetime value (USD)</span>';
 
   var html = '<div style="margin-bottom:14px;">';
   if(insightChips) html += '<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px;">'+insightChips+'</div>';
@@ -5132,6 +5251,165 @@ document.getElementById('cmsModal').addEventListener('click',function(e){if(e.ta
 // ── Escape helpers ──────────────────────────────────────────────
 function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+// ════════════════════════════════════════════════════════════════
+// SMART FEATURES — load / save smart-features.json
+// ════════════════════════════════════════════════════════════════
+var _sfData = null;
+
+function sfLoad(){
+  fetch('/_data/settings/smart-features.json?v='+Date.now())
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d) return;
+      _sfData = d;
+      // Shipping
+      var sh = d.shipping||{};
+      ['gh','ng','us','gb','de','fr','ca','au','za','ke'].forEach(function(c){
+        var el = document.getElementById('sf-ship-'+c);
+        if(el && sh[c]) el.value = sh[c].time||'';
+      });
+      var defEl = document.getElementById('sf-ship-default');
+      if(defEl && sh['default']) defEl.value = sh['default'].time||'';
+      // Waitlist
+      var w = d.waitlist||{};
+      ['heading','subtext','placeholder','cta','success'].forEach(function(k){
+        var el = document.getElementById('sf-wl-'+k);
+        if(el && w[k]!=null) el.value = w[k];
+      });
+      // Contact prefill
+      var cp = d.contact_prefill||{};
+      var tEl = document.getElementById('sf-prefill-template');
+      if(tEl && cp.template) tEl.value = cp.template;
+      // Headings
+      var jh = document.getElementById('sf-journ-heading');
+      var rvh = document.getElementById('sf-rv-heading');
+      if(jh && d.journal_suggestions) jh.value = d.journal_suggestions.heading||'';
+      if(rvh && d.recently_viewed) rvh.value = d.recently_viewed.heading||'';
+      // Social proof
+      var sp = d.social_proof||{};
+      var spShow = document.getElementById('sf-sp-show');
+      var spTmpl = document.getElementById('sf-sp-template');
+      var spLast = document.getElementById('sf-sp-last');
+      if(spShow) spShow.checked = sp.show !== false;
+      if(spTmpl && sp.template) spTmpl.value = sp.template;
+      if(spLast && sp.last_purchase_template) spLast.value = sp.last_purchase_template;
+    })
+    .catch(function(){});
+}
+
+function sfBuild(){
+  var sh = _sfData && _sfData.shipping ? JSON.parse(JSON.stringify(_sfData.shipping)) : {};
+  var countryNames = {gh:'Ghana',ng:'Nigeria',us:'United States',gb:'United Kingdom',de:'Germany',fr:'France',ca:'Canada',au:'Australia',za:'South Africa',ke:'Kenya'};
+  ['gh','ng','us','gb','de','fr','ca','au','za','ke'].forEach(function(c){
+    var val = (document.getElementById('sf-ship-'+c)||{}).value||'';
+    sh[c] = { name: countryNames[c]||c, time: val };
+  });
+  var defVal = (document.getElementById('sf-ship-default')||{}).value||'10–20 business days';
+  sh['default'] = { name:'International', time: defVal };
+
+  var w = {};
+  ['heading','subtext','placeholder','cta','success'].forEach(function(k){
+    var el = document.getElementById('sf-wl-'+k);
+    w[k] = el ? el.value : '';
+  });
+
+  var tmpl = (document.getElementById('sf-prefill-template')||{}).value||'Hi Jeffery,\n\nI\'m interested in "{print}" and would love to know more.';
+
+  var jhVal = (document.getElementById('sf-journ-heading')||{}).value||'You might also enjoy';
+  var rvhVal = (document.getElementById('sf-rv-heading')||{}).value||'Recently viewed';
+
+  var spShow = document.getElementById('sf-sp-show');
+  var spTmpl = (document.getElementById('sf-sp-template')||{}).value||'Collected by buyers in {countries} countries';
+  var spLast = (document.getElementById('sf-sp-last')||{}).value||'Last purchased {days} days ago';
+
+  return {
+    shipping: sh,
+    waitlist: w,
+    contact_prefill: { template: tmpl },
+    journal_suggestions: { heading: jhVal },
+    recently_viewed: { heading: rvhVal },
+    social_proof: {
+      template: spTmpl,
+      last_purchase_template: spLast,
+      show: spShow ? spShow.checked : true
+    }
+  };
+}
+
+function sfSave(){
+  var cfg = sfBuild();
+  _sfData = cfg;
+  var statIds = ['sf-ship-status','sf-wl-status','sf-prefill-status','sf-headings-status','sf-sp-status'];
+  statIds.forEach(function(id){ var el=document.getElementById(id); if(el){el.className='cms-status';el.textContent='Saving…';} });
+
+  ghFreshPut('settings/smart-features', cfg, function(err){
+    statIds.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){ el.className='cms-status '+(err?'err':'ok'); el.textContent=err?('Save failed: '+err):'Saved ✓ — live in ~2 min'; }
+    });
+  });
+}
+
+function sfPublishSocialProof(){
+  var btn = document.getElementById('sf-sp-publish-btn');
+  var st = document.getElementById('sf-sp-status');
+  var preview = document.getElementById('sf-sp-preview');
+  if(btn){ btn.disabled=true; btn.textContent='Computing…'; }
+  if(st){ st.className='cms-status'; st.textContent=''; }
+
+  // Get orders from localStorage
+  var allOrders = (typeof loadOrders === 'function') ? loadOrders() : [];
+  if(!allOrders.length){
+    if(st){ st.className='cms-status err'; st.textContent='No orders loaded yet. Sync first.'; }
+    if(btn){ btn.disabled=false; btn.textContent='📊 Publish social proof now'; }
+    return;
+  }
+
+  var countries = {};
+  var latestDate = null;
+  allOrders.forEach(function(o){
+    var c = (o.country||'').trim();
+    if(c && c !== 'Unknown') countries[c] = 1;
+    var d = new Date(o.dateAdded||o.date||0);
+    if(!isNaN(d.getTime()) && (!latestDate || d > latestDate)) latestDate = d;
+  });
+  var countryCount = Object.keys(countries).length;
+  var daysSince = latestDate ? Math.floor((Date.now() - latestDate.getTime()) / 86400000) : null;
+
+  var spCfg = _sfData && _sfData.social_proof ? _sfData.social_proof : {};
+  var showSP = document.getElementById('sf-sp-show');
+  var payload = {
+    countries: countryCount,
+    lastPurchaseDays: daysSince,
+    show: showSP ? showSP.checked : (spCfg.show !== false),
+    updatedAt: new Date().toISOString()
+  };
+
+  var previewParts = [];
+  if(countryCount > 1) previewParts.push('Buyers in '+countryCount+' countries');
+  if(daysSince !== null) previewParts.push('Last purchased '+(daysSince===0?'today':daysSince===1?'yesterday':daysSince+' days ago'));
+  if(preview){ preview.textContent = previewParts.join(' · '); preview.style.display=''; }
+
+  ghFreshPut('social-proof', payload, function(err){
+    if(btn){ btn.disabled=false; btn.textContent='📊 Publish social proof now'; }
+    if(st){ st.className='cms-status '+(err?'err':'ok'); st.textContent=err?('Failed: '+err):'Published ✓ — live in ~1 min'; }
+  });
+}
+
+// Load smart features when panel is activated
+(function(){
+  var sfLoaded = false;
+  var origSidenav = document.querySelectorAll('.cms-sidenav-item');
+  origSidenav.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(btn.dataset.cms === 'smart' && !sfLoaded){
+        sfLoaded = true;
+        sfLoad();
+      }
+    });
+  });
+})();
+
 // ── Init ─────────────────────────────────────────────────────────
 renderOrders();
 syncFromSheet();
@@ -5172,6 +5450,49 @@ syncFromSheet();
   });
   // Focus password input on load
   document.getElementById('pw-input').focus();
+})();
+
+// ── Inactivity lock — 1 hour of no activity re-shows the password gate ──
+(function(){
+  var TIMEOUT  = 60 * 60 * 1000; // 1 hour
+  var AUTH_KEY = 'ja_admin_auth';
+  var TS_KEY   = 'ja_last_active';
+
+  function touch(){
+    if(sessionStorage.getItem(AUTH_KEY) === '1')
+      sessionStorage.setItem(TS_KEY, Date.now());
+  }
+
+  function checkIdle(){
+    if(sessionStorage.getItem(AUTH_KEY) !== '1') return;
+    var last = +sessionStorage.getItem(TS_KEY) || 0;
+    if(!last){ touch(); return; }
+    if(Date.now() - last > TIMEOUT) lock();
+  }
+
+  function lock(){
+    sessionStorage.removeItem(AUTH_KEY);
+    sessionStorage.removeItem(TS_KEY);
+    var gate = document.getElementById('pw-gate');
+    var inp  = document.getElementById('pw-input');
+    var err  = document.getElementById('pw-error');
+    if(gate){ gate.style.display='flex'; gate.classList.remove('hidden'); }
+    if(inp){  inp.value=''; }
+    if(err){  err.textContent='Session expired. Please log in again.'; }
+    setTimeout(function(){ if(inp) inp.focus(); }, 80);
+  }
+
+  // Record any user interaction
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(function(ev){
+    document.addEventListener(ev, touch, { passive:true, capture:true });
+  });
+
+  // Check immediately on tab regaining focus (catches sleep / long background)
+  window.addEventListener('focus', checkIdle);
+  // Also poll every 60 s for when the tab stays in the foreground
+  setInterval(checkIdle, 60000);
+  // Seed the timestamp if the user is already logged in
+  touch();
 })();
 
 // ── Mobile nav & FAB ─────────────────────────────────────────
