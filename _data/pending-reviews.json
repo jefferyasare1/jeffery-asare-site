@@ -1,1 +1,11 @@
-{"reviews":[]}
+{
+  "reviews": [
+    {
+      "id": "1786913344790",
+      "name": "Test User",
+      "rating": 5,
+      "message": "Test review for debugging",
+      "date": "2026-08-16"
+    }
+  ]
+}
