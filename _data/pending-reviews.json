@@ -6,6 +6,13 @@
       "rating": 5,
       "message": "Test review for debugging",
       "date": "2026-08-16"
+    },
+    {
+      "id": "1786914790880",
+      "name": "Jeffery",
+      "rating": 5,
+      "message": "Images are great",
+      "date": "2026-08-16"
     }
   ]
 }
