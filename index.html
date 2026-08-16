@@ -2332,7 +2332,7 @@ function submitReview(){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(d.ok){
-        if(status){ status.className='review-form-status ok'; status.textContent='Thank you! Your review will appear once approved.'; }
+        if(status){ status.className='review-form-status ok'; status.textContent='Received. Every word means something — yours will be up shortly.'; }
         if(btn){ btn.textContent='Submitted ✓'; }
         document.getElementById('reviewName').value='';
         document.getElementById('reviewMsg').value='';
