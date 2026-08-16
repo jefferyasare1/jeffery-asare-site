@@ -5807,10 +5807,29 @@ function sfPublishSocialProof(){
   });
 })();
 
+// ── Reviews badge (shown on initial load without opening the tab) ──
+function refreshReviewsBadge(){
+  fetch(cmsApiUrl('pending-reviews'))
+    .then(function(r){ return r.ok ? r.json() : {reviews:[]}; })
+    .then(function(d){
+      var count = Array.isArray((d||{}).reviews) ? d.reviews.length : 0;
+      var badge = document.getElementById('sn-reviews-badge');
+      if(!badge) return;
+      if(count > 0){
+        badge.textContent = count;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    })
+    .catch(function(){});
+}
+
 // ── Init ─────────────────────────────────────────────────────────
 renderOrders();
 renderOverview();
 syncFromSheet();
+refreshReviewsBadge();
 
 // ── Password gate ─────────────────────────────────────────────────
 (function(){

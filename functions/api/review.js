@@ -2,11 +2,12 @@
 // POST /api/review
 // Body: { name, rating, message, website? }
 // Appends to _data/pending-reviews.json on GitHub (pending approval)
-// Requires GITHUB_TOKEN in Cloudflare env variables.
+// Requires GITHUB_TOKEN and BREVO_API_KEY in Cloudflare env variables.
 
 const REPO   = 'jefferyasare1/jeffery-asare-site';
 const BRANCH = 'main';
 const PATH   = '_data/pending-reviews.json';
+const OWNER_EMAIL = 'jeffery.asare1@gmail.com';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -37,6 +38,30 @@ async function ghPut(token, path, data, sha, message) {
   });
   if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'GitHub write failed'); }
   return r.json();
+}
+
+async function sendEmail(brevoKey, { name, rating, message }) {
+  const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
+      <p style="font-size:13px;color:#888;margin-bottom:4px;">New review on jefferyasare.com</p>
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 6px;">${name}</h2>
+      <p style="font-size:18px;color:#c8a870;letter-spacing:3px;margin:0 0 16px;">${stars}</p>
+      <p style="font-size:15px;line-height:1.7;color:#333;border-left:3px solid #ddd;padding-left:14px;margin:0 0 24px;">${message}</p>
+      <a href="https://jefferyasare.com/dashboard?key=jA9kx2vP7m" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;">Review in dashboard →</a>
+    </div>
+  `;
+
+  await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': brevoKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender:      { name: 'Jeffery Asare Site', email: 'hello@jefferyasare.com' },
+      to:          [{ email: OWNER_EMAIL, name: 'Jeffery' }],
+      subject:     `⭐ New review from ${name}`,
+      htmlContent: html,
+    }),
+  });
 }
 
 export async function onRequest(context) {
@@ -76,6 +101,11 @@ export async function onRequest(context) {
     await ghPut(TOKEN, PATH, data, sha, `New review from ${name}`);
   } catch (e) {
     return json({ error: e.message }, 500);
+  }
+
+  // Send email notification (non-blocking — don't fail the response if email fails)
+  if (env.BREVO_API_KEY) {
+    sendEmail(env.BREVO_API_KEY, { name, rating, message }).catch(() => {});
   }
 
   return json({ ok: true });
