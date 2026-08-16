@@ -60,6 +60,7 @@ async function sendEmail(brevoKey, { name, rating, message }) {
       to:          [{ email: OWNER_EMAIL, name: 'Jeffery' }],
       subject:     `⭐ New review from ${name}`,
       htmlContent: html,
+      headers:     { 'List-Unsubscribe': '' },
     }),
   });
 }
