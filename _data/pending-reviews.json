@@ -1,13 +1,6 @@
 {
   "reviews": [
     {
-      "id": "1786915317431",
-      "name": "Jeffery",
-      "rating": 5,
-      "message": "The images are great",
-      "date": "2026-08-16"
-    },
-    {
       "id": "1786915348933",
       "name": "Jeffery",
       "rating": 5,
