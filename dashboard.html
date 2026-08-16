@@ -702,6 +702,15 @@
       pre,code{max-width:100%;overflow-x:auto;white-space:pre-wrap;word-break:break-word;}
       img,canvas{max-width:100%;height:auto;}
       .sync-bar,.orders-header,.cms-list-header,.cms-save-row{flex-wrap:wrap;}
+      /* ── CMS content area — constrain to viewport ── */
+      .cms-content-area{width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;}
+      .cms-panel{max-width:100%;overflow-x:hidden;}
+      .cms-ext-bar{flex-wrap:wrap;}
+      /* ── Item titles must not push layout wider ── */
+      .cms-item-body{overflow:hidden;min-width:0;}
+      .cms-item-title{min-width:0;}
+      /* ── Reorder + actions stay inside item bounds ── */
+      .cms-item{max-width:100%;box-sizing:border-box;}
     }
 
     /* ── Smart Digest Card ── */
@@ -915,8 +924,6 @@
       .cms-layout{overflow-x:hidden;}
       /* Hide panel titles that duplicate the mobile header tab name */
       .mob-skip{display:none !important;}
-      /* Hide date span (removed) */
-      .mob-date{display:none !important;}
     }
   </style>
 </head>
@@ -944,7 +951,7 @@
     <span class="mob-section-name" id="mobSectionName">Today</span>
     <svg class="mob-section-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 8 10 13 15 8"/></svg>
   </button>
-  <span class="mob-date" id="mobDate" style="display:none"></span>
+  <span class="mob-date" id="mobDate" style="display:none;"></span>
 </div>
 
 <!-- ── Sidebar nav ── -->
@@ -5998,6 +6005,8 @@ refreshReviewsBadge();
     _tab = tab;
     var el=document.getElementById('mobSectionName');
     if(el) el.textContent = _names[tab]||tab;
+    var dateEl=document.getElementById('mobDate');
+    if(dateEl) dateEl.style.display = (tab==='today') ? '' : 'none';
     Object.keys(_names).forEach(function(t){
       var n=document.getElementById('mn-'+t);
       if(n) n.classList.toggle('dim', t!==tab);
