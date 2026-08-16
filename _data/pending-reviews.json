@@ -1,32 +1,3 @@
 {
-  "reviews": [
-    {
-      "id": "1786913344790",
-      "name": "Test User",
-      "rating": 5,
-      "message": "Test review for debugging",
-      "date": "2026-08-16"
-    },
-    {
-      "id": "1786914790880",
-      "name": "Jeffery",
-      "rating": 5,
-      "message": "Images are great",
-      "date": "2026-08-16"
-    },
-    {
-      "id": "1786915317431",
-      "name": "Jeffery",
-      "rating": 5,
-      "message": "The images are great",
-      "date": "2026-08-16"
-    },
-    {
-      "id": "1786915348933",
-      "name": "Jeffery",
-      "rating": 5,
-      "message": "Images are great",
-      "date": "2026-08-16"
-    }
-  ]
+  "reviews": []
 }
