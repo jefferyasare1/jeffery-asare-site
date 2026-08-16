@@ -722,7 +722,7 @@
       --rule:rgba(160,140,120,.22);
       --card-shadow:5px 5px 14px rgba(160,140,120,.32),-3px -3px 9px rgba(255,255,252,.72);
       --card-shadow-hover:6px 6px 18px rgba(160,140,120,.38),-3px -3px 11px rgba(255,255,252,.78);
-      --rc:18px;--rb:50px;
+      --rc:14px;--rb:10px;
     }
     body{background:#ddd8d0;}
     #pw-gate{background:#ddd8d0;}
@@ -738,7 +738,7 @@
     /* ── Desktop sidebar ── */
     .dash-sidebar{background:linear-gradient(145deg,#1e1e1e,#2e2e2e);border-right:none;box-shadow:6px 0 20px rgba(0,0,0,.25);}
     .sn-logo{border-bottom-color:rgba(255,255,255,.07);}
-    .sn-logo img{filter:brightness(0) invert(1);opacity:.55;}
+    .sn-logo img{filter:invert(1);opacity:.85;}
     .sn-label{color:rgba(255,255,255,.2);}
     .sn-item{color:rgba(255,255,255,.35);}
     .sn-item:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.06);}
@@ -827,6 +827,57 @@
     .manual-toggle{background:transparent;border:1.5px dashed rgba(160,140,120,.4);}
     .manual-toggle:hover{border-style:solid;border-color:rgba(160,140,120,.6);}
 
+    /* ── Today panel: override inline styles ── */
+    #today-stats > div{
+      background:linear-gradient(145deg,#f0ece4,#e2ddd5) !important;
+      border:none !important;
+      box-shadow:var(--card-shadow) !important;
+      border-radius:var(--rc) !important;
+    }
+    #today-queue > div{
+      background:linear-gradient(145deg,#f0ece4,#e2ddd5) !important;
+      border:none !important;
+      box-shadow:var(--card-shadow) !important;
+      border-radius:var(--rc) !important;
+    }
+    #today-queue > div:hover{
+      box-shadow:var(--card-shadow-hover) !important;
+      border-color:transparent !important;
+    }
+
+    /* ── Sync / quick-link buttons — more clearly clickable ── */
+    .btn-sync{
+      background:linear-gradient(145deg,#ece8e0,#d8d4cc) !important;
+      border:1.5px solid rgba(160,140,120,.3) !important;
+      color:var(--ink) !important;
+      box-shadow:2px 2px 5px rgba(160,140,120,.22),-1px -1px 3px rgba(255,255,252,.6) !important;
+      border-radius:var(--rb) !important;
+      font-weight:600 !important;
+    }
+    .btn-sync:hover{
+      background:linear-gradient(145deg,#f0ece4,#e2ddd5) !important;
+      border-color:rgba(160,140,120,.5) !important;
+      box-shadow:3px 3px 7px rgba(160,140,120,.28),-1px -1px 4px rgba(255,255,252,.65) !important;
+    }
+    .btn-sync:active{background:linear-gradient(145deg,#d8d4cc,#ece8e0) !important;}
+
+    /* ── Text inputs: clearly a text field ── */
+    input[type=text],input[type=email],input[type=url],
+    .inline-field,.search-input,.aq-tracking,
+    .cms-field input[type=text],.cms-field input[type=date],.cms-field textarea,
+    .nl-field input,.nl-field textarea,#dashInputField{
+      background:#faf8f5 !important;
+      border:1.5px solid rgba(160,140,120,.4) !important;
+      border-radius:var(--rb) !important;
+      box-shadow:inset 2px 2px 5px rgba(150,130,110,.18),inset -1px -1px 3px rgba(255,255,252,.55) !important;
+    }
+    input[type=text]:focus,input[type=email]:focus,input[type=url]:focus,
+    .inline-field:focus,.search-input:focus,#dashInputField:focus{
+      background:#fff !important;
+      border-color:#111 !important;
+      box-shadow:inset 1px 1px 3px rgba(0,0,0,.1),0 0 0 3px rgba(17,24,39,.08) !important;
+    }
+
     /* ── Mobile ── */
     @media(max-width:700px){
       .mob-header{background:linear-gradient(145deg,#1e1e1e,#2e2e2e);border-bottom:none;box-shadow:0 4px 12px rgba(0,0,0,.3);}
@@ -840,9 +891,13 @@
       .mob-nav-num{color:rgba(255,255,255,.2);}
       .mob-nav-name{color:rgba(255,255,255,.9);}
       .mob-nav-name.dim{color:rgba(255,255,255,.35);}
-      .mob-nav-logo img{filter:brightness(0) invert(1);}
+      .mob-nav-logo img{filter:invert(1);opacity:.85;}
       .mob-fab{background:linear-gradient(145deg,#1a1a1a,#363636);box-shadow:3px 3px 10px rgba(0,0,0,.45),-1px -1px 4px rgba(255,255,255,.06);}
       .mob-fab-lbl{background:linear-gradient(145deg,#1a1a1a,#363636);}
+      /* Prevent content tabs from overflowing and triggering nav swipe */
+      .dash-main{overflow-x:hidden;}
+      #clientsList{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+      .cms-layout{overflow-x:hidden;}
     }
   </style>
 </head>
@@ -6094,8 +6149,8 @@ syncFromSheet();
     if(Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.65) return;
     var overlay = document.getElementById('mobNavOverlay');
     var isOpen = overlay && overlay.classList.contains('open');
-    if(dx > 0 && !isOpen) mobNavOpen();   // swipe right → open menu
-    if(dx < 0 && isOpen)  mobNavClose();  // swipe left  → close menu
+    if(dx > 0 && !isOpen && _tx < 40) mobNavOpen();  // swipe right from left edge only → open menu
+    if(dx < 0 && isOpen)  mobNavClose();             // swipe left  → close menu
   }, { passive: true });
 })();
 
