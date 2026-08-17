@@ -3905,6 +3905,12 @@ fetch('/_data/settings/portfolio-page.json')
   .then(function(r){ return r.json(); })
   .then(function(s){
     if(s.portfolio_desc){ var el=document.getElementById('portfolioDesc'); if(el) el.textContent=s.portfolio_desc; }
+    // Dynamic: load any series_intro_{slug} key (supports new series)
+    Object.keys(s).forEach(function(key){
+      var m=key.match(/^series_intro_(.+)$/);
+      if(m && s[key]) SERIES_INTROS[m[1].replace(/_/g,'-')]=s[key];
+    });
+    // Legacy keys for backwards compat
     if(s.series_eclipse)       SERIES_INTROS['eclipse']        = s.series_eclipse;
     if(s.series_portraits)     SERIES_INTROS['portraits']      = s.series_portraits;
     if(s.series_random_stories)SERIES_INTROS['random-stories'] = s.series_random_stories;

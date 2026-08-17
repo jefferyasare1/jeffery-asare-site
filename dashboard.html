@@ -127,11 +127,13 @@
 
     /* ── Action queue ── */
     .action-queue{margin-bottom:28px;}
-    .queue-banner{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;padding:9px 14px;border-radius:var(--rb);margin-bottom:10px;border:1px solid;}
-    .queue-banner.red{background:var(--red-bg);border-color:var(--red-border);}
-    .queue-banner.amber{background:var(--amber-bg);border-color:var(--amber-border);}
-    .queue-banner.clear{background:var(--green-bg);border-color:var(--green-border);}
-    .queue-title{font-size:12px;font-weight:700;white-space:nowrap;}
+    .queue-banner{display:flex;align-items:center;gap:7px;padding:0 0 10px;margin-bottom:6px;background:none;border:none;}
+    .queue-banner.red,.queue-banner.amber,.queue-banner.clear{background:none;border:none;}
+    .queue-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .queue-dot.red{background:var(--red);}
+    .queue-dot.amber{background:var(--amber);}
+    .queue-dot.clear{background:var(--green);}
+    .queue-title{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
     .queue-title.red{color:var(--red);}
     .queue-title.amber{color:var(--amber);}
     .queue-title.clear{color:var(--green);}
@@ -447,8 +449,8 @@
     .search-input::placeholder{color:#c5b9ab;}
 
     /* ── Overdue banner inside urgent cards ── */
-    .overdue-banner{background:#991b1b;color:#fff;padding:10px 22px;font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
-    .overdue-banner .ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);flex-shrink:0;animation:ob-pulse 1.4s infinite;}
+    .overdue-banner{background:none;color:var(--red);padding:6px 22px 4px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(153,27,27,.12);}
+    .overdue-banner .ob-dot{width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0;animation:ob-pulse 1.4s infinite;}
     @keyframes ob-pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
     /* ── Clients panel cards ── */
@@ -610,8 +612,12 @@
       .cms-item{flex-wrap:wrap;gap:8px;}
       .cms-item-actions{margin-left:0;width:100%;display:flex;flex-wrap:wrap;gap:6px;}
       .cms-list-header{flex-wrap:wrap;gap:8px;}
-      /* ── Analytics ── */
+      /* ── Analytics + Clients overflow fix ── */
       .stat-grid{grid-template-columns:1fr 1fr;}
+      .an-row-label{white-space:normal;word-break:break-word;}
+      .an-row-bar-wrap{display:none;}
+      #panel-analytics,#panel-clients{overflow-x:hidden;}
+      .dash-main{overflow-x:hidden;}
       /* ── Port sub-tabs scroll ── */
       .port-subtabs{overflow-x:auto;}
       /* ── Order card buttons ── */
@@ -632,8 +638,8 @@
       .mob-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;background:#fff;border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:200;}
       .mob-section-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:var(--sans);padding:0;}
       .mob-section-name{font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--ink);}
-      .mob-section-chevron{color:var(--muted);transition:transform .2s;}
-      .mob-section-btn.open .mob-section-chevron{transform:rotate(180deg);}
+      .mob-section-chevron{color:rgba(255,255,255,.5);font-size:15px;line-height:1;transition:transform .2s;}
+      .mob-section-btn.open .mob-section-chevron{transform:rotate(90deg);}
       .mob-date{font-size:11px;color:var(--muted);}
       /* Full-screen nav overlay */
       .mob-nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:600;padding:36px 28px;flex-direction:column;justify-content:center;}
@@ -843,6 +849,7 @@
       #clientsList{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       .cms-layout{overflow-x:hidden;}
       .mob-skip{display:none !important;}
+      html,body{overscroll-behavior-y:none;}
       /* Mobile bottom nav — black */
       .dash-sidebar{background:#111;border-top-color:rgba(255,255,255,.08);}
       .sn-item{color:rgba(255,255,255,.45);}
@@ -873,7 +880,7 @@
 <div class="mob-header" id="mobHeader">
   <button class="mob-section-btn" id="mobSectionBtn" onclick="mobNavOpen()">
     <span class="mob-section-name" id="mobSectionName">Today</span>
-    <svg class="mob-section-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 8 10 13 15 8"/></svg>
+    <span class="mob-section-chevron" aria-hidden="true">˿</span>
   </button>
   <span class="mob-date" id="mobDate" style="display:none;"></span>
 </div>
@@ -1376,10 +1383,7 @@
         <div class="cms-section-body">
           <div class="cms-field"><label>Portfolio intro text</label><textarea id="st-portfolio-desc" rows="4"></textarea></div>
           <div class="cms-field" style="margin-top:20px"><label style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">Gallery Descriptions</label></div>
-          <div class="cms-field"><label>Eclipse of the Self</label><textarea id="st-series-eclipse" rows="4"></textarea></div>
-          <div class="cms-field"><label>Portraits</label><textarea id="st-series-portraits" rows="4"></textarea></div>
-          <div class="cms-field"><label>Random Stories</label><textarea id="st-series-random" rows="4"></textarea></div>
-          <div class="cms-field"><label>Abstract</label><textarea id="st-series-abstract" rows="3"></textarea></div>
+          <div id="st-series-intros"><p style="font-size:12px;color:var(--muted);padding:6px 0;">Open Content → Portfolio first to load your series.</p></div>
           <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSitePortfolio()">Save</button><div class="cms-status" id="cms-portfolio-status"></div></div>
         </div>
       </div>
@@ -2057,13 +2061,13 @@ function renderOverview(){
   }
 
   qEl.innerHTML = items.slice(0,8).map(function(it){
-    return '<div onclick="'+it.action+'" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1px solid var(--rule);border-radius:var(--rc);margin-bottom:6px;cursor:pointer;transition:border-color .12s;" onmouseover="this.style.borderColor=\'#c8c0b6\'" onmouseout="this.style.borderColor=\'var(--rule)\'">'
-      +'<div style="width:4px;height:36px;border-radius:2px;background:'+it.color+';flex-shrink:0;"></div>'
+    return '<div onclick="'+it.action+'" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule);cursor:pointer;" onmouseover="this.querySelector(\'.aq-name-inner\').style.opacity=\'.7\'" onmouseout="this.querySelector(\'.aq-name-inner\').style.opacity=\'1\'">'
+      +'<div style="width:7px;height:7px;border-radius:50%;background:'+it.color+';flex-shrink:0;margin-top:1px;"></div>'
       +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:13px;font-weight:600;color:var(--ink);">'+it.label+'</div>'
-        +'<div style="font-size:11px;color:var(--muted);">'+it.sub+'</div>'
+        +'<div class="aq-name-inner" style="font-size:13px;font-weight:600;color:var(--ink);transition:opacity .12s;">'+it.label+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:1px;">'+it.sub+'</div>'
       +'</div>'
-      +'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" style="color:#d1d5db;flex-shrink:0;" aria-hidden="true"><polyline points="7 4 13 10 7 16"/></svg>'
+      +'<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" style="color:var(--rule);flex-shrink:0;" aria-hidden="true"><polyline points="7 4 13 10 7 16"/></svg>'
     +'</div>';
   }).join('');
 }
@@ -2815,17 +2819,19 @@ function buildActionQueue(orders){
   } else {
     if(overdue.length){
       html += '<div class="queue-banner red">'
-        +'<div class="queue-title red">'+overdue.length+' overdue — click to jump</div>'
-        +'<div class="queue-desc">'+overdue.map(function(x){
-            return '<strong style="cursor:pointer;text-decoration:underline;" onclick="scrollToCard(\''+x.o.id+'\')">'+escH(x.o.buyerName)+'</strong> · '+escH(x.s.label);
-          }).join(' &nbsp;&nbsp; ')+'</div></div>';
+        +'<div class="queue-dot red"></div>'
+        +'<div class="queue-title red">'+overdue.length+' overdue</div>'
+        +'<div class="queue-desc" style="font-size:12px;color:var(--muted);">'+overdue.map(function(x){
+            return '<span style="cursor:pointer;text-decoration:underline;" onclick="scrollToCard(\''+x.o.id+'\')">'+escH(x.o.buyerName)+'</span>';
+          }).join(', ')+'</div></div>';
     }
     if(due.length){
       html += '<div class="queue-banner amber">'
-        +'<div class="queue-title amber">'+due.length+' need attention — click to jump</div>'
-        +'<div class="queue-desc">'+due.map(function(x){
-            return '<strong style="cursor:pointer;text-decoration:underline;" onclick="scrollToCard(\''+x.o.id+'\')">'+escH(x.o.buyerName)+'</strong> · '+escH(x.s.label);
-          }).join(' &nbsp;&nbsp; ')+'</div></div>';
+        +'<div class="queue-dot amber"></div>'
+        +'<div class="queue-title amber">'+due.length+' need attention</div>'
+        +'<div class="queue-desc" style="font-size:12px;color:var(--muted);">'+due.map(function(x){
+            return '<span style="cursor:pointer;text-decoration:underline;" onclick="scrollToCard(\''+x.o.id+'\')">'+escH(x.o.buyerName)+'</span>';
+          }).join(', ')+'</div></div>';
     }
   }
   return html;
@@ -5008,6 +5014,8 @@ function cmsInitPortfolio(){
       _seriesList=(d.content&&d.content.series)||[]; _seriesSha=d.sha;
       cmsBuildSeriesSelector();
       if(_seriesList.length) cmsSelectSeries(_seriesList[0].slug);
+      // Re-render series intro fields now that series list is known
+      cmsRenderSeriesIntroFields(_seriesList, _sitePortfolioData);
     })
     .catch(function(){if(sel)sel.innerHTML='<p style="color:var(--red);font-size:12px;">Error.</p>';});
 }
@@ -5392,14 +5400,30 @@ function cmsSitePopulateHero(d){
   }).join('');
 }
 
+var _sitePortfolioData = null;
+var _SERIES_LEGACY_KEYS = {eclipse:'series_eclipse',portraits:'series_portraits','random-stories':'series_random_stories',abstract:'series_abstract'};
+
+function cmsRenderSeriesIntroFields(list, data){
+  var container = document.getElementById('st-series-intros');
+  if(!container) return;
+  if(!list||!list.length){
+    container.innerHTML='<p style="font-size:12px;color:var(--muted);padding:6px 0;">Open Content → Portfolio first to load your series.</p>';
+    return;
+  }
+  container.innerHTML = list.map(function(s){
+    var legacyKey = _SERIES_LEGACY_KEYS[s.slug];
+    var val = data ? (data['series_intro_'+s.slug.replace(/-/g,'_')] || (legacyKey && data[legacyKey]) || '') : '';
+    return '<div class="cms-field"><label>'+escH(s.label)+'</label>'
+      +'<textarea id="st-si-'+escAttr(s.slug)+'" rows="3">'+escH(val)+'</textarea></div>';
+  }).join('');
+}
+
 function cmsSitePopulatePortfolio(d){
   if(!d)return;
+  _sitePortfolioData = d;
   function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
   set('st-portfolio-desc',d.portfolio_desc);
-  set('st-series-eclipse',d.series_eclipse);
-  set('st-series-portraits',d.series_portraits);
-  set('st-series-random',d.series_random_stories);
-  set('st-series-abstract',d.series_abstract);
+  cmsRenderSeriesIntroFields(_seriesList||[], d);
 }
 
 function cmsSitePopulateAbout(d){
@@ -5441,13 +5465,18 @@ function cmsSaveSiteHero(){
 }
 function cmsSaveSitePortfolio(){
   cmsSiteSave('settings/portfolio-page',function(){
-    return{
-      portfolio_desc:g('st-portfolio-desc'),
-      series_eclipse:g('st-series-eclipse'),
-      series_portraits:g('st-series-portraits'),
-      series_random_stories:g('st-series-random'),
-      series_abstract:g('st-series-abstract')
-    };
+    var data={portfolio_desc:g('st-portfolio-desc')};
+    (_seriesList||[]).forEach(function(s){
+      var el=document.getElementById('st-si-'+s.slug);
+      if(!el) return;
+      var val=el.value.trim();
+      // New key pattern (supports any series)
+      data['series_intro_'+s.slug.replace(/-/g,'_')]=val;
+      // Legacy key for backwards compat
+      var legacyKey=_SERIES_LEGACY_KEYS[s.slug];
+      if(legacyKey) data[legacyKey]=val;
+    });
+    return data;
   },'cms-portfolio-status');
 }
 function cmsSaveSiteAbout(){
