@@ -36,6 +36,7 @@
 }
 </script>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;--title:'General Sans',system-ui,sans-serif;--serif:'EB Garamond','Georgia',serif;--sans:'General Sans',system-ui,sans-serif;--pad:clamp(1.5rem,5vw,4rem);}
@@ -698,11 +699,14 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .journal-post-title{font-family:var(--title);font-size:1.25rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .45rem;line-height:1.25;}
 .journal-post-excerpt{font-size:13px;color:var(--muted);line-height:1.65;margin:0;}
 .journal-post-thumb{width:90px;height:110px;object-fit:cover;flex-shrink:0;display:block;}
-.journal-body-wrap{max-width:680px;margin:0 auto;padding:3rem 1.5rem 6rem;}
-.journal-body-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
-.journal-body-title{font-family:var(--title);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:600;letter-spacing:-.02em;margin:.4rem 0 1.6rem;line-height:1.2;}
-.journal-body-text p{font-size:15px;line-height:1.85;color:var(--ink);margin:0 0 1.4em;}
-.journal-post-nav{display:flex;justify-content:space-between;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--rule);gap:1rem;}
+.journal-body-wrap{max-width:640px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+.journal-article{background:#dedad4;border-radius:16px;padding:36px 28px 30px;position:relative;overflow:hidden;}
+.journal-qm{position:absolute;top:14px;right:20px;font-size:110px;font-weight:900;color:rgba(102,88,74,.18);line-height:1;pointer-events:none;font-family:'Barlow',sans-serif;user-select:none;}
+.journal-body-meta{font-size:9px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:rgba(102,88,74,.65);margin-bottom:20px;font-family:'Barlow',sans-serif;}
+.journal-body-title{font-family:'Barlow',sans-serif;font-size:clamp(2rem,6vw,2.8rem);font-weight:900;line-height:.96;letter-spacing:-.02em;color:#1a1612;margin:0 0 26px;}
+.journal-body-text p{font-size:15px;line-height:1.85;color:#3a342e;margin:0 0 1.4em;}
+.journal-body-foot{display:flex;justify-content:space-between;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:rgba(102,88,74,.65);margin-top:32px;font-family:'Barlow',sans-serif;}
+.journal-post-nav{display:flex;justify-content:space-between;margin-top:2rem;padding:1.5rem 0;border-top:1px solid var(--rule);gap:1rem;}
 .journal-post-nav-item{flex:1;}
 .journal-post-nav-item.next{text-align:right;}
 .journal-post-nav-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
@@ -2450,12 +2454,17 @@ function _openJournalPost(post, posts){
     +(prevPost?'<div class="journal-post-nav-item prev"><div class="journal-post-nav-label">&#8592; Previous</div><div class="journal-post-nav-title" data-navid="'+prevPost.id+'">'+prevPost.title+'</div></div>':'<div class="journal-post-nav-item"></div>')
     +(nextPost?'<div class="journal-post-nav-item next"><div class="journal-post-nav-label">Next &#8594;</div><div class="journal-post-nav-title" data-navid="'+nextPost.id+'">'+nextPost.title+'</div></div>':'<div class="journal-post-nav-item"></div>')
     +'</div>';
+  var postNum = String(posts.indexOf(post) + 1).padStart(3, '0');
   if(content){
     content.innerHTML =
-      (post.img?'<img style="width:100%;max-height:420px;object-fit:cover;margin-bottom:1.5rem;display:block;" src="'+post.img+'" alt="'+post.title+'" loading="lazy">':'')
-      +'<div class="journal-body-meta">'+post.series+' &nbsp;·&nbsp; '+dateStr+' &nbsp;·&nbsp; '+_readingTime(post.body)+'</div>'
+      (post.img?'<img style="width:100%;max-height:480px;object-fit:cover;border-radius:12px;margin-bottom:1.5rem;display:block;" src="'+post.img+'" alt="'+post.title+'" loading="lazy">':'')
+      +'<div class="journal-article">'
+      +'<div class="journal-qm">“</div>'
+      +'<div class="journal-body-meta">'+post.series+'</div>'
       +'<h1 class="journal-body-title">'+post.title+'</h1>'
       +'<div class="journal-body-text">'+bodyHtml+'</div>'
+      +'<div class="journal-body-foot"><span>Jeffery Asare &nbsp;&middot;&nbsp; '+dateStr+'</span><span>Post '+postNum+'</span></div>'
+      +'</div>'
       +navHtml;
     content.querySelectorAll('.journal-post-nav-title[data-navid]').forEach(function(btn){
       btn.addEventListener('click',function(){
