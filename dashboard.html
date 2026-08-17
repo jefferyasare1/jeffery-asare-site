@@ -902,6 +902,11 @@
       box-shadow:inset 3px 3px 7px rgba(160,148,135,.45),inset -2px -2px 5px rgba(255,255,255,.8);}
     .neupicker-day.other-month{color:rgba(122,117,112,.35);cursor:default;}
     .neupicker-day.empty{cursor:default;}
+    @media(max-width:700px){
+      .neupicker-day{padding:10px 2px;font-size:14px;}
+      .neupicker-nav{width:40px;height:40px;}
+      .neupicker-title{font-size:15px;}
+    }
 
     /* ── Mobile functional overrides ── */
 
@@ -925,16 +930,39 @@
       .cms-layout{overflow-x:hidden;}
       .mob-skip{display:none !important;}
       html,body{overscroll-behavior-y:none;}
-      /* Mobile bottom nav — black raised buttons */
-      .dash-sidebar{background:#111;border-top-color:rgba(255,255,255,.06);}
-      .sn-item{color:rgba(255,255,255,.5);border-radius:8px;border-top:none;background:linear-gradient(145deg,#1c1c1c,#080808);box-shadow:4px 4px 10px rgba(0,0,0,.9),-2px -2px 5px rgba(50,45,40,.2);margin-bottom:0;}
-      .sn-item.active{background:linear-gradient(145deg,#060606,#1a1a1a);color:#fff;font-weight:700;border-radius:8px;border-top:none;box-shadow:inset 4px 4px 10px rgba(0,0,0,.95),inset -2px -2px 5px rgba(50,45,40,.12);}
+      /* ── Mobile bottom nav — raised buttons ── */
+      .dash-sidebar{background:#111;border-top-color:rgba(255,255,255,.06);
+        padding:6px 6px 6px;gap:4px;overflow-y:visible;}
+      .sn-item{color:rgba(255,255,255,.5);border-radius:8px;border-top:none;
+        background:linear-gradient(145deg,#1c1c1c,#080808);
+        box-shadow:0 4px 10px rgba(0,0,0,.85),0 -2px 5px rgba(50,45,40,.15);
+        margin:0;padding:7px 4px 6px;flex:1;min-width:0;}
+      .sn-item.active{background:linear-gradient(145deg,#060606,#1a1a1a);color:#fff;
+        font-weight:700;border-radius:8px;border-top:none;
+        box-shadow:inset 3px 3px 8px rgba(0,0,0,.92),inset -2px -2px 5px rgba(50,45,40,.1);}
       .sn-item.active svg{color:#fff;}
-      .sn-item:hover{background:linear-gradient(145deg,#242424,#0e0e0e);}
-      /* Mobile full-screen nav items — dark neumorphic cards */
-      .mob-nav-item{background:linear-gradient(145deg,#1c1c1c,#080808);border:none;border-radius:12px;padding:14px 18px;margin-bottom:8px;box-shadow:6px 6px 14px rgba(0,0,0,.92),-3px -3px 8px rgba(60,55,50,.18);transition:all .12s;}
-      .mob-nav-item:active{background:linear-gradient(145deg,#0a0a0a,#1c1c1c);box-shadow:inset 4px 4px 10px rgba(0,0,0,.95),inset -2px -2px 5px rgba(60,55,50,.12);}
+      /* ── Mobile section header button ── */
+      .mob-section-btn{background:linear-gradient(145deg,#1c1c1c,#080808);
+        border-radius:8px;padding:6px 12px;
+        box-shadow:4px 4px 10px rgba(0,0,0,.85),-2px -2px 5px rgba(50,45,40,.15);}
+      .mob-section-btn:active{box-shadow:inset 3px 3px 8px rgba(0,0,0,.9),inset -2px -2px 4px rgba(50,45,40,.1);}
+      /* ── Mobile FAB ── */
+      .mob-fab{background:linear-gradient(145deg,#1c1c1c,#080808);
+        box-shadow:6px 6px 16px rgba(0,0,0,.85),-3px -3px 8px rgba(50,45,40,.18);}
+      .mob-fab-lbl{background:linear-gradient(145deg,#1c1c1c,#080808);}
+      /* ── Mobile full-screen nav items ── */
+      .mob-nav-item{background:linear-gradient(145deg,#1c1c1c,#080808);border:none;
+        border-radius:12px;padding:14px 18px;margin-bottom:8px;
+        box-shadow:6px 6px 14px rgba(0,0,0,.92),-3px -3px 8px rgba(60,55,50,.18);transition:all .12s;}
+      .mob-nav-item:active{background:linear-gradient(145deg,#0a0a0a,#1c1c1c);
+        box-shadow:inset 4px 4px 10px rgba(0,0,0,.95),inset -2px -2px 5px rgba(60,55,50,.12);}
       .mob-nav-overlay{background:#111;padding:36px 20px;}
+      /* ── Calendar picker on mobile — fixed, centered above bottom nav ── */
+      .neupicker{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);
+        width:calc(100vw - 32px);max-width:340px;top:auto;}
+      /* ── Cards / stat blocks on mobile — ensure shadow shows ── */
+      .today-stat-block,.msg-card,.order-card,.cms-item{overflow:visible;}
+      .tabs,.action-subtabs,.cms-subnav,.port-subtabs{flex-wrap:wrap;}
     }
   </style>
 </head>
