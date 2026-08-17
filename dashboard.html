@@ -769,16 +769,42 @@
     #pw-btn{background:linear-gradient(145deg,#1c1c1c,#363636);border:none;border-radius:50px;box-shadow:6px 6px 16px rgba(0,0,0,.52),-2px -2px 6px rgba(255,255,255,.10);}
     #pw-btn:hover{background:linear-gradient(145deg,#262626,#404040);border:none;}
 
-    /* ── Raised cards ── */
-    .order-card,.aq-card,.nl-stat,.client-card,.wf-step,.cms-item,
-    .msg-card,.today-stat-block,
+    /* ── Light raised cards (warm neumorphic) ── */
+    .aq-card,.client-card,.wf-step,
+    .msg-card,
     #orders-sidebar,#smartDigest,.modal,
     #dashModalBox,#dashConfirmBox,#dashInputBox,.cms-modal-box{
       background:linear-gradient(145deg,#f2ede6,#d4cfc8);
       border:none;
       box-shadow:var(--card-shadow);
     }
-    .order-card:hover,.cms-item:hover,.msg-card:hover,.today-stat-block:hover{border:none;box-shadow:var(--card-shadow-hover);}
+    .msg-card:hover{border:none;box-shadow:var(--card-shadow-hover);}
+
+    /* ── Dark raised cards (black neumorphic) ── */
+    .today-stat-block,.order-card,.cms-item,.nl-stat{
+      background:linear-gradient(145deg,#1e1e1e,#080808);
+      border:none;
+      box-shadow:8px 8px 22px rgba(0,0,0,.94),-4px -4px 10px rgba(50,45,40,.22);
+      color:rgba(255,255,255,.88);
+    }
+    .today-stat-block:hover,.nl-stat:hover{box-shadow:10px 10px 28px rgba(0,0,0,.97),-5px -5px 13px rgba(50,45,40,.28);}
+    .order-card:hover,.cms-item:hover{box-shadow:10px 10px 28px rgba(0,0,0,.97),-5px -5px 13px rgba(50,45,40,.28);}
+    /* Text inside dark order cards */
+    .card-buyer{color:#fff;}
+    .card-print,.card-email,.card-detail-meta{color:rgba(255,255,255,.5);}
+    .order-card .card-expand-btn{border-color:rgba(255,255,255,.2);background:transparent;}
+    .order-card .card-expand-btn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.06);}
+    .order-card .card-expand-btn.open{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.4);}
+    /* Text inside dark cms items */
+    .cms-item-title{color:#fff;}
+    .cms-item-meta{color:rgba(255,255,255,.5);}
+    /* Text inside dark newsletter stats */
+    .nl-stat-val{color:#fff;}
+    .nl-stat-label{color:rgba(255,255,255,.5);}
+    /* Today stat block inner elements (CSS classes replace inline styles) */
+    .stat-lbl{font-size:11px;letter-spacing:.04em;color:rgba(255,255,255,.5);margin-bottom:4px;}
+    .stat-val{font-size:22px;font-weight:700;letter-spacing:-.03em;line-height:1;color:#fff;}
+    .stat-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
     .sidebar-hd,.card-detail,.card-inline,.nl-preview-frame{
       background:linear-gradient(145deg,#ddd8d1,#eae5de);
       border-color:rgba(160,148,135,.22);
@@ -843,6 +869,25 @@
     .inline-field:focus,.search-input:focus,#dashInputField:focus{
       background:#f0ece5;border:none;
       box-shadow:inset 2px 2px 5px rgba(160,148,135,.22),0 0 0 3px rgba(17,24,39,.12);
+    }
+
+    /* ── Dropdowns (select elements) ── */
+    .client-sel{
+      background:linear-gradient(145deg,#ddd8d1,#eae5de);
+      border:none;
+      box-shadow:inset 6px 6px 14px rgba(160,148,135,.52),inset -4px -4px 10px rgba(255,255,255,.86);
+      border-radius:var(--rb);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 14px center;
+    }
+    .client-sel:focus{
+      background-color:#f0ece5;
+      border:none;
+      box-shadow:inset 2px 2px 5px rgba(160,148,135,.22),0 0 0 3px rgba(17,24,39,.12);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 14px center;
     }
 
     /* ── Neumorphic tabs ── */
@@ -930,16 +975,15 @@
       .cms-layout{overflow-x:hidden;}
       .mob-skip{display:none !important;}
       html,body{overscroll-behavior-y:none;}
-      /* ── Mobile bottom nav — raised buttons ── */
+      /* ── Mobile bottom nav — flat (no 3D) ── */
       .dash-sidebar{background:#111;border-top-color:rgba(255,255,255,.06);
-        padding:6px 6px 6px;gap:4px;overflow-y:visible;}
-      .sn-item{color:rgba(255,255,255,.5);border-radius:8px;border-top:none;
-        background:linear-gradient(145deg,#1c1c1c,#080808);
-        box-shadow:0 4px 10px rgba(0,0,0,.85),0 -2px 5px rgba(50,45,40,.15);
+        padding:4px 4px 4px;gap:2px;overflow-y:visible;}
+      .sn-item{color:rgba(255,255,255,.45);border-radius:8px;border-top:none;
+        background:transparent;box-shadow:none;
         margin:0;padding:7px 4px 6px;flex:1;min-width:0;}
-      .sn-item.active{background:linear-gradient(145deg,#060606,#1a1a1a);color:#fff;
-        font-weight:700;border-radius:8px;border-top:none;
-        box-shadow:inset 3px 3px 8px rgba(0,0,0,.92),inset -2px -2px 5px rgba(50,45,40,.1);}
+      .sn-item:hover{background:rgba(255,255,255,.08);box-shadow:none;}
+      .sn-item.active{background:rgba(255,255,255,.14);color:#fff;
+        font-weight:700;border-radius:8px;border-top:none;box-shadow:none;}
       .sn-item.active svg{color:#fff;}
       /* ── Mobile section header button ── */
       .mob-section-btn{background:linear-gradient(145deg,#1c1c1c,#080808);
@@ -963,6 +1007,10 @@
       /* ── Cards / stat blocks on mobile — ensure shadow shows ── */
       .today-stat-block,.msg-card,.order-card,.cms-item{overflow:visible;}
       .tabs,.action-subtabs,.cms-subnav,.port-subtabs{flex-wrap:wrap;}
+      /* ── Clients tab — allow table to scroll horizontally ── */
+      #panel-clients{overflow-x:visible !important;}
+      #clientsList{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+      #clientsList table{min-width:480px;}
     }
   </style>
 </head>
@@ -2127,9 +2175,9 @@ function renderOverview(){
   if(statsEl){
     function stat(label,val,sub){
       return '<div class="today-stat-block">'
-        +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">'+label+'</div>'
-        +'<div style="font-size:22px;font-weight:600;letter-spacing:-.03em;line-height:1;">'+val+'</div>'
-        +(sub?'<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+sub+'</div>':'')
+        +'<div class="stat-lbl">'+label+'</div>'
+        +'<div class="stat-val">'+val+'</div>'
+        +(sub?'<div class="stat-sub">'+sub+'</div>':'')
         +'</div>';
     }
     statsEl.innerHTML =
