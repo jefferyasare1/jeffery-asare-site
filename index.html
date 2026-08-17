@@ -1932,12 +1932,12 @@ var _contactSuggestions = {
   'Exhibition': "Hi Jeffery, I\u2019m reaching out about a potential exhibition opportunity. I\u2019d love to share the details and see if it might be a fit for your work.",
   'Collaboration': "Hi Jeffery, I\u2019m interested in exploring a collaboration and have some ideas I think you\u2019d find interesting. Would love to connect and hear your thoughts."
 };
-function contactSubjectChange(val){
+window.contactSubjectChange = function(val){
   var area = document.getElementById('msgArea');
   if(!area) return;
   var suggestion = _contactSuggestions[val];
   if(suggestion){ area.value = suggestion; area.dispatchEvent(new Event('input')); }
-}
+};
 
 // ============================================================
 // HERO SLIDESHOW — Ken Burns + Fade through Black
@@ -2354,7 +2354,7 @@ function submitReview(){
         document.getElementById('reviewName').value='';
         document.getElementById('reviewMsg').value='';
         _selectedRating=5; _initStarPicker();
-        setTimeout(function(){ if(btn){ btn.disabled=false; btn.textContent='Submit review'; } if(status){ status.className='review-form-status'; status.textContent=''; } }, 30000);
+        setTimeout(function(){ if(btn){ btn.disabled=false; btn.textContent='Submit review'; } if(status){ status.className='review-form-status'; status.textContent=''; } }, 5000);
       } else {
         if(status){ status.className='review-form-status err'; status.textContent=d.error||'Something went wrong. Try again.'; }
         if(btn){ btn.disabled=false; btn.textContent='Submit review'; }
