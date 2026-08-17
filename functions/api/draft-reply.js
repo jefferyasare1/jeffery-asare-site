@@ -18,7 +18,7 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
 
-    const { name, subject, message } = body;
+    const { name, subject, message, tone } = body;
     if (!name || !message) {
       return new Response(JSON.stringify({ error: 'Missing name or message' }), { status: 400, headers: corsHeaders });
     }
@@ -28,9 +28,16 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500, headers: corsHeaders });
     }
 
+    const toneGuides = {
+      warm: 'Write a warm, personal reply — genuine, specific to what they wrote, with a little personality. 2–4 sentences.',
+      professional: 'Write a clean, professional reply — measured, direct, and polite. 2–3 sentences. No small talk.',
+      brief: 'Write a very brief reply — 1–2 sentences max. Get straight to the point.'
+    };
+    const toneInstruction = toneGuides[tone] || toneGuides.warm;
+
     const prompt = `You are helping Jeffery Asare, a fine art photographer based in Ghana, reply to a message from a customer or inquirer on his website.
 
-Write a warm, professional reply from Jeff. Keep it concise (2-4 sentences), genuine, and specific to what they wrote. Don't be generic. Sign off as Jeff.
+${toneInstruction} Don't be generic. Sign off as Jeff.
 
 Customer name: ${name}
 Subject: ${subject || '(no subject)'}
