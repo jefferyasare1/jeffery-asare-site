@@ -638,8 +638,8 @@
       .mob-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;background:#fff;border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:200;}
       .mob-section-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:var(--sans);padding:0;}
       .mob-section-name{font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--ink);}
-      .mob-section-chevron{color:rgba(255,255,255,.5);font-size:15px;line-height:1;transition:transform .2s;}
-      .mob-section-btn.open .mob-section-chevron{transform:rotate(90deg);}
+      .mob-section-chevron{color:rgba(255,255,255,.55);display:flex;align-items:center;transition:transform .2s;}
+      .mob-section-btn.open .mob-section-chevron{transform:rotate(-90deg);}
       .mob-date{font-size:11px;color:var(--muted);}
       /* Full-screen nav overlay */
       .mob-nav-overlay{position:fixed;inset:0;background:var(--bg);z-index:600;padding:36px 28px;flex-direction:column;justify-content:center;}
@@ -879,8 +879,8 @@
 <!-- ── Mobile header ── -->
 <div class="mob-header" id="mobHeader">
   <button class="mob-section-btn" id="mobSectionBtn" onclick="mobNavOpen()">
+    <span class="mob-section-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg></span>
     <span class="mob-section-name" id="mobSectionName">Today</span>
-    <span class="mob-section-chevron" aria-hidden="true">˿</span>
   </button>
   <span class="mob-date" id="mobDate" style="display:none;"></span>
 </div>
