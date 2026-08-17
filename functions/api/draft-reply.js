@@ -29,22 +29,26 @@ export async function onRequestPost(context) {
     }
 
     const toneGuides = {
-      warm: 'Write a warm, personal reply — genuine, specific to what they wrote, with a little personality. 2–4 sentences.',
-      professional: 'Write a clean, professional reply — measured, direct, and polite. 2–3 sentences. No small talk.',
-      brief: 'Write a very brief reply — 1–2 sentences max. Get straight to the point.'
+      warm: 'Sound like a real person talking, not a brand. Warm, genuine, specific to what they said. Short sentences. A bit of personality. 2–3 sentences.',
+      professional: 'Clear and direct. Friendly but not chatty. Gets to the point without any filler. 2 sentences.',
+      brief: 'One or two sentences. Straight up. No fluff at all.'
     };
     const toneInstruction = toneGuides[tone] || toneGuides.warm;
 
-    const prompt = `You are helping Jeffery Asare, a fine art photographer based in Ghana, reply to a message from a customer or inquirer on his website.
+    const prompt = `You are writing a reply for Jeffery Asare — a fine art photographer based in Ghana. He runs a photography studio and sells prints.
 
-${toneInstruction} Don't be generic. Sign off as Jeff.
+His voice is: conversational, like texting a friend. Short sentences. No corporate speak. No "I hope this message finds you well." Just real, direct, warm.
 
-Customer name: ${name}
+${toneInstruction}
+
+Respond specifically to what they wrote — don't be generic. Sign off as Jeff (just "Jeff" or "– Jeff"). No subject line, no "Dear [name]," just start the reply.
+
+Their name: ${name}
 Subject: ${subject || '(no subject)'}
-Their message:
+What they wrote:
 ${message}
 
-Write only the reply body. Start directly — no "Dear [name]," opening. End with a natural closing like "Jeff" or "– Jeff". No subject line.`;
+Write only the reply text. Nothing else.`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
