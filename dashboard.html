@@ -3696,20 +3696,26 @@ function msgDraftReply(tone){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ key: 'jA9kx2vP7m', name: msg.name, subject: msg.subject, message: msg.message, tone: tone })
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r){
+    var status = r.status;
+    return r.text().then(function(text){
+      var d;
+      try { d = JSON.parse(text); } catch(e) { d = { error: 'HTTP '+status+(status===404?' — function not deployed yet':' error') }; }
+      return d;
+    });
+  })
   .then(function(d){
+    if(draftStatusEl){ draftStatusEl.textContent = ''; }
     if(d.draft){
       if(bodyEl){ bodyEl.value = d.draft; bodyEl.focus(); }
-      if(draftStatusEl){ draftStatusEl.textContent = ''; }
       if(statusEl){ statusEl.textContent = 'Draft ready — review before sending.'; statusEl.style.color = '#166534'; }
     } else {
-      if(draftStatusEl){ draftStatusEl.textContent = ''; }
       if(statusEl){ statusEl.textContent = d.error || 'Could not generate draft.'; statusEl.style.color = '#c00'; }
     }
   })
-  .catch(function(){
+  .catch(function(err){
     if(draftStatusEl){ draftStatusEl.textContent = ''; }
-    if(statusEl){ statusEl.textContent = 'Draft failed. Check connection.'; statusEl.style.color = '#c00'; }
+    if(statusEl){ statusEl.textContent = 'Network error — check your connection.'; statusEl.style.color = '#c00'; }
   });
 }
 
