@@ -812,12 +812,14 @@
     .filter-chip.active{background:linear-gradient(145deg,#1c1c1c,#3a3a3a);border:none;box-shadow:7px 7px 18px rgba(0,0,0,.58),-3px -3px 8px rgba(255,255,255,.10);color:#fff;}
 
     /* ── Black sidebar nav ── */
-    .dash-sidebar{background:#111;border-right:none;}
+    .dash-sidebar{background:#111;border-right:none;box-shadow:6px 0 24px rgba(0,0,0,.5);}
     .sn-logo img{filter:invert(1);opacity:.85;}
-    .sn-item{color:rgba(255,255,255,.42);}
-    .sn-item:hover{color:#fff;background:rgba(255,255,255,.08);}
-    .sn-item.active{color:#fff;font-weight:600;background:rgba(255,255,255,.11);}
-    .sn-badge{background:rgba(255,255,255,.18);color:#fff;}
+    .sn-item{color:rgba(255,255,255,.45);border-radius:50px;transition:all .15s;}
+    .sn-item:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.09);border-radius:50px;}
+    .sn-item.active{background:#fff;color:#111;font-weight:700;border-radius:50px;box-shadow:5px 5px 14px rgba(0,0,0,.85),-2px -2px 6px rgba(80,70,60,.15);}
+    .sn-item.active svg{color:#111;}
+    .sn-badge{background:rgba(255,255,255,.2);color:#fff;}
+    .sn-item.active .sn-badge{background:#111;color:#fff;}
     .sn-divider{background:rgba(255,255,255,.1);}
     .sn-bottom{border-top-color:rgba(255,255,255,.1);}
 
@@ -839,6 +841,33 @@
       background:#f0ece5;border:none;
       box-shadow:inset 2px 2px 5px rgba(160,148,135,.22),0 0 0 3px rgba(17,24,39,.12);
     }
+
+    /* ── Neumorphic tabs ── */
+    .tabs{border-bottom:none;padding-bottom:4px;gap:4px;background:transparent;align-items:stretch;}
+    .tab{border-bottom:none;margin-bottom:0;border-radius:var(--rc);background:linear-gradient(145deg,#f0ebe4,#d4cfc8);box-shadow:5px 5px 12px rgba(160,148,135,.58),-3px -3px 8px rgba(255,255,255,.88);font-weight:500;color:var(--muted);}
+    .tab:hover{background:linear-gradient(145deg,#f5f0e9,#dedad4);border:none;box-shadow:7px 7px 16px rgba(160,148,135,.65),-5px -5px 12px rgba(255,255,255,.92);color:var(--ink);}
+    .tab.active{background:linear-gradient(145deg,#1c1c1c,#3a3a3a);color:#fff;font-weight:700;border-bottom:none;box-shadow:6px 6px 14px rgba(0,0,0,.58),-2px -2px 6px rgba(255,255,255,.10);}
+    .tab-sep{display:none;}
+    .tab-group-label{display:none;}
+    /* Action sub-tabs */
+    .action-subtabs{border-bottom:none;gap:4px;margin-bottom:24px;}
+    .action-subtab{border-bottom:none;border-radius:var(--rc);background:linear-gradient(145deg,#f0ebe4,#d4cfc8);box-shadow:4px 4px 10px rgba(160,148,135,.55),-3px -3px 7px rgba(255,255,255,.86);font-weight:500;color:var(--muted);}
+    .action-subtab:hover{color:var(--ink);}
+    .action-subtab.active{background:linear-gradient(145deg,#1c1c1c,#3a3a3a);color:#fff;font-weight:600;border-bottom:none;box-shadow:5px 5px 12px rgba(0,0,0,.58),-2px -2px 5px rgba(255,255,255,.10);}
+    /* CMS sub-tabs */
+    .cms-subnav{border-bottom:none;gap:4px;margin-bottom:28px;}
+    .cms-tab{border-bottom:none;border-radius:var(--rc);background:linear-gradient(145deg,#f0ebe4,#d4cfc8);box-shadow:4px 4px 10px rgba(160,148,135,.55),-3px -3px 7px rgba(255,255,255,.86);font-weight:500;color:var(--muted);}
+    .cms-tab:hover{color:var(--ink);}
+    .cms-tab.active{background:linear-gradient(145deg,#1c1c1c,#3a3a3a);color:#fff;font-weight:600;border-bottom:none;box-shadow:5px 5px 12px rgba(0,0,0,.58),-2px -2px 5px rgba(255,255,255,.10);}
+    /* Portfolio sub-tabs */
+    .port-subtabs{border-bottom:none;gap:4px;}
+    .port-subtab{border-bottom:none;border-radius:var(--rc);background:linear-gradient(145deg,#f0ebe4,#d4cfc8);box-shadow:4px 4px 10px rgba(160,148,135,.55),-3px -3px 7px rgba(255,255,255,.86);font-weight:500;color:var(--muted);}
+    .port-subtab:hover{color:var(--ink);}
+    .port-subtab.active{background:linear-gradient(145deg,#1c1c1c,#3a3a3a);color:#fff;font-weight:600;border-bottom:none;box-shadow:5px 5px 12px rgba(0,0,0,.58),-2px -2px 5px rgba(255,255,255,.10);}
+    /* Buttons — bolder */
+    .btn-card{font-weight:700;letter-spacing:.03em;border-radius:50px;}
+    .btn-primary{font-weight:700;letter-spacing:.09em;}
+    .btn-sm{font-weight:700;}
 
     /* ── Mobile functional overrides ── */
 
@@ -864,9 +893,14 @@
       html,body{overscroll-behavior-y:none;}
       /* Mobile bottom nav — black */
       .dash-sidebar{background:#111;border-top-color:rgba(255,255,255,.08);}
-      .sn-item{color:rgba(255,255,255,.45);}
-      .sn-item.active{background:transparent;border-top-color:#fff;color:#fff;}
-      .sn-item:hover{background:rgba(255,255,255,.08);}
+      .sn-item{color:rgba(255,255,255,.45);border-radius:8px;border-top:none;}
+      .sn-item.active{background:#fff;color:#111;font-weight:700;border-radius:8px;border-top:none;box-shadow:0 -4px 12px rgba(0,0,0,.7),0 3px 8px rgba(0,0,0,.4);}
+      .sn-item.active svg{color:#111;}
+      .sn-item:hover{background:rgba(255,255,255,.09);}
+      /* Mobile full-screen nav items — dark neumorphic cards */
+      .mob-nav-item{background:linear-gradient(145deg,#1c1c1c,#080808);border:none;border-radius:12px;padding:14px 18px;margin-bottom:8px;box-shadow:6px 6px 14px rgba(0,0,0,.92),-3px -3px 8px rgba(60,55,50,.18);transition:all .12s;}
+      .mob-nav-item:active{background:linear-gradient(145deg,#0a0a0a,#1c1c1c);box-shadow:inset 4px 4px 10px rgba(0,0,0,.95),inset -2px -2px 5px rgba(60,55,50,.12);}
+      .mob-nav-overlay{background:#111;padding:36px 20px;}
     }
   </style>
 </head>
@@ -929,7 +963,7 @@
   </button>
   <button class="sn-item" id="sn-messages" onclick="switchTab('messages')">
     <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6l-4 3V5a1 1 0 0 1 1-1Z"/></svg>
-    Messages <span class="sn-badge" id="sn-messages-badge" style="display:none;"></span>
+    Messages <span class="sn-badge" id="sn-messages-badge" style="display:none;background:#dc2626;"></span>
   </button>
   <button class="sn-item" id="sn-reviews" onclick="switchTab('reviews')">
     <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="10 2 12.4 7.5 18.5 8.2 14 12.3 15.3 18.3 10 15.4 4.7 18.3 6 12.3 1.5 8.2 7.6 7.5"/></svg>
@@ -6159,6 +6193,8 @@ refreshReviewsBadge();
   // Re-sync when messages are fetched
   var _origMsgRender = msgRender;
   msgRender = function(){ _origMsgRender(); _syncAlerts(); };
+  // Pre-fetch messages in background so badge shows without visiting the tab
+  setTimeout(function(){ if(_msgData === null) msgInit(); }, 1800);
 
   // Close overlay on Escape
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') mobNavClose(); });
