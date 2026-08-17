@@ -524,10 +524,14 @@
     .nl-confirm-btns{display:flex;gap:10px;justify-content:center;}
     /* ── CMS secondary sidebar ── */
     .cms-layout{display:flex;gap:0;min-height:400px;}
-    .cms-sidenav{width:150px;flex-shrink:0;border-right:1px solid var(--rule);padding:0;}
-    .cms-sidenav-item{display:block;padding:8px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;border-left:2px solid transparent;transition:all .13s;white-space:nowrap;}
+    .cms-sidenav{width:168px;flex-shrink:0;border-right:1px solid var(--rule);padding:8px 0;}
+    .cms-sidenav-item{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;border-left:2px solid transparent;transition:all .13s;}
     .cms-sidenav-item:hover{color:var(--ink);}
     .cms-sidenav-item.active{color:var(--ink);font-weight:600;border-left-color:var(--ink);background:#f5f0ea;}
+    .cms-tile-icon{font-size:15px;flex-shrink:0;line-height:1;}
+    .cms-tile-name{flex:1;}
+    .cms-tile-count{font-size:10px;color:var(--muted);background:rgba(0,0,0,.07);padding:1px 6px;border-radius:50px;line-height:1.5;display:none;}
+    .cms-tile-count:not(:empty){display:inline;}
     .cms-content-area{flex:1;min-width:0;padding:0 0 0 28px;}
     .cms-ext-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;padding:7px 12px;background:#fff;border:1px solid var(--rule);border-radius:var(--rb);}
     .cms-ext-bar .ext-tools-label{margin-right:2px;}
@@ -564,9 +568,11 @@
       .tab-group-label{padding:0 10px 5px;font-size:8px;}
       /* ── CMS secondary nav → horizontal scroll tabs ── */
       .cms-layout{flex-direction:column;}
-      .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,1fr);overflow-x:visible;padding:0;gap:0;}
-      .cms-sidenav-item{width:auto;white-space:nowrap;padding:9px 4px;border-left:none;border-bottom:2px solid transparent;text-align:center;font-size:12px;min-width:0;}
-      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:var(--ink);background:transparent;}
+      .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;overflow-x:visible;}
+      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(60,52,44,.55);background:linear-gradient(145deg,#e2ddd4,#cec9c0);box-shadow:6px 6px 14px rgba(102,88,74,.42),-3px -3px 9px rgba(255,255,250,.88);min-width:0;white-space:normal;width:auto;}
+      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(26,20,14,.85);font-weight:600;}
+      .cms-sidenav-item .cms-tile-icon{font-size:22px;margin-bottom:5px;line-height:1;}
+      .cms-sidenav-item .cms-tile-count{font-size:9px;margin-top:3px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:50px;}
       .cms-content-area{padding:16px 0 0;}
       /* ── Grids → stack ── */
       .cms-grid2{grid-template-columns:1fr;}
@@ -668,9 +674,11 @@
       .tab{padding:8px 12px;font-size:12px;}
       .tab-group-label{padding:0 10px 5px;font-size:8px;}
       .cms-layout{flex-direction:column;}
-      .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,1fr);overflow-x:visible;padding:0;gap:0;}
-      .cms-sidenav-item{width:auto;white-space:nowrap;padding:9px 4px;border-left:none;border-bottom:2px solid transparent;text-align:center;font-size:12px;min-width:0;}
-      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:var(--ink);background:transparent;}
+      .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;overflow-x:visible;}
+      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(60,52,44,.55);background:linear-gradient(145deg,#e2ddd4,#cec9c0);box-shadow:6px 6px 14px rgba(102,88,74,.42),-3px -3px 9px rgba(255,255,250,.88);min-width:0;white-space:normal;width:auto;}
+      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(26,20,14,.85);font-weight:600;}
+      .cms-sidenav-item .cms-tile-icon{font-size:22px;margin-bottom:5px;line-height:1;}
+      .cms-sidenav-item .cms-tile-count{font-size:9px;margin-top:3px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:50px;}
       .cms-content-area{padding:16px 0 0;}
       .cms-grid2{grid-template-columns:1fr;}
       .nl-compose{grid-template-columns:1fr;}
@@ -822,6 +830,7 @@
 
     /* ── CMS sidenav active — pressed/inset ── */
     .cms-sidenav-item.active{background:linear-gradient(145deg,#b2ada5,#ccc7be);border-left-color:var(--ink);box-shadow:inset 3px 3px 8px rgba(102,88,74,.3),inset -2px -2px 5px rgba(255,255,250,.6);}
+    @media(max-width:700px){.cms-sidenav-item.active{border-left-color:transparent;box-shadow:inset 4px 4px 10px rgba(102,88,74,.35),inset -2px -2px 7px rgba(255,255,250,.75);}}
 
     /* ── Forms ── */
     input[type=text],input[type=email],input[type=url]{background:linear-gradient(145deg,#b8b3ab,#cac5bc);border-color:rgba(145,128,110,.28);}
@@ -1318,12 +1327,12 @@
     <div class="cms-layout">
       <!-- Vertical sidebar -->
       <nav class="cms-sidenav">
-        <button class="cms-sidenav-item active" data-cms="journal">Journal</button>
-        <button class="cms-sidenav-item" data-cms="prints">Prints</button>
-        <button class="cms-sidenav-item" data-cms="portfolio">Portfolio</button>
-        <button class="cms-sidenav-item" data-cms="site">Site Text</button>
-        <button class="cms-sidenav-item" data-cms="files">Files</button>
-        <button class="cms-sidenav-item" data-cms="smart">Smart</button>
+        <button class="cms-sidenav-item active" data-cms="journal"><span class="cms-tile-icon">📓</span><span class="cms-tile-name">Journal</span><span class="cms-tile-count" id="cnt-journal"></span></button>
+        <button class="cms-sidenav-item" data-cms="prints"><span class="cms-tile-icon">🖼️</span><span class="cms-tile-name">Prints</span><span class="cms-tile-count" id="cnt-prints"></span></button>
+        <button class="cms-sidenav-item" data-cms="portfolio"><span class="cms-tile-icon">🗂️</span><span class="cms-tile-name">Portfolio</span><span class="cms-tile-count" id="cnt-portfolio"></span></button>
+        <button class="cms-sidenav-item" data-cms="site"><span class="cms-tile-icon">✏️</span><span class="cms-tile-name">Site Text</span><span class="cms-tile-count" id="cnt-site"></span></button>
+        <button class="cms-sidenav-item" data-cms="files"><span class="cms-tile-icon">📁</span><span class="cms-tile-name">Files</span><span class="cms-tile-count" id="cnt-files"></span></button>
+        <button class="cms-sidenav-item" data-cms="smart"><span class="cms-tile-icon">⚡</span><span class="cms-tile-name">Smart</span><span class="cms-tile-count" id="cnt-smart"></span></button>
       </nav>
 
       <!-- Content area -->
@@ -4804,6 +4813,13 @@ function cmsLoad(which){
     });
 }
 
+// ── CMS tile count badges ────────────────────────────────────────
+function _setCmsCount(which, n){
+  var el=document.getElementById('cnt-'+which);
+  if(!el) return;
+  el.textContent = n > 0 ? n : '';
+}
+
 // ── Journal ─────────────────────────────────────────────────────
 var _journalStatusCache={};
 
@@ -4811,6 +4827,7 @@ function cmsRenderJournal(){
   var el=document.getElementById('cms-journal-list'); if(!el) return;
   var allPosts=(_cmsData.journal&&_cmsData.journal.posts)||[];
   var posts=allPosts.map(function(p,i){return{p:p,origIdx:i};}).filter(function(o){return !o.p.status||o.p.status==='live';});
+  _setCmsCount('journal', posts.length);
   if(!posts.length){ el.innerHTML='<div class="empty-state"><p>No posts yet. Add one above.</p></div>'; return; }
   el.innerHTML=posts.map(function(o,i){
     var p=o.p,origIdx=o.origIdx;
@@ -4952,6 +4969,7 @@ function cmsDeleteJournal(idx){
 function cmsRenderPrints(){
   var el=document.getElementById('cms-prints-list'); if(!el) return;
   var prints=(_cmsData.prints&&_cmsData.prints.prints)||[];
+  _setCmsCount('prints', prints.length);
   if(!prints.length){el.innerHTML='<div class="empty-state"><p>No prints yet. Add one above.</p></div>';return;}
   el.innerHTML=prints.map(function(p,i){
     return '<div class="cms-item">'
