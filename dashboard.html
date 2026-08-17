@@ -3765,6 +3765,7 @@ function msgRender() {
 }
 
 var _msgOpenId = null;
+var _msgAutoDraft = false;
 function msgOpen(id) {
   var msg = (_msgData||[]).find(function(m){ return m.id === id; });
   if (!msg) return;
@@ -3802,8 +3803,9 @@ function msgOpen(id) {
   }
 
   overlay.style.display = 'flex';
-  // Auto-generate a warm draft for messages not yet replied to
+  // Auto-generate a warm draft for messages not yet replied to (fail silently)
   if (!msg.replied) {
+    _msgAutoDraft = true;
     msgDraftReply('warm');
   } else {
     bodyEl.focus();
@@ -3884,12 +3886,16 @@ function msgDraftReply(tone){
       if(bodyEl){ bodyEl.value = d.draft; bodyEl.focus(); }
       if(statusEl){ statusEl.textContent = 'Draft ready — review before sending.'; statusEl.style.color = '#166534'; }
     } else {
-      if(statusEl){ statusEl.textContent = d.error || 'Could not generate draft.'; statusEl.style.color = '#c00'; }
+      // Only show error if user manually clicked a tone button, not on auto-load
+      if(!_msgAutoDraft && statusEl){ statusEl.textContent = d.error || 'Could not generate draft.'; statusEl.style.color = '#c00'; }
     }
+    _msgAutoDraft = false;
   })
   .catch(function(err){
     if(draftStatusEl){ draftStatusEl.textContent = ''; }
-    if(statusEl){ statusEl.textContent = 'Network error — check your connection.'; statusEl.style.color = '#c00'; }
+    // Fail silently on auto-draft; only show error on manual click
+    if(!_msgAutoDraft && statusEl){ statusEl.textContent = 'Network error — check your connection.'; statusEl.style.color = '#c00'; }
+    _msgAutoDraft = false;
   });
 }
 
