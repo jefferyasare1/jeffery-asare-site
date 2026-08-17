@@ -35,10 +35,10 @@
     #pw-gate.unlocking .pw-box{transform:translateY(-10px) scale(1.02);opacity:0;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --ink:#111827;--bg:#faf7f2;--warm:#faf7f2;--muted:#6b7280;--rule:#ede8e0;
-      --card-shadow:0 1px 4px rgba(180,160,140,.18),0 1px 2px rgba(180,160,140,.12);
-      --card-shadow-hover:0 4px 16px rgba(180,160,140,.28),0 2px 6px rgba(180,160,140,.18);
-      --rc:10px;--rb:6px;
+      --ink:#111827;--bg:#e4e1dd;--warm:#e4e1dd;--muted:#7a7570;--rule:rgba(180,168,155,.3);
+      --card-shadow:8px 8px 20px rgba(152,138,125,.38),-5px -5px 14px rgba(255,255,252,.88);
+      --card-shadow-hover:10px 10px 26px rgba(152,138,125,.45),-6px -6px 18px rgba(255,255,252,.92);
+      --rc:12px;--rb:8px;
       --green:#166534;--green-bg:#dcfce7;--green-border:#bbf7d0;
       --amber:#92400e;--amber-bg:#fef9c3;--amber-border:#fde68a;
       --red:#991b1b;--red-bg:#fee2e2;--red-border:#fecaca;
@@ -528,7 +528,7 @@
     .cms-sidenav-item{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:var(--sans);width:100%;text-align:left;border-left:2px solid transparent;transition:all .13s;}
     .cms-sidenav-item:hover{color:var(--ink);}
     .cms-sidenav-item.active{color:var(--ink);font-weight:600;border-left-color:var(--ink);background:#f5f0ea;}
-    .cms-tile-icon{font-size:15px;flex-shrink:0;line-height:1;}
+    .cms-tile-icon{width:15px;height:15px;flex-shrink:0;display:block;}
     .cms-tile-name{flex:1;}
     .cms-tile-count{font-size:10px;color:var(--muted);background:rgba(0,0,0,.07);padding:1px 6px;border-radius:50px;line-height:1.5;display:none;}
     .cms-tile-count:not(:empty){display:inline;}
@@ -569,9 +569,9 @@
       /* ── CMS secondary nav → horizontal scroll tabs ── */
       .cms-layout{flex-direction:column;}
       .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;overflow-x:visible;}
-      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(60,52,44,.55);background:linear-gradient(145deg,#e2ddd4,#cec9c0);box-shadow:6px 6px 14px rgba(102,88,74,.42),-3px -3px 9px rgba(255,255,250,.88);min-width:0;white-space:normal;width:auto;}
-      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(26,20,14,.85);font-weight:600;}
-      .cms-sidenav-item .cms-tile-icon{font-size:22px;margin-bottom:5px;line-height:1;}
+      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(50,45,40,.55);background:linear-gradient(145deg,#edeae6,#dad7d3);box-shadow:6px 6px 16px rgba(152,138,125,.38),-3px -3px 10px rgba(255,255,252,.88);min-width:0;white-space:normal;width:auto;}
+      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(17,24,39,.9);font-weight:600;background:linear-gradient(145deg,#d5d2ce,#dedad6);box-shadow:inset 4px 4px 10px rgba(152,138,125,.28),inset -2px -2px 6px rgba(255,255,252,.72);}
+      .cms-sidenav-item .cms-tile-icon{width:22px;height:22px;margin-bottom:6px;display:block;}
       .cms-sidenav-item .cms-tile-count{font-size:9px;margin-top:3px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:50px;}
       .cms-content-area{padding:16px 0 0;}
       /* ── Grids → stack ── */
@@ -675,9 +675,9 @@
       .tab-group-label{padding:0 10px 5px;font-size:8px;}
       .cms-layout{flex-direction:column;}
       .cms-sidenav{width:100%;border-right:none;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;overflow-x:visible;}
-      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(60,52,44,.55);background:linear-gradient(145deg,#e2ddd4,#cec9c0);box-shadow:6px 6px 14px rgba(102,88,74,.42),-3px -3px 9px rgba(255,255,250,.88);min-width:0;white-space:normal;width:auto;}
-      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(26,20,14,.85);font-weight:600;}
-      .cms-sidenav-item .cms-tile-icon{font-size:22px;margin-bottom:5px;line-height:1;}
+      .cms-sidenav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px 10px;border:none;border-radius:10px;text-align:center;font-size:11px;font-weight:500;color:rgba(50,45,40,.55);background:linear-gradient(145deg,#edeae6,#dad7d3);box-shadow:6px 6px 16px rgba(152,138,125,.38),-3px -3px 10px rgba(255,255,252,.88);min-width:0;white-space:normal;width:auto;}
+      .cms-sidenav-item.active{border-left-color:transparent;border-bottom-color:transparent;color:rgba(17,24,39,.9);font-weight:600;background:linear-gradient(145deg,#d5d2ce,#dedad6);box-shadow:inset 4px 4px 10px rgba(152,138,125,.28),inset -2px -2px 6px rgba(255,255,252,.72);}
+      .cms-sidenav-item .cms-tile-icon{width:22px;height:22px;margin-bottom:6px;display:block;}
       .cms-sidenav-item .cms-tile-count{font-size:9px;margin-top:3px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:50px;}
       .cms-content-area{padding:16px 0 0;}
       .cms-grid2{grid-template-columns:1fr;}
@@ -747,8 +747,71 @@
     .client-score-vip{background:#fef9c3;color:#854d0e;}
 
     /* ══════════════════════════════════════════
-       JEMA CLEAN THEME
+       JEMA NEUMORPHIC THEME
     ══════════════════════════════════════════ */
+    body{background:#e4e1dd;}
+    #pw-gate{background:#e4e1dd;}
+
+    /* ── Raised cards ── */
+    .order-card,.aq-card,.nl-stat,.client-card,.wf-step,.cms-item,
+    #orders-sidebar,#smartDigest,.modal,
+    #dashModalBox,#dashConfirmBox,#dashInputBox,.cms-modal-box{
+      background:linear-gradient(145deg,#edeae6,#dad7d3);
+      border:none;
+      box-shadow:var(--card-shadow);
+    }
+    .order-card:hover,.cms-item:hover{border:none;box-shadow:var(--card-shadow-hover);}
+    .sidebar-hd,.card-detail,.card-inline,.nl-preview-frame{
+      background:linear-gradient(145deg,#d8d5d1,#e0ddd9);
+      border-color:rgba(180,168,155,.25);
+    }
+
+    /* ── Series selector ── */
+    .series-selector{background:linear-gradient(145deg,#d5d2ce,#dedad6);box-shadow:inset 5px 5px 12px rgba(152,138,125,.3),inset -3px -3px 8px rgba(255,255,252,.75);border-radius:18px;}
+    .series-btn.active{background:linear-gradient(145deg,#edeae6,#dad7d3);box-shadow:5px 5px 12px rgba(152,138,125,.32),-3px -3px 8px rgba(255,255,252,.78);}
+
+    /* ── Buttons ── */
+    .btn-primary,.btn-add,.btn-sm{background:linear-gradient(145deg,#1c1c1c,#363636);border:none;box-shadow:5px 5px 14px rgba(0,0,0,.38),-2px -2px 6px rgba(255,255,255,.08);border-radius:50px;}
+    .btn-primary:hover,.btn-add:hover,.btn-sm:hover{background:linear-gradient(145deg,#262626,#404040);border:none;}
+    .btn-card{background:linear-gradient(145deg,#e0ddd9,#d0cdc9);border:none;box-shadow:4px 4px 10px rgba(152,138,125,.28),-2px -2px 7px rgba(255,255,252,.75);}
+    .btn-card:hover{background:linear-gradient(145deg,#e8e5e1,#d8d5d1);border:none;}
+    .btn-card.primary{background:linear-gradient(145deg,#1c1c1c,#363636);border:none;box-shadow:5px 5px 14px rgba(0,0,0,.38);}
+    .btn-card.primary:hover{background:linear-gradient(145deg,#262626,#404040);border:none;}
+    .btn-card.danger:hover{border:none;box-shadow:0 0 0 2px var(--red);}
+    #dashModalOk,#dashConfirmOk,#dashInputOk{background:linear-gradient(145deg,#1c1c1c,#363636);border:none;border-radius:50px;}
+    .cms-ai-apply{background:linear-gradient(145deg,#1c1c1c,#363636);border-radius:50px;}
+    .btn-sync,.btn-upload{background:linear-gradient(145deg,#e0ddd9,#d0cdc9);border:none;box-shadow:4px 4px 10px rgba(152,138,125,.24),-2px -2px 7px rgba(255,255,252,.7);}
+    .btn-sync:hover,.btn-upload:hover{background:linear-gradient(145deg,#e8e5e1,#d8d5d1);border:none;}
+    .btn-reorder{background:linear-gradient(145deg,#e0ddd9,#d0cdc9);border:none;box-shadow:3px 3px 7px rgba(152,138,125,.22),-1px -1px 5px rgba(255,255,252,.65);}
+
+    /* ── Filter chips ── */
+    .filter-chip{background:linear-gradient(145deg,#e0ddd9,#d0cdc9);border:none;box-shadow:4px 4px 10px rgba(152,138,125,.24),-2px -2px 7px rgba(255,255,252,.7);}
+    .filter-chip:hover{border:none;color:var(--ink);}
+    .filter-chip.active{background:linear-gradient(145deg,#1c1c1c,#363636);border:none;box-shadow:5px 5px 12px rgba(0,0,0,.35);color:#fff;}
+
+    /* ── Ext bar ── */
+    .ext-tools-bar{background:linear-gradient(145deg,#edeae6,#dad7d3);border:none;box-shadow:var(--card-shadow);}
+    .ext-tool-link{background:linear-gradient(145deg,#e0ddd9,#d0cdc9);border:none;}
+    .ext-tool-link:hover{background:linear-gradient(145deg,#e8e5e1,#d8d5d1);border:none;}
+
+    /* ── CMS sidenav desktop active ── */
+    .cms-sidenav-item.active{background:linear-gradient(145deg,#d5d2ce,#dedad6);border-left-color:var(--ink);box-shadow:inset 3px 3px 8px rgba(152,138,125,.28),inset -2px -2px 5px rgba(255,255,252,.65);}
+
+    /* ── Inputs ── */
+    input[type=text],input[type=email],input[type=url],
+    .inline-field,.search-input,.aq-tracking,
+    .cms-field input[type=text],.cms-field input[type=date],.cms-field textarea,
+    .nl-field input,.nl-field textarea,#dashInputField{
+      background:linear-gradient(145deg,#d8d5d1,#e2dfe0);
+      border:1.5px solid rgba(180,168,155,.28);
+      border-radius:var(--rb);
+      box-shadow:inset 4px 4px 10px rgba(152,138,125,.22),inset -2px -2px 7px rgba(255,255,252,.7);
+    }
+    input[type=text]:focus,input[type=email]:focus,input[type=url]:focus,
+    .inline-field:focus,.search-input:focus,#dashInputField:focus{
+      background:#fff;border-color:#111;
+      box-shadow:inset 1px 1px 3px rgba(152,138,125,.1),0 0 0 3px rgba(17,24,39,.1);
+    }
 
     /* ── Mobile functional overrides ── */
 
@@ -1166,12 +1229,12 @@
     <div class="cms-layout">
       <!-- Vertical sidebar -->
       <nav class="cms-sidenav">
-        <button class="cms-sidenav-item active" data-cms="journal"><span class="cms-tile-icon">📓</span><span class="cms-tile-name">Journal</span><span class="cms-tile-count" id="cnt-journal"></span></button>
-        <button class="cms-sidenav-item" data-cms="prints"><span class="cms-tile-icon">🖼️</span><span class="cms-tile-name">Prints</span><span class="cms-tile-count" id="cnt-prints"></span></button>
-        <button class="cms-sidenav-item" data-cms="portfolio"><span class="cms-tile-icon">🗂️</span><span class="cms-tile-name">Portfolio</span><span class="cms-tile-count" id="cnt-portfolio"></span></button>
-        <button class="cms-sidenav-item" data-cms="site"><span class="cms-tile-icon">✏️</span><span class="cms-tile-name">Site Text</span><span class="cms-tile-count" id="cnt-site"></span></button>
-        <button class="cms-sidenav-item" data-cms="files"><span class="cms-tile-icon">📁</span><span class="cms-tile-name">Files</span><span class="cms-tile-count" id="cnt-files"></span></button>
-        <button class="cms-sidenav-item" data-cms="smart"><span class="cms-tile-icon">⚡</span><span class="cms-tile-name">Smart</span><span class="cms-tile-count" id="cnt-smart"></span></button>
+        <button class="cms-sidenav-item active" data-cms="journal"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><span class="cms-tile-name">Journal</span><span class="cms-tile-count" id="cnt-journal"></span></button>
+        <button class="cms-sidenav-item" data-cms="prints"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span><span class="cms-tile-name">Prints</span><span class="cms-tile-count" id="cnt-prints"></span></button>
+        <button class="cms-sidenav-item" data-cms="portfolio"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span class="cms-tile-name">Portfolio</span><span class="cms-tile-count" id="cnt-portfolio"></span></button>
+        <button class="cms-sidenav-item" data-cms="site"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span><span class="cms-tile-name">Site Text</span><span class="cms-tile-count" id="cnt-site"></span></button>
+        <button class="cms-sidenav-item" data-cms="files"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span><span class="cms-tile-name">Files</span><span class="cms-tile-count" id="cnt-files"></span></button>
+        <button class="cms-sidenav-item" data-cms="smart"><span class="cms-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="cms-tile-name">Smart</span><span class="cms-tile-count" id="cnt-smart"></span></button>
       </nav>
 
       <!-- Content area -->
