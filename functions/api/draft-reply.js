@@ -29,7 +29,7 @@ export async function onRequestPost(context) {
     }
 
     const toneGuides = {
-      warm: 'Sound like a real person talking, not a brand. Warm, genuine, specific to what they said. Short sentences. A bit of personality. 2–3 sentences.',
+      warm: 'Sound like a real person talking, not a brand. Warm, genuine, specific to what they said. Short sentences. A bit of personality. 2-3 sentences.',
       professional: 'Clear and direct. Friendly but not chatty. Gets to the point without any filler. 2 sentences.',
       brief: 'One or two sentences. Straight up. No fluff at all.'
     };
@@ -41,7 +41,7 @@ His voice is: conversational, like texting a friend. Short sentences. No corpora
 
 ${toneInstruction}
 
-Respond specifically to what they wrote — don't be generic. Sign off as Jeff (just "Jeff" or "– Jeff"). No subject line, no "Dear [name]," just start the reply.
+Respond specifically to what they wrote — don't be generic. Sign off as Jeff (just "Jeff" or "- Jeff"). No subject line, no "Dear [name]," just start the reply.
 
 Their name: ${name}
 Subject: ${subject || '(no subject)'}
@@ -50,18 +50,28 @@ ${message}
 
 Write only the reply text. Nothing else.`;
 
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'grok-3-mini',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    // Abort if xAI takes longer than 20 seconds — prevents Cloudflare HTML 502
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+
+    let res;
+    try {
+      res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'grok-3-mini',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!res.ok) {
       const errText = await res.text();
@@ -79,7 +89,10 @@ Write only the reply text. Nothing else.`;
     return new Response(JSON.stringify({ draft }), { headers: corsHeaders });
 
   } catch (e) {
-    console.error('draft-reply error:', e);
+    console.error('draft-reply error:', e.name, e.message);
+    if (e.name === 'AbortError') {
+      return new Response(JSON.stringify({ error: 'AI service timed out' }), { status: 504, headers: corsHeaders });
+    }
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: corsHeaders });
   }
 }
