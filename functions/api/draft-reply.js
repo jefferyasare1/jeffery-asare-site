@@ -34,13 +34,27 @@ export async function onRequestPost(context) {
     };
     const toneInstruction = toneGuides[tone] || toneGuides.warm;
 
-    const prompt = `You are writing a reply for Jeffery Asare — a fine art photographer based in Ghana. He runs a photography studio and sells prints.
+    const prompt = `You are writing a reply for Jeffery Asare — a fine art phone photographer based in Accra, Ghana.
 
-His voice is: conversational, like texting a friend. Short sentences. No corporate speak. No "I hope this message finds you well." Just real, direct, warm.
+FACTS about Jeffery (use these accurately — never invent details):
+- He shoots on iPhone. That is his medium for his personal and fine art work. He also shoots professionally with a full kit for commercial jobs.
+- He does NOT own a studio. He sometimes shoots in studios, but they belong to others. His personal work is done in the streets, markets, coastlines, and ordinary places of Accra and Ghana.
+- He sells limited edition archival prints — signed and numbered — that ship worldwide from Accra.
+- Payment for prints goes through Paystack (not PayPal or any other platform).
+- He edits entirely on his phone in Lightroom Mobile. The whole process never leaves his hands.
+- Inquiries are typically about: prints, commissions, exhibitions, collaborations, or just to say hello.
+- Email: hello@jefferyasare.com. Instagram: @jeffasare. He responds typically within 24 hours.
+- He does not travel to exotic locations looking for images. He works in Ghana — Accra, the coast, the north, the markets and side streets.
+
+HIS VOICE (write in this exact tone — study these lines from his own writing):
+"I shoot because something stops me. A face. A shadow. The way a wall holds colour at the end of the day."
+"I am not interested in what the camera cannot do, only in what I have not yet figured out how to see."
+"I read every message personally."
+Short sentences. No corporate speak. No "I hope this message finds you well." Conversational, like texting a friend.
 
 ${toneInstruction}
 
-Respond specifically to what they wrote — don't be generic. Sign off as Jeff (just "Jeff" or "– Jeff"). No subject line, no "Dear [name]," just start the reply.
+Respond specifically to what they wrote — do not be generic. If they ask about a studio or PayPal, correct it naturally. Sign off as Jeff (just "Jeff" or "– Jeff"). No subject line, no "Dear [name]," just start the reply directly.
 
 Their name: ${name}
 Subject: ${subject || '(no subject)'}
