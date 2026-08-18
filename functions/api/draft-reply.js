@@ -1,5 +1,5 @@
 // Cloudflare Pages Function — POST /api/draft-reply
-// Generates a draft reply to a contact form message using the xAI (Grok) API.
+// Generates a draft reply using the xAI (Grok) API.
 // Requires XAI_API_KEY secret set in Cloudflare Pages dashboard.
 
 export async function onRequestPost(context) {
@@ -13,7 +13,6 @@ export async function onRequestPost(context) {
   try {
     const body = await request.json();
 
-    // Auth check
     if (body.key !== 'jA9kx2vP7m') {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
@@ -35,30 +34,27 @@ export async function onRequestPost(context) {
     };
     const toneInstruction = toneGuides[tone] || toneGuides.warm;
 
-    const prompt = `You are writing a reply for Jeffery Asare — a fine art photographer based in Ghana. He runs a photography studio and sells prints.
+    const prompt = `You are writing a reply for Jeffery Asare, a fine art photographer based in Ghana who runs a studio and sells prints.
 
-His voice is: conversational, like texting a friend. Short sentences. No corporate speak. No "I hope this message finds you well." Just real, direct, warm.
+His voice: conversational, like texting a friend. Short sentences. No corporate speak. No "I hope this message finds you well." Just real, direct, warm.
 
 ${toneInstruction}
 
-Respond specifically to what they wrote — don't be generic. Sign off as Jeff (just "Jeff" or "- Jeff"). No subject line, no "Dear [name]," just start the reply.
+Respond specifically to what they wrote. Sign off as "- Jeff". No subject line, no greeting, just start the reply.
 
 Their name: ${name}
 Subject: ${subject || '(no subject)'}
-What they wrote:
+Their message:
 ${message}
 
 Write only the reply text. Nothing else.`;
 
-    // Abort if xAI takes longer than 20 seconds — prevents Cloudflare HTML 502
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20000);
-
+    // Use AbortSignal.timeout — the correct way to timeout fetch in Cloudflare Workers
     let res;
     try {
       res = await fetch('https://api.x.ai/v1/chat/completions', {
         method: 'POST',
-        signal: controller.signal,
+        signal: AbortSignal.timeout(25000),
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
@@ -69,8 +65,10 @@ Write only the reply text. Nothing else.`;
           messages: [{ role: 'user', content: prompt }]
         })
       });
-    } finally {
-      clearTimeout(timer);
+    } catch (fetchErr) {
+      console.error('xAI fetch error:', fetchErr.name, fetchErr.message);
+      const isTimeout = fetchErr.name === 'TimeoutError' || fetchErr.name === 'AbortError';
+      return new Response(JSON.stringify({ error: isTimeout ? 'AI service timed out' : 'AI service unreachable' }), { status: 502, headers: corsHeaders });
     }
 
     if (!res.ok) {
@@ -90,9 +88,6 @@ Write only the reply text. Nothing else.`;
 
   } catch (e) {
     console.error('draft-reply error:', e.name, e.message);
-    if (e.name === 'AbortError') {
-      return new Response(JSON.stringify({ error: 'AI service timed out' }), { status: 504, headers: corsHeaders });
-    }
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: corsHeaders });
   }
 }
