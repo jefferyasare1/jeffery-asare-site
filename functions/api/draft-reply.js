@@ -49,7 +49,7 @@ ${message}
 
 Write only the reply text. Nothing else.`;
 
-    const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    const response = await env.AI.run('@cf/meta/llama-3.2-3b-instruct', {
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 300
     });
