@@ -91,10 +91,7 @@ export async function onRequestGet(context) {
 
   try {
     const img = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
-      prompt,
-      num_steps: 8,
-      width: 1024,
-      height: 576
+      prompt
     });
 
     // Workers AI returns a ReadableStream — read to bytes then encode
