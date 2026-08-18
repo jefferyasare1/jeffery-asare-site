@@ -94,26 +94,48 @@ export async function onRequestGet(context) {
       prompt
     });
 
-    // Workers AI returns a ReadableStream — read to bytes then encode
-    const reader = img.getReader();
-    const chunks = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-    const total = chunks.reduce((s, c) => s + c.length, 0);
-    const bytes = new Uint8Array(total);
-    let off = 0;
-    for (const c of chunks) { bytes.set(c, off); off += c.length; }
+    let b64 = '';
 
-    // Uint8Array → base64
-    let bin = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      bin += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    // Case 1: model returned { image: base64string }
+    if (img && typeof img.image === 'string') {
+      b64 = img.image;
+
+    // Case 2: ReadableStream
+    } else if (img && typeof img.getReader === 'function') {
+      const reader = img.getReader();
+      const chunks = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      const total = chunks.reduce((s, c) => s + c.length, 0);
+      const bytes = new Uint8Array(total);
+      let off = 0;
+      for (const c of chunks) { bytes.set(c, off); off += c.length; }
+      let bin = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        bin += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      b64 = btoa(bin);
+
+    // Case 3: ArrayBuffer
+    } else if (img instanceof ArrayBuffer || (img && img.byteLength !== undefined)) {
+      const bytes = new Uint8Array(img);
+      let bin = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        bin += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      b64 = btoa(bin);
+
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Unknown FLUX response type', type: typeof img, keys: img ? Object.keys(img) : [] }),
+        { status: 500, headers }
+      );
     }
-    const b64 = btoa(bin);
 
     return new Response(
       JSON.stringify({ image: b64, mimeType: 'image/png', room, source: 'flux-1-schnell' }),
