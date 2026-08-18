@@ -1,6 +1,6 @@
 // Cloudflare Pages Function — POST /api/draft-reply
-// Generates a draft reply to a contact form message using the Anthropic API.
-// Requires ANTHROPIC_API_KEY secret set in Cloudflare Pages dashboard.
+// Generates a draft reply to a contact form message using the xAI (Grok) API.
+// Requires XAI_API_KEY secret set in Cloudflare Pages dashboard.
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -23,7 +23,7 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Missing name or message' }), { status: 400, headers: corsHeaders });
     }
 
-    const apiKey = env.ANTHROPIC_API_KEY;
+    const apiKey = env.XAI_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500, headers: corsHeaders });
     }
@@ -50,15 +50,14 @@ ${message}
 
 Write only the reply text. Nothing else.`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
+        model: 'grok-3-mini',
         max_tokens: 300,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -66,12 +65,12 @@ Write only the reply text. Nothing else.`;
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error('Anthropic API error:', errText);
-      return new Response(JSON.stringify({ error: 'AI service error' }), { status: 502, headers: corsHeaders });
+      console.error('xAI API error:', res.status, errText);
+      return new Response(JSON.stringify({ error: 'AI service error', detail: res.status }), { status: 502, headers: corsHeaders });
     }
 
     const data = await res.json();
-    const draft = data?.content?.[0]?.text?.trim() || '';
+    const draft = data?.choices?.[0]?.message?.content?.trim() || '';
 
     if (!draft) {
       return new Response(JSON.stringify({ error: 'No draft generated' }), { status: 500, headers: corsHeaders });
