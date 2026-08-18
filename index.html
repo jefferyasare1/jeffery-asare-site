@@ -1237,11 +1237,11 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="review-field">
         <label>Your rating</label>
         <div class="star-picker" id="starPicker">
-          <button type="button" data-star="1" aria-label="1 star">Ã¢ÂÂ</button>
-          <button type="button" data-star="2" aria-label="2 stars">Ã¢ÂÂ</button>
-          <button type="button" data-star="3" aria-label="3 stars">Ã¢ÂÂ</button>
-          <button type="button" data-star="4" aria-label="4 stars">Ã¢ÂÂ</button>
-          <button type="button" data-star="5" aria-label="5 stars">Ã¢ÂÂ</button>
+          <button type="button" data-star="1" aria-label="1 star">&#9733;</button>
+          <button type="button" data-star="2" aria-label="2 stars">&#9733;</button>
+          <button type="button" data-star="3" aria-label="3 stars">&#9733;</button>
+          <button type="button" data-star="4" aria-label="4 stars">&#9733;</button>
+          <button type="button" data-star="5" aria-label="5 stars">&#9733;</button>
         </div>
       </div>
       <div class="review-field"><label>Your name</label><input type="text" id="reviewName" placeholder="e.g. Ama Owusu" maxlength="80"></div>
@@ -1424,7 +1424,7 @@ var FORMSPREE_URL = "https://formspree.io/f/xwvdwaal";
 
 // Ã¢ÂÂÃ¢ÂÂ WHATSAPP NUMBER Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // Replace with your actual WhatsApp number (country code + number, no + or spaces)
-// Example: Ghana number +233 24 123 4567 Ã¢ÂÂ '233241234567'
+// Example: Ghana number +233 24 123 4567 &rarr; '233241234567'
 var WA_NUMBER = '233501361192';
 // Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 
@@ -1856,7 +1856,7 @@ function renderShop(page){
   var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img && (p.img.indexOf('/')==0||p.img.indexOf('http')==0); });
   if(!allVisible.length){
     list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
-      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">Ã¢ÂÂ»</div>'
+      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">&#9723;</div>'
       +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
       +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
       +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;ÃÂ·&nbsp; or get in touch</p>'
@@ -1875,7 +1875,7 @@ function renderShop(page){
     var basePrice=p.sizes[0].price;
     var priceText=CURRENCY==='USD'
       ? "From $"+Math.round(basePrice*USD_RATE)
-      : "From GHÃ¢ÂÂµ "+Number(basePrice).toLocaleString();
+      : "From GH&#8373; "+Number(basePrice).toLocaleString();
     var actionBtn=p.soldOut
       ? "<span class=\"shop-sold-badge\">Sold out</span>"
       : "<button class=\"shop-view-btn\">View print &#8594;</button>";
@@ -1918,7 +1918,7 @@ function renderShop(page){
     pag.style.gridColumn="1 / -1";
     var prevBtn=document.createElement("button");
     prevBtn.className="shop-page-btn";
-    prevBtn.textContent="Ã¢ÂÂ Previous";
+    prevBtn.textContent="&larr; Previous";
     prevBtn.disabled=(page===0);
     prevBtn.addEventListener("click",function(){ renderShop(page-1); window.scrollTo(0,0); });
     var info=document.createElement("span");
@@ -1926,7 +1926,7 @@ function renderShop(page){
     info.textContent="Page "+(page+1)+" of "+totalPages;
     var nextBtn=document.createElement("button");
     nextBtn.className="shop-page-btn";
-    nextBtn.textContent="Next Ã¢ÂÂÃÂÃÂ";
+    nextBtn.textContent="Next &rarr;ÃÂÃÂ";
     nextBtn.disabled=(page>=totalPages-1);
     nextBtn.addEventListener("click",function(){ renderShop(page+1); window.scrollTo(0,0); });
     pag.appendChild(prevBtn);
@@ -1969,7 +1969,7 @@ if(cForm){
         } else { if(err) err.style.display="block"; }
       })
       .catch(function(){ if(err) err.style.display="block"; })
-      .finally(function(){ if(btn){ btn.textContent="Send message Ã¢ÂÂÃÂÃÂ"; btn.disabled=false; } });
+      .finally(function(){ if(btn){ btn.textContent="Send message &rarr;ÃÂÃÂ"; btn.disabled=false; } });
   });
 }
 
@@ -2301,7 +2301,7 @@ document.querySelectorAll(".newsletter-btn").forEach(function(btn){
     }).then(function(r){ return r.json(); }).then(function(data){
       if(data.ok){
         inp.style.display="none";
-        btn.textContent="You're on the list Ã¢ÂÂ";
+        btn.textContent="You're on the list &#10003;";
         btn.style.background="transparent";
         btn.style.color="rgba(255,255,255,.7)";
         btn.style.cursor="default";
@@ -2346,7 +2346,7 @@ function _buildReviewCards(reviews){
     el.innerHTML = '<div class="reviews-empty"><p>No reviews yet Ã¢ÂÂ be the first to share your experience.</p></div>';
     return;
   }
-  function stars(n){ return 'Ã¢ÂÂ'.repeat(n)+'Ã¢ÂÂ'.repeat(5-n); }
+  function stars(n){ return '&#9733;'.repeat(n)+'&#9734;'.repeat(5-n); }
   function fmtDate(d){ try{ return new Date(d).toLocaleDateString('en-GB',{year:'numeric',month:'long'}); }catch(e){ return d||''; } }
   el.innerHTML = reviews.slice().reverse().map(function(r){
     return '<div class="review-card">'
@@ -2399,7 +2399,7 @@ function submitReview(){
     .then(function(d){
       if(d.ok){
         if(status){ status.className='review-form-status ok'; status.textContent='Received. Every word means something Ã¢ÂÂ thank you for taking the time.'; }
-        if(btn){ btn.textContent='Submitted Ã¢ÂÂ'; }
+        if(btn){ btn.textContent='Submitted &#10003;'; }
         document.getElementById('reviewName').value='';
         document.getElementById('reviewMsg').value='';
         _selectedRating=5; _initStarPicker();
@@ -2734,7 +2734,7 @@ function openPrintDetail(print){
       if(!code){pdDeliveryNote.innerHTML='';return;}
       var country=COUNTRIES.find(function(c){return c.code===code;})||{time:'12Ã¢ÂÂ20 business days',region:'row'};
       if(country.region==='gh'){
-        var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GHÃ¢ÂÂµ '+DELIVERY_FEE_GHC.toLocaleString();
+        var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH&#8373; '+DELIVERY_FEE_GHC.toLocaleString();
         pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+country.time;
       } else {
         pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
@@ -2833,14 +2833,14 @@ function openPrintDetail(print){
     var visual = document.getElementById('sizeGuideVisual');
     if(!toggle||!panel||!visual) return;
 
-    // Size definitions (mm Ã¢ÂÂ pixels at scale: 1mm = 0.28px, person = 170cm)
+    // Size definitions (mm &rarr; pixels at scale: 1mm = 0.28px, person = 170cm)
     var SIZES = [
       {label:'A4', w:210, h:297, dims:'21 ÃÂ 29.7 cm'},
       {label:'A3', w:297, h:420, dims:'29.7 ÃÂ 42 cm'},
       {label:'A2', w:420, h:594, dims:'42 ÃÂ 59.4 cm'},
       {label:'A1', w:594, h:841, dims:'59.4 ÃÂ 84.1 cm'}
     ];
-    var scale = 0.17; // mm Ã¢ÂÂ px for display
+    var scale = 0.17; // mm &rarr; px for display
     var personH = Math.round(1700 * scale); // 170cm in mm
 
     // Find which sizes this print offers
@@ -3099,7 +3099,7 @@ var COUNTRIES=[
     sel.appendChild(opt);
   });
 })();
-// Fetch live GHSÃ¢ÂÂUSD rate on load (free API, no key needed)
+// Fetch live GHS&rarr;USD rate on load (free API, no key needed)
 (function fetchRate(){
   fetch('https://open.er-api.com/v6/latest/GHS')
     .then(function(r){return r.json();})
@@ -3260,7 +3260,7 @@ function checkoutCart(){
       var cartItems=CART.slice();
       var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+' x'+i.qty;}).join('; ');
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
-      var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GHÃ¢ÂÂµ '+total.toLocaleString();
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH&#8373; '+total.toLocaleString();
       var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
       sendOrderAlert({buyer:email,buyer_name:cartBuyerDisplayName,items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
       // Log to Sheet
@@ -3332,7 +3332,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
     callback:function(response){
       var selCtry=document.getElementById('pdCountry');
       var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
-      var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GHÃ¢ÂÂµ '+priceGHC.toLocaleString();
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH&#8373; '+priceGHC.toLocaleString();
       var displayName=buyerFullName||email.split('@')[0];
       sendOrderAlert({buyer:email,buyer_name:displayName,items:print.title+' | '+selectedSize+' x'+qty,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
       // Log to Sheet
@@ -3582,7 +3582,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
         }).catch(function(){});
       }
       // Thank-you email was already sent automatically on payment Ã¢ÂÂ just update UI
-      printBtn.textContent='Ã¢ÂÂ Certificate downloaded';
+      printBtn.textContent='&#10003; Certificate downloaded';
       printBtn.style.background='#2d6a4f';
       if(hint){
         hint.textContent='Your Certificate of Authenticity has been saved to your device. You can now close this window.';
@@ -3855,7 +3855,7 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
   var params=new URLSearchParams(window.location.search);
   var pid=params.get('print');
   var pg=params.get('page'); // legacy query-param support
-  // Real-path routing: /portfolio Ã¢ÂÂ 'portfolio', /shop Ã¢ÂÂ 'shop', etc.
+  // Real-path routing: /portfolio &rarr; 'portfolio', /shop &rarr; 'shop', etc.
   var _pathPageMap={'/portfolio':'portfolio','/shop':'shop','/about':'about','/contact':'contact','/terms':'terms','/privacy':'privacy','/journal':'journal'};
   // Deep-link to a specific journal post: /journal/some-slug
   var _journalDeepLink=window.location.pathname.match(/^\/journal\/([a-z0-9][a-z0-9\-]*)$/);
@@ -4058,7 +4058,7 @@ fetch('/_data/settings/contact-info.json')
       var el=document.getElementById('contactInstagram');
       if(el){ el.textContent=s.contact_instagram_handle; el.href=s.contact_instagram_url; }
     }
-    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='Ã¢ÂÂ° '+s.contact_response; }
+    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='&#9200; '+s.contact_response; }
   }).catch(function(){});
 
 
@@ -4216,7 +4216,7 @@ fetch('/_data/prints.json')
     window.navigate=function(page){
       gsap.killTweensOf(sweep);
       if(page==='home'&&strips&&strips[0]){
-        // Sweep in Ã¢ÂÂ swap to home Ã¢ÂÂ strips take over instantly Ã¢ÂÂ intro fires
+        // Sweep in &rarr; swap to home &rarr; strips take over instantly &rarr; intro fires
         gsap.timeline()
           .set(sweep,{pointerEvents:'all'})
           .to(sweep,{xPercent:0,duration:0.32,ease:'power3.in'})
