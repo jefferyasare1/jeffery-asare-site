@@ -2980,6 +2980,10 @@ function openRoomPreview(){
   var bg=document.getElementById('pdRoomBg'); if(bg) bg.src='/images/rooms/gallery.jpg';
   _applyRoomOverlay();
 }
+// Expose room preview functions to global scope (onclick attributes need them)
+window.openRoomPreview = openRoomPreview;
+window.setRoom = setRoom;
+window.setRoomSize = setRoomSize;
 
 // ===========================================================
 // CURRENCY
