@@ -1,6 +1,7 @@
 // Cloudflare Pages Function — POST /api/draft-reply
-// Generates a draft reply using the xAI (Grok) API.
-// Requires XAI_API_KEY secret set in Cloudflare Pages dashboard.
+// Generates a draft reply using Google Gemini API (free tier).
+// Requires GEMINI_API_KEY secret set in Cloudflare Pages dashboard.
+// Get a free key at aistudio.google.com
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -22,7 +23,7 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Missing name or message' }), { status: 400, headers: corsHeaders });
     }
 
-    const apiKey = env.XAI_API_KEY;
+    const apiKey = env.GEMINI_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500, headers: corsHeaders });
     }
@@ -49,36 +50,33 @@ ${message}
 
 Write only the reply text. Nothing else.`;
 
-    // Use AbortSignal.timeout — the correct way to timeout fetch in Cloudflare Workers
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
     let res;
     try {
-      res = await fetch('https://api.x.ai/v1/chat/completions', {
+      res = await fetch(url, {
         method: 'POST',
         signal: AbortSignal.timeout(25000),
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'grok-3-mini',
-          max_tokens: 300,
-          messages: [{ role: 'user', content: prompt }]
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.8 }
         })
       });
     } catch (fetchErr) {
-      console.error('xAI fetch error:', fetchErr.name, fetchErr.message);
+      console.error('Gemini fetch error:', fetchErr.name, fetchErr.message);
       const isTimeout = fetchErr.name === 'TimeoutError' || fetchErr.name === 'AbortError';
       return new Response(JSON.stringify({ error: isTimeout ? 'AI service timed out' : 'AI service unreachable' }), { status: 502, headers: corsHeaders });
     }
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error('xAI API error:', res.status, errText);
+      console.error('Gemini API error:', res.status, errText);
       return new Response(JSON.stringify({ error: 'AI service error', detail: res.status }), { status: 502, headers: corsHeaders });
     }
 
     const data = await res.json();
-    const draft = data?.choices?.[0]?.message?.content?.trim() || '';
+    const draft = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 
     if (!draft) {
       return new Response(JSON.stringify({ error: 'No draft generated' }), { status: 500, headers: corsHeaders });
