@@ -3961,6 +3961,10 @@ protectImages();
 // Re-run whenever new images are added to the DOM (shop cards, lightbox etc.)
 new MutationObserver(protectImages).observe(document.body,{childList:true,subtree:true});
 
+  // Expose render functions globally so fetch callbacks in other script blocks can call them
+  window.renderShop = renderShop;
+  window.renderPortfolio = renderPortfolio;
+
 }); // end DOMContentLoaded
 </script>
 
@@ -4080,9 +4084,9 @@ fetch('/_data/prints.json')
         editionSize: edTotal, printsSold: sold, remaining: remaining
       };
     });
-    // Re-render shop if it's currently visible
+    // Re-render shop if it's currently the active page
     var shopPage = document.getElementById('page-shop');
-    if(shopPage && shopPage.style.display !== 'none') renderShop(0);
+    if(shopPage && shopPage.classList.contains('active') && typeof window.renderShop === 'function') window.renderShop(0);
       }).catch(function(){});
 </script>
 
