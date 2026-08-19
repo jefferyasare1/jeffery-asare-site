@@ -1857,7 +1857,7 @@ function renderShop(page){
   var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img && (p.img.indexOf('/')==0||p.img.indexOf('http')==0); });
   if(!allVisible.length){
     list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
-      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">â»</div>'
+      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">&#9723;</div>'
       +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
       +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
       +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;·&nbsp; or get in touch</p>'
