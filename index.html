@@ -750,8 +750,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-viewport{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--rule);}
 .pd-room-bg{width:100%;display:block;min-height:200px;background:#e8e3dc;object-fit:cover;}
 .pd-room-overlay{position:absolute;transform:translate(-50%,-50%);transition:left .3s,top .3s,width .3s;}
-.pd-room-frame{border:3px solid #1a1a1a;box-shadow:0 6px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.25);}
-.pd-room-mat{background:#fff;padding:9%;}
+.pd-room-frame{background:linear-gradient(160deg,#2e221a 0%,#1a130c 40%,#261c12 65%,#1e1610 100%);padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset -2px -2px 0 rgba(0,0,0,.5),0 10px 45px rgba(0,0,0,.6),0 3px 12px rgba(0,0,0,.35);}
+.pd-room-mat{background:#fff;padding:8%;box-shadow:inset 0 0 10px rgba(0,0,0,.05);}
 .pd-room-print{display:block;width:100%;height:auto;}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
 @media(max-width:600px){.pd-room-sizes{margin-left:0;width:100%;}.pd-room-tabs{gap:.35rem;}}
@@ -2948,9 +2948,9 @@ var _roomCurrent='gallery', _roomSize='a2';
 // left/top = centre of the frame on the wall (uses translate(-50%,-50%) so the
 // anchor stays fixed regardless of print size). Adjust after swapping room images.
 var ROOM_CFG={
-  gallery:{ left:'50%', top:'44%', w:{ a4:'10%', a3:'14%', a2:'20%', a1:'28%' } },
-  living: { left:'50%', top:'42%', w:{ a4:'9%',  a3:'13%', a2:'18%', a1:'25%' } },
-  bedroom:{ left:'50%', top:'38%', w:{ a4:'9%',  a3:'13%', a2:'18%', a1:'25%' } }
+  gallery:{ left:'50%', top:'40%', w:{ a4:'12%', a3:'18%', a2:'26%', a1:'36%' } },
+  living: { left:'50%', top:'36%', w:{ a4:'12%', a3:'18%', a2:'26%', a1:'36%' } },
+  bedroom:{ left:'50%', top:'32%', w:{ a4:'10%', a3:'16%', a2:'24%', a1:'34%' } }
 };
 function setRoom(btn,room){
   _roomCurrent=room;
