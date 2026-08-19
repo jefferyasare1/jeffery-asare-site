@@ -5934,61 +5934,87 @@ function cmsUploadRoomImg(input, room){
   });
 }
 
-// Room option picker — stores AI-generated images for each room
+// Room option picker
 var _roomOpts={};
-async function generateRoomOptions(room){
-  var wrap=document.getElementById('room-opts-'+room);
-  var btn=document.getElementById('room-gen-btn-'+room);
-  if(btn){btn.textContent='Generating…';btn.style.color='var(--muted)';}
-  if(wrap){wrap.style.display='grid';wrap.innerHTML='<div style="grid-column:1/-1;padding:1rem;font-size:12px;color:var(--muted);text-align:center">Asking AI to generate 3 options… ~20 seconds</div>';}
-  var results=await Promise.all([0,1,2].map(function(){
-    return fetch('/api/generate-room?room='+room+'&key='+CMS_KEY).then(function(r){return r.json();}).catch(function(){return null;});
-  }));
-  if(btn){btn.textContent='⊕ Regenerate';btn.style.color='';}
-  var opts=results.filter(function(r){return r&&r.image;});
-  _roomOpts[room]=opts;
-  if(!opts.length){
-    if(wrap) wrap.innerHTML='<div style="grid-column:1/-1;color:var(--red);font-size:12px;padding:.5rem;text-align:center">Generation failed — check the API key or try again.</div>';
-    return;
+function generateRoomOptions(room){
+  var wrap=document.getElementById("room-opts-"+room);
+  var btn=document.getElementById("room-gen-btn-"+room);
+  if(btn) btn.textContent="Generating...";
+  if(wrap){wrap.style.display="grid";wrap.innerHTML="<div style='grid-column:1/-1;padding:1rem;font-size:12px;color:var(--muted);text-align:center'>Generating 3 options... ~20 seconds</div>";}
+  var pending=3,collected=[];
+  function onDone(){
+    if(--pending>0) return;
+    _roomOpts[room]=collected;
+    if(btn) btn.textContent="Regenerate";
+    if(!collected.length){
+      if(wrap) wrap.innerHTML="<div style='grid-column:1/-1;color:var(--red);font-size:12px;padding:.5rem;text-align:center'>Generation failed. Try again.</div>";
+      return;
+    }
+    renderRoomOpts(room);
   }
-  if(wrap){
-    wrap.innerHTML=opts.map(function(opt,i){
-      var src='data:'+(opt.mimeType||'image/png')+';base64,'+opt.image;
-      return '<div id="room-opt-'+room+'-'+i+'" onclick="highlightRoomOpt(''+room+'','+i+')" '
-        +'style="border:2px solid var(--rule);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s">'
-        +'<img src="'+src+'" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" loading="lazy">'
-        +'<div style="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;background:#fafaf8">'
-        +'<span style="font-size:11px;color:var(--muted)">Option '+(i+1)+'</span>'
-        +'<button onclick="event.stopPropagation();applyRoomOpt(''+room+'','+i+')" '
-        +'style="font-size:10px;padding:3px 10px;border:none;border-radius:999px;background:var(--ink);color:#fff;cursor:pointer;font-family:var(--sans);letter-spacing:.03em">Use this</button>'
-        +'</div></div>';
-    }).join('');
-  }
+  [0,1,2].forEach(function(){
+    fetch("/api/generate-room?room="+room+"&key="+CMS_KEY)
+      .then(function(r){return r.json();})
+      .then(function(data){if(data&&data.image) collected.push(data); onDone();})
+      .catch(function(){onDone();});
+  });
+}
+function renderRoomOpts(room){
+  var wrap=document.getElementById("room-opts-"+room);
+  var opts=_roomOpts[room]||[];
+  if(!wrap||!opts.length) return;
+  wrap.innerHTML="";
+  opts.forEach(function(opt,i){
+    var card=document.createElement("div");
+    card.id="room-opt-"+room+"-"+i;
+    card.style.cssText="border:2px solid var(--rule);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s";
+    card.onclick=function(){highlightRoomOpt(room,i);};
+    var img=document.createElement("img");
+    img.src="data:"+(opt.mimeType||"image/png")+";base64,"+opt.image;
+    img.style.cssText="width:100%;display:block;aspect-ratio:16/9;object-fit:cover";
+    var foot=document.createElement("div");
+    foot.style.cssText="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;background:#fafaf8";
+    var lbl=document.createElement("span");
+    lbl.style.cssText="font-size:11px;color:var(--muted)";
+    lbl.textContent="Option "+(i+1);
+    var useBtn=document.createElement("button");
+    useBtn.style.cssText="font-size:10px;padding:3px 10px;border:none;border-radius:999px;background:var(--ink);color:#fff;cursor:pointer;font-family:var(--sans)";
+    useBtn.textContent="Use this";
+    (function(idx){useBtn.onclick=function(e){e.stopPropagation();applyRoomOpt(room,idx);};})(i);
+    foot.appendChild(lbl); foot.appendChild(useBtn);
+    card.appendChild(img); card.appendChild(foot);
+    wrap.appendChild(card);
+  });
 }
 function highlightRoomOpt(room,idx){
   [0,1,2].forEach(function(i){
-    var el=document.getElementById('room-opt-'+room+'-'+i);
-    if(el) el.style.borderColor=(i===idx)?'var(--ink)':'var(--rule)';
+    var el=document.getElementById("room-opt-"+room+"-"+i);
+    if(el) el.style.borderColor=(i===idx)?"var(--ink)":"var(--rule)";
   });
 }
-async function applyRoomOpt(room,idx){
+function applyRoomOpt(room,idx){
   var opt=(_roomOpts[room]||[])[idx]; if(!opt) return;
-  var st=document.getElementById('room-status-'+room);
-  if(st){st.className='cms-status';st.textContent='Saving…';}
-  var r=await fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({filename:room+'.jpg',content:opt.image,folder:'images/rooms'})});
-  var d=await r.json();
-  if(d.ok){
-    var prev=document.getElementById('room-prev-'+room);
-    if(prev){prev.src=d.path+'?t='+Date.now();prev.style.opacity='1';}
-    var wrap=document.getElementById('room-opts-'+room);
-    if(wrap){wrap.innerHTML='';wrap.style.display='none';}
-    var btn=document.getElementById('room-gen-btn-'+room);
-    if(btn){btn.textContent='⊕ Generate options';btn.style.color='';}
-    if(st){st.className='cms-status ok';st.textContent='Set ✓ — live in ~2 min';}
-  } else {
-    if(st){st.className='cms-status err';st.textContent=d.error||'Save failed';}
-  }
+  var st=document.getElementById("room-status-"+room);
+  if(st){st.className="cms-status";st.textContent="Saving...";}
+  fetch("/api/upload?key="+CMS_KEY,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({filename:room+".jpg",content:opt.image,folder:"images/rooms"})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.ok){
+      var prev=document.getElementById("room-prev-"+room);
+      if(prev){prev.src=data.path+"?t="+Date.now();prev.style.opacity="1";}
+      var wrap=document.getElementById("room-opts-"+room);
+      if(wrap){wrap.innerHTML="";wrap.style.display="none";}
+      var btn=document.getElementById("room-gen-btn-"+room);
+      if(btn) btn.textContent="Generate options";
+      if(st){st.className="cms-status ok";st.textContent="Set - live in ~2 min";}
+    } else {
+      if(st){st.className="cms-status err";st.textContent=data.error||"Save failed";}
+    }
+  })
+  .catch(function(err){
+    if(st){st.className="cms-status err";st.textContent="Error: "+err.message;}
+  });
 }
 
 // Call /api/ai-suggest — Claude + Grok run in parallel on the server, synthesised into one result
