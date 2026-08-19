@@ -1392,7 +1392,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         <div class="pd-room-frame"><div class="pd-room-mat"><img class="pd-room-print" id="pdRoomPrint" src="" alt=""></div></div>
       </div>
     </div>
-    <p class="pd-room-note">Print sizes shown proportional to actual A-series dimensions. Mat and framing style may vary.</p>
+    <p class="pd-room-note" id="pd-room-note">A2 · 420 × 594 mm · Framing style may vary.</p>
   </div>
   <!-- RELATED PRINTS -->
   <div id="pdRelated" class="pd-related" style="display:none;"></div>
@@ -2959,9 +2959,15 @@ function setRoom(btn,room){
   if(btn){ document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); }
   _applyRoomOverlay();
 }
+var ROOM_DIMS={a4:"A4 · 210 × 297 mm",a3:"A3 · 297 × 420 mm",a2:"A2 · 420 × 594 mm",a1:"A1 · 594 × 841 mm"};
 function setRoomSize(btn,size){
   _roomSize=size;
-  if(btn){ document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); }
+  if(btn){
+    document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+  }
+  var dn=document.getElementById('pd-room-note');
+  if(dn) dn.textContent=(ROOM_DIMS[size]||'')+' · Framing style may vary.';
   _applyRoomOverlay();
 }
 function _applyRoomOverlay(){
