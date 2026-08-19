@@ -943,7 +943,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <a id="mmPortBtn">Portfolio</a>
   <a id="mmShopBtn">Shop</a>
   <a id="mmContactBtn">Contact</a>
-  <span class="mobile-menu-foot">Jeffery Asare Â· Accra, Ghana</span>
+  <span class="mobile-menu-foot">Jeffery Asare · Accra, Ghana</span>
 </div>
 
 <!-- LIGHTBOX -->
@@ -961,9 +961,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="lb-title" id="lbTitle"></div>
     <div class="lb-pix-meta">
       <span class="lb-series" id="lbSeries"></span>
-      <span class="lb-pix-sep">Â·</span>
+      <span class="lb-pix-sep">·</span>
       <span class="lb-pix-loc" id="lbLoc"></span>
-      <span class="lb-pix-sep">Â·</span>
+      <span class="lb-pix-sep">·</span>
       <span class="lb-pix-date" id="lbDate"></span>
     </div>
   </div>
@@ -1696,7 +1696,7 @@ function renderPhotoOfWeek(){
   var firstSunday=new Date(startOfYear.getFullYear(),startOfYear.getMonth(),startOfYear.getDate()-startOfYear.getDay());
   var weekOfYear=Math.floor((thisSunday-firstSunday)/(7*24*60*60*1000))+1;
   // Populate editorial spread
-  document.getElementById("potwWeek").textContent="Photo of the Week Â· Week "+String(weekOfYear).padStart(2,"0")+" Â· "+now.getFullYear();
+  document.getElementById("potwWeek").textContent="Photo of the Week · Week "+String(weekOfYear).padStart(2,"0")+" · "+now.getFullYear();
   document.getElementById("potwTitle").textContent=photo.title||"";
   document.getElementById("potwLoc").textContent=photo.loc||"";
   document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
@@ -1860,7 +1860,7 @@ function renderShop(page){
       +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">â»</div>'
       +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
       +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
-      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;Â·&nbsp; or get in touch</p>'
+      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;·&nbsp; or get in touch</p>'
       +'</div>';
     return;
   }
@@ -2468,7 +2468,7 @@ function _buildJournalList(posts, seriesFilter){
     var rt=_readingTime(p.body);
     return '<div class="journal-post" data-jid="'+p.id+'">'
       +'<div class="journal-post-body">'
-      +'<div class="journal-post-meta">'+p.series+' &nbsp;Â·&nbsp; '+dateStr+' &nbsp;Â·&nbsp; '+rt+'</div>'
+      +'<div class="journal-post-meta">'+p.series+' &nbsp;·&nbsp; '+dateStr+' &nbsp;·&nbsp; '+rt+'</div>'
       +'<div class="journal-post-title">'+p.title+'</div>'
       +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
       +'</div>'
@@ -2588,7 +2588,7 @@ function renderSocialProof(){
         else parts.push('Last purchased '+d.lastPurchaseDays+' days ago');
       }
       if(!parts.length) { el.style.display='none'; return; }
-      el.innerHTML = '<div class="shop-social-proof">'+parts.join(' &nbsp;Â·&nbsp; ')+'</div>';
+      el.innerHTML = '<div class="shop-social-proof">'+parts.join(' &nbsp;·&nbsp; ')+'</div>';
       el.style.display = '';
     })
     .catch(function(){ el.style.display='none'; });
@@ -2836,10 +2836,10 @@ function openPrintDetail(print){
 
     // Size definitions (mm â pixels at scale: 1mm = 0.28px, person = 170cm)
     var SIZES = [
-      {label:'A4', w:210, h:297, dims:'21 Ã 29.7 cm'},
-      {label:'A3', w:297, h:420, dims:'29.7 Ã 42 cm'},
-      {label:'A2', w:420, h:594, dims:'42 Ã 59.4 cm'},
-      {label:'A1', w:594, h:841, dims:'59.4 Ã 84.1 cm'}
+      {label:'A4', w:210, h:297, dims:'21 × 29.7 cm'},
+      {label:'A3', w:297, h:420, dims:'29.7 × 42 cm'},
+      {label:'A2', w:420, h:594, dims:'42 × 59.4 cm'},
+      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm'}
     ];
     var scale = 0.17; // mm â px for display
     var personH = Math.round(1700 * scale); // 170cm in mm
@@ -3238,7 +3238,7 @@ function renderCartItems(){
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
-      +'<div class="cart-item-sub">'+item.size+' &nbsp;Â·&nbsp; Qty '+item.qty+'</div>'
+      +'<div class="cart-item-sub">'+item.size+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
       +'<div class="cart-item-price">'+priceStr+'</div>'
       +'<button class="cart-item-remove" data-id="'+item.print.id+'" data-size="'+item.size+'" onclick="removeFromCart(this.dataset.id,this.dataset.size)">Remove</button>'
       +'</div></div>';
@@ -3424,7 +3424,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
   var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var dateStr=months[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();
   var uniqueNum=String(Math.floor(1000+Math.random()*9000));
-  var coaRef="COA-"+uniqueNum+" Â· "+now.getFullYear();
+  var coaRef="COA-"+uniqueNum+" · "+now.getFullYear();
   var isSingle=items.length===1;
   var certDataArr=[]; // collects per-print data; email fires on Print click
 
