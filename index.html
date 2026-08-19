@@ -2967,7 +2967,7 @@ function setRoomSize(btn,size){
     btn.classList.add('active');
   }
   var dn=document.getElementById('pd-room-note');
-  if(dn) dn.textContent=(ROOM_DIMS[size]||'')+' Â· Framing style may vary.';
+  if(dn) dn.textContent=(ROOM_DIMS[size]||'')+' \u00B7 Framing style may vary.';
   _applyRoomOverlay();
 }
 function _applyRoomOverlay(){
