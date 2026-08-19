@@ -4080,6 +4080,9 @@ fetch('/_data/prints.json')
         editionSize: edTotal, printsSold: sold, remaining: remaining
       };
     });
+    // Re-render shop if it's currently visible
+    var shopPage = document.getElementById('page-shop');
+    if(shopPage && shopPage.style.display !== 'none') renderShop(0);
       }).catch(function(){});
 </script>
 
