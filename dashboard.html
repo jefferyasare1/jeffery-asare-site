@@ -5974,7 +5974,7 @@ function renderRoomOpts(room){
     card.onclick=(function(idx){return function(){highlightRoomOpt(room,idx);};})(i);
     var img=document.createElement("img");
     img.src="data:"+(opt.mimeType||"image/png")+";base64,"+opt.image;
-    img.style.cssText="width:100%;display:block;aspect-ratio:16/9;object-fit:cover";
+    img.style.cssText="width:100%;display:block;aspect-ratio:3/4;object-fit:cover";
     var foot=document.createElement("div");
     foot.style.cssText="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;background:#fafaf8";
     var lbl=document.createElement("span");
