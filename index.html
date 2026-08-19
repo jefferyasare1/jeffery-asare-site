@@ -752,7 +752,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-overlay{position:absolute;transform:translate(-50%,-50%);transition:left .3s,top .3s,width .3s;}
 .pd-room-frame{background:linear-gradient(160deg,#2e221a 0%,#1a130c 40%,#261c12 65%,#1e1610 100%);padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset -2px -2px 0 rgba(0,0,0,.5),0 10px 45px rgba(0,0,0,.6),0 3px 12px rgba(0,0,0,.35);}
 .pd-room-mat{background:#fff;padding:8%;box-shadow:inset 0 0 10px rgba(0,0,0,.05);}
-.pd-room-print{display:block;width:100%;height:auto;}
+.pd-room-print{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
 @media(max-width:600px){.pd-room-sizes{margin-left:0;width:100%;}.pd-room-tabs{gap:.35rem;}}
 @media print{.cert-print-btn,.detail-back,.inner-nav,.wa-float{display:none!important;}}
@@ -1659,7 +1659,7 @@ function renderPortfolio(filter, animate){
     visible.forEach(function(p,i){
       var card=document.createElement("div");
       card.className="photo-card";
-      var inner=p.img?"<img src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\">":"<div class=\""+PH_C[i%PH_C.length]+"\" style=\"width:100%;height:100%;\"></div>";
+      var inner=p.img?"<img src=\""+((p.img.indexOf('/')==0||p.img.indexOf('http')==0)?p.img:'/images/prints/'+p.img)+"\" alt=\""+p.title+"\" loading=\"lazy\">":"<div class=\""+PH_C[i%PH_C.length]+"\" style=\"width:100%;height:100%;\"></div>";
       card.innerHTML=inner+"<div class=\"photo-card-info\"><div class=\"photo-card-title\">"+p.title+"</div><div class=\"photo-card-loc\">"+p.loc+"</div></div>";
       card.classList.add("card-in");
       card.style.animationDelay = (i * 0.055) + "s";
@@ -1854,7 +1854,7 @@ function renderShop(page){
   var list=document.getElementById("shopList");
   if(!list) return;
   list.innerHTML="";
-  var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img && (p.img.indexOf('/')==0||p.img.indexOf('http')==0); });
+  var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img; });
   if(!allVisible.length){
     list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
       +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">&#9723;</div>'
@@ -2948,9 +2948,9 @@ var _roomCurrent='gallery', _roomSize='a2';
 // left/top = centre of the frame on the wall (uses translate(-50%,-50%) so the
 // anchor stays fixed regardless of print size). Adjust after swapping room images.
 var ROOM_CFG={
-  gallery:{ left:'50%', top:'40%', w:{ a4:'10%', a3:'14%', a2:'21%', a1:'29%' } },
-  living: { left:'50%', top:'36%', w:{ a4:'10%', a3:'14%', a2:'21%', a1:'29%' } },
-  bedroom:{ left:'50%', top:'32%', w:{ a4:'8%', a3:'13%', a2:'19%', a1:'27%' } }
+  gallery:{ left:'50%', top:'40%', w:{ a4:'20%', a3:'28%', a2:'38%', a1:'50%' } },
+  living: { left:'50%', top:'36%', w:{ a4:'20%', a3:'28%', a2:'38%', a1:'50%' } },
+  bedroom:{ left:'50%', top:'32%', w:{ a4:'18%', a3:'26%', a2:'36%', a1:'48%' } }
 };
 function setRoom(btn,room){
   _roomCurrent=room;
@@ -2979,7 +2979,7 @@ function _applyRoomOverlay(){
 function openRoomPreview(){
   var preview=document.getElementById('pdRoomPreview');
   var img=document.getElementById('pdRoomPrint');
-  if(img&&currentPrint&&currentPrint.img) img.src=currentPrint.img;
+  if(img&&currentPrint&&currentPrint.img) img.src=(currentPrint.img&&(currentPrint.img.indexOf('/')==0||currentPrint.img.indexOf('http')==0)?currentPrint.img:'/images/prints/'+currentPrint.img);
   if(preview){ preview.style.display='block'; preview.scrollIntoView({behavior:'smooth',block:'start'}); }
   _roomCurrent='gallery'; _roomSize='a2';
   document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
