@@ -79,9 +79,7 @@ export async function onRequestGet(context) {
 
   try {
     const img = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
-      prompt,
-      width: 768,
-      height: 1024
+      prompt
     });
     let b64 = '';
 
