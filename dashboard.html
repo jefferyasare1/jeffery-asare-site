@@ -5919,6 +5919,8 @@ function cmsUploadRoomImg(input, room){
   var file=input.files&&input.files[0]; if(!file) return;
   var st=document.getElementById('room-status-'+room);
   if(st){st.className='cms-status';st.textContent='Compressing…';}
+  var _p=document.getElementById('room-prev-'+room);
+  if(_p){var _fr=new FileReader();_fr.onload=function(e){_p.src=e.target.result;_p.style.opacity='1';};_fr.readAsDataURL(file);}
   compressForUpload(file,function(base64){
     if(st) st.textContent='Uploading…';
     fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
@@ -6034,15 +6036,15 @@ function cmsGenerateRoomImg(room){
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.image){
-        if(st) st.textContent='Uploading?';
+        var prev=document.getElementById('room-prev-'+room);
+        if(prev){prev.src='data:'+(d.mimeType||'image/jpeg')+';base64,'+d.image;prev.style.opacity='1';}
+        if(st) st.textContent='Saving...';
         return fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({filename:room+'.jpg',content:d.image,folder:'images/rooms'})})
           .then(function(r2){return r2.json();})
           .then(function(u){
             if(u.ok){
-              var prev=document.getElementById('room-prev-'+room);
-              if(prev){prev.src=u.path+'?t='+Date.now();prev.style.opacity='1';}
-              if(st){st.className='cms-status ok';st.textContent='Generated ? ? live in ~2 min';}
+              if(st){st.className='cms-status ok';st.textContent='Done - live in ~2 min';}
             } else {
               if(st){st.className='cms-status err';st.textContent=u.error||'Upload failed';}
             }
