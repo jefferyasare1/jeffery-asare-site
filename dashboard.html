@@ -5130,8 +5130,35 @@ function cmsOpenPrintEdit(idx){
   }).join('');
   document.getElementById('cmsModalTitle').textContent=isNew?'New Print':'Edit Print';
   document.getElementById('cmsModalSub').textContent=isNew?'Add a new print to the shop.':'Changes update the shop listing.';
+  // Build portfolio picker options from already-loaded data
+  var pickerOptions='<option value="">-- Select a portfolio photo --</option>';
+  var allSlugs=Object.keys(_portfolioData);
+  if(allSlugs.length){
+    allSlugs.forEach(function(slug){
+      var seriesLabel='';
+      if(_seriesList){ var s=_seriesList.find(function(x){return x.slug===slug;}); if(s) seriesLabel=(s.name||slug).toUpperCase(); }
+      else { seriesLabel=slug.toUpperCase(); }
+      var photos=(_portfolioData[slug]||[]).filter(function(p){return !p.status||p.status==='live';});
+      if(!photos.length) return;
+      pickerOptions+='<optgroup label="'+escAttr(seriesLabel)+'">';
+      photos.forEach(function(p,i){
+        pickerOptions+='<option value="'+escAttr(slug+':'+i)+'">'+escH(p.title||'Untitled')+'</option>';
+      });
+      pickerOptions+='</optgroup>';
+    });
+  }
+  var pickerRow= allSlugs.length
+    ? '<div class="cms-field" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule)">'
+      +'<label>Fill from portfolio photo <span class="opt">(optional)</span></label>'
+      +'<select id="cms-p-portfolio-pick" style="width:100%;border:1.5px solid var(--rule);padding:8px 10px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);appearance:none;cursor:pointer;" onchange="cmsApplyPortfolioPhoto(this.value)">'+pickerOptions+'</select>'
+      +'</div>'
+    : '<div class="cms-field" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule)">'
+      +'<p style="font-size:12px;color:var(--muted);">Open the Portfolio tab first to enable the fill-from-photo picker.</p>'
+      +'</div>';
+
   document.getElementById('cmsModalBody').innerHTML=
-    '<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
+    pickerRow
+    +'<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Description <span class="opt">(shown on print detail)</span></label><textarea id="cms-p-desc" rows="3" style="width:100%;border:1.5px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);resize:vertical;">'+escH(print.desc||'')+'</textarea></div>'
@@ -5150,6 +5177,21 @@ function cmsSizeToggle(lbl){
   var chk=document.getElementById('cms-sz-chk-'+lbl);
   var price=document.getElementById('cms-sz-price-'+lbl);
   if(price) price.style.display=chk&&chk.checked?'':'none';
+}
+
+function cmsApplyPortfolioPhoto(val){
+  if(!val) return;
+  var parts=val.split(':'), slug=parts[0], idx=parseInt(parts[1],10);
+  var photos=_portfolioData[slug]||[];
+  var p=photos[idx]; if(!p) return;
+  var tf=document.getElementById('cms-p-title'); if(tf) tf.value=p.title||'';
+  var seriesVal='';
+  if(_seriesList){ var s=_seriesList.find(function(x){return x.slug===slug;}); if(s) seriesVal=(s.name||slug).toUpperCase(); }
+  else { seriesVal=slug.toUpperCase(); }
+  var sf=document.getElementById('cms-p-series'); if(sf) sf.value=seriesVal;
+  var df=document.getElementById('cms-p-desc'); if(df&&!df.value.trim()) df.value=p.desc||'';
+  var imgf=document.getElementById('cms-p-img'); if(imgf) imgf.value=p.img||'';
+  var pick=document.getElementById('cms-p-portfolio-pick'); if(pick) pick.value='';
 }
 
 function cmsSavePrint(idx,printId){
