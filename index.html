@@ -2959,7 +2959,7 @@ function setRoom(btn,room){
   if(btn){ document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); }
   _applyRoomOverlay();
 }
-var ROOM_DIMS={a4:"A4 Â· 210 Ã 297 mm",a3:"A3 Â· 297 Ã 420 mm",a2:"A2 Â· 420 Ã 594 mm",a1:"A1 Â· 594 Ã 841 mm"};
+var ROOM_DIMS={a4:"A4 \u00B7 210 \u00D7 297 mm",a3:"A3 \u00B7 297 \u00D7 420 mm",a2:"A2 \u00B7 420 \u00D7 594 mm",a1:"A1 \u00B7 594 \u00D7 841 mm"};
 function setRoomSize(btn,size){
   _roomSize=size;
   if(btn){
