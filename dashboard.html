@@ -1538,6 +1538,36 @@
         </div>
       </div>
 
+      <!-- Room Preview Images -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Room Preview Images</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">The backgrounds shown in the &ldquo;See it in a room&rdquo; preview on each print&rsquo;s page. Preview below, then upload a replacement to swap any image before it goes live.</p>
+          <div class="cms-grid2">
+            <div class="cms-field">
+              <label>Gallery</label>
+              <img id="room-prev-gallery" src="/images/rooms/gallery.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
+              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'gallery')"></label>
+              <div class="cms-status" id="room-status-gallery"></div>
+            </div>
+            <div class="cms-field">
+              <label>Living room</label>
+              <img id="room-prev-living" src="/images/rooms/living.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
+              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'living')"></label>
+              <div class="cms-status" id="room-status-living"></div>
+            </div>
+            <div class="cms-field" style="margin-bottom:0">
+              <label>Bedroom</label>
+              <img id="room-prev-bedroom" src="/images/rooms/bedroom.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
+              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'bedroom')"></label>
+              <div class="cms-status" id="room-status-bedroom"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Portfolio -->
       <div class="cms-section">
         <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
@@ -5863,6 +5893,29 @@ function cmsUploadImg(input,targetId,statusId,enableAi,forceName){
           if(enableAi) cmsAiSuggest(base64);
         } else {
           if(st){st.className='cms-status err';st.textContent=(d.error||'Upload failed');}
+        }
+      })
+      .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
+  });
+}
+
+// Upload a room background image (gallery / living / bedroom)
+function cmsUploadRoomImg(input, room){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var st=document.getElementById('room-status-'+room);
+  if(st){st.className='cms-status';st.textContent='Compressing…';}
+  compressForUpload(file,function(base64){
+    if(st) st.textContent='Uploading…';
+    fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filename:room+'.jpg',content:base64,folder:'images/rooms'})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){
+          var prev=document.getElementById('room-prev-'+room);
+          if(prev){prev.src=d.path+'?t='+Date.now();prev.style.opacity='1';}
+          if(st){st.className='cms-status ok';st.textContent='Uploaded ✓ — live in ~2 min';}
+        } else {
+          if(st){st.className='cms-status err';st.textContent=d.error||'Upload failed';}
         }
       })
       .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
