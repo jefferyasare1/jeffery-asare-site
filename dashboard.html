@@ -5940,7 +5940,10 @@ function generateRoomOptions(room){
   var wrap=document.getElementById("room-opts-"+room);
   var btn=document.getElementById("room-gen-btn-"+room);
   if(btn) btn.textContent="Generating...";
-  if(wrap){wrap.style.display="grid";wrap.innerHTML="<div style='grid-column:1/-1;padding:1rem;font-size:12px;color:var(--muted);text-align:center'>Generating 3 options... ~20 seconds</div>";}
+  if(wrap){
+    wrap.style.display="grid";
+    wrap.innerHTML="<div style='grid-column:1/-1;padding:1rem;font-size:12px;color:var(--muted);text-align:center'>Generating 3 options... takes about 20 seconds.</div>";
+  }
   var pending=3,collected=[];
   function onDone(){
     if(--pending>0) return;
@@ -5953,8 +5956,8 @@ function generateRoomOptions(room){
     renderRoomOpts(room);
   }
   [0,1,2].forEach(function(){
-    fetch("/api/generate-room?room="+room+"&key="+CMS_KEY)
-      .then(function(r){return r.json();})
+    fetch("/api/generate-room?room="+room+"&key=jA9kx2vP7m")
+      .then(function(res){return res.json();})
       .then(function(data){if(data&&data.image) collected.push(data); onDone();})
       .catch(function(){onDone();});
   });
@@ -5968,7 +5971,7 @@ function renderRoomOpts(room){
     var card=document.createElement("div");
     card.id="room-opt-"+room+"-"+i;
     card.style.cssText="border:2px solid var(--rule);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s";
-    card.onclick=function(){highlightRoomOpt(room,i);};
+    card.onclick=(function(idx){return function(){highlightRoomOpt(room,idx);};})(i);
     var img=document.createElement("img");
     img.src="data:"+(opt.mimeType||"image/png")+";base64,"+opt.image;
     img.style.cssText="width:100%;display:block;aspect-ratio:16/9;object-fit:cover";
@@ -5980,7 +5983,7 @@ function renderRoomOpts(room){
     var useBtn=document.createElement("button");
     useBtn.style.cssText="font-size:10px;padding:3px 10px;border:none;border-radius:999px;background:var(--ink);color:#fff;cursor:pointer;font-family:var(--sans)";
     useBtn.textContent="Use this";
-    (function(idx){useBtn.onclick=function(e){e.stopPropagation();applyRoomOpt(room,idx);};})(i);
+    useBtn.onclick=(function(idx){return function(e){e.stopPropagation();applyRoomOpt(room,idx);};})(i);
     foot.appendChild(lbl); foot.appendChild(useBtn);
     card.appendChild(img); card.appendChild(foot);
     wrap.appendChild(card);
@@ -5996,9 +5999,12 @@ function applyRoomOpt(room,idx){
   var opt=(_roomOpts[room]||[])[idx]; if(!opt) return;
   var st=document.getElementById("room-status-"+room);
   if(st){st.className="cms-status";st.textContent="Saving...";}
-  fetch("/api/upload?key="+CMS_KEY,{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({filename:room+".jpg",content:opt.image,folder:"images/rooms"})})
-  .then(function(r){return r.json();})
+  fetch("/api/upload",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({key:"jA9kx2vP7m",filename:room+".jpg",content:opt.image,folder:"images/rooms"})
+  })
+  .then(function(res){return res.json();})
   .then(function(data){
     if(data.ok){
       var prev=document.getElementById("room-prev-"+room);
