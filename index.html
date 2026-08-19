@@ -1174,7 +1174,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <h1 id="shopTitle">Fine Art Prints</h1>
     <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
   </div>
-  <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" onclick="setCurrency('GHS')">GHâµ</button><button id="btnUSD" onclick="setCurrency('USD')">USD</button></div></div>
+  <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" onclick="setCurrency('GHS')">GH&#8373;</button><button id="btnUSD" onclick="setCurrency('USD')">USD</button></div></div>
   <div id="shopSocialProof" style="display:none;"></div>
   <div class="shop-list" id="shopList"></div>
   <div id="recentlyViewedTray" style="display:none;"></div>
@@ -1346,7 +1346,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div>
         <div style="display:flex;align-items:baseline;justify-content:space-between;">
           <div class="print-detail-size-label">Select size</div>
-          <button class="size-guide-toggle" id="sizeGuideToggle">Size guide</button>
+          <button type="button" class="size-guide-toggle" id="sizeGuideToggle">Size guide</button>
         </div>
         <div class="print-detail-size-grid" id="pdSizes"></div>
         <div class="size-guide-panel" id="sizeGuidePanel">
@@ -1876,7 +1876,7 @@ function renderShop(page){
     var basePrice=p.sizes[0].price;
     var priceText=CURRENCY==='USD'
       ? "From $"+Math.round(basePrice*USD_RATE)
-      : "From GHâµ "+Number(basePrice).toLocaleString();
+      : "From GH&#8373; "+Number(basePrice).toLocaleString();
     var actionBtn=p.soldOut
       ? "<span class=\"shop-sold-badge\">Sold out</span>"
       : "<button class=\"shop-view-btn\">View print &#8594;</button>";
@@ -2735,7 +2735,7 @@ function openPrintDetail(print){
       if(!code){pdDeliveryNote.innerHTML='';return;}
       var country=COUNTRIES.find(function(c){return c.code===code;})||{time:'12â20 business days',region:'row'};
       if(country.region==='gh'){
-        var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GHâµ '+DELIVERY_FEE_GHC.toLocaleString();
+        var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH&#8373; '+DELIVERY_FEE_GHC.toLocaleString();
         pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+country.time;
       } else {
         pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
@@ -2798,36 +2798,6 @@ function openPrintDetail(print){
 
   // Render "You might also like" after navigation
   setTimeout(function(){
-    var relDiv = document.getElementById('pdRelated');
-    if(!relDiv) return;
-    var active = PRINTS.filter(function(p){ return p.title !== 'Untitled Print' && p.id !== print.id; });
-    var sameSeries = active.filter(function(p){ return p.series === print.series; });
-    var others = active.filter(function(p){ return p.series !== print.series; });
-    var picks = sameSeries.concat(others).slice(0, 3);
-    if(!picks.length){ relDiv.style.display='none'; return; }
-    relDiv.style.display = 'block';
-    relDiv.innerHTML = '<div class="pd-related-title">You might also like</div>'
-      + '<div class="pd-related-grid">'
-      + picks.map(function(p){
-          var img = p.img
-            ? '<img class="pd-related-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
-            : '<div class="pd-related-img"></div>';
-          return '<div class="pd-related-card" data-pid="'+p.id+'">'
-            + img
-            + '<div class="pd-related-series">'+p.series+'</div>'
-            + '<div class="pd-related-name">'+p.title+'</div>'
-            + '</div>';
-        }).join('')
-      + '</div>';
-    relDiv.querySelectorAll('.pd-related-card').forEach(function(card){
-      card.addEventListener('click', function(){
-        var pid = card.dataset.pid;
-        var found = PRINTS.find(function(x){ return x.id === pid; });
-        if(found) openPrintDetail(found);
-      });
-    });
-
-  // ââ Size guide ââââââââââââââââââââââââââââââââââââââââââââ
   (function(){
     var toggle = document.getElementById('sizeGuideToggle');
     var panel  = document.getElementById('sizeGuidePanel');
@@ -2898,6 +2868,36 @@ function openPrintDetail(print){
       });
     }
   })();
+
+    var relDiv = document.getElementById('pdRelated');
+    if(!relDiv) return;
+    var active = PRINTS.filter(function(p){ return p.title !== 'Untitled Print' && p.id !== print.id; });
+    var sameSeries = active.filter(function(p){ return p.series === print.series; });
+    var others = active.filter(function(p){ return p.series !== print.series; });
+    var picks = sameSeries.concat(others).slice(0, 3);
+    if(!picks.length){ relDiv.style.display='none'; return; }
+    relDiv.style.display = 'block';
+    relDiv.innerHTML = '<div class="pd-related-title">You might also like</div>'
+      + '<div class="pd-related-grid">'
+      + picks.map(function(p){
+          var img = p.img
+            ? '<img class="pd-related-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
+            : '<div class="pd-related-img"></div>';
+          return '<div class="pd-related-card" data-pid="'+p.id+'">'
+            + img
+            + '<div class="pd-related-series">'+p.series+'</div>'
+            + '<div class="pd-related-name">'+p.title+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+    relDiv.querySelectorAll('.pd-related-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        var pid = card.dataset.pid;
+        var found = PRINTS.find(function(x){ return x.id === pid; });
+        if(found) openPrintDetail(found);
+      });
+    });
+
 
   // ââ Collectors counter ââââââââââââââââââââââââââââââââââââ
   (function(printTitle){
@@ -3010,7 +3010,7 @@ var COUNTRIES=[
   {code:'BJ',name:'Benin',time:'5â8 business days',region:'wa'},
   {code:'BF',name:'Burkina Faso',time:'7â10 business days',region:'wa'},
   {code:'CV',name:'Cape Verde',time:'7â10 business days',region:'wa'},
-  {code:'CI',name:'CÃ´te d\'Ivoire',time:'7â10 business days',region:'wa'},
+  {code:'CI',name:'Côte d\'Ivoire',time:'7â10 business days',region:'wa'},
   {code:'GM',name:'Gambia',time:'7â10 business days',region:'wa'},
   {code:'GN',name:'Guinea',time:'7â10 business days',region:'wa'},
   {code:'GW',name:'Guinea-Bissau',time:'7â10 business days',region:'wa'},
@@ -3174,7 +3174,7 @@ function setCurrency(c){
 }
 function formatPrice(ghc){
   if(CURRENCY==='USD') return '<strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> + shipping</span>';
-  return '<strong>GHâµ '+Number(ghc).toLocaleString()+'</strong><span class="ship"> + shipping</span>';
+  return '<strong>GH&#8373; '+Number(ghc).toLocaleString()+'</strong><span class="ship"> + shipping</span>';
 }
 // Wire currency toggle buttons via addEventListener (not inline onclick)
 (function(){
@@ -3234,7 +3234,7 @@ function renderCartItems(){
       :'<div class="cart-item-img-ph"></div>';
     var itemPrice=item.price||item.print.priceGHC;
     var priceStr=CURRENCY==='USD'?'$'+(itemPrice*USD_RATE*item.qty).toFixed(0)
-      :'GHâµ '+(itemPrice*item.qty).toLocaleString();
+      :'GH&#8373; '+(itemPrice*item.qty).toLocaleString();
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
@@ -3244,7 +3244,7 @@ function renderCartItems(){
       +'</div></div>';
   }).join('');
   var total=cartTotal();
-  var totalStr=CURRENCY==='USD'?'$'+(total*USD_RATE).toFixed(0):'GHâµ '+total.toLocaleString();
+  var totalStr=CURRENCY==='USD'?'$'+(total*USD_RATE).toFixed(0):'GH&#8373; '+total.toLocaleString();
   foot.innerHTML='<div class="cart-total-row"><span>Total</span><span>'+totalStr+'</span></div>'
     +'<p class="cart-note">+ shipping &middot; Production 7-14 business days. Certificate of Authenticity included with each print.</p>'
     +'<div class="cart-email-wrap"><input type="text" id="cartName" class="cart-email-input" placeholder="Your full name" style="margin-bottom:.5rem;" /><input type="email" id="cartEmail" class="cart-email-input" placeholder="Your email address" /></div>'
@@ -3269,7 +3269,7 @@ function checkoutCart(){
       var cartItems=CART.slice();
       var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+' x'+i.qty;}).join('; ');
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
-      var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GHâµ '+total.toLocaleString();
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH&#8373; '+total.toLocaleString();
       var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
       sendOrderAlert({buyer:email,buyer_name:cartBuyerDisplayName,items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
       // Log to Sheet
@@ -3341,7 +3341,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
     callback:function(response){
       var selCtry=document.getElementById('pdCountry');
       var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
-      var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GHâµ '+priceGHC.toLocaleString();
+      var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH&#8373; '+priceGHC.toLocaleString();
       var displayName=buyerFullName||email.split('@')[0];
       sendOrderAlert({buyer:email,buyer_name:displayName,items:print.title+' | '+selectedSize+' x'+qty,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
       // Log to Sheet
