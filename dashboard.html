@@ -1552,6 +1552,7 @@
               <div style="display:flex;gap:6px;margin-bottom:6px">
                 <button id="room-gen-btn-gallery" onclick="generateRoomOptions('gallery')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
                 <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'gallery')"></label>
+              <button type="button" onclick="cmsGenerateRoomImg('gallery')" style="display:block;width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;">? Generate with AI</button>
               </div>
               <div id="room-opts-gallery" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-gallery"></div>
@@ -1562,6 +1563,7 @@
               <div style="display:flex;gap:6px;margin-bottom:6px">
                 <button id="room-gen-btn-living" onclick="generateRoomOptions('living')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
                 <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'living')"></label>
+              <button type="button" onclick="cmsGenerateRoomImg('living')" style="display:block;width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;">? Generate with AI</button>
               </div>
               <div id="room-opts-living" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-living"></div>
@@ -1572,6 +1574,7 @@
               <div style="display:flex;gap:6px;margin-bottom:6px">
                 <button id="room-gen-btn-bedroom" onclick="generateRoomOptions('bedroom')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
                 <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'bedroom')"></label>
+              <button type="button" onclick="cmsGenerateRoomImg('bedroom')" style="display:block;width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;">? Generate with AI</button>
               </div>
               <div id="room-opts-bedroom" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-bedroom"></div>
@@ -6021,6 +6024,34 @@ function applyRoomOpt(room,idx){
   .catch(function(err){
     if(st){st.className="cms-status err";st.textContent="Error: "+err.message;}
   });
+}
+
+// Generate a room background image using the AI endpoint
+function cmsGenerateRoomImg(room){
+  var st=document.getElementById('room-status-'+room);
+  if(st){st.className='cms-status';st.textContent='Generating? this takes ~20s';}
+  fetch('/api/generate-room?room='+room+'&key='+CMS_KEY)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.image){
+        if(st) st.textContent='Uploading?';
+        return fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({filename:room+'.jpg',content:d.image,folder:'images/rooms'})})
+          .then(function(r2){return r2.json();})
+          .then(function(u){
+            if(u.ok){
+              var prev=document.getElementById('room-prev-'+room);
+              if(prev){prev.src=u.path+'?t='+Date.now();prev.style.opacity='1';}
+              if(st){st.className='cms-status ok';st.textContent='Generated ? ? live in ~2 min';}
+            } else {
+              if(st){st.className='cms-status err';st.textContent=u.error||'Upload failed';}
+            }
+          });
+      } else {
+        if(st){st.className='cms-status err';st.textContent=d.error||'Generation failed';}
+      }
+    })
+    .catch(function(err){if(st){st.className='cms-status err';st.textContent='Error: '+err.message;}});
 }
 
 // Call /api/ai-suggest — Claude + Grok run in parallel on the server, synthesised into one result
