@@ -1380,9 +1380,10 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <button class="pd-room-tab" data-room="living" onclick="setRoom(this,'living')">Living room</button>
       <button class="pd-room-tab" data-room="bedroom" onclick="setRoom(this,'bedroom')">Bedroom</button>
       <div class="pd-room-sizes">
-        <button class="pd-room-size" data-size="sm" onclick="setRoomSize(this,'sm')">Small</button>
-        <button class="pd-room-size active" data-size="md" onclick="setRoomSize(this,'md')">Medium</button>
-        <button class="pd-room-size" data-size="lg" onclick="setRoomSize(this,'lg')">Large</button>
+        <button class="pd-room-size" data-size="a4" onclick="setRoomSize(this,'a4')">A4</button>
+        <button class="pd-room-size" data-size="a3" onclick="setRoomSize(this,'a3')">A3</button>
+        <button class="pd-room-size active" data-size="a2" onclick="setRoomSize(this,'a2')">A2</button>
+        <button class="pd-room-size" data-size="a1" onclick="setRoomSize(this,'a1')">A1</button>
       </div>
     </div>
     <div class="pd-room-viewport">
@@ -1391,7 +1392,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         <div class="pd-room-frame"><div class="pd-room-mat"><img class="pd-room-print" id="pdRoomPrint" src="" alt=""></div></div>
       </div>
     </div>
-    <p class="pd-room-note">Room settings are illustrative. Actual print size, mat, and frame may vary.</p>
+    <p class="pd-room-note">Print sizes shown proportional to actual A-series dimensions. Mat and framing style may vary.</p>
   </div>
   <!-- RELATED PRINTS -->
   <div id="pdRelated" class="pd-related" style="display:none;"></div>
@@ -2943,7 +2944,7 @@ function openPrintDetail(print){
 // ===========================================================
 // ROOM PREVIEW
 // ===========================================================
-var _roomCurrent='gallery', _roomSize='md';
+var _roomCurrent='gallery', _roomSize='a2';
 // left/top = centre of the frame on the wall (uses translate(-50%,-50%) so the
 // anchor stays fixed regardless of print size). Adjust after swapping room images.
 var ROOM_CFG={
@@ -2967,18 +2968,18 @@ function _applyRoomOverlay(){
   var cfg=ROOM_CFG[_roomCurrent]||ROOM_CFG.gallery;
   var ov=document.getElementById('pdRoomOverlay');
   if(!ov) return;
-  ov.style.left=cfg.left; ov.style.top=cfg.top; ov.style.width=cfg.w[_roomSize]||cfg.w.md;
+  ov.style.left=cfg.left; ov.style.top=cfg.top; ov.style.width=cfg.w[_roomSize]||cfg.w.a2;
 }
 function openRoomPreview(){
   var preview=document.getElementById('pdRoomPreview');
   var img=document.getElementById('pdRoomPrint');
   if(img&&currentPrint&&currentPrint.img) img.src=currentPrint.img;
   if(preview){ preview.style.display='block'; preview.scrollIntoView({behavior:'smooth',block:'start'}); }
-  _roomCurrent='gallery'; _roomSize='md';
+  _roomCurrent='gallery'; _roomSize='a2';
   document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
   var gt=document.querySelector('.pd-room-tab[data-room="gallery"]'); if(gt) gt.classList.add('active');
   document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
-  var ms=document.querySelector('.pd-room-size[data-size="md"]'); if(ms) ms.classList.add('active');
+  var ms=document.querySelector('.pd-room-size[data-size="a2"]'); if(ms) ms.classList.add('active');
   var bg=document.getElementById('pdRoomBg'); if(bg) bg.src='/images/rooms/gallery.jpg';
   _applyRoomOverlay();
 }
