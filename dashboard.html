@@ -1526,7 +1526,7 @@
         </div>
         <div class="cms-section-body">
           <div class="cms-grid2">
-            <div class="cms-field" style="margin-bottom:0"><label>Headline line 1</label><input type="text" id="st-hero-line1"></div>
+            <div class="cms-field"><label>Headline line 1</label><input type="text" id="st-hero-line1"></div>
             <div class="cms-field" style="margin-bottom:0"><label>Headline line 2</label><input type="text" id="st-hero-line2"></div>
           </div>
           <div class="cms-field" style="margin-top:12px"><label>Tagline</label><textarea id="st-hero-desc" rows="2"></textarea></div>
@@ -1544,24 +1544,36 @@
           <div class="cms-section-title">Room Preview Images</div><span class="cms-chevron">▼</span>
         </div>
         <div class="cms-section-body">
-          <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">The backgrounds shown in the &ldquo;See it in a room&rdquo; preview on each print&rsquo;s page. Preview below, then upload a replacement to swap any image before it goes live.</p>
-          <div class="cms-grid2">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">The backgrounds shown in the &ldquo;See it in a room&rdquo; preview on each print&rsquo;s page. See current images below. Hit &ldquo;Generate options&rdquo; to get 3 AI variations to choose from, or upload your own.</p>
+          <div>
             <div class="cms-field">
               <label>Gallery</label>
               <img id="room-prev-gallery" src="/images/rooms/gallery.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
-              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'gallery')"></label>
+              <div style="display:flex;gap:6px;margin-bottom:6px">
+                <button id="room-gen-btn-gallery" onclick="generateRoomOptions('gallery')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
+                <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'gallery')"></label>
+              </div>
+              <div id="room-opts-gallery" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-gallery"></div>
             </div>
             <div class="cms-field">
               <label>Living room</label>
               <img id="room-prev-living" src="/images/rooms/living.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
-              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'living')"></label>
+              <div style="display:flex;gap:6px;margin-bottom:6px">
+                <button id="room-gen-btn-living" onclick="generateRoomOptions('living')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
+                <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'living')"></label>
+              </div>
+              <div id="room-opts-living" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-living"></div>
             </div>
             <div class="cms-field" style="margin-bottom:0">
               <label>Bedroom</label>
               <img id="room-prev-bedroom" src="/images/rooms/bedroom.jpg" style="width:100%;border-radius:4px;margin-bottom:6px;aspect-ratio:16/9;object-fit:cover;background:#e8e3dc;" onerror="this.style.opacity='.3'">
-              <label class="btn-upload" style="display:block;text-align:center;">Replace image<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'bedroom')"></label>
+              <div style="display:flex;gap:6px;margin-bottom:6px">
+                <button id="room-gen-btn-bedroom" onclick="generateRoomOptions('bedroom')" style="flex:1;font-family:var(--sans);font-size:11px;padding:.38rem .8rem;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--muted);cursor:pointer;transition:all .2s">⊕ Generate options</button>
+                <label class="btn-upload" style="flex:1;text-align:center;margin:0">Upload your own<input type="file" accept="image/*" onchange="cmsUploadRoomImg(this,'bedroom')"></label>
+              </div>
+              <div id="room-opts-bedroom" style="display:none;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"></div>
               <div class="cms-status" id="room-status-bedroom"></div>
             </div>
           </div>
@@ -5920,6 +5932,63 @@ function cmsUploadRoomImg(input, room){
       })
       .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
   });
+}
+
+// Room option picker — stores AI-generated images for each room
+var _roomOpts={};
+async function generateRoomOptions(room){
+  var wrap=document.getElementById('room-opts-'+room);
+  var btn=document.getElementById('room-gen-btn-'+room);
+  if(btn){btn.textContent='Generating…';btn.style.color='var(--muted)';}
+  if(wrap){wrap.style.display='grid';wrap.innerHTML='<div style="grid-column:1/-1;padding:1rem;font-size:12px;color:var(--muted);text-align:center">Asking AI to generate 3 options… ~20 seconds</div>';}
+  var results=await Promise.all([0,1,2].map(function(){
+    return fetch('/api/generate-room?room='+room+'&key='+CMS_KEY).then(function(r){return r.json();}).catch(function(){return null;});
+  }));
+  if(btn){btn.textContent='⊕ Regenerate';btn.style.color='';}
+  var opts=results.filter(function(r){return r&&r.image;});
+  _roomOpts[room]=opts;
+  if(!opts.length){
+    if(wrap) wrap.innerHTML='<div style="grid-column:1/-1;color:var(--red);font-size:12px;padding:.5rem;text-align:center">Generation failed — check the API key or try again.</div>';
+    return;
+  }
+  if(wrap){
+    wrap.innerHTML=opts.map(function(opt,i){
+      var src='data:'+(opt.mimeType||'image/png')+';base64,'+opt.image;
+      return '<div id="room-opt-'+room+'-'+i+'" onclick="highlightRoomOpt(''+room+'','+i+')" '
+        +'style="border:2px solid var(--rule);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s">'
+        +'<img src="'+src+'" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" loading="lazy">'
+        +'<div style="padding:5px 8px;display:flex;justify-content:space-between;align-items:center;background:#fafaf8">'
+        +'<span style="font-size:11px;color:var(--muted)">Option '+(i+1)+'</span>'
+        +'<button onclick="event.stopPropagation();applyRoomOpt(''+room+'','+i+')" '
+        +'style="font-size:10px;padding:3px 10px;border:none;border-radius:999px;background:var(--ink);color:#fff;cursor:pointer;font-family:var(--sans);letter-spacing:.03em">Use this</button>'
+        +'</div></div>';
+    }).join('');
+  }
+}
+function highlightRoomOpt(room,idx){
+  [0,1,2].forEach(function(i){
+    var el=document.getElementById('room-opt-'+room+'-'+i);
+    if(el) el.style.borderColor=(i===idx)?'var(--ink)':'var(--rule)';
+  });
+}
+async function applyRoomOpt(room,idx){
+  var opt=(_roomOpts[room]||[])[idx]; if(!opt) return;
+  var st=document.getElementById('room-status-'+room);
+  if(st){st.className='cms-status';st.textContent='Saving…';}
+  var r=await fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({filename:room+'.jpg',content:opt.image,folder:'images/rooms'})});
+  var d=await r.json();
+  if(d.ok){
+    var prev=document.getElementById('room-prev-'+room);
+    if(prev){prev.src=d.path+'?t='+Date.now();prev.style.opacity='1';}
+    var wrap=document.getElementById('room-opts-'+room);
+    if(wrap){wrap.innerHTML='';wrap.style.display='none';}
+    var btn=document.getElementById('room-gen-btn-'+room);
+    if(btn){btn.textContent='⊕ Generate options';btn.style.color='';}
+    if(st){st.className='cms-status ok';st.textContent='Set ✓ — live in ~2 min';}
+  } else {
+    if(st){st.className='cms-status err';st.textContent=d.error||'Save failed';}
+  }
 }
 
 // Call /api/ai-suggest — Claude + Grok run in parallel on the server, synthesised into one result
