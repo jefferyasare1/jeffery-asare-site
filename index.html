@@ -749,7 +749,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-size.active{background:var(--ink);border-color:var(--ink);color:#fff;}
 .pd-room-viewport{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--rule);}
 .pd-room-bg{width:100%;display:block;min-height:200px;background:#e8e3dc;object-fit:cover;}
-.pd-room-overlay{position:absolute;transform:translateX(-50%);transition:left .3s,top .3s,width .3s;}
+.pd-room-overlay{position:absolute;transform:translate(-50%,-50%);transition:left .3s,top .3s,width .3s;}
 .pd-room-frame{background:#1c1c1c;padding:5px;box-shadow:0 4px 20px rgba(0,0,0,.35);}
 .pd-room-mat{background:#f0ece4;padding:10px;}
 .pd-room-print{display:block;width:100%;height:auto;}
@@ -2944,10 +2944,12 @@ function openPrintDetail(print){
 // ROOM PREVIEW
 // ===========================================================
 var _roomCurrent='gallery', _roomSize='md';
+// left/top = centre of the frame on the wall (uses translate(-50%,-50%) so the
+// anchor stays fixed regardless of print size). Adjust after swapping room images.
 var ROOM_CFG={
-  gallery:{ left:'50%', top:'22%', w:{ sm:'14%', md:'20%', lg:'27%' } },
-  living: { left:'50%', top:'12%', w:{ sm:'12%', md:'17%', lg:'23%' } },
-  bedroom:{ left:'50%', top:'10%', w:{ sm:'12%', md:'17%', lg:'22%' } }
+  gallery:{ left:'50%', top:'30%', w:{ sm:'14%', md:'20%', lg:'27%' } },
+  living: { left:'50%', top:'22%', w:{ sm:'12%', md:'17%', lg:'23%' } },
+  bedroom:{ left:'50%', top:'20%', w:{ sm:'12%', md:'17%', lg:'22%' } }
 };
 function setRoom(btn,room){
   _roomCurrent=room;
