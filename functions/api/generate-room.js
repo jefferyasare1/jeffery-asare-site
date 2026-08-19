@@ -27,9 +27,9 @@ export async function onRequestGet(context) {
   }
 
   const prompts = {
-    gallery: 'Interior of a minimalist contemporary art gallery. Pure white walls, polished concrete floor. Straight-on view of a clean empty white wall, centered in frame, ready for artwork. Soft even diffused daylight from skylights. No artwork hanging on wall. No people. Professional architectural photography. Photorealistic, ultra detailed.',
-    living: 'Interior of a warm modern Scandinavian living room. Pale sand-beige walls. A low contemporary light gray sofa centered against the back wall. Light natural oak hardwood floor. Warm ambient lighting. Empty wall space clearly visible above the sofa, centered in frame. No artwork hanging. No people. Professional interior design photography. Photorealistic, ultra detailed.',
-    bedroom: 'Interior of a serene minimalist bedroom. Soft warm white walls. Neatly made bed with crisp white linen and a simple natural wood headboard, centered against the back wall. Natural morning window light. Empty wall clearly visible above the headboard, centered in frame. No artwork hanging. No people. Professional interior design photography. Photorealistic, ultra detailed.'
+    gallery: 'Fine art gallery interior, portrait format vertical photograph. Warm white plaster walls, overhead gallery spotlights casting soft even light. Warm herringbone oak parquet floor. One large empty wall centered prominently in frame: smooth, bright, ready for artwork. No art on the wall. No people. Slight upward camera angle. Professional architectural photography, photorealistic, ultra-detailed. Clean, sophisticated gallery aesthetic.',
+    living: 'Warm sophisticated living room interior, portrait format vertical photograph. Deep dusty taupe walls. A deep corduroy sectional sofa in warm caramel and tawny brown positioned below a large empty wall. Natural linen curtains filtering soft afternoon light. Amber pendant light bulb. Dried botanical branches in a dark ceramic vase. Round natural oak coffee table. One large empty wall clearly visible above and behind the sofa, no artwork on wall, smooth surface. No people. Warm ambient light. Photorealistic, ultra-detailed interior design photography.',
+    bedroom: 'Serene minimalist bedroom interior, portrait format vertical photograph. Warm cream and off-white walls, polished pale hardwood floor. Simple natural oak bed frame with softly rounded headboard, linen bedding in sand and oat tones. Small square oak nightstand with a warm white table lamp glowing softly. Ceramic potted plant beside the bed. One large empty wall clearly visible above the headboard, no artwork on wall, smooth plaster surface. No people. Soft warm evening light. Photorealistic, ultra-detailed interior design photography, minimal Japandi aesthetic.'
   };
 
   const prompt = prompts[room];
@@ -46,7 +46,7 @@ export async function onRequestGet(context) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             instances: [{ prompt }],
-            parameters: { sampleCount: 1, aspectRatio: '16:9' }
+            parameters: { sampleCount: 1, aspectRatio: '3:4' }
           })
         }
       );
@@ -78,7 +78,11 @@ export async function onRequestGet(context) {
   }
 
   try {
-    const img = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt });
+    const img = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+      prompt,
+      width: 768,
+      height: 1024
+    });
     let b64 = '';
 
     if (img && typeof img.image === 'string') {
