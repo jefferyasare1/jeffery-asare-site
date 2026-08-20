@@ -121,8 +121,12 @@ export async function onRequestGet(context) {
     throw new Error('Unknown FLUX response type');
   }
 
+  // Run sequentially to avoid overwhelming Workers AI capacity
   try {
-    const results = await Promise.all([runFlux(), runFlux(), runFlux()]);
+    const results = [];
+    for (let i = 0; i < 3; i++) {
+      results.push(await runFlux());
+    }
     return new Response(
       JSON.stringify({ images: results, mimeType: 'image/png', room, source: 'flux-1-schnell' }),
       { headers }
@@ -130,8 +134,8 @@ export async function onRequestGet(context) {
   } catch (e) {
     console.error('Workers AI FLUX failed:', e.message);
     return new Response(
-      JSON.stringify({ error: e.message, room }),
-      { status: 500, headers }
+      JSON.stringify({ error: 'AI capacity is temporarily exceeded. Wait a moment and try again.' }),
+      { status: 503, headers }
     );
   }
 }
