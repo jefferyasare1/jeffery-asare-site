@@ -945,7 +945,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <a id="mmPortBtn">Portfolio</a>
   <a id="mmShopBtn">Shop</a>
   <a id="mmContactBtn">Contact</a>
-  <span class="mobile-menu-foot">Jeffery Asare ÃÂ· Accra, Ghana</span>
+  <span class="mobile-menu-foot">Jeffery Asare ÃÂÃÂ· Accra, Ghana</span>
 </div>
 
 <!-- LIGHTBOX -->
@@ -963,9 +963,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="lb-title" id="lbTitle"></div>
     <div class="lb-pix-meta">
       <span class="lb-series" id="lbSeries"></span>
-      <span class="lb-pix-sep">ÃÂ·</span>
+      <span class="lb-pix-sep">ÃÂÃÂ·</span>
       <span class="lb-pix-loc" id="lbLoc"></span>
-      <span class="lb-pix-sep">ÃÂ·</span>
+      <span class="lb-pix-sep">ÃÂÃÂ·</span>
       <span class="lb-pix-date" id="lbDate"></span>
     </div>
   </div>
@@ -1698,7 +1698,7 @@ function renderPhotoOfWeek(){
   var firstSunday=new Date(startOfYear.getFullYear(),startOfYear.getMonth(),startOfYear.getDate()-startOfYear.getDay());
   var weekOfYear=Math.floor((thisSunday-firstSunday)/(7*24*60*60*1000))+1;
   // Populate editorial spread
-  document.getElementById("potwWeek").textContent="Photo of the Week ÃÂ· Week "+String(weekOfYear).padStart(2,"0")+" ÃÂ· "+now.getFullYear();
+  document.getElementById("potwWeek").textContent="Photo of the Week ÃÂÃÂ· Week "+String(weekOfYear).padStart(2,"0")+" ÃÂÃÂ· "+now.getFullYear();
   document.getElementById("potwTitle").textContent=photo.title||"";
   document.getElementById("potwLoc").textContent=photo.loc||"";
   document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
@@ -1862,7 +1862,7 @@ function renderShop(page){
       +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;"style="display:none"></div>'
       +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
       +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
-      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;ÃÂ·&nbsp; or get in touch</p>'
+      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;ÃÂÃÂ·&nbsp; or get in touch</p>'
       +'</div>';
     return;
   }
@@ -2075,8 +2075,8 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
   var EASE=0.05;       // lerp factor for parallax shift
   var TILT=10;         // max tilt degrees
   var TILT_EASE=0.08;  // tilt follows cursor with slight lag
-  var S_PORT=12;  // portfolio ÃÂÃÂ±% shift
-  var S_POTW=24;  // POTW ÃÂÃÂ±% shift
+  var S_PORT=12;  // portfolio ÃÂÃÂÃÂÃÂ±% shift
+  var S_POTW=24;  // POTW ÃÂÃÂÃÂÃÂ±% shift
 
   var cards=[];
   var potwSh=0,potwTgt=0;
@@ -2087,7 +2087,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     var baseB=null, baseG=null;
     window.addEventListener("deviceorientation",function(e){
       if(baseB===null){ baseB=e.beta||0; baseG=e.gamma||0; }
-      // clamp to ÃÂÃÂ±25ÃÂÃÂ° from neutral position
+      // clamp to ÃÂÃÂÃÂÃÂ±25ÃÂÃÂÃÂÃÂ° from neutral position
       gyroTy=Math.max(-.5,Math.min(.5,(e.beta -baseB)/25));
       gyroTx=Math.max(-.5,Math.min(.5,(e.gamma-baseG)/25));
       usingGyro=true;
@@ -2470,7 +2470,7 @@ function _buildJournalList(posts, seriesFilter){
     var rt=_readingTime(p.body);
     return '<div class="journal-post" data-jid="'+p.id+'">'
       +'<div class="journal-post-body">'
-      +'<div class="journal-post-meta">'+p.series+' &nbsp;ÃÂ·&nbsp; '+dateStr+' &nbsp;ÃÂ·&nbsp; '+rt+'</div>'
+      +'<div class="journal-post-meta">'+p.series+' &nbsp;ÃÂÃÂ·&nbsp; '+dateStr+' &nbsp;ÃÂÃÂ·&nbsp; '+rt+'</div>'
       +'<div class="journal-post-title">'+p.title+'</div>'
       +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
       +'</div>'
@@ -2590,7 +2590,7 @@ function renderSocialProof(){
         else parts.push('Last purchased '+d.lastPurchaseDays+' days ago');
       }
       if(!parts.length) { el.style.display='none'; return; }
-      el.innerHTML = '<div class="shop-social-proof">'+parts.join(' &nbsp;ÃÂ·&nbsp; ')+'</div>';
+      el.innerHTML = '<div class="shop-social-proof">'+parts.join(' &nbsp;ÃÂÃÂ·&nbsp; ')+'</div>';
       el.style.display = '';
     })
     .catch(function(){ el.style.display='none'; });
@@ -2808,10 +2808,10 @@ function openPrintDetail(print){
 
     // Size definitions (mm -> pixels at scale: 1mm = 0.28px, person = 170cm)
     var SIZES = [
-      {label:'A4', w:210, h:297, dims:'21 ÃÂ 29.7 cm'},
-      {label:'A3', w:297, h:420, dims:'29.7 ÃÂ 42 cm'},
-      {label:'A2', w:420, h:594, dims:'42 ÃÂ 59.4 cm'},
-      {label:'A1', w:594, h:841, dims:'59.4 ÃÂ 84.1 cm'}
+      {label:'A4', w:210, h:297, dims:'21 ÃÂÃÂ 29.7 cm'},
+      {label:'A3', w:297, h:420, dims:'29.7 ÃÂÃÂ 42 cm'},
+      {label:'A2', w:420, h:594, dims:'42 ÃÂÃÂ 59.4 cm'},
+      {label:'A1', w:594, h:841, dims:'59.4 ÃÂÃÂ 84.1 cm'}
     ];
     var scale = 0.17; // mm -> px for display
     var personH = Math.round(1700 * scale); // 170cm in mm
@@ -3012,7 +3012,7 @@ var COUNTRIES=[
   {code:'BJ',name:'Benin',time:'5 - 8 business days',region:'wa'},
   {code:'BF',name:'Burkina Faso',time:'7 - 10 business days',region:'wa'},
   {code:'CV',name:'Cape Verde',time:'7 - 10 business days',region:'wa'},
-  {code:'CI',name:'CÃÂ´te d\'Ivoire',time:'7 - 10 business days',region:'wa'},
+  {code:'CI',name:'CÃÂÃÂ´te d\'Ivoire',time:'7 - 10 business days',region:'wa'},
   {code:'GM',name:'Gambia',time:'7 - 10 business days',region:'wa'},
   {code:'GN',name:'Guinea',time:'7 - 10 business days',region:'wa'},
   {code:'GW',name:'Guinea-Bissau',time:'7 - 10 business days',region:'wa'},
@@ -3240,7 +3240,7 @@ function renderCartItems(){
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
-      +'<div class="cart-item-sub">'+item.size+' &nbsp;ÃÂ·&nbsp; Qty '+item.qty+'</div>'
+      +'<div class="cart-item-sub">'+item.size+' &nbsp;ÃÂÃÂ·&nbsp; Qty '+item.qty+'</div>'
       +'<div class="cart-item-price">'+priceStr+'</div>'
       +'<button class="cart-item-remove" data-id="'+item.print.id+'" data-size="'+item.size+'" onclick="removeFromCart(this.dataset.id,this.dataset.size)">Remove</button>'
       +'</div></div>';
@@ -3426,7 +3426,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
   var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var dateStr=months[now.getMonth()]+" "+now.getDate()+", "+now.getFullYear();
   var uniqueNum=String(Math.floor(1000+Math.random()*9000));
-  var coaRef="COA-"+uniqueNum+" ÃÂ· "+now.getFullYear();
+  var coaRef="COA-"+uniqueNum+" ÃÂÃÂ· "+now.getFullYear();
   var isSingle=items.length===1;
   var certDataArr=[]; // collects per-print data; email fires on Print click
 
@@ -3965,7 +3965,7 @@ function protectImages(){
   document.querySelectorAll('img').forEach(function(img){
     img.setAttribute('draggable','false');
     img.setAttribute('data-pin-nopin','true');
-    img.setAttribute('data-pin-description','ÃÂÃÂ© Jeffery Asare. All rights reserved');
+    img.setAttribute('data-pin-description','ÃÂÃÂÃÂÃÂ© Jeffery Asare. All rights reserved');
   });
 }
 protectImages();
