@@ -1086,6 +1086,10 @@
     <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="10 2 12.4 7.5 18.5 8.2 14 12.3 15.3 18.3 10 15.4 4.7 18.3 6 12.3 1.5 8.2 7.6 7.5"/></svg>
     Reviews <span class="sn-badge" id="sn-reviews-badge" style="display:none;background:var(--amber);color:var(--amber-bg);"></span>
   </button>
+  <button class="sn-item" id="sn-protect" onclick="switchTab('protect')">
+    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2L3 5v5c0 4.4 3 8.3 7 9.3 4-1 7-4.9 7-9.3V5L10 2z"/></svg>
+    Protection <span class="sn-badge" id="sn-protect-badge" style="display:none;background:var(--amber);"></span>
+  </button>
   <div class="sn-bottom">
     <button class="sn-item" id="sn-clients" onclick="switchTab('clients')">
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
@@ -1920,6 +1924,58 @@
     <div id="rev-approved-list"><div class="aq-empty">Loading...</div></div>
   </div>
 
+  <!-- PROTECTION PANEL -->
+  <div class="panel" id="panel-protect">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <h2 class="panel-title mob-skip" style="margin-bottom:4px;">Image Protection</h2>
+        <p class="panel-sub" style="margin-bottom:0;">Three-layer defence against screenshots, sharpening, and AI upscaling.</p>
+      </div>
+      <button class="btn-card" onclick="protectRefresh()" style="font-size:11px;padding:6px 12px;">&#8635; Refresh</button>
+    </div>
+    <div class="section-label" style="margin-top:0;">Active layers</div>
+    <div style="display:grid;gap:10px;margin-bottom:28px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);">
+        <span style="font-size:18px;">&#10003;</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">55% resolution cap</div><div style="font-size:11px;color:var(--muted);">Browser never receives the full-resolution image. Sharpening and upscaling can't recover pixels that were never sent.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);">
+        <span style="font-size:18px;">&#10003;</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Temporal dithering</div><div style="font-size:11px;color:var(--muted);">Canvas alternates pixel sets at 22 fps. A screenshot captures one frame - a soft, cross-hatched ghost of a 55%-res render.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);">
+        <span style="font-size:18px;">&#10003;</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Steganographic fingerprint</div><div style="font-size:11px;color:var(--muted);">Each visitor session gets a unique invisible watermark encoded into pixel LSBs. Leaked screenshots can be traced back to that visitor.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);" id="protect-poison-row">
+        <span style="font-size:18px;" id="protect-poison-icon">&#9675;</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);">Adversarial AI poisoning</div>
+          <div style="font-size:11px;color:var(--muted);">Bakes imperceptible pixel perturbations into source images. AI upscalers output your logo at 80% center instead of enhancing the photo.</div>
+          <div style="margin-top:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:11px;color:var(--muted);" id="protect-progress-label">Loading status...</span>
+              <span style="font-size:11px;font-weight:600;color:var(--ink);" id="protect-progress-pct"></span>
+            </div>
+            <div style="height:6px;border-radius:3px;background:rgba(0,0,0,.1);overflow:hidden;"><div id="protect-progress-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .4s;width:0%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">Run the poisoning script</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Runs on your Mac overnight. Once done, push to GitHub and Cloudflare deploys the protected versions. Picks up where it left off if interrupted.</p>
+    <div style="background:var(--warm);border-radius:8px;padding:12px 14px;font-family:monospace;font-size:12px;color:var(--ink);margin-bottom:14px;word-break:break-all;line-height:1.7;">cd ~/Documents/GitHub/jeffery-asare-site &amp;&amp; pip3 install torch torchvision pillow &amp;&amp; python3 tools/poison_all.py</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-card" onclick="protectCopyCmd()" style="font-size:12px;padding:9px 18px;" id="protect-copy-btn">Copy command</button>
+      <button class="btn-card" onclick="protectCopyCmd(true)" style="font-size:12px;padding:9px 18px;background:var(--warm);color:var(--ink);">Copy with --gpu flag</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;">Open Terminal, paste, and hit Enter. Saves progress after each image so you can interrupt and resume.</p>
+    <div class="section-label" style="margin-top:20px;">After the script finishes</div>
+    <div style="background:var(--warm);border-radius:8px;padding:12px 14px;font-family:monospace;font-size:12px;color:var(--ink);margin-bottom:10px;line-height:1.7;">cd ~/Documents/GitHub/jeffery-asare-site &amp;&amp; git add images/ &amp;&amp; git commit -m "poison all images" &amp;&amp; git push</div>
+    <button class="btn-card" onclick="protectCopyPush()" style="font-size:12px;padding:9px 18px;background:var(--warm);color:var(--ink);">Copy push command</button>
+    <div class="section-label" style="margin-top:24px;">Image status <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;" id="protect-img-count"></span></div>
+    <div id="protect-img-list" style="display:grid;gap:6px;"></div>
+  </div>
 </div><!-- /page -->
 </div><!-- /dash-main -->
 
@@ -1937,7 +1993,8 @@
     <button class="mob-nav-item" onclick="mobNavGo('newsletter')"><span class="mob-nav-num">06</span><span class="mob-nav-name dim" id="mn-newsletter">Newsletter</span><span class="mob-nav-alert" id="mn-alert-newsletter"></span></button>
     <button class="mob-nav-item" onclick="mobNavGo('messages')"><span class="mob-nav-num">07</span><span class="mob-nav-name dim" id="mn-messages">Messages</span><span class="mob-nav-sub" id="mn-sub-messages"></span><span class="mob-nav-alert" id="mn-alert-messages"></span></button>
     <button class="mob-nav-item" onclick="mobNavGo('reviews')"><span class="mob-nav-num">08</span><span class="mob-nav-name dim" id="mn-reviews">Reviews</span></button>
-    <button class="mob-nav-item" onclick="mobNavGo('clients')"><span class="mob-nav-num">09</span><span class="mob-nav-name dim" id="mn-clients">Clients</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('protect')"><span class="mob-nav-num">09</span><span class="mob-nav-name dim" id="mn-protect">Protection</span></button>
+    <button class="mob-nav-item" onclick="mobNavGo('clients')"><span class="mob-nav-num">10</span><span class="mob-nav-name dim" id="mn-clients">Clients</span></button>
     <button class="mob-nav-item" onclick="mobNavGo('analytics')"><span class="mob-nav-num">10</span><span class="mob-nav-name dim" id="mn-analytics">Analytics</span></button>
   </div>
 </div>
@@ -2181,7 +2238,68 @@ function switchTab(name){
   if(name === 'messages')   msgInit();
   if(name === 'analytics')  anInit();
   if(name === 'reviews')    revInit();
+  if(name === 'protect')    protectInit();
 }
+// ?? Protection panel ????????????????????????????????????????????????
+var _protectLoaded=false;
+function protectInit(){if(_protectLoaded)return;_protectLoaded=true;protectRefresh();}
+function protectRefresh(){
+  var label=document.getElementById('protect-progress-label');
+  var pct=document.getElementById('protect-progress-pct');
+  var bar=document.getElementById('protect-progress-bar');
+  var badge=document.getElementById('sn-protect-badge');
+  var list=document.getElementById('protect-img-list');
+  var count=document.getElementById('protect-img-count');
+  var icon=document.getElementById('protect-poison-icon');
+  var row=document.getElementById('protect-poison-row');
+  if(label)label.textContent='Checking status...';
+  fetch('/tools/poison_all.log?_='+Date.now())
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(log){
+      if(!log){log={};}
+      var paths=Object.keys(log);
+      var done=paths.filter(function(p){return log[p]==='ok';}).length;
+      var total=Math.max(paths.length,88);
+      var p=total>0?Math.round(done*100/total):0;
+      var allDone=done>=total&&total>0;
+      if(bar)bar.style.width=p+'%';
+      if(pct)pct.textContent=p+'%';
+      if(label)label.textContent=done+' / '+total+' images poisoned';
+      if(icon)icon.textContent=allDone?'?':'?';
+      if(row){row.style.background=allDone?'rgba(34,197,94,.08)':'rgba(245,158,11,.08)';row.style.borderColor=allDone?'rgba(34,197,94,.2)':'rgba(245,158,11,.25)';}
+      if(badge){if(!allDone&&total>0){badge.textContent=total-done;badge.style.display='';}else{badge.style.display='none';}}
+      if(count)count.textContent='('+total+' total)';
+      if(list){
+        if(paths.length===0){list.innerHTML='<div style="font-size:12px;color:var(--muted);padding:12px 0;">Script has not run yet. Copy the command below and run it in Terminal.</div>';}
+        else{
+          var html='';
+          paths.sort().forEach(function(path){
+            var ok=log[path]==='ok';
+            var name=path.split('/').pop();
+            var dir=path.split('/').slice(-2,-1)[0]||'';
+            html+='<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:7px;background:var(--warm);">'
+              +'<span style="font-size:14px;'+(ok?'color:#22c55e':'color:#f59e0b')+'">'+(ok?'?':'?')+'</span>'
+              +'<div style="min-width:0;flex:1;"><div style="font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(name)+'</div>'
+              +'<div style="font-size:10px;color:var(--muted);">'+escH(dir)+'</div></div>'
+              +'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;'+(ok?'background:rgba(34,197,94,.12);color:#15803d':'background:rgba(245,158,11,.12);color:#b45309')+'">'+(ok?'Protected':'Pending')+'</span>'
+              +'</div>';
+          });
+          list.innerHTML=html;
+        }
+      }
+    })
+    .catch(function(){
+      if(label)label.textContent='Script not yet run';
+      if(pct)pct.textContent='0%';
+      if(bar)bar.style.width='0%';
+      if(list)list.innerHTML='<div style="font-size:12px;color:var(--muted);padding:12px 0;">Run the command below to start protecting your images.</div>';
+    });
+}
+function protectCopyCmd(gpu){
+  var cmd='cd ~/Documents/GitHub/jeffery-asare-site && pip3 install torch torchvision pillow && python3 tools/poison_all.py'+(gpu?' --gpu':'');
+  navigator.clipboard.writeText(cmd).then(function(){var b=document.getElementById('protect-copy-btn');if(b){var t=b.textContent;b.textContent='Copied!';setTimeout(function(){b.textContent=t;},1800);}});
+}
+function protectCopyPush(){navigator.clipboard.writeText('cd ~/Documents/GitHub/jeffery-asare-site && git add images/ && git commit -m "poison all images" && git push');}
 
 // ── Overview / Today panel ──────────────────────────────────────────
 function renderOverview(){
