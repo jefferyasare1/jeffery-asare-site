@@ -198,6 +198,7 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 var(--pad) 4rem;}
 .photo-card{position:relative;overflow:hidden;cursor:pointer;background:var(--warm);aspect-ratio:3/4;}
 .photo-card img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-card canvas{width:100%;height:100%;display:block;}
 .photo-card-info{position:absolute;bottom:0;left:0;right:0;padding:2rem 1.2rem 1.2rem;background:linear-gradient(transparent,rgba(0,0,0,.65));opacity:0;transition:opacity .3s;}
 .photo-card:hover .photo-card-info{opacity:1;}
 .photo-card-title{font-size:13px;color:#fff;font-weight:400;margin-bottom:.2rem;}
@@ -455,6 +456,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* Portfolio parallax  -  images oversized so shift never reveals card bg */
 .photo-card{background:#111;} /* dark fallback: invisible if edge shows */
 .photo-card img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;transition:none;will-change:transform;}
+.photo-card canvas{position:absolute;top:-15%;left:0;width:100%;height:130%;will-change:transform;}
 .photo-card:hover img{transform:none;} /* JS handles transform */
 /* POTW editorial parallax */
 .potw-editorial-img{position:absolute;top:-26%;left:0;width:100%;height:152%;object-fit:cover;opacity:.72;will-change:transform;}
@@ -2102,7 +2104,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
   function refresh(){
     document.querySelectorAll(".photo-card").forEach(function(el){
       if(el._pxInit) return;
-      var img=el.querySelector("img");
+      var img=el.querySelector("img,canvas[data-prot]");
       if(!img) return;
       el._pxInit=true;
       var t=dist(el)*S_PORT;
@@ -3994,9 +3996,15 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
     _pool=alive;
     _rafId=_pool.length?requestAnimationFrame(_tick):null;
   }
+  function _coverDraw(ctx,img,w,h){
+    var iw=img.naturalWidth,ih=img.naturalHeight;
+    var sc=Math.max(w/iw,h/ih);
+    var sw=w/sc,sh=h/sc,sx=(iw-sw)/2,sy=(ih-sh)/2;
+    ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
+  }
   function _paint(e,phase){
     var ctx=e.ctx,w=e.w,h=e.h;
-    ctx.drawImage(e.img,0,0,w,h);
+    if(e.cover){_coverDraw(ctx,e.img,w,h);}else{ctx.drawImage(e.img,0,0,w,h);}
     var id=ctx.getImageData(0,0,w,h);
     var d=id.data;
     for(var y=0;y<h;y++){
@@ -4058,6 +4066,37 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
       img.setAttribute('data-prot','1');
       if(img.complete&&img.naturalWidth){_mkCanvas(img,t.css);}
       else{img.addEventListener('load',function(){_mkCanvas(img,t.css);},{once:true});}
+    }).observe(el,{childList:true,subtree:true});
+  });
+
+  // Grid protection: photoGrid cards + shopList cards
+  [{id:'photoGrid',cls:''},{id:'shopList',cls:'shop-card-img'}].forEach(function(g){
+    var el=document.getElementById(g.id);
+    if(!el) return;
+    new MutationObserver(function(){
+      el.querySelectorAll('img:not([data-prot])').forEach(function(img){
+        if(!img.src) return;
+        img.setAttribute('data-prot','1');
+        var cv=document.createElement('canvas');
+        if(g.cls) cv.className=g.cls;
+        cv.setAttribute('data-prot','1');
+        cv.style.userSelect='none'; cv.style.webkitUserSelect='none';
+        cv.setAttribute('draggable','false');
+        cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+        cv.addEventListener('dragstart',function(e){e.preventDefault();});
+        var ctx=cv.getContext('2d');
+        var img2=new Image();
+        img2.onload=function(){
+          var iw=img2.naturalWidth,ih=img2.naturalHeight;
+          var w=Math.max(1,(iw*0.55)|0),h=Math.max(1,(ih*0.55)|0);
+          cv.width=w; cv.height=h;
+          _coverDraw(ctx,img2,w,h);
+          _pool.push({cv:cv,ctx:ctx,img:img2,w:w,h:h,phase:-1,cover:true});
+          if(!_rafId) _rafId=requestAnimationFrame(_tick);
+        };
+        img2.src=img.src;
+        img.parentNode.replaceChild(cv,img);
+      });
     }).observe(el,{childList:true,subtree:true});
   });
 })();
