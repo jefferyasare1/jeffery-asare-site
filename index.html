@@ -736,8 +736,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .cert-print-btn:hover{opacity:.8;}
 @media(max-width:900px){.print-detail-grid{grid-template-columns:1fr;}.print-detail-img-wrap{position:static;}.cert-sig-grid{grid-template-columns:1fr;}}
 /* ROOM PREVIEW */
-.pd-room-trigger{display:block;width:100%;background:none;border:1px solid var(--rule);border-radius:999px;padding:.55rem 1.2rem;font-family:var(--sans);font-size:12px;color:var(--muted);cursor:pointer;margin-top:.8rem;transition:all .2s;letter-spacing:.05em;}
-.pd-room-trigger:hover{border-color:var(--ink);color:var(--ink);}
+.pd-room-trigger{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:none;border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink);cursor:pointer;margin-top:.8rem;transition:border-color .2s;}
+.pd-room-trigger:hover{border-color:#999;}
 .pd-room-preview{padding:0 var(--pad) 4rem;}
 .pd-room-header{display:flex;align-items:center;justify-content:space-between;padding:2.5rem 0 1.2rem;border-top:1px solid var(--rule);}
 .pd-room-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
@@ -1856,12 +1856,9 @@ function renderShop(page){
   list.innerHTML="";
   var allVisible=PRINTS.filter(function(p){ return p.title!=="Untitled Print" && p.img && (p.img.indexOf('/')==0||p.img.indexOf('http')==0); });
   if(!allVisible.length){
-    list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;">'
-      +'<div style="font-size:32px;margin-bottom:1.2rem;opacity:.35;">&#9723;</div>'
-      +'<p style="font-family:var(--title);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:.6rem;">The prints are coming.</p>'
-      +'<p style="font-size:13px;color:var(--muted);line-height:1.8;max-width:380px;margin:0 auto 2rem;">A curated selection of limited edition archival prints is being prepared. Each one signed, numbered, and made to last.</p>'
-      +'<p style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.6;">Check back soon &nbsp;·&nbsp; or get in touch</p>'
-      +'</div>';
+    if(!window.__shopDataLoaded){
+      list.innerHTML='<div style="padding:5rem var(--pad);text-align:center;"><div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);opacity:.5;">Loading&hellip;</div></div>';
+    }
     return;
   }
   var totalPages=Math.ceil(allVisible.length/SHOP_PER_PAGE);
@@ -4214,9 +4211,11 @@ fetch('/_data/settings/contact-info.json')
 
 
 // Load shop prints from CMS
+window.__shopDataLoaded = false;
 fetch('/_data/prints.json')
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(d){
+    window.__shopDataLoaded = true;
     if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
     PRINTS = d.prints.map(function(p){
       var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('pr'+Math.random().toString(36).slice(2));
@@ -4234,7 +4233,7 @@ fetch('/_data/prints.json')
     // Re-render shop if it's currently the active page
     var shopPage = document.getElementById('page-shop');
     if(shopPage && shopPage.classList.contains('active') && typeof window.renderShop === 'function') window.renderShop(0);
-      }).catch(function(){});
+      }).catch(function(){ window.__shopDataLoaded = true; });
 </script>
 
 <!-- CART FLOAT -->
