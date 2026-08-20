@@ -4071,7 +4071,7 @@ fetch('/_data/settings/contact-info.json')
       var el=document.getElementById('contactInstagram');
       if(el){ el.textContent=s.contact_instagram_handle; el.href=s.contact_instagram_url; }
     }
-    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='&#x23F0; '+s.contact_response; }
+    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='\u23F0 '+s.contact_response; }
   }).catch(function(){});
 
 
