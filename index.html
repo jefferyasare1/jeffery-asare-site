@@ -456,7 +456,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* Portfolio parallax  -  images oversized so shift never reveals card bg */
 .photo-card{background:#111;} /* dark fallback: invisible if edge shows */
 .photo-card img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;transition:none;will-change:transform;}
-.photo-card canvas{position:absolute;top:-15%;left:0;width:100%;height:130%;will-change:transform;}
+.photo-card canvas{position:absolute;top:-15%;left:0;width:100%;height:130%;}
 .photo-card:hover img{transform:none;} /* JS handles transform */
 /* POTW editorial parallax */
 .potw-editorial-img{position:absolute;top:-26%;left:0;width:100%;height:152%;object-fit:cover;opacity:.72;will-change:transform;}
@@ -4094,8 +4094,8 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
         img2.onload=function(){
           var dispW=par.offsetWidth||300;
           var dispH=Math.round((par.offsetHeight||400)*1.3);
-          var w=Math.max(1,(dispW*0.82)|0);
-          var h=Math.max(1,(dispH*0.82)|0);
+          var w=Math.max(1,(dispW*0.65)|0);
+          var h=Math.max(1,(dispH*0.65)|0);
           cv.width=w; cv.height=h;
           _coverDraw(ctx,img2,w,h);
           // Grid thumbnails: static render only (82% res cap + poisoning covers them)
