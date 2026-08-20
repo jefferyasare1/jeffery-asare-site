@@ -4094,8 +4094,8 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
         img2.onload=function(){
           var dispW=par.offsetWidth||300;
           var dispH=Math.round((par.offsetHeight||400)*1.3);
-          var w=Math.max(1,(dispW*0.55)|0);
-          var h=Math.max(1,(dispH*0.55)|0);
+          var w=Math.max(1,(dispW*0.82)|0);
+          var h=Math.max(1,(dispH*0.82)|0);
           cv.width=w; cv.height=h;
           _coverDraw(ctx,img2,w,h);
           _pool.push({cv:cv,ctx:ctx,img:img2,w:w,h:h,phase:-1,cover:true,slow:true});
