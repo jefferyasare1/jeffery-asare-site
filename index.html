@@ -4098,8 +4098,8 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
           var h=Math.max(1,(dispH*0.82)|0);
           cv.width=w; cv.height=h;
           _coverDraw(ctx,img2,w,h);
-          _pool.push({cv:cv,ctx:ctx,img:img2,w:w,h:h,phase:-1,cover:true,slow:true});
-          if(!_rafId) _rafId=requestAnimationFrame(_tick);
+          // Grid thumbnails: static render only (82% res cap + poisoning covers them)
+          // No pool entry = no RAF overhead during scroll
         };
         img2.src=img.src;
       });
