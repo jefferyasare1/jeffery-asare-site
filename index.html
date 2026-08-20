@@ -4236,9 +4236,8 @@ fetch('/_data/prints.json')
         editionSize: edTotal, printsSold: sold, remaining: remaining
       };
     });
-    // Re-render shop if it's currently the active page
-    var shopPage = document.getElementById('page-shop');
-    if(shopPage && shopPage.classList.contains('active') && typeof window.renderShop === 'function') window.renderShop(0);
+    // Always refresh the shop list so data is ready whenever the user navigates there
+    if(typeof window.renderShop === 'function') window.renderShop(0);
       }).catch(function(){ window.__shopDataLoaded = true; });
 </script>
 
