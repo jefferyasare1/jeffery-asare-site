@@ -2787,7 +2787,7 @@ function openPrintDetail(print){
   // Update WhatsApp button to reference this specific print
   var waBtn = document.getElementById('waFloat');
   if(waBtn){
-    var waMsg = "Hi Jeffery, I'm interested in the ""+print.title+"" print. Could you tell me more?";
+    var waMsg = "Hi Jeffery, I'm interested in the \""+print.title+"\" print. Could you tell me more?";
     waBtn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(waMsg);
   }
 
@@ -4165,26 +4165,33 @@ fetch('/_data/prints.json')
     if(strips[0]) strips.forEach(function(s){s.style.display='none';});
     // Set logo initial state
     gsap.set(splashLogo,{opacity:0,scale:0.05});
-    gsap.set(splash,{clipPath:'circle(141% at 50% 50%)'});
+        gsap.set(splash,{clipPath:'circle(141% at 50% 50%)'})
+    function _dismissSplash(){splash.style.display='none';splash.style.pointerEvents='none';}
     function _runSplash(){
       gsap.timeline()
-        // Stamp: scales in with overshoot, settles
         .to(splashLogo,{opacity:1,scale:1.28,duration:0.28,ease:'power3.out'})
         .to(splashLogo,{scale:0.9,duration:0.11,ease:'power2.in'})
         .to(splashLogo,{scale:1,duration:0.15,ease:'back.out(2.5)'})
-        // Hold
         .to(splashLogo,{opacity:1,duration:0.55})
-        // Aperture iris: black field (with logo) collapses inward to reveal hero
         .to(splash,{clipPath:'circle(0% at 50% 50%)',duration:0.75,ease:'expo.inOut'},'+=0.1')
         .set(splash,{display:'none',pointerEvents:'none'});
     }
-    if(document.visibilityState==='visible'){
+    var _splashKill=setTimeout(_dismissSplash,3500);
+    var _splashStarted=false;
+    function _startSplash(){
+      if(_splashStarted)return;
+      _splashStarted=true;
+      clearTimeout(_splashKill);
+      _splashKill=setTimeout(_dismissSplash,3500);
       _runSplash();
+    }
+    if(document.visibilityState==='visible'){
+      _startSplash();
     } else {
       var _splashVH=function(){
         if(document.visibilityState==='visible'){
           document.removeEventListener('visibilitychange',_splashVH);
-          _runSplash();
+          _startSplash();
         }
       };
       document.addEventListener('visibilitychange',_splashVH);
