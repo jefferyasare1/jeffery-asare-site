@@ -2306,7 +2306,7 @@ document.querySelectorAll(".newsletter-btn").forEach(function(btn){
     }).then(function(r){ return r.json(); }).then(function(data){
       if(data.ok){
         inp.style.display="none";
-        btn.textContent="You're on the list &#10003;";
+        btn.textContent="You're on the list ✓";
         btn.style.background="transparent";
         btn.style.color="rgba(255,255,255,.7)";
         btn.style.cursor="default";
@@ -2404,7 +2404,7 @@ function submitReview(){
     .then(function(d){
       if(d.ok){
         if(status){ status.className='review-form-status ok'; status.textContent='Received. Every word means something — thank you for taking the time.'; }
-        if(btn){ btn.textContent='Submitted &#10003;'; }
+        if(btn){ btn.textContent='Submitted ✓'; }
         document.getElementById('reviewName').value='';
         document.getElementById('reviewMsg').value='';
         _selectedRating=5; _initStarPicker();
@@ -3637,7 +3637,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
         }).catch(function(){});
       }
       // Thank-you email was already sent automatically on payment — just update UI
-      printBtn.textContent='&#10003; Certificate downloaded';
+      printBtn.textContent='✓ Certificate downloaded';
       printBtn.style.background='#2d6a4f';
       if(hint){
         hint.textContent='Your Certificate of Authenticity has been saved to your device. You can now close this window.';
@@ -4265,7 +4265,7 @@ fetch('/_data/settings/contact-info.json')
       var el=document.getElementById('contactInstagram');
       if(el){ el.textContent=s.contact_instagram_handle; el.href=s.contact_instagram_url; }
     }
-    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='&#9200; '+s.contact_response; }
+    if(s.contact_response){ var el=document.getElementById('contactResponse'); if(el) el.textContent='⏰ '+s.contact_response; }
   }).catch(function(){});
 
 

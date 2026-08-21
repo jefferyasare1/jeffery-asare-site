@@ -213,6 +213,34 @@ fine either way. This bit us twice already:
   print momentarily belongs to a series of one). The IIFE wrap is the real fix,
   not the print count.
 
+## HTML entities in `.textContent` — READ THIS before adding any new one
+`&#NNNN;`-style numeric HTML entities only decode when the browser's HTML
+*parser* sees them (raw markup, or a string assigned to `.innerHTML`).
+`.textContent = '...'` sets a raw text node and never runs the HTML parser on
+it, so an entity inside a textContent string shows up on the page **literally**,
+character for character (e.g. `&#9200; Typically within 24 hours` — this is
+the exact bug Jeff reported on 2026-08-21). Found and fixed 4 occurrences, all
+in `index.html`, all now using the real Unicode character directly in the JS
+string instead of an entity:
+- `contactResponse` element, set from the CMS's `contact_response` setting
+  (~line 4268, was `&#9200;` → now `⏰`) — this was the one Jeff actually saw,
+  since it only fires when `/_data/settings/contact-info.json` has a
+  `contact_response` value, overwriting the (correctly-entity-encoded, because
+  it's raw HTML) static fallback text sitting in the markup at line 1223.
+- Newsletter signup success state (~line 2309, `&#10003;` → `✓`)
+- Review submit success state (~line 2407, `&#10003;` → `✓`)
+- Certificate-of-authenticity download button (~line 3640, `&#10003;` → `✓`)
+Grepped the whole file afterward for any other `textContent\s*=` assignment
+containing `&#`/`&amp;`/`&nbsp;`/etc — none left, and none in dashboard.html /
+admin.html / central-admin.html / thank-you.html / prints/index.html either.
+**When adding a new one-off UI symbol (checkmark, arrow, emoji, etc.) via JS:**
+if it's going into `.textContent`, use the literal Unicode character (or a
+`\uXXXX` JS escape) directly in the string — never an HTML entity. Entities are
+only safe inside literal `<tag>...</tag>` markup or a string assigned to
+`.innerHTML`, both of which the many other `&#8594;`/`&#9733;`/etc. usages in
+this file correctly are (that's why only these 4 were broken and not all of
+them).
+
 ## Shop catalog
 - `_data/prints.json` currently has exactly one print ("The Herdsman", RANDOM-STORIES
   series). Jeff has mentioned wanting more prints in the shop — don't fabricate
