@@ -38,12 +38,17 @@ const SIZE_CM = { a4: 29.7, a3: 42, a2: 59.4, a1: 84.1 };
 
 const SAFE_PRINT_PATH = /^\/images\/[a-zA-Z0-9/_-]+\.(jpg|jpeg|png|webp)$/i;
 
-// Tried in order until one works.
+// Tried in order until one works. gemini-2.5-flash-image is the stable,
+// generally-available model and goes first — gemini-3.1-flash-image is a
+// newer preview model with a much tighter free-tier quota, so leading with
+// it was burning out on 429 "quota exceeded" before ever trying the model
+// that actually had headroom. It stays in the list as a fallback in case
+// 2.5 itself is ever the one that's rate-limited.
 const GEMINI_ATTEMPTS = [
-  { apiVersion: 'v1', model: 'gemini-3.1-flash-image' },
-  { apiVersion: 'v1beta', model: 'gemini-3.1-flash-image' },
   { apiVersion: 'v1', model: 'gemini-2.5-flash-image' },
-  { apiVersion: 'v1beta', model: 'gemini-2.5-flash-image' }
+  { apiVersion: 'v1beta', model: 'gemini-2.5-flash-image' },
+  { apiVersion: 'v1', model: 'gemini-3.1-flash-image' },
+  { apiVersion: 'v1beta', model: 'gemini-3.1-flash-image' }
 ];
 
 function json(data, status) {
