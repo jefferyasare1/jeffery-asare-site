@@ -23,3 +23,9 @@ npm-debug.log*
 
 # Utility scripts
 *.command
+
+# Session handoff notes — contain live credentials, never commit
+PROJECT_HANDOFF.md
+
+# Scratch tooling from AI sessions
+commit_helper.html

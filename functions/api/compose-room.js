@@ -62,9 +62,16 @@ function bytesToBase64(bytes) {
   return btoa(bin);
 }
 
-async function fetchAsBase64(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch ' + url + ' (' + res.status + ')');
+// Loads a same-zone static asset (print photos, room backgrounds) as base64.
+// IMPORTANT: this must go through env.ASSETS.fetch(), not a raw fetch(url) —
+// a Pages Function calling fetch() back to its own zone's public hostname
+// hits Cloudflare's same-zone subrequest restriction and the whole invocation
+// 502s at the edge with no JSON body at all (nothing here to catch it — the
+// _middleware.js SPA fallback already works around this the same way).
+async function fetchAsBase64(env, request, path) {
+  const assetUrl = new URL(path, request.url).toString();
+  const res = await env.ASSETS.fetch(new Request(assetUrl));
+  if (!res.ok) throw new Error('Failed to fetch ' + path + ' (' + res.status + ')');
   const buf = await res.arrayBuffer();
   const contentType = (res.headers.get('content-type') || 'image/jpeg').split(';')[0];
   return { base64: bytesToBase64(new Uint8Array(buf)), mimeType: contentType };
@@ -159,8 +166,8 @@ export async function onRequestGet(context) {
   let printImg, roomImg;
   try {
     [printImg, roomImg] = await Promise.all([
-      fetchAsBase64(new URL(printPath, request.url).toString()),
-      fetchAsBase64(new URL(ROOM_BACKGROUNDS[room], request.url).toString())
+      fetchAsBase64(env, request, printPath),
+      fetchAsBase64(env, request, ROOM_BACKGROUNDS[room])
     ]);
   } catch (e) {
     return json({ error: 'Could not load source images: ' + e.message }, 502);
