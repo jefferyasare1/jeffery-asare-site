@@ -16,8 +16,11 @@
 //     dashboard (same pattern as WAITLIST_KV) to turn this on; it works without
 //     one, it's just uncached (and uncapped) until you do.
 //
-// Usage:   /api/compose-room?room=living&print=/images/portfolio/x/y.jpg&size=a3
-// Returns: { image: b64, mimeType, room, size, source, cached }
+// Usage:   /api/compose-room?room=living&print=/images/portfolio/x/y.jpg&size=a3&frame=walnut
+// Returns: { image: b64, mimeType, room, size, frame, source, cached }
+// `frame` is optional (defaults to 'walnut') — set per print in the dashboard
+// (Shop > print > Frame style) and threaded through automatically by the
+// public site; see FRAME_STYLES below for the available keys.
 //
 // NOTE: the exact Gemini image-editing endpoint/model naming has moved fast
 // (Imagen -> gemini-2.0-flash-exp-image-generation -> gemini-2.5-flash-image ->
@@ -37,6 +40,17 @@ const ROOM_BACKGROUNDS = {
 const SIZE_CM = { a4: 29.7, a3: 42, a2: 59.4, a1: 84.1 };
 
 const SAFE_PRINT_PATH = /^\/images\/[a-zA-Z0-9/_-]+\.(jpg|jpeg|png|webp)$/i;
+
+// Frame styles chosen per-print in the dashboard (see cmsOpenPrintEdit /
+// cms-p-frame in dashboard.html) — keep these keys in sync with the
+// FRAME_OPTIONS list there. 'walnut' is the default for prints saved before
+// this field existed.
+const FRAME_STYLES = {
+  walnut: 'a thin dark walnut-brown wooden frame (about 2cm wide) around a cream/off-white mat border (about 6-8cm wide)',
+  black: 'a slim matte black wooden frame (about 2cm wide) around a crisp white mat border (about 6-8cm wide)',
+  white: 'a slim white-painted wooden frame (about 2cm wide) around a soft white mat border (about 6-8cm wide)',
+  oak: 'a light natural oak wooden frame (about 2cm wide) around a warm off-white mat border (about 6-8cm wide)'
+};
 
 // Tried in order until one works. gemini-2.5-flash-image is the stable,
 // generally-available model and goes first — gemini-3.1-flash-image is a
@@ -139,6 +153,7 @@ export async function onRequestGet(context) {
   const room = url.searchParams.get('room') || 'living';
   const printPath = url.searchParams.get('print') || '';
   const size = (url.searchParams.get('size') || 'a3').toLowerCase();
+  const frame = (url.searchParams.get('frame') || 'walnut').toLowerCase();
 
   if (!ROOM_BACKGROUNDS[room]) {
     return json({ error: 'Invalid room. Use: ' + Object.keys(ROOM_BACKGROUNDS).join(', ') }, 400);
@@ -149,8 +164,11 @@ export async function onRequestGet(context) {
   if (!SIZE_CM[size]) {
     return json({ error: 'Invalid size. Use: a4, a3, a2, a1' }, 400);
   }
+  if (!FRAME_STYLES[frame]) {
+    return json({ error: 'Invalid frame. Use: ' + Object.keys(FRAME_STYLES).join(', ') }, 400);
+  }
 
-  const cacheKey = 'room-compose:' + await sha256Hex(`${room}:${size}:${printPath}`);
+  const cacheKey = 'room-compose:' + await sha256Hex(`${room}:${size}:${frame}:${printPath}`);
 
   if (env.ROOM_CACHE_KV) {
     try {
@@ -165,7 +183,12 @@ export async function onRequestGet(context) {
 
   const geminiKey = env.GEMINI_API_KEY;
   if (!geminiKey) {
-    return json({ error: 'GEMINI_API_KEY not configured.' }, 500);
+    // 200, not 500: Cloudflare's edge replaces the body of a 5xx response from
+    // a Pages Function with its own generic "Bad Gateway" HTML page, so a real
+    // 5xx here means the client (and anyone checking Network tab) never sees
+    // this actual message — just a dead-end Cloudflare error screen. The client
+    // already treats a missing `image` field as failure regardless of status.
+    return json({ error: 'GEMINI_API_KEY not configured.' }, 200);
   }
 
   let printImg, roomImg;
@@ -175,15 +198,16 @@ export async function onRequestGet(context) {
       fetchAsBase64(env, request, ROOM_BACKGROUNDS[room])
     ]);
   } catch (e) {
-    return json({ error: 'Could not load source images: ' + e.message }, 502);
+    return json({ error: 'Could not load source images: ' + e.message }, 200); // see note above on why not 502
   }
 
   const longEdgeCm = SIZE_CM[size];
+  const frameDesc = FRAME_STYLES[frame];
   const promptText =
     'You are given two images: the SECOND image is a photograph of a room with one empty wall. ' +
     'The FIRST image is a fine art print. ' +
     'Composite the first image onto the empty wall in the second image as a realistically framed, matted print: ' +
-    'a thin dark walnut-brown wooden frame (about 2cm wide) around a cream/off-white mat border (about 6-8cm wide), ' +
+    frameDesc + ', ' +
     'the photograph itself centered inside, uncropped, at its original aspect ratio. ' +
     `Scale the whole framed piece so its longest outer edge reads as roughly ${longEdgeCm}cm in real life, judged against ` +
     'the furniture and architecture already in the room (door heights, sofa depth, ceiling height). ' +
@@ -206,10 +230,10 @@ export async function onRequestGet(context) {
   }
 
   if (!result) {
-    return json({ error: 'Image compositing failed: ' + (lastErr ? lastErr.message : 'unknown error') }, 502);
+    return json({ error: 'Image compositing failed: ' + (lastErr ? lastErr.message : 'unknown error') }, 200); // see note above on why not 502
   }
 
-  const payload = { image: result.data, mimeType: result.mimeType, room, size, source: sourceLabel };
+  const payload = { image: result.data, mimeType: result.mimeType, room, size, frame, source: sourceLabel };
 
   if (env.ROOM_CACHE_KV) {
     try {

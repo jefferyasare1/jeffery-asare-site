@@ -625,7 +625,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 #splash-logo-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
 #splash-logo{width:min(420px,55vmin);height:min(420px,55vmin);display:block;opacity:0;}
 /* PRINT DETAIL PAGE */
-.print-detail-grid{display:grid;grid-template-columns:44% 1fr;gap:4rem;padding:2rem var(--pad) 5rem;align-items:start;}
+.print-detail-grid{display:grid;grid-template-columns:22% 1fr;gap:4rem;padding:2rem var(--pad) 5rem;align-items:start;}
 .print-detail-img-wrap{position:sticky;top:72px;}
 .print-detail-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);}
 .print-detail-img-ph{width:100%;aspect-ratio:3/4;background:var(--warm);display:flex;align-items:center;justify-content:center;}
@@ -738,7 +738,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* ROOM PREVIEW */
 .pd-room-trigger{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:none;border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink);cursor:pointer;margin-top:.8rem;transition:border-color .2s;}
 .pd-room-trigger:hover{border-color:#999;}
-.pd-room-preview{padding:0 var(--pad) 4rem;max-width:620px;margin:0 auto;}
+.pd-room-preview{padding:0 var(--pad) 4rem;max-width:930px;margin:0 auto;}
 .pd-room-header{display:flex;align-items:center;justify-content:space-between;padding:2.5rem 0 1.2rem;border-top:1px solid var(--rule);}
 .pd-room-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
 .pd-room-close{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--muted);cursor:pointer;}
@@ -1546,6 +1546,12 @@ function navigate(page) {
     _navFromHistory = false;
   }, 220);
 }
+
+// Expose to global scope: inline onclick="navigate(...)" attributes (e.g. the
+// Terms of Sale link) run in true global scope and can't see this closure's
+// local `navigate`. Also lets the "Surprise Me" / page-sweep-transition hooks
+// further down correctly wrap the real function instead of silently no-op'ing.
+window.navigate = navigate;
 
 function bind(id,page){ var el=document.getElementById(id); if(el) el.addEventListener("click",function(){ navigate(page); }); }
 
@@ -2797,34 +2803,40 @@ function openPrintDetail(print){
 
   // Render "You might also like" after navigation
   setTimeout(function(){
-    var relDiv = document.getElementById('pdRelated');
-    if(!relDiv) return;
-    var active = PRINTS.filter(function(p){ return p.title !== 'Untitled Print' && p.id !== print.id; });
-    var sameSeries = active.filter(function(p){ return p.series === print.series; });
-    var others = active.filter(function(p){ return p.series !== print.series; });
-    var picks = sameSeries.concat(others).slice(0, 3);
-    if(!picks.length){ relDiv.style.display='none'; return; }
-    relDiv.style.display = 'block';
-    relDiv.innerHTML = '<div class="pd-related-title">You might also like</div>'
-      + '<div class="pd-related-grid">'
-      + picks.map(function(p){
-          var img = p.img
-            ? '<img class="pd-related-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
-            : '<div class="pd-related-img"></div>';
-          return '<div class="pd-related-card" data-pid="'+p.id+'">'
-            + img
-            + '<div class="pd-related-series">'+p.series+'</div>'
-            + '<div class="pd-related-name">'+p.title+'</div>'
-            + '</div>';
-        }).join('')
-      + '</div>';
-    relDiv.querySelectorAll('.pd-related-card').forEach(function(card){
-      card.addEventListener('click', function(){
-        var pid = card.dataset.pid;
-        var found = PRINTS.find(function(x){ return x.id === pid; });
-        if(found) openPrintDetail(found);
+    // Wrapped in its own IIFE: with only one print in the catalog there are no
+    // related picks, and this section used to `return` straight out of the
+    // whole setTimeout callback — silently skipping Size guide and the
+    // collectors counter below, which have nothing to do with related prints.
+    (function(){
+      var relDiv = document.getElementById('pdRelated');
+      if(!relDiv) return;
+      var active = PRINTS.filter(function(p){ return p.title !== 'Untitled Print' && p.id !== print.id; });
+      var sameSeries = active.filter(function(p){ return p.series === print.series; });
+      var others = active.filter(function(p){ return p.series !== print.series; });
+      var picks = sameSeries.concat(others).slice(0, 3);
+      if(!picks.length){ relDiv.style.display='none'; return; }
+      relDiv.style.display = 'block';
+      relDiv.innerHTML = '<div class="pd-related-title">You might also like</div>'
+        + '<div class="pd-related-grid">'
+        + picks.map(function(p){
+            var img = p.img
+              ? '<img class="pd-related-img" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
+              : '<div class="pd-related-img"></div>';
+            return '<div class="pd-related-card" data-pid="'+p.id+'">'
+              + img
+              + '<div class="pd-related-series">'+p.series+'</div>'
+              + '<div class="pd-related-name">'+p.title+'</div>'
+              + '</div>';
+          }).join('')
+        + '</div>';
+      relDiv.querySelectorAll('.pd-related-card').forEach(function(card){
+        card.addEventListener('click', function(){
+          var pid = card.dataset.pid;
+          var found = PRINTS.find(function(x){ return x.id === pid; });
+          if(found) openPrintDetail(found);
+        });
       });
-    });
+    })();
 
   // ── Size guide ────────────────────────────────────────────
   (function(){
@@ -2950,7 +2962,8 @@ var _roomComposeCache={};
 
 function _roomComposeKey(){
   var pid=(currentPrint&&(currentPrint.id||currentPrint.img))||'';
-  return pid+'|'+_roomCurrent+'|'+_roomSize;
+  var frame=(currentPrint&&currentPrint.frame)||'walnut';
+  return pid+'|'+_roomCurrent+'|'+_roomSize+'|'+frame;
 }
 
 function setRoom(btn,room){
@@ -2993,7 +3006,7 @@ function _loadRoomComposite(){
   }
 
   var token=++_roomReqToken;
-  var qs='room='+encodeURIComponent(_roomCurrent)+'&print='+encodeURIComponent(currentPrint.img)+'&size='+encodeURIComponent(_roomSize);
+  var qs='room='+encodeURIComponent(_roomCurrent)+'&print='+encodeURIComponent(currentPrint.img)+'&size='+encodeURIComponent(_roomSize)+'&frame='+encodeURIComponent(currentPrint.frame||'walnut');
   fetch('/api/compose-room?'+qs)
     .then(function(r){return r.json();})
     .then(function(d){
@@ -4259,7 +4272,7 @@ fetch('/_data/prints.json')
       return {
         id: id, series: p.series||'', title: p.title, desc: p.desc||'',
         paper: p.paper||'', edition: p.edition||'', sizes: p.sizes||[],
-        priceGHC: Number(p.price)||0, img: p.img||'',
+        priceGHC: Number(p.price)||0, img: p.img||'', frame: p.frame||'walnut',
         soldOut: !!(p.soldOut||(remaining!==null&&remaining===0)),
         editionSize: edTotal, printsSold: sold, remaining: remaining
       };
