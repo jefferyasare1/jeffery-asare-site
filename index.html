@@ -1404,7 +1404,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a> &nbsp;&middot;&nbsp; <a data-nav="privacy">Privacy Policy</a></span>
+      <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a> &nbsp;&middot;&nbsp; <a data-nav="privacy">Privacy Policy</a> &nbsp;&middot;&nbsp; Ambient music: <a href="https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/" target="_blank" rel="noopener">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound</span>
       <span class="footer-loc">Accra, Ghana</span>
     </div>
   </footer>
@@ -1585,7 +1585,13 @@ function injectFooters(){
     var f=document.createElement("footer");
     f.className="mini-footer";
     var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id;
-    f.innerHTML="<span class=\"mini-footer-copy\">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005.</span>"
+    // Music credit only on the Portfolio mini-footer — that's the one page the
+    // ambient-toggle (and therefore this track) can actually be heard on, see
+    // CLAUDE.md "Ambient background audio" for the full story.
+    var musicCredit=id==="port"
+      ?" &nbsp;&middot;&nbsp; Ambient music: <a href=\"https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/\" target=\"_blank\" rel=\"noopener\">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound"
+      :"";
+    f.innerHTML="<span class=\"mini-footer-copy\">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005."+musicCredit+"</span>"
       +"<ul class=\"mini-footer-links\">"
       +"<li><a id=\""+igId+"\" href=\"https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh\" target=\"_blank\">Instagram</a></li>"
       +(id!=="contact" ? "<li><a id=\""+cId+"\">Contact</a></li>" : "")
@@ -3756,21 +3762,45 @@ document.addEventListener("keydown",function(e){
 })();
 
 // ============================================================
-// AMBIENT MELODY  (HTML5 audio — /ambient.mp3, loops, fades)
+// AMBIENT MELODY  (HTML5 audio — /audio/ambient.mp3)
+// Deliberately quiet background bed, not a featured track: low target
+// volume, and a real fade-out-into-loop instead of the browser's native
+// loop="true" hard cut (which would pop/jump at the seam every ~2:48).
 // ============================================================
 (function(){
-  var audio=null,running=false,fadeTimer=null;
+  var TARGET_VOL=0.15;      // low & unobtrusive on purpose — do not raise without asking Jeff first
+  var TOGGLE_FADE_MS=2600;  // fade length when the visitor turns it on/off
+  var LOOP_FADE_SEC=3;      // fades out over the last 3s of the track, restarts, fades back in over 3s
+  var audio=null,running=false,fadeTimer=null,loopArmed=false;
 
   function getAudio(){
     if(!audio){
-      audio=new Audio("/ambient.mp3");
-      audio.loop=true;
+      audio=new Audio("/audio/ambient.mp3");
+      audio.loop=false; // looping is hand-rolled below so the seam can fade instead of cutting
       audio.volume=0;
+      audio.addEventListener("timeupdate",function(){
+        if(!running||!audio.duration) return;
+        var remain=audio.duration-audio.currentTime;
+        if(remain<=LOOP_FADE_SEC&&!loopArmed){
+          loopArmed=true;
+          fadeTo(0,Math.max(200,remain*1000),true);
+        }
+      });
+      audio.addEventListener("ended",function(){
+        loopArmed=false;
+        if(!running) return;
+        audio.currentTime=0;
+        audio.volume=0;
+        audio.play().catch(function(){});
+        fadeTo(TARGET_VOL,LOOP_FADE_SEC*1000);
+      });
     }
     return audio;
   }
 
-  function fadeTo(target,ms){
+  // isLoopFade: true when this fade-to-zero is the loop seam, not a manual
+  // toggle-off — skips the auto-pause so playback keeps running into `ended`.
+  function fadeTo(target,ms,isLoopFade){
     clearInterval(fadeTimer);
     var a=getAudio();
     var start=a.volume;
@@ -3782,9 +3812,9 @@ document.addEventListener("keydown",function(e){
       a.volume=Math.min(1,Math.max(0,+(start+diff*(step/steps)).toFixed(4)));
       if(step>=steps){
         clearInterval(fadeTimer);
-        if(target===0) a.pause();
+        if(target===0&&!isLoopFade) a.pause();
       }
-    },ms/steps);
+    },Math.max(16,ms/steps));
   }
 
   function updateBtns(){
@@ -3803,13 +3833,14 @@ document.addEventListener("keydown",function(e){
     running=!running;
     updateBtns();
     if(running){
+      loopArmed=false;
       getAudio().play().catch(function(){
         running=false;
         updateBtns();
       });
-      fadeTo(0.72,3000);
+      fadeTo(TARGET_VOL,TOGGLE_FADE_MS);
     } else {
-      fadeTo(0,2000);
+      fadeTo(0,TOGGLE_FADE_MS);
     }
   });
 })();
