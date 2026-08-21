@@ -1559,6 +1559,20 @@
               </div>
               <div class="cms-status" id="room-status-living"></div>
               <div id="room-picker-living" style="display:none;margin-top:10px;"></div>
+
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--rule);">
+                <label style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;">Preview a print in this room</label>
+                <p style="font-size:11.5px;color:var(--muted);margin:0 0 8px;">Content-aware compositing — same call the public site makes. Use this to sanity-check a print before customers see it.</p>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                  <select id="room-preview-print-living" style="flex:2;min-width:160px;"><option value="">Loading prints…</option></select>
+                  <select id="room-preview-size-living" style="flex:1;min-width:80px;">
+                    <option value="a4">A4</option><option value="a3" selected>A3</option><option value="a2">A2</option><option value="a1">A1</option>
+                  </select>
+                  <button class="btn-card primary" onclick="cmsPreviewRoomComposite('living')">Preview</button>
+                </div>
+                <div class="cms-status" id="room-composite-status-living"></div>
+                <img id="room-composite-result-living" style="display:none;width:100%;border-radius:4px;margin-top:8px;aspect-ratio:3/4;object-fit:cover;" alt="Composited preview">
+              </div>
             </div>
           </div>
         </div>
@@ -5097,6 +5111,9 @@ document.querySelectorAll('.cms-sidenav-item').forEach(function(btn){
   if(contentBtn) contentBtn.addEventListener('click', function(){ if(!_cmsLoaded.journal) cmsLoad('journal'); });
 })();
 
+// Pre-populate the room preview print selector on page load
+cmsLoadPrintsForPreview('living');
+
 function cmsLoad(which){
   _cmsLoaded[which] = true;
   var el = document.getElementById('cms-'+which+'-list');
@@ -6141,6 +6158,45 @@ function cmsUploadChosenRoomImg(room,b64,mime,source,st,picker){
         if(st){st.className='cms-status ok';st.textContent='Generated via '+source+' ✓ — live in ~2 min';}
       } else {
         if(st){st.className='cms-status err';st.textContent=u.error||'Upload failed';}
+      }
+    })
+    .catch(function(err){if(st){st.className='cms-status err';st.textContent='Error: '+err.message;}});
+}
+
+// Load print options into the room preview print selector
+function cmsLoadPrintsForPreview(room){
+  var sel=document.getElementById('room-preview-print-'+room);
+  if(!sel) return;
+  fetch('/_data/prints.json')
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      var prints=(d&&d.prints)||[];
+      if(!prints.length){sel.innerHTML='<option value="">No prints found</option>';return;}
+      sel.innerHTML=prints.map(function(p){
+        return '<option value="'+p.img+'">'+(p.title||p.img)+'</option>';
+      }).join('');
+    })
+    .catch(function(){sel.innerHTML='<option value="">Could not load prints</option>';});
+}
+
+// Content-aware room compositing — same endpoint the public "See it in a room" uses.
+function cmsPreviewRoomComposite(room){
+  var sel=document.getElementById('room-preview-print-'+room);
+  var sizeSel=document.getElementById('room-preview-size-'+room);
+  var st=document.getElementById('room-composite-status-'+room);
+  var img=document.getElementById('room-composite-result-'+room);
+  if(!sel||!sel.value){if(st){st.className='cms-status err';st.textContent='Pick a print first.';}return;}
+  if(st){st.className='cms-status';st.textContent='Compositing… (about 10–20s)';}
+  if(img) img.style.display='none';
+  var qs='room='+encodeURIComponent(room)+'&print='+encodeURIComponent(sel.value)+'&size='+encodeURIComponent(sizeSel?sizeSel.value:'a3');
+  fetch('/api/compose-room?'+qs)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.image){
+        if(img){img.src='data:'+(d.mimeType||'image/png')+';base64,'+d.image;img.style.display='block';}
+        if(st){st.className='cms-status ok';st.textContent=(d.cached?'From cache':'Generated via '+d.source)+' ✓';}
+      } else {
+        if(st){st.className='cms-status err';st.textContent=(d&&d.error)||'Preview failed';}
       }
     })
     .catch(function(err){if(st){st.className='cms-status err';st.textContent='Error: '+err.message;}});

@@ -751,10 +751,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-size.active{background:var(--ink);border-color:var(--ink);color:#fff;}
 .pd-room-viewport{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--rule);}
 .pd-room-bg{width:100%;display:block;min-height:200px;background:#e8e3dc;object-fit:cover;}
-.pd-room-overlay{position:absolute;transform:translate(-50%,-50%);transition:left .3s,top .3s,width .3s;}
-.pd-room-frame{background:#6b3f1e;padding:5px;box-shadow:0 4px 20px rgba(0,0,0,.35);}
-.pd-room-mat{background:#f0ece4;padding:10px;}
-.pd-room-print{display:block;width:100%;height:auto;}
+.pd-room-status{position:absolute;bottom:0;left:0;right:0;padding:.6rem 1rem;background:rgba(0,0,0,.52);color:#fff;font-size:11px;letter-spacing:.04em;text-align:center;}
+.pd-room-status.err{background:rgba(180,40,40,.7);}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
 @media(max-width:600px){.pd-room-sizes{margin-left:0;width:100%;}.pd-room-tabs{gap:.35rem;}}
 @media print{.cert-print-btn,.detail-back,.inner-nav,.wa-float{display:none!important;}}
@@ -1386,11 +1384,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         <button class="pd-room-size" data-size="a1" onclick="setRoomSize(this,'a1')">A1</button>
       </div>
     </div>
-    <div class="pd-room-viewport">
+    <div class="pd-room-viewport" id="pdRoomViewport">
       <img class="pd-room-bg" id="pdRoomBg" src="/images/rooms/living.jpg" alt="Living room">
-      <div class="pd-room-overlay" id="pdRoomOverlay">
-        <div class="pd-room-frame"><div class="pd-room-mat"><img class="pd-room-print" id="pdRoomPrint" src="" alt=""></div></div>
-      </div>
+      <div class="pd-room-status" id="pdRoomStatus" style="display:none;">Placing your print in the room&hellip;</div>
     </div>
     <p class="pd-room-note">Room settings are illustrative. Actual print size, mat, and frame may vary.</p>
   </div>
@@ -2946,23 +2942,25 @@ function openPrintDetail(print){
 }
 
 // ===========================================================
-// ROOM PREVIEW
+// ROOM PREVIEW — content-aware compositing via /api/compose-room
 // ===========================================================
-var _roomCurrent='living', _roomSize='a3';
-// Overlay position: left/top = centre of the frame on the wall (uses translate(-50%,-50%))
-var ROOM_CFG={
-  living: { left:'50%', top:'22%', w:{ a4:'8%', a3:'12%', a2:'17%', a1:'24%' } }
-};
+var _roomCurrent='living', _roomSize='a3', _roomReqToken=0;
+// In-memory cache so flipping between size/room tabs for the same print
+// doesn't re-hit the API (the server also caches, this just skips the round trip).
+var _roomComposeCache={};
+
+function _roomComposeKey(){
+  var pid=(currentPrint&&(currentPrint.id||currentPrint.img))||'';
+  return pid+'|'+_roomCurrent+'|'+_roomSize;
+}
 
 function setRoom(btn,room){
   _roomCurrent=room;
-  var bg=document.getElementById('pdRoomBg');
-  if(bg) bg.src='/images/rooms/'+room+'.jpg';
   if(btn){
     document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
   }
-  _applyRoomOverlay();
+  _loadRoomComposite();
 }
 
 function setRoomSize(btn,size){
@@ -2971,28 +2969,59 @@ function setRoomSize(btn,size){
     document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
   }
-  _applyRoomOverlay();
+  _loadRoomComposite();
 }
 
-function _applyRoomOverlay(){
-  var cfg=ROOM_CFG[_roomCurrent]||ROOM_CFG.living;
-  var ov=document.getElementById('pdRoomOverlay');
-  if(!ov) return;
-  ov.style.left=cfg.left;
-  ov.style.top=cfg.top;
-  ov.style.width=cfg.w[_roomSize]||cfg.w.a3;
+function _loadRoomComposite(){
+  var bg=document.getElementById('pdRoomBg');
+  var status=document.getElementById('pdRoomStatus');
+  if(!bg||!currentPrint||!currentPrint.img) return;
+
+  var key=_roomComposeKey();
+  var cached=_roomComposeCache[key];
+  if(cached){
+    bg.src='data:'+cached.mimeType+';base64,'+cached.image;
+    if(status) status.style.display='none';
+    return;
+  }
+
+  // Show the plain room while we wait, with a status note over it.
+  bg.src='/images/rooms/'+_roomCurrent+'.jpg';
+  if(status){
+    status.className='pd-room-status';
+    status.style.display='block';
+    status.textContent='Placing your print in the room… (about 10–20s)';
+  }
+
+  var token=++_roomReqToken;
+  var qs='room='+encodeURIComponent(_roomCurrent)+'&print='+encodeURIComponent(currentPrint.img)+'&size='+encodeURIComponent(_roomSize);
+  fetch('/api/compose-room?'+qs)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(token!==_roomReqToken) return;
+      if(d&&d.image){
+        _roomComposeCache[key]={image:d.image,mimeType:d.mimeType||'image/png'};
+        bg.src='data:'+(d.mimeType||'image/png')+';base64,'+d.image;
+        if(status) status.style.display='none';
+      } else {
+        if(status){status.className='pd-room-status err';status.textContent='Preview unavailable right now — showing the plain room.';}
+      }
+    })
+    .catch(function(){
+      if(token!==_roomReqToken) return;
+      if(status){status.className='pd-room-status err';status.textContent='Preview unavailable right now — showing the plain room.';}
+    });
 }
 
 function openRoomPreview(){
   var preview=document.getElementById('pdRoomPreview');
-  var img=document.getElementById('pdRoomPrint');
-  if(img&&currentPrint&&currentPrint.img) img.src=currentPrint.img;
   if(preview){ preview.style.display='block'; preview.scrollIntoView({behavior:'smooth',block:'start'}); }
   _roomCurrent='living'; _roomSize='a3';
+  document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
+  var mt=document.querySelector('.pd-room-tab[data-room="living"]'); if(mt) mt.classList.add('active');
   document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
   var ms=document.querySelector('.pd-room-size[data-size="a3"]'); if(ms) ms.classList.add('active');
-  var bg=document.getElementById('pdRoomBg'); if(bg) bg.src='/images/rooms/living.jpg';
-  _applyRoomOverlay();
+  _loadRoomComposite();
 }
 // Expose room preview functions to global scope (onclick attributes need them)
 window.openRoomPreview = openRoomPreview;
