@@ -90,6 +90,22 @@ session starts cold. Keep it updated as things change; don't let it go stale.
   now inspectable (Network tab, logs) instead of being swallowed. Apply this
   same pattern to any other endpoint here that seems to "hide" its own error
   messages behind a blank Cloudflare error page.
+- **RE-CONFIRMED (2026-08-21, later same day, after Jeff reported "unable to
+  place the print into the room" post-deploy):** tested live against the
+  newest Production deployment (`9ac32cd` / deployment id
+  `6dc3b5d4-8a00-421c-a151-4527f983c9a1`, confirmed as current Production via
+  the deployments list) by hitting `/api/compose-room` directly in-browser
+  with a fresh cache-busting param. Two things confirmed at once: (1) the
+  200-status fix IS live — the browser now shows the real JSON error body
+  instead of Cloudflare's generic "502 Bad Gateway" page (tab title changed
+  from "502: Bad gateway" to a normal title); (2) the underlying failure is
+  the exact same Gemini quota issue, unchanged: `{"error":"Image compositing
+  failed: v1beta/gemini-3.1-flash-image error 429: ... You exceeded your
+  current quota, please check your plan and billing details..."}`. So Jeff's
+  fresh bug report is NOT a regression or a new bug — it's the same
+  pre-existing Google-side quota exhaustion, just now visible with a real
+  error message instead of a dead Cloudflare error page. Nothing to fix in
+  code here; still waiting on Jeff to sort out Gemini billing/quota.
 - Check Cloudflare Dashboard → Workers & Pages → jeffery-asare-site → latest
   deployment → Functions → Real-time Logs (Beta) → click a log row to expand
   full JSON (request headers, response status, captured console.error calls)
@@ -124,6 +140,32 @@ session starts cold. Keep it updated as things change; don't let it go stale.
   getting quite narrow).
 - Room preview section (`.pd-room-preview`): **max-width:930px** (was 620px,
   increased 50% on 2026-08-21; originally full-bleed edge to edge before that).
+
+## Shop/portfolio grid image clarity vs. anti-theft canvas protection (2026-08-21)
+`index.html`'s "IMAGE PROTECTION" IIFE (~line 4019) replaces every `<img>` inside
+`#photoGrid` and `#shopList` with a `<canvas>` (right-click/drag blocked, no
+`src` attribute for a casual "view source"/Pinterest scrape) — see that whole
+section before touching grid image rendering. The grid-thumbnail path (not the
+lightbox/detail path, which has its own separate flicker+steganography
+treatment) had a real bug: it sized the canvas's internal pixel buffer to only
+`0.65 *` the CSS display size and **never accounted for `devicePixelRatio`
+at all**. On a standard 1x monitor that's merely soft; on any Retina/hi-DPI
+screen (Jeff's Mac, any modern iPhone, most 4K monitors) the canvas buffer was
+rendering at *below* one physical pixel per CSS pixel, i.e. genuinely
+lower-than-native resolution, which is why Jeff reported the shop catalog
+images looking unclear. Fixed by rendering the canvas buffer at
+`dispSize * 0.92 * min(devicePixelRatio, 2)` instead — the `min(...,2)` cap
+keeps canvas memory sane on 3x mobile displays, and 0.92 (not 1.0) keeps this
+a genuine re-render rather than a byte-identical copy, so the "it's a canvas
+snapshot, not the source file" protection framing still holds. Nothing else
+about the protection changed: same canvas swap, same blocked
+contextmenu/dragstart, same `data-pin-nopin`/`data-prot` attributes. Verified
+locally via Playwright at both `deviceScaleFactor:1` and `:2` — canvas
+buffer-to-CSS-size ratio came out to 0.92 and 1.84 respectively (was a flat
+0.65 before, meaning it used to get *more* under-resolved the higher the
+screen's pixel density, which is backwards). If clarity ever needs another
+notch, raise `RES_FACTOR` in that block — it's a single named constant now,
+not a magic number buried in the width/height lines.
 
 ## Closure-scoping gotcha — READ THIS before adding any new inline onclick=""
 `index.html`'s whole SPA (navigate, bind, openPrintDetail, renderShop, setCurrency,
