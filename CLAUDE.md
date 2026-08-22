@@ -583,6 +583,70 @@ is ever activated, it needs its own fallback-position entry (currently
 hardcoded to the "living" wall coordinates via a fixed CSS position, not a
 per-room map — worth revisiting if/when that happens).
 
+## Size guide rebuild: technical dimension marks + spec table (2026-08-22)
+
+Replaced the print-detail page's size guide (`#sizeGuidePanel` /
+`#sizeGuideVisual`, wired up in the "── Size guide ──" IIFE). The previous
+version showed flat proportional rectangles next to a hand-drawn "You /
+170cm" stick figure. Before touching code, four alternative directions were
+mocked up as pictures (not just described) in a published artifact so Jeff
+could actually see them side by side rather than imagine them from text —
+that artifact is a standing reference, not part of the site itself. He
+picked a combination: keep the room-preview "see it on the actual wall"
+feature exactly as it already ships (that's the `.pd-room-fallback`
+compositing from the entry above — untouched by this change), and replace
+the on-page size guide with the "technical dimension marks" concept coupled
+with a plain spec table underneath.
+
+What changed:
+- **Rectangles**: `.sg-rect` is now an outlined-only box (no fill) with
+  8 small `.sg-tick` divs per item forming corner tick marks (2 ticks per
+  corner, drafting-drawing style) — this reads as a measurement device
+  rather than a decorative block. The previous "You" stick-figure SVG was
+  dropped entirely; a standing-figure comparison and a corner-tick technical
+  drawing are two different metaphors and mixing them read cluttered in the
+  mockup review.
+- **Active-size styling**: rather than toggling opacity on individual
+  `.sg-rect` elements (the old approach), the `active-size` class now goes
+  on the whole `.sg-item` wrapper, and descendant selectors
+  (`.sg-item.active-size .sg-rect`, `.sg-tick`, `.sg-name`) bump the border
+  to 1.5px and darken from `var(--muted)`-ish tones to full `var(--ink)`.
+  Simpler to keep in sync and reads more "technical" than a fill/opacity
+  change would.
+- **New spec table**: `<table class="size-guide-table">` added inside the
+  panel, below the rectangles, with Size/Dimensions/Suits columns —
+  `#sizeGuideTableBody` populated in the same loop that builds the
+  rectangles so the two stay in lockstep off one `SIZES` array (each entry
+  now also carries a `use` string, e.g. A2 → "Above a desk or console").
+  The active row gets `background:var(--bg)` against the panel's
+  `var(--warm)` background — pops in both light and dark themes since both
+  tokens invert together in `html.darkroom`.
+- **Click sync**: the existing `pdSizes` click listener (fires when a
+  size-pill is picked) now toggles `.active-size` on both the matching
+  `.sg-item` *and* the matching table `<tr>` via a shared `matches()`
+  closure, keyed off a `data-label` attribute set on each element at build
+  time — cleaner than the old approach of re-deriving the label from a
+  `.sg-name` text node at click time.
+- **Mobile column spacing**: first pass had `SIZE`/`DIMENSIONS` header text
+  running together edge-to-edge on a 390px viewport (no gap between
+  columns) — table cells had `padding:...0` with no horizontal padding.
+  Fixed with `padding-right:.8rem` on non-last th/td. Second pass: with that
+  padding added, the narrower Dimensions column started wrapping
+  "59.4 × 84.1 cm" onto two lines ("59.4 × 84.1" / "cm"), which read badly
+  for a measurement. Added `white-space:nowrap` to `.sg-td-dim` so the
+  Suits column (prose, wraps fine) absorbs the space pressure instead of
+  the dimension figures.
+- Verified: desktop (900px) and mobile (390px) screenshots of both the
+  rectangles and table rendering correctly with real print data; clicking a
+  size pill moves `active-size` to the correct item *and* row (checked
+  programmatically, not just visually); dark mode (`html.darkroom`) resolves
+  every color through the existing token set with no hardcoded literals;
+  full 8-page nav + scroll regression (`test44_full_nav_regression.mjs`)
+  still passes with zero JS errors after this change.
+- `.sg-item`/`.sg-rect`/`.sg-dim`/`.sg-name` class names are reused from the
+  old implementation (same names, new meaning/markup) — grepped the whole
+  file first to confirm nothing else referenced them before repurposing.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

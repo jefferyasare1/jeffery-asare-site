@@ -697,19 +697,31 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-country-select:focus{outline:none;border-color:var(--ink);}
 .pd-delivery-note{font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.7;}
 .pd-delivery-note strong{color:var(--ink);}
-/* SIZE GUIDE */
+/* SIZE GUIDE — technical dimension marks + spec table */
 .size-guide-toggle{background:none;border:none;font-family:var(--sans);font-size:11px;color:var(--muted);cursor:pointer;padding:0;letter-spacing:.06em;text-decoration:underline;margin-top:.5rem;display:inline-block;}
 .size-guide-toggle:hover{color:var(--ink);}
 .size-guide-panel{display:none;margin-top:1rem;padding:1.2rem;background:var(--warm);border:1px solid var(--rule);}
 .size-guide-panel.open{display:block;}
 .size-guide-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#bbb;margin-bottom:1rem;}
-.size-guide-visual{display:flex;align-items:flex-end;gap:1.2rem;justify-content:center;padding:.5rem 0 1.2rem;}
-.sg-item{display:flex;flex-direction:column;align-items:center;gap:.5rem;}
-.sg-rect{background:var(--ink);opacity:.12;border:1px solid var(--ink);}
-.sg-rect.active-size{opacity:.35;}
-.sg-dim{font-size:9px;color:var(--muted);letter-spacing:.04em;text-align:center;line-height:1.4;}
-.sg-name{font-size:10px;font-weight:600;color:var(--ink);letter-spacing:.04em;}
-.sg-person{width:18px;opacity:.25;margin-bottom:0;}
+.size-guide-visual{display:flex;align-items:flex-end;gap:1.7rem;justify-content:center;flex-wrap:wrap;padding:.5rem 0 1.3rem;}
+.sg-item{display:flex;flex-direction:column;align-items:center;}
+.sg-rect-wrap{position:relative;margin-bottom:.8rem;}
+.sg-rect{border:1px solid var(--rule);transition:border-color .2s;}
+.sg-tick{position:absolute;background:var(--muted);transition:background .2s;}
+.sg-name{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em;margin-bottom:.3rem;transition:color .2s;}
+.sg-item.active-size .sg-rect{border:1.5px solid var(--ink);}
+.sg-item.active-size .sg-tick{background:var(--ink);}
+.sg-item.active-size .sg-name{color:var(--ink);}
+.sg-dim{font-size:8px;color:var(--muted);letter-spacing:.02em;text-align:center;}
+.size-guide-table{width:100%;border-collapse:collapse;border-top:1px solid var(--rule);}
+.size-guide-table th{text-align:left;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:.9rem .8rem .6rem 0;}
+.size-guide-table td{padding:.8rem .8rem .8rem 0;border-top:1px solid var(--rule);font-size:13px;vertical-align:baseline;color:var(--ink);transition:background-color .2s;}
+.size-guide-table th:last-child,.size-guide-table td:last-child{text-align:right;padding-right:0;}
+.size-guide-table .sg-td-size{font-weight:700;}
+.size-guide-table .sg-td-dim{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.size-guide-table .sg-td-use{color:var(--muted);}
+.size-guide-table tr.active-size td{background:var(--bg);}
+.size-guide-table tr.active-size .sg-td-size{color:var(--ink);}
 /* JOURNAL */
 .journal-wrap{max-width:700px;margin:0 auto;padding:3rem 1.5rem 5rem;}
 .journal-header{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:2px solid var(--ink);}
@@ -1407,6 +1419,10 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         <div class="size-guide-panel" id="sizeGuidePanel">
           <div class="size-guide-label">Actual print sizes</div>
           <div class="size-guide-visual" id="sizeGuideVisual"></div>
+          <table class="size-guide-table">
+            <thead><tr><th>Size</th><th>Dimensions</th><th>Suits</th></tr></thead>
+            <tbody id="sizeGuideTableBody"></tbody>
+          </table>
         </div>
       </div>
       <div id="pdCollectors" style="font-size:11px;color:var(--muted);margin:.2rem 0 .6rem;min-height:1.2em;"></div>
@@ -2972,53 +2988,70 @@ function openPrintDetail(print){
     })();
 
   // ── Size guide ────────────────────────────────────────────
+  // Technical dimension-mark rectangles (corner tick marks, like a drafting
+  // drawing) paired with a plain spec table below. Replaces the earlier
+  // proportional-block + standing-figure version — see CLAUDE.md
+  // "Size guide rebuild" entry for why.
   (function(){
-    var toggle = document.getElementById('sizeGuideToggle');
-    var panel  = document.getElementById('sizeGuidePanel');
-    var visual = document.getElementById('sizeGuideVisual');
-    if(!toggle||!panel||!visual) return;
+    var toggle    = document.getElementById('sizeGuideToggle');
+    var panel     = document.getElementById('sizeGuidePanel');
+    var visual    = document.getElementById('sizeGuideVisual');
+    var tableBody = document.getElementById('sizeGuideTableBody');
+    if(!toggle||!panel||!visual||!tableBody) return;
 
-    // Size definitions (mm &rarr; pixels at scale: 1mm = 0.28px, person = 170cm)
     var SIZES = [
-      {label:'A4', w:210, h:297, dims:'21 × 29.7 cm'},
-      {label:'A3', w:297, h:420, dims:'29.7 × 42 cm'},
-      {label:'A2', w:420, h:594, dims:'42 × 59.4 cm'},
-      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm'}
+      {label:'A4', w:210, h:297, dims:'21 × 29.7 cm', use:'Desk, shelf'},
+      {label:'A3', w:297, h:420, dims:'29.7 × 42 cm', use:'Hallway, gallery wall'},
+      {label:'A2', w:420, h:594, dims:'42 × 59.4 cm', use:'Above a desk or console'},
+      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm', use:'Statement wall piece'}
     ];
-    var scale = 0.17; // mm &rarr; px for display
-    var personH = Math.round(1700 * scale); // 170cm in mm
+    var scale = 0.18; // mm &rarr; px for display
 
     // Find which sizes this print offers
     var printLabels = print.sizes.map(function(s){ return s.label; });
     var firstActiveLabel = print.sizes.length ? print.sizes[0].label : '';
 
+    var tickCorners = function(){
+      return '<div class="sg-tick" style="left:-4px;top:-4px;width:4px;height:1px;"></div>'
+        +'<div class="sg-tick" style="left:-4px;top:-4px;width:1px;height:4px;"></div>'
+        +'<div class="sg-tick" style="right:-4px;top:-4px;width:4px;height:1px;"></div>'
+        +'<div class="sg-tick" style="right:-4px;top:-4px;width:1px;height:4px;"></div>'
+        +'<div class="sg-tick" style="left:-4px;bottom:-4px;width:4px;height:1px;"></div>'
+        +'<div class="sg-tick" style="left:-4px;bottom:-4px;width:1px;height:4px;"></div>'
+        +'<div class="sg-tick" style="right:-4px;bottom:-4px;width:4px;height:1px;"></div>'
+        +'<div class="sg-tick" style="right:-4px;bottom:-4px;width:1px;height:4px;"></div>';
+    };
+
     visual.innerHTML = '';
+    tableBody.innerHTML = '';
     SIZES.forEach(function(sz){
       var hasSz = printLabels.some(function(l){ return l.indexOf(sz.label) >= 0; });
-      var isActive = printLabels.some(function(l){ return l.indexOf(sz.label) >= 0 && l === firstActiveLabel; });
       if(!hasSz) return; // only show sizes this print offers
+      var isActive = printLabels.some(function(l){ return l.indexOf(sz.label) >= 0 && l === firstActiveLabel; });
       var pxW = Math.round(sz.w * scale);
       var pxH = Math.round(sz.h * scale);
-      var div = document.createElement('div');
-      div.className = 'sg-item';
-      div.innerHTML =
+
+      var item = document.createElement('div');
+      item.className = 'sg-item' + (isActive ? ' active-size' : '');
+      item.dataset.label = sz.label;
+      item.innerHTML =
         '<div class="sg-name">'+sz.label+'</div>'
-        +'<div class="sg-rect'+(isActive?' active-size':'')+'" style="width:'+pxW+'px;height:'+pxH+'px;"></div>'
+        +'<div class="sg-rect-wrap">'
+          +'<div class="sg-rect" style="width:'+pxW+'px;height:'+pxH+'px;"></div>'
+          +tickCorners()
+        +'</div>'
         +'<div class="sg-dim">'+sz.dims+'</div>';
-      visual.appendChild(div);
+      visual.appendChild(item);
+
+      var row = document.createElement('tr');
+      row.className = isActive ? 'active-size' : '';
+      row.dataset.label = sz.label;
+      row.innerHTML =
+        '<td class="sg-td-size">'+sz.label+'</td>'
+        +'<td class="sg-td-dim">'+sz.dims+'</td>'
+        +'<td class="sg-td-use">'+sz.use+'</td>';
+      tableBody.appendChild(row);
     });
-    // Person silhouette for scale
-    var person = document.createElement('div');
-    person.className = 'sg-item';
-    person.innerHTML = '<div class="sg-name" style="color:var(--muted);font-weight:400;">You</div>'
-      +'<svg class="sg-person" width="18" height="'+personH+'" viewBox="0 0 18 '+personH+'" fill="none" xmlns="http://www.w3.org/2000/svg">'
-      +'<circle cx="9" cy="9" r="5" fill="var(--ink)"/>'
-      +'<rect x="5" y="18" width="8" height="'+(personH-36)+'" rx="4" fill="var(--ink)"/>'
-      +'<rect x="3" y="'+Math.round(personH*0.55)+'" width="5" height="'+(Math.round(personH*0.3))+'" rx="2" fill="var(--ink)"/>'
-      +'<rect x="10" y="'+Math.round(personH*0.55)+'" width="5" height="'+(Math.round(personH*0.3))+'" rx="2" fill="var(--ink)"/>'
-      +'</svg>'
-      +'<div class="sg-dim">170 cm</div>';
-    visual.appendChild(person);
 
     // Wire toggle
     panel.classList.remove('open');
@@ -3027,17 +3060,21 @@ function openPrintDetail(print){
       var isOpen = panel.classList.toggle('open');
       toggle.textContent = isOpen ? 'Hide guide' : 'Size guide';
     };
-    // Update active size when pill is clicked
+    // Update active size when pill is clicked — keeps both the rectangles
+    // and the table row in sync.
     if(pdSizes){
       pdSizes.addEventListener('click', function(e){
         var pill = e.target.closest('.size-pill');
         if(!pill) return;
         var activeLabel = pill.textContent;
-        visual.querySelectorAll('.sg-rect').forEach(function(r,i){
-          var items = visual.querySelectorAll('.sg-item');
-          // match label
-          var name = items[i] ? items[i].querySelector('.sg-name') : null;
-          if(name) r.classList.toggle('active-size', printLabels.some(function(l){ return l === activeLabel && l.indexOf(name.textContent)>=0; }));
+        var matches = function(label){
+          return printLabels.some(function(l){ return l === activeLabel && l.indexOf(label) >= 0; });
+        };
+        visual.querySelectorAll('.sg-item').forEach(function(item){
+          item.classList.toggle('active-size', matches(item.dataset.label));
+        });
+        tableBody.querySelectorAll('tr').forEach(function(row){
+          row.classList.toggle('active-size', matches(row.dataset.label));
         });
       });
     }
