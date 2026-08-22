@@ -4485,28 +4485,20 @@ fetch('/_data/prints.json')
   var splash=document.getElementById('splash');
   var splashLogo=document.getElementById('splash-logo');
   if(splash&&splashLogo){
-    // Strips are only for re-nav; hide them so splash has a clean stage
-    if(strips[0]) strips.forEach(function(s){s.style.display='none';});
-    // Set logo initial state
-    gsap.set(splashLogo,{opacity:0,scale:0.05});
-    gsap.set(splash,{clipPath:'circle(141% at 50% 50%)'});
     function _dismissSplash(){
       splash.style.display='none';
       splash.style.pointerEvents='none';
     }
-    function _runSplash(){
-      gsap.timeline()
-        // Stamp: scales in with overshoot, settles
-        .to(splashLogo,{opacity:1,scale:1.28,duration:0.28,ease:'power3.out'})
-        .to(splashLogo,{scale:0.9,duration:0.11,ease:'power2.in'})
-        .to(splashLogo,{scale:1,duration:0.15,ease:'back.out(2.5)'})
-        // Hold
-        .to(splashLogo,{opacity:1,duration:0.55})
-        // Aperture iris: black field (with logo) collapses inward to reveal hero
-        .to(splash,{clipPath:'circle(0% at 50% 50%)',duration:0.75,ease:'expo.inOut'},'+=0.1')
-        .set(splash,{display:'none',pointerEvents:'none'});
-    }
-    // Failsafe: always dismiss after 3.5 s regardless of animation state
+    // Failsafe set up FIRST, before anything that depends on GSAP having
+    // loaded. If the GSAP CDN script is slow/blocked on a given load (real
+    // risk on a flaky connection, and this file has hit exactly that failure
+    // mode with other CDN scripts before), gsap.set()/gsap.timeline() below
+    // throw a ReferenceError — previously that happened BEFORE this failsafe
+    // was created, so it never got scheduled and the splash stayed stuck on
+    // screen (fully opaque, blocking the whole page) with no way to recover
+    // short of a fresh reload. Now the failsafe always exists first, and the
+    // GSAP-dependent setup is wrapped in try/catch so a GSAP failure dismisses
+    // the splash immediately instead of leaving it stuck for 3.5s or forever.
     var _splashKill=setTimeout(_dismissSplash,3500);
     var _splashStarted=false;
     function _startSplash(){
@@ -4514,7 +4506,26 @@ fetch('/_data/prints.json')
       _splashStarted=true;
       clearTimeout(_splashKill);
       _splashKill=setTimeout(_dismissSplash,3500);
-      _runSplash();
+      try{
+        // Strips are only for re-nav; hide them so splash has a clean stage
+        if(strips[0]) strips.forEach(function(s){s.style.display='none';});
+        // Set logo initial state
+        gsap.set(splashLogo,{opacity:0,scale:0.05});
+        gsap.set(splash,{clipPath:'circle(141% at 50% 50%)'});
+        gsap.timeline()
+          // Stamp: scales in with overshoot, settles
+          .to(splashLogo,{opacity:1,scale:1.28,duration:0.28,ease:'power3.out'})
+          .to(splashLogo,{scale:0.9,duration:0.11,ease:'power2.in'})
+          .to(splashLogo,{scale:1,duration:0.15,ease:'back.out(2.5)'})
+          // Hold
+          .to(splashLogo,{opacity:1,duration:0.55})
+          // Aperture iris: black field (with logo) collapses inward to reveal hero
+          .to(splash,{clipPath:'circle(0% at 50% 50%)',duration:0.75,ease:'expo.inOut'},'+=0.1')
+          .set(splash,{display:'none',pointerEvents:'none'});
+      }catch(e){
+        clearTimeout(_splashKill);
+        _dismissSplash();
+      }
     }
     if(document.visibilityState==='visible'){
       _startSplash();

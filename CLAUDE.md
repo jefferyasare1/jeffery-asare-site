@@ -429,6 +429,54 @@ direct children so the areas have something to attach to. Verified via
 bounding-box checks at a 390×844 viewport: Work and About share the same
 `top`, Newsletter's `top` is below both.
 
+## Splash screen stuck on-screen if GSAP fails to load (2026-08-22)
+Found while investigating a report of "mangled characters on POTW after reload,
+gone on a second reload" — didn't end up being the same bug (see below), but
+this is a real, separate one worth fixing regardless.
+
+The intro splash (`#splash`, the black screen with the stamp/aperture-iris
+logo animation on first load) is entirely GSAP-driven: `gsap.set(...)` and
+`gsap.timeline()...` ran directly inside the `if(splash&&splashLogo){...}`
+block, with the "always dismiss after 3.5s" failsafe timer created *after*
+those calls. If the GSAP CDN script (`cdnjs.cloudflare.com/.../gsap.min.js`)
+is slow, blocked, or fails outright on a given load — a real risk on a flaky
+mobile connection, and this file has hit that exact failure mode with other
+CDN scripts before (see the emailjs note below) — `gsap.set(...)` throws a
+ReferenceError immediately, which aborted execution before the failsafe timer
+was ever created. Result: the splash stays fully opaque, z-index 9999,
+`pointer-events:all` — the entire site is invisible and unusable — with no
+recovery except the user reloading again (and hoping GSAP loads that time).
+Reproduced locally by aborting just the gsap request while stubbing every
+other CDN script normally; confirmed via a real browser session (Chrome, via
+the desktop bridge) on the live site too — a hard/cache-bypassed reload got
+the splash stuck this way at least once, though it's intermittent since it
+depends on network timing.
+
+Fixed by restructuring so the failsafe timer is created *first*, before
+anything GSAP-dependent, and wrapping the GSAP calls in try/catch — a GSAP
+failure now dismisses the splash immediately (not even waiting the 3.5s)
+instead of leaving it stuck indefinitely. Verified in isolation (extracted
+the exact splash code into a minimal standalone page): with `gsap` undefined,
+splash dismisses immediately, no error escapes; with GSAP working normally,
+behavior is unchanged (dismisses via the real animation, same as before).
+
+**Investigating the actual "mangled characters" report:** used the desktop
+Chrome bridge to load the live production site directly and hard/soft-reload
+the Portfolio page repeatedly (7+ times, including cache-bypassed reloads) —
+POTW text (`Photo of the Week · Week 34 · 2026`, title, location, description)
+rendered correctly every time I could observe it. Also fetched and checked
+all 87 photos' title/loc/desc fields directly from `/_data/portfolio/*.json`
+for stray HTML entities (the pattern behind a previously-fixed bug) — none
+found. Also confirmed via live fingerprint checks that **none of this
+session's commits are deployed yet** (not even the earlier DPR/entity fixes),
+so whatever Jeff saw was on an older, undiagnosed build. Could not reproduce
+the literal "mangled characters" symptom directly — if it recurs after this
+batch deploys, a screenshot or the exact text would make it possible to
+pin down precisely (candidates not yet ruled out: a font FOUT/glyph-swap
+artifact specific to the custom Fontshare typeface on a cold cache, or
+something intermittent tied to mobile network timing that a fast desktop
+session with Chrome's disk cache warm doesn't reproduce).
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not
