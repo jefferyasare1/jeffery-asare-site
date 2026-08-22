@@ -647,6 +647,64 @@ What changed:
   old implementation (same names, new meaning/markup) — grepped the whole
   file first to confirm nothing else referenced them before repurposing.
 
+## Shop page rendering completely empty (2026-08-22)
+
+Jeff reported: refreshed the site, hero loaded, clicked Shop, and got the
+header/description/currency-toggle but no print cards at all — just empty
+space down to the footer. Reproduced live via screen access to his actual
+browser (not guessed from a description): the DOM was genuinely correct —
+one `.shop-card` present, right position, right size, right styling — but
+its `<canvas class="shop-card-img">` was stuck at **0×0**, i.e. never drawn.
+
+**Root cause:** the "grid protection" mechanism added earlier this session
+(see the "Shop/portfolio grid image clarity vs. anti-theft canvas
+protection" entry, 2026-08-21) swaps every `<img>` in `#shopList`/
+`#photoGrid` for a `<canvas>`, then defers the actual fetch+decode+draw
+until an `IntersectionObserver` reports the canvas as intersecting the
+viewport — this was the fix for a *different* problem (decoding 80+
+full-res Portfolio images at once on page load). The bug: `renderShop()`
+rebuilds `#shopList`'s entire innerHTML — and therefore recreates every
+canvas from scratch — on **every** visit to Shop, not just the first
+(`navigate()` calls `renderShop(0)` again each time). When that rebuild
+happens right after the Shop page's ancestor flips from `display:none` to
+`display:block` (i.e. you just clicked "Shop"), the freshly-created canvas
+is already sitting inside the visible viewport with nothing left to scroll
+— so there's no future scroll event to ever trigger a notification, and
+browsers don't reliably re-run intersection checks the instant an ancestor
+becomes visible via a class toggle rather than actual scrolling. Confirmed
+directly on the live tab: a brand-new `IntersectionObserver` attached to
+that exact on-screen canvas never fired its callback at all. Whatever the
+precise trigger (this looks tied to the tab's focus/visibility state at
+that instant, which would explain why it isn't 100%-reproducible and why a
+second refresh can "fix" it), the canvas had no fallback and no retry — it
+would sit blank forever until the next full reload got lucky.
+
+**Fix:** in `_protectGridImg` (shared by Shop and Portfolio), check the
+canvas's real `getBoundingClientRect()` the instant it's created. If it's
+already on/near screen (same generous margin as the existing
+`rootMargin:'600px 0px'`), draw it immediately instead of waiting on
+`IntersectionObserver` at all. Only canvases that are NOT yet near the
+viewport at creation time (the normal case for cards further down a long
+Portfolio grid) still go through the observer — so the original memory-
+saving intent is fully preserved for genuinely offscreen content, this only
+closes the gap for content that's already on-screen the moment it's built.
+`draw()` now guards against being called twice (`drawn` flag) since the
+eager path and a late-firing observer could theoretically both fire.
+
+Verified: Playwright repro immediately after `navigate('shop')` shows the
+canvas properly drawn (270×438, non-zero) with zero JS errors, both cards
+count and content correct. Portfolio (87 cards) still only eagerly draws
+the ~8 actually within/near the initial viewport — the other ~79 stay at
+0×0 until scrolled near, confirming lazy-loading behavior is untouched.
+Could not force the exact background/hidden-tab condition inside Playwright
+to 100% reproduce the pre-fix failure synthetically (Playwright's multi-tab
+`bringToFront` didn't toggle `document.hidden` the way it does in a real
+browser) — so this fix is verified against the mechanism directly observed
+on the live site (a real `IntersectionObserver` failing to notify a
+genuinely on-screen canvas), not against a scripted repeat of Jeff's exact
+click sequence. Flagging that honestly rather than claiming a full repro I
+don't actually have.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

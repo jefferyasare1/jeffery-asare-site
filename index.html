@@ -4382,7 +4382,10 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
     var par=img.parentNode;
     var src=img.src;
     img.parentNode.replaceChild(cv,img);
+    var drawn=false;
     function draw(){
+      if(drawn) return; // guards against the eager check and a late IO firing both calling this
+      drawn=true;
       var img2=new Image();
       img2.onload=function(){
         // Use actual display dims to avoid aspect-ratio squishing
@@ -4405,6 +4408,30 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
         // is much more likely to try a clean single screenshot).
       };
       img2.src=src;
+    }
+    // If this card is already on/near screen the instant it's created, draw
+    // it right away instead of waiting on an IntersectionObserver notification.
+    // This matters because renderShop()/renderPortfolio() rebuild the whole
+    // grid — and therefore recreate every canvas from scratch — on EVERY visit
+    // to Shop/Portfolio, not just the first. When that rebuild happens right
+    // after the page's ancestor flips from display:none to display:block (the
+    // normal case: you just clicked "Shop"), the freshly-created canvas is
+    // already sitting inside the visible viewport with nothing left to scroll
+    // — so there is no future scroll event to ever trigger an IntersectionObserver
+    // notification, and on top of that, browsers don't always re-run intersection
+    // checks promptly right after a display:none→block flip. Either way, the
+    // canvas could sit at 0×0 forever with no error and no retry: the exact
+    // "Shop page renders completely empty" bug reported 2026-08-22 — every card
+    // was in the DOM, correctly positioned and correctly sized, just permanently
+    // undrawn. Checking the real bounding rect at creation time and drawing
+    // immediately when it's already in/near view sidesteps the whole problem;
+    // IntersectionObserver is still used for cards genuinely below the fold
+    // (Portfolio can have 80+), so the original memory-saving intent is kept.
+    var r0=cv.getBoundingClientRect();
+    var alreadyNear = r0.width>0 && r0.bottom>-600 && r0.top<(window.innerHeight+600);
+    if(alreadyNear){
+      draw();
+      return;
     }
     if('IntersectionObserver' in window){
       var io=new IntersectionObserver(function(entries){
