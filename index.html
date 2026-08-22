@@ -40,6 +40,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;--title:'General Sans',system-ui,sans-serif;--serif:'EB Garamond','Georgia',serif;--sans:'General Sans',system-ui,sans-serif;--pad:clamp(1.5rem,5vw,4rem);}
 html{scroll-behavior:smooth;}
+/* CSS smooth-scroll fights with native momentum/rubber-band scrolling on
+   touch devices — the two animation systems fight for control of scroll
+   position, which is what shows up as janky scrolling and a hard "slam"
+   when momentum scroll hits the end of the page while the CSS animation is
+   still catching up. Touchscreens already have smooth native momentum
+   scrolling built in and don't need (or want) this. Desktop keeps it, for
+   anchor-link jumps and the odd JS-triggered scroll. */
+@media (pointer:coarse){ html{scroll-behavior:auto;} }
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
 img,canvas{-webkit-user-drag:none;-khtml-user-drag:none;-moz-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select:none;}
 .page{display:none;}.page.active{display:block;}
@@ -371,6 +379,8 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .journal-suggestion-meta{font-size:11px;color:var(--muted);}
 /* ── /Smart features ── */
 .mini-footer{border-top:1px solid var(--rule);padding:1.2rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.mini-footer-centered{flex-direction:column;justify-content:center;text-align:center;}
+.mini-footer-centered .mini-footer-links{justify-content:center;}
 .mini-footer-copy{font-size:11px;color:var(--muted);}
 .mini-footer-links{display:flex;gap:1.4rem;list-style:none;}
 .mini-footer-links a{font-size:11px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s;}
@@ -389,7 +399,13 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 @media(max-width:580px){
   .photo-grid{grid-template-columns:1fr 1fr;}
   .field-row-2{grid-template-columns:1fr;}
-  .footer-grid{grid-template-columns:1fr;}
+  /* Brand full-width on top, Work + About side by side, Newsletter full-width
+     below both — instead of all four stacking one under another. */
+  .footer-grid{grid-template-columns:1fr 1fr;grid-template-areas:"brand brand" "work about" "newsletter newsletter";}
+  .footer-col-brand{grid-area:brand;}
+  .footer-col-work{grid-area:work;}
+  .footer-col-about{grid-area:about;}
+  .footer-col-newsletter{grid-area:newsletter;}
   .shop-list{grid-template-columns:1fr 1fr;}
   /* Bottom safe area so content doesn't hide behind home bar */
   .mini-footer{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));}
@@ -1261,7 +1277,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <button class="ham-btn" id="termsHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
   <div class="terms-wrap">
-    <button class="detail-back" id="termsBackBtn" style="padding-left:0;">&#8592; Back to Shop</button>
+    <button class="detail-back" id="termsBackBtn" style="padding-left:0;">&#8592; Back</button>
     <h1 style="font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin:1.5rem 0 .3rem;">Terms of Sale</h1>
     <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: June 2026</p>
     <div class="terms-section"><h2>1. Ownership of Copyright</h2><p>All photographs on this website are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase of a print does not transfer any copyright or reproduction rights.</p></div>
@@ -1398,10 +1414,10 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
 <template id="footerTpl">
   <footer class="site-footer">
     <div class="footer-grid">
-      <div><div class="footer-brand-name"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="footer-logo-img"></div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
-      <div><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">Field Notes</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
-      <div><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
-      <div><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
+      <div class="footer-col-brand"><div class="footer-brand-name"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="footer-logo-img"></div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
+      <div class="footer-col-work"><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">Field Notes</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
+      <div class="footer-col-about"><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
+      <div class="footer-col-newsletter"><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
     <div class="footer-bottom">
       <span class="footer-copy">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005 (Act 690). <a data-nav="terms">Terms of Sale</a> &nbsp;&middot;&nbsp; <a data-nav="privacy">Privacy Policy</a> &nbsp;&middot;&nbsp; Ambient music: <a href="https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/" target="_blank" rel="noopener">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound</span>
@@ -1518,6 +1534,12 @@ var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
 var _pageUrlMap = {home:'/',portfolio:'/portfolio',shop:'/shop',about:'/about',contact:'/contact',terms:'/terms',privacy:'/privacy',journal:'/journal'};
+// Set true the first time this page actually pushes a history entry during
+// this browser session — lets goBack() below tell "there's a real in-site
+// page to return to" apart from "visitor landed straight on this URL with
+// nothing of ours behind it in history" (a bookmark, a shared link, a fresh
+// tab). See goBack() for why this matters.
+var _hasInternalNav = false;
 
 function navigate(page) {
   var overlay = document.getElementById("pageTransition");
@@ -1525,7 +1547,7 @@ function navigate(page) {
   // Push URL for main pages so each section is shareable/bookmarkable
   if(!_navFromHistory && _pageUrlMap[page]){
     var cur = history.state;
-    if(!cur || cur.page !== page) history.pushState({page:page}, '', _pageUrlMap[page]);
+    if(!cur || cur.page !== page){ history.pushState({page:page}, '', _pageUrlMap[page]); _hasInternalNav = true; }
   }
   setTimeout(function(){
     document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
@@ -1553,6 +1575,17 @@ function navigate(page) {
 // further down correctly wrap the real function instead of silently no-op'ing.
 window.navigate = navigate;
 
+// True "go back to wherever you came from" for pages reachable from many
+// different places (Terms, Privacy, Journal are all linked from the global
+// footer, so a hardcoded navigate('shop')/navigate('home') on their Back
+// button is wrong whenever you didn't arrive from that specific page).
+// Falls back to `fallback` only when there's genuinely nothing of ours to
+// go back to (direct/bookmarked/shared-link landing) — see _hasInternalNav.
+function goBack(fallback){
+  if(_hasInternalNav) history.back();
+  else navigate(fallback);
+}
+
 function bind(id,page){ var el=document.getElementById(id); if(el) el.addEventListener("click",function(){ navigate(page); }); }
 
 bind("homeLogoBtn","home");bind("homePortBtn","portfolio");bind("homeAboutBtn","about");bind("homeShopBtn","shop");bind("homeContactBtn","contact");bind("heroViewBtn","portfolio");
@@ -1561,9 +1594,18 @@ bind("detailLogoBtn","home");bind("detailPortBtn","portfolio");bind("detailAbout
 bind("aboutLogoBtn","home");bind("aboutPortBtn","portfolio");bind("aboutShopBtn","shop");bind("aboutContactBtn","contact");bind("aboutViewPortBtn","portfolio");bind("aboutGetInTouchBtn","contact");bind("aboutShopPrintsBtn","shop");
 bind("shopLogoBtn","home");bind("shopPortBtn","portfolio");bind("shopAboutBtn","about");bind("shopContactBtn","contact");
 bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAboutBtn","about");bind("contactShopBtn","shop");
-bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");bind("termsBackBtn","shop");
-bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");bind("privBackBtn","home");
-bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journContactBtn","contact");bind("journBackBtn","home");
+bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");
+bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");
+bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journContactBtn","contact");
+// Terms/Privacy/Journal are all reachable from the global footer on every
+// page, so their Back button uses real "wherever you came from" semantics
+// instead of a fixed destination — see goBack(). Fallback only matters for
+// a direct/bookmarked/shared-link landing with no in-site history yet.
+(function(){
+  var tb=document.getElementById("termsBackBtn"); if(tb) tb.addEventListener("click",function(){ goBack("shop"); });
+  var pb=document.getElementById("privBackBtn");  if(pb) pb.addEventListener("click",function(){ goBack("home"); });
+  var jb=document.getElementById("journBackBtn"); if(jb) jb.addEventListener("click",function(){ goBack("home"); });
+})();
 bind("pdLogoBtn","home");bind("pdPortBtn","portfolio");bind("pdAboutBtn","about");bind("pdShopBtn","shop");bind("pdContactBtn","contact");bind("pdBackBtn","shop");
 
 // ============================================================
@@ -1583,7 +1625,10 @@ function injectFooters(){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
-    f.className="mini-footer";
+    // Shop's footer links (Instagram / Contact / Terms of Sale / Privacy)
+    // are centered per Jeff's request — every other mini-footer keeps the
+    // default copy-left / links-right layout.
+    f.className="mini-footer"+(id==="shop"?" mini-footer-centered":"");
     var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id;
     // Music credit only on the Portfolio mini-footer — that's the one page the
     // ambient-toggle (and therefore this track) can actually be heard on, see
@@ -2108,14 +2153,23 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     return Math.max(-1,Math.min(1,(r.top+r.height/2-window.innerHeight/2)/window.innerHeight));
   }
 
-  // Pick up newly rendered cards without re-processing old ones
+  // Pick up newly rendered cards without re-processing old ones, and drop
+  // cards whose element got removed from the DOM by a re-render (renderShop/
+  // renderPortfolio rebuild the grid's innerHTML on every filter change and
+  // every page visit — without this, `cards` grew forever across a session,
+  // and the loop below kept computing layout + writing styles for an
+  // ever-growing pile of detached, invisible nodes on every single frame).
   function refresh(){
+    if(cards.length){
+      cards=cards.filter(function(s){ return s.el.isConnected; });
+    }
     document.querySelectorAll(".photo-card").forEach(function(el){
       if(el._pxInit) return;
       var img=el.querySelector("img,canvas[data-prot]");
       if(!img) return;
       el._pxInit=true;
       var t=dist(el)*S_PORT;
+      img.style.transform="perspective(600px) translateY("+t+"%) rotateX(0deg) rotateY(0deg)";
       cards.push({el:el,img:img,sh:t,tsh:t,rx:0,ry:0});
     });
     document.querySelectorAll(".shop-card").forEach(function(el){
@@ -2124,6 +2178,7 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
       if(!img) return;
       el._pxInit=true;
       var t=dist(el)*S_PORT;
+      img.style.transform="perspective(600px) translateY("+t+"%) rotateX(0deg) rotateY(0deg)";
       cards.push({el:el,img:img,sh:t,tsh:t,rx:0,ry:0});
     });
   }
@@ -2153,26 +2208,40 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     if(pEl&&pEl.classList.contains("visible")) potwTgt=dist(pEl)*S_POTW;
   },{passive:true});
 
-  // Continuous lerp loop — runs every frame, glides toward targets
+  // Continuous lerp loop — glides toward targets. Two perf fixes on top of
+  // the original always-on-every-frame version, which was a real cost on
+  // every scroll everywhere in the site (not just portfolio/shop):
+  //  1. refresh()'s two full-DOM querySelectorAll scans only need to run a
+  //     few times a second, not 60x/sec — new cards render in well under
+  //     that, and it's invisible to the eye either way.
+  //  2. Skip the style.transform write once a card's lerp has converged
+  //     (the overwhelming majority of frames, for any card that isn't
+  //     currently being scrolled past or hovered) — writing the identical
+  //     transform string 60 times a second forces the browser to do
+  //     compositing work for zero visual change, which is exactly the kind
+  //     of background cost that shows up as scroll jank on weaker phones.
+  var EPS=0.02;
+  var _pxFrame=0;
   (function loop(){
     requestAnimationFrame(loop);
     try {
-      refresh(); // catch any cards added since last frame
+      _pxFrame++;
+      if(_pxFrame%12===0) refresh(); // ~5x/sec at 60fps — plenty fast to pick up new cards
       cards.forEach(function(s){
         var tx=usingGyro?gyroTx:(s.el._pxHover?(s.el._pxTx||0):0);
         var ty=usingGyro?gyroTy:(s.el._pxHover?(s.el._pxTy||0):0);
         var active=usingGyro||s.el._pxHover;
         var trx=active?(-ty*TILT):0;
         var try_=active?(tx*TILT):0;
-        s.sh+=(s.tsh-s.sh)*EASE;
-        s.rx+=(trx-s.rx)*TILT_EASE;
-        s.ry+=(try_-s.ry)*TILT_EASE;
+        var dsh=(s.tsh-s.sh)*EASE, drx=(trx-s.rx)*TILT_EASE, dry=(try_-s.ry)*TILT_EASE;
+        if(Math.abs(dsh)<EPS&&Math.abs(drx)<EPS&&Math.abs(dry)<EPS&&!active) return; // converged, nothing to paint
+        s.sh+=dsh; s.rx+=drx; s.ry+=dry;
         s.img.style.transform="perspective(600px) translateY("+s.sh+"%) rotateX("+s.rx+"deg) rotateY("+s.ry+"deg)";
       });
       var pImg=document.getElementById("potwEditorialImg");
       if(pImg){
-        potwSh+=(potwTgt-potwSh)*EASE;
-        pImg.style.transform="translateY("+potwSh+"%)";
+        var dp=(potwTgt-potwSh)*EASE;
+        if(Math.abs(dp)>=EPS){ potwSh+=dp; pImg.style.transform="translateY("+potwSh+"%)"; }
       }
     } catch(e) { /* silently ignore layout errors during zoom/resize */ }
   })();
@@ -4148,49 +4217,78 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
   });
 
   // Grid protection: photoGrid cards + shopList cards
+  // Swaps <img> for a <canvas> immediately (cheap — just DOM structure, no
+  // visible layout difference), but DEFERS the actual fetch+decode+draw
+  // until the card is about to scroll into view. The old version did the
+  // fetch+decode for every single card the instant the grid rendered,
+  // regardless of scroll position — the original <img> had loading="lazy",
+  // but this canvas swap created a brand-new Image() and set .src on it
+  // immediately, which silently defeated that hint entirely. On a page
+  // with dozens of cards (Portfolio alone can have 80+), that meant a
+  // single page load was decoding 80+ full-resolution photos into memory
+  // at once. That's real jank on any device, and on a memory-constrained
+  // phone it's exactly the kind of thing that crashes the tab after a few
+  // reloads rather than just feeling slow.
+  function _protectGridImg(img,cls){
+    if(!img.src) return;
+    img.setAttribute('data-prot','1');
+    var cv=document.createElement('canvas');
+    // Canvases default to 300x150 the instant they're created, before draw()
+    // ever runs — zero them out explicitly so an undrawn canvas can't be
+    // mistaken for a drawn one (by this code or by anything checking later).
+    cv.width=0; cv.height=0;
+    if(cls) cv.className=cls;
+    cv.setAttribute('data-prot','1');
+    cv.style.userSelect='none'; cv.style.webkitUserSelect='none'; cv.style.webkitTouchCallout='none';
+    cv.setAttribute('draggable','false');
+    cv.addEventListener('contextmenu',function(e){e.preventDefault();});
+    cv.addEventListener('dragstart',function(e){e.preventDefault();});
+    var ctx=cv.getContext('2d');
+    var par=img.parentNode;
+    var src=img.src;
+    img.parentNode.replaceChild(cv,img);
+    function draw(){
+      var img2=new Image();
+      img2.onload=function(){
+        // Use actual display dims to avoid aspect-ratio squishing
+        var dispW=par.offsetWidth||300;
+        var dispH=Math.round((par.offsetHeight||400)*1.3);
+        // Render at device pixel ratio so canvas thumbnails are as sharp as a
+        // real <img> on Retina/hi-DPI screens — capped at 2x so this doesn't
+        // balloon canvas memory on 3x mobile displays. RES_FACTOR stays just
+        // under 1 so this remains a genuine canvas re-render (not a byte-
+        // identical copy of the source file) rather than because it
+        // meaningfully limits detail.
+        var dpr=Math.min(window.devicePixelRatio||1,2);
+        var RES_FACTOR=0.92;
+        var w=Math.max(1,(dispW*RES_FACTOR*dpr)|0);
+        var h=Math.max(1,(dispH*RES_FACTOR*dpr)|0);
+        cv.width=w; cv.height=h;
+        _coverDraw(ctx,img2,w,h);
+        // Grid thumbnails: static render only (no RAF/dithering pool — that
+        // stays reserved for the lightbox/detail views where a would-be thief
+        // is much more likely to try a clean single screenshot).
+      };
+      img2.src=src;
+    }
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(!entry.isIntersecting) return;
+          io.disconnect();
+          draw();
+        });
+      },{rootMargin:'600px 0px'}); // start decoding a bit before it's actually visible, so it's ready by the time you scroll to it
+      io.observe(cv);
+    } else {
+      draw(); // no IntersectionObserver support — fall back to eager (old behavior)
+    }
+  }
   [{id:'photoGrid',cls:''},{id:'shopList',cls:'shop-card-img'}].forEach(function(g){
     var el=document.getElementById(g.id);
     if(!el) return;
     new MutationObserver(function(){
-      el.querySelectorAll('img:not([data-prot])').forEach(function(img){
-        if(!img.src) return;
-        img.setAttribute('data-prot','1');
-        var cv=document.createElement('canvas');
-        if(g.cls) cv.className=g.cls;
-        cv.setAttribute('data-prot','1');
-        cv.style.userSelect='none'; cv.style.webkitUserSelect='none'; cv.style.webkitTouchCallout='none';
-        cv.setAttribute('draggable','false');
-        cv.addEventListener('contextmenu',function(e){e.preventDefault();});
-        cv.addEventListener('dragstart',function(e){e.preventDefault();});
-        var ctx=cv.getContext('2d');
-        var par=img.parentNode;
-        img.parentNode.replaceChild(cv,img);
-        var img2=new Image();
-        img2.onload=function(){
-          // Use actual display dims to avoid aspect-ratio squishing
-          var dispW=par.offsetWidth||300;
-          var dispH=Math.round((par.offsetHeight||400)*1.3);
-          // Render at device pixel ratio so canvas thumbnails are as sharp as a
-          // real <img> on Retina/hi-DPI screens — capped at 2x so this doesn't
-          // balloon canvas memory on 3x mobile displays. Previously this ignored
-          // DPR entirely and only rendered at 0.65x the CSS display size, which
-          // is why grid thumbnails looked soft on any Retina/hi-DPI screen (a
-          // MacBook, an iPhone, most modern monitors) even though the source
-          // photo itself is high resolution. RES_FACTOR stays just under 1 so
-          // this remains a genuine canvas re-render (not a byte-identical copy
-          // of the source file) rather than because it meaningfully limits detail.
-          var dpr=Math.min(window.devicePixelRatio||1,2);
-          var RES_FACTOR=0.92;
-          var w=Math.max(1,(dispW*RES_FACTOR*dpr)|0);
-          var h=Math.max(1,(dispH*RES_FACTOR*dpr)|0);
-          cv.width=w; cv.height=h;
-          _coverDraw(ctx,img2,w,h);
-          // Grid thumbnails: static render only (no RAF/dithering pool — that
-          // stays reserved for the lightbox/detail views where a would-be thief
-          // is much more likely to try a clean single screenshot).
-        };
-        img2.src=img.src;
-      });
+      el.querySelectorAll('img:not([data-prot])').forEach(function(img){ _protectGridImg(img,g.cls); });
     }).observe(el,{childList:true,subtree:true});
   });
 })();

@@ -320,6 +320,115 @@ those four CDN URLs before navigating (defines just enough of `window.emailjs`
 working version of these stubs was built and used successfully in this session;
 recreate the same pattern rather than testing against the raw crash.
 
+## Mobile scroll smoothness, back-button, footer layout, and refresh-crash fixes (2026-08-22)
+Jeff reported a batch of 5 issues in one message. All 5 fixed and verified via
+Playwright + wrangler dev before delivery.
+
+**1. Janky scroll on phone, "slams" at the bottom.**
+Two separate causes, both fixed:
+- `html{scroll-behavior:smooth}` was global. Smooth-scroll and native touch
+  momentum/rubber-banding fight each other on iOS/Android — that fight is what
+  produces the "slam" at the top/bottom of the page. Fixed by scoping smooth
+  scroll to non-touch input only: `@media (pointer:coarse){ html{scroll-behavior:auto} }`.
+  Verified via Playwright device emulation (`devices['iPhone 13']` → `auto`,
+  desktop viewport → `smooth`).
+- The portfolio/shop parallax RAF loop (`PORTFOLIO + POTW PARALLAX` IIFE) was
+  running a full `document.querySelectorAll` + per-card `.style.transform`
+  write on *every single animation frame*, for every card on the page (up to
+  ~87 on Portfolio). Throttled the expensive `refresh()` (element re-query) to
+  run every 12th frame instead of every frame, and added an epsilon-based
+  (`0.02`) skip so a card's `.style.transform` is only actually written when
+  its computed value changed meaningfully — cheap on desktop, but this was
+  real, measurable jank on mobile GPUs. The very first transform write per
+  card is still forced unconditionally (skipping only on later frames) so
+  there's no regression in initial paint.
+
+**2. Memory leak in the same parallax system.**
+Found while fixing #1, and very likely a contributor to #5 (see below): the
+`cards[]` array the parallax loop tracks was only ever appended to, never
+pruned. `renderShop`/`renderPortfolio` rebuild their grids via `innerHTML` on
+every visit, which detaches the old DOM nodes — but the old references stayed
+alive in `cards[]` forever, so repeated Shop↔Portfolio navigation grew the
+array unbounded. Fixed with `cards = cards.filter(s => s.el.isConnected)` at
+the top of `refresh()`. Verified with a debug-instrumented copy of the file
+(exposing `cards.length` via `window.__pxDebug()`): stayed correctly bounded
+at 88 (matching real DOM count) across 6 repeated navigation round-trips.
+
+**3. Grid-protection canvases were decoding every image on page load, eagerly,
+all at once — defeating `loading="lazy"` and very likely the real cause of #5.**
+This was the most involved investigation of the batch. The anti-theft system
+(`_protectGridImg`, "Grid protection" block) swaps every `<img>` for a
+`<canvas>` and redraws the photo into it — but to do that redraw it was
+creating a brand-new `Image()` and setting `.src` on it *immediately* for
+every card the instant the grid rendered. The `<img>` tags themselves
+correctly have `loading="lazy"`, but that hint is meaningless once the image
+has already been swapped out and a fresh, eager fetch kicked off in JS — so
+Portfolio (which can have 80+ cards) was decoding 80+ full-resolution photos
+into memory on every single page load, whether or not the user ever scrolled
+that far. That's a lot of simultaneous full-res decodes for a phone browser
+to hold, and refreshing repeatedly (issue #5) compounds it further before the
+previous page's memory is even reliably reclaimed. Fixed by gating the actual
+`draw()` call behind a per-canvas `IntersectionObserver` (`rootMargin:'600px
+0px'`, so decoding starts a bit before a card is actually on screen, not
+exactly when it crosses into view) — the cheap part (swapping `<img>` for
+`<canvas>`) still happens immediately, only the expensive part (fetch +
+decode + render) is deferred. Falls back to the old eager behavior if
+`IntersectionObserver` isn't supported.
+  - **Verification note for future reference:** an unset `<canvas>` element
+    defaults to `width=300,height=150` per spec — so `canvas.width > 0` looks
+    true for a canvas that has *never* been drawn, not just for one that has.
+    An early verification pass checked exactly that and got a false "PASS"
+    (looked like all 87 canvases were already drawn on load). Fixed by
+    explicitly zeroing `cv.width=0;cv.height=0;` right when the canvas is
+    created, so `width>0` becomes a trustworthy "has this actually been
+    drawn" signal both for future debugging and structurally (no stale
+    default-sized blank canvas sitting around pre-draw). Re-verified
+    correctly after that: only 4/87 canvases drawn on initial Portfolio load
+    (matching a direct `draw()`-call counter), and a realistic incremental
+    scroll-through (20 steps down the page, not an instant jump) results in
+    all 87/87 drawn by the time you've scrolled past them.
+
+**4. Terms of Sale / Privacy Policy "back" button always went to a fixed page
+(Hero / Shop) instead of wherever you actually came from.**
+The back buttons were hardcoded to `navigate('shop')` / `navigate('home')`,
+which is a fresh `navigate()` call — not a real "go back". Added an
+`_hasInternalNav` flag that's set true the first time `navigate()` pushes a
+real history entry, and a `goBack(fallback)` helper: if there's real in-site
+navigation history, use `history.back()` (so it returns to the actual
+previous page); otherwise (e.g. someone lands directly on `/terms` via a
+shared link, with nothing to go back to) fall back to the old fixed
+destination. Verified: Contact→Terms→Back returns to Contact; About→Privacy→
+Back returns to About; landing directly on `/terms` with no history correctly
+falls back to Shop.
+
+**5. Successive refreshes crashing the page, especially on phone.**
+No single reproducible "crash" was captured directly (that's genuinely hard
+to force from a sandboxed headless browser), but #2 (unbounded memory leak)
+and #3 (up to 80+ simultaneous full-res image decodes per load) are exactly
+the kind of thing that would compound across repeated refreshes on a
+memory-constrained mobile browser until it gives up and reloads the tab. Both
+are fixed above. If Jeff still sees crashes after this ships, that'd be very
+useful signal that something else is going on — worth him noting roughly how
+many refreshes it takes and whether it's Safari/Chrome/a specific phone.
+
+**6. Instagram / Contact / Terms of Sale / Privacy links at the bottom of Shop
+weren't centered** (they were left-aligned like every other page's mini-footer,
+but Jeff wanted Shop's specifically centered). Added a `mini-footer-centered`
+modifier class, applied only to `#shop-mini-footer` in `injectFooters()`, and
+scoped a couple of small CSS overrides to it. Verified via computed style
+(`flex-direction:column; justify-content:center`) and a screenshot.
+
+**7. About page mobile footer: "Work" and "About" link columns stacked
+vertically instead of sitting side by side, with Newsletter above them instead
+of below.**
+Fixed with `grid-template-areas` on the existing footer grid, scoped to the
+`max-width:580px` breakpoint only (desktop/tablet layout untouched):
+`"brand brand" "work about" "newsletter newsletter"`. Added
+`footer-col-{brand,work,about,newsletter}` classes to the footer template's 4
+direct children so the areas have something to attach to. Verified via
+bounding-box checks at a 390×844 viewport: Work and About share the same
+`top`, Newsletter's `top` is below both.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not
