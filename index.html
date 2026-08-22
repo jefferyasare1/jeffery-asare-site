@@ -116,7 +116,16 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .potw-btn:hover{background:var(--ink);color:#fff;}
 @media(max-width:640px){.potw-body{gap:.7rem;}.potw-btn{margin-left:0;}}
 /* ---- POTW Editorial Spread (portfolio) ---- */
-.potw-editorial{position:relative;width:100%;height:62vh;min-height:300px;overflow:hidden;background:#1a1410;display:none;}
+/* height repeated with svh as a progressive enhancement: plain vh is measured
+   against the browser's full viewport including the address bar, and mobile
+   browsers resize that address bar as you scroll — so a block sized in vh
+   actually changes height mid-scroll, shoving everything below it up or down
+   without warning. That's exactly what a sudden "slam"/jump feels like right
+   as you approach the bottom of a tall page like Portfolio. svh is measured
+   against the smallest the viewport ever gets, so it stays constant through
+   the whole scroll. Browsers that don't support svh just keep the vh value
+   above (same pattern already used on .hero). */
+.potw-editorial{position:relative;width:100%;height:62vh;height:62svh;min-height:300px;overflow:hidden;background:#1a1410;display:none;}
 .potw-editorial.visible{display:block;}
 .potw-editorial-img{width:100%;height:100%;object-fit:cover;display:block;opacity:.72;}
 .potw-editorial-over{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.80) 0%,rgba(0,0,0,.3) 55%,transparent 100%),linear-gradient(to top,rgba(0,0,0,.45) 0%,transparent 55%);}
@@ -127,7 +136,7 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .potw-editorial-desc{font-size:13px;color:rgba(255,255,255,.6);line-height:1.8;max-width:400px;margin-bottom:1.4rem;}
 .potw-editorial-btn{display:inline-flex;align-items:center;gap:.5rem;background:#fff;color:#111;border:none;border-radius:999px;padding:.65rem 1.5rem;font-size:12px;font-family:var(--sans);cursor:pointer;transition:opacity .2s;width:fit-content;}
 .potw-editorial-btn:hover{opacity:.85;}
-@media(max-width:640px){.potw-editorial{height:55vh;}.potw-editorial-desc{display:none;}}
+@media(max-width:640px){.potw-editorial{height:55vh;height:55svh;}.potw-editorial-desc{display:none;}}
 /* ---- Dark Room Mode ---- */
 html.darkroom{--bg:#0d0d0d;--warm:#1a1816;--rule:#242220;--muted:#585450;--ink:#c8c0b4;}
 html.darkroom body{background:#0d0d0d;color:#c8c0b4;}
@@ -167,7 +176,7 @@ html.darkroom .size-pill{color:#585450;border-color:#242220;}
 html.darkroom .size-pill:hover:not(.active){border-color:#444;color:#c8c0b4;}
 html.darkroom .shop-view-btn{background:#1a1816;border-color:#242220;color:#c8c0b4;}
 html.darkroom .shop-view-btn:hover{background:#c8c0b4;color:#0d0d0d;border-color:#c8c0b4;}
-html.darkroom .mini-footer{border-color:#242220;}
+html.darkroom .mini-footer{background:#111008;border-color:rgba(255,255,255,.06);}
 html.darkroom .field-input,html.darkroom .field-select,html.darkroom .field-textarea{background:#1a1816;border-color:#242220;color:#c8c0b4;}
 html.darkroom .field-input::placeholder,html.darkroom .field-textarea::placeholder{color:#383430;}
 html.darkroom #series-intro .si-inner{background:var(--warm);}
@@ -239,7 +248,7 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .lb-pix-date{display:inline;}
 .detail-back{padding:1.2rem var(--pad);font-size:12px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--sans);display:flex;align-items:center;gap:.4rem;}
 .detail-back:hover{color:var(--ink);}
-.detail-hero-ph{width:100%;height:60vh;display:flex;align-items:center;justify-content:center;background:var(--warm);}
+.detail-hero-ph{width:100%;height:60vh;height:60svh;display:flex;align-items:center;justify-content:center;background:var(--warm);}
 .detail-hero-img{width:100%;max-height:70vh;object-fit:contain;display:block;}
 .detail-body{display:grid;grid-template-columns:1fr 1fr;gap:3rem;padding:2.5rem var(--pad) 5rem;align-items:start;}
 .detail-series{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
@@ -378,13 +387,11 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .journal-suggestion-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:.2rem;}
 .journal-suggestion-meta{font-size:11px;color:var(--muted);}
 /* ── /Smart features ── */
-.mini-footer{border-top:1px solid var(--rule);padding:1.2rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
-.mini-footer-centered{flex-direction:column;justify-content:center;text-align:center;}
-.mini-footer-centered .mini-footer-links{justify-content:center;}
-.mini-footer-copy{font-size:11px;color:var(--muted);}
+.mini-footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.08);padding:1.2rem var(--pad);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.mini-footer-copy{font-size:11px;color:rgba(255,255,255,.6);}
 .mini-footer-links{display:flex;gap:1.4rem;list-style:none;}
-.mini-footer-links a{font-size:11px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s;}
-.mini-footer-links a:hover{color:var(--ink);}
+.mini-footer-links a{font-size:11px;color:rgba(255,255,255,.6);text-decoration:none;cursor:pointer;transition:color .2s;}
+.mini-footer-links a:hover{color:#fff;}
 @media(max-width:900px){
   .photo-grid{grid-template-columns:repeat(3,1fr);}
   .about-hero,.about-cols,.contact-body{grid-template-columns:1fr;}
@@ -409,6 +416,10 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
   .shop-list{grid-template-columns:1fr 1fr;}
   /* Bottom safe area so content doesn't hide behind home bar */
   .mini-footer{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));}
+  /* On phone, the link row (Instagram/Contact/Terms of Sale/Privacy) always
+     centers on its own full-width line — the copyright text next to it keeps
+     its normal left alignment, it just wraps above instead of sharing the row. */
+  .mini-footer-links{flex:1 1 100%;justify-content:center;}
   /* Page header spacing feels tight on small screens */
   .page-header{padding-top:1.5rem;}
   /* About page: smaller hero font */
@@ -528,7 +539,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 
 /* Mini footer links */
 .mini-footer-links a{position:relative;}
-.mini-footer-links a::after{content:"";position:absolute;bottom:-1px;left:0;width:0;height:1px;background:var(--muted);transition:width .22s ease;}
+.mini-footer-links a::after{content:"";position:absolute;bottom:-1px;left:0;width:0;height:1px;background:rgba(255,255,255,.5);transition:width .22s ease;}
 .mini-footer-links a:hover::after{width:100%;}
 
 /* Hero dot pulse on active */
@@ -769,6 +780,15 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-bg{width:100%;display:block;min-height:200px;background:#e8e3dc;object-fit:cover;}
 .pd-room-status{position:absolute;bottom:0;left:0;right:0;padding:.6rem 1rem;background:rgba(0,0,0,.52);color:#fff;font-size:11px;letter-spacing:.04em;text-align:center;}
 .pd-room-status.err{background:rgba(180,40,40,.7);}
+/* Fallback: a plain, un-perspective-matched framed print roughly placed on
+   the wall, shown only when the real (Gemini-composited) preview fails —
+   see _loadRoomComposite(). Positioned by eye against the empty wall area
+   in /images/rooms/living.jpg specifically; if a second room photo is ever
+   wired up in ROOM_BACKGROUNDS (ROOM_FALLBACK_POS below only has 'living'),
+   give it a matching entry with its own coordinates. */
+.pd-room-fallback{position:absolute;left:63%;top:33%;transform:translate(-50%,-50%);pointer-events:none;}
+.pd-room-fallback-frame{padding:3%;box-shadow:0 10px 26px rgba(0,0,0,.4);}
+.pd-room-fallback-frame img{display:block;width:100%;background:#fff;padding:6%;box-sizing:border-box;}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
 @media(max-width:600px){.pd-room-sizes{width:100%;}.pd-room-tabs{gap:.35rem;}}
 @media print{.cert-print-btn,.detail-back,.inner-nav,.wa-float{display:none!important;}}
@@ -923,6 +943,25 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 html.darkroom .review-card{background:#181614;border-color:#2e2a26;}
 html.darkroom .review-msg{color:#b0a89e;}
 html.darkroom .review-field input,html.darkroom .review-field textarea{background:#1a1814;border-color:#2e2a26;color:#e0d8cc;}
+
+/* iOS Safari (and some other mobile browsers) force-zoom the whole page in
+   whenever a focused input's computed font-size is under 16px — it's an
+   accessibility heuristic, not a bug in Safari, but it reads as the page
+   randomly zooming in the moment you tap a field. Every form field on the
+   site was smaller than that (12-14px, tuned for desktop). Bumped to 16px
+   on touch devices only, so desktop keeps its tighter type. Placed at the
+   very end of the stylesheet, after every rule it needs to override —
+   a @media block carries no extra specificity, so it only wins the cascade
+   by coming later in source order than the plain (always-13px-ish) rules
+   above; putting it any earlier gets silently overridden by them. */
+@media (pointer:coarse){
+  .field-input,.field-select,.field-textarea,
+  .newsletter-input,
+  .cert-buyer-input,
+  .cart-email-input,
+  .review-field input,.review-field textarea,
+  .pd-country-select{ font-size:16px; }
+}
 </style>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -1401,6 +1440,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     </div>
     <div class="pd-room-viewport" id="pdRoomViewport">
       <img class="pd-room-bg" id="pdRoomBg" src="/images/rooms/living.jpg" alt="Living room">
+      <div class="pd-room-fallback" id="pdRoomFallback" style="display:none;">
+        <div class="pd-room-fallback-frame" id="pdRoomFallbackFrame"><img id="pdRoomFallbackImg" alt=""></div>
+      </div>
       <div class="pd-room-status" id="pdRoomStatus" style="display:none;">Placing your print in the room&hellip;</div>
     </div>
     <p class="pd-room-note">Room settings are illustrative. Actual print size, mat, and frame may vary.</p>
@@ -1625,10 +1667,13 @@ function injectFooters(){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
-    // Shop's footer links (Instagram / Contact / Terms of Sale / Privacy)
-    // are centered per Jeff's request — every other mini-footer keeps the
-    // default copy-left / links-right layout.
-    f.className="mini-footer"+(id==="shop"?" mini-footer-centered":"");
+    // All mini-footers now share the same look (black bg, white text, same
+    // as the About page footer) and the same phone behavior — the link row
+    // (Instagram/Contact/Terms of Sale/Privacy) centers on its own line on
+    // phone via the .mini-footer-links rule at the 580px breakpoint, while
+    // the copyright text keeps its normal left alignment everywhere,
+    // including Shop.
+    f.className="mini-footer";
     var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id;
     // Music credit only on the Portfolio mini-footer — that's the one page the
     // ambient-toggle (and therefore this track) can actually be heard on, see
@@ -2201,11 +2246,24 @@ document.addEventListener("dragstart",function(e){ if(e.target.tagName==="IMG") 
     c._pxTy=(e.clientY-r.top)/r.height-.5;
   });
 
-  // On scroll: update targets only (no DOM writes here)
+  // On scroll: update targets only (no DOM writes here). getBoundingClientRect()
+  // forces a synchronous layout — calling it for every card on every raw
+  // scroll event was the real cost here: touch scrolling can fire scroll
+  // events far more often than the screen can even repaint, so this was
+  // doing up to ~87 forced-layout calls multiple times per rendered frame —
+  // a direct, measurable source of stutter during a phone scroll gesture,
+  // independent of (and on top of) the RAF loop below. Gated to run at most
+  // once per animation frame, same idea as the throttled refresh() above.
+  var _scrollRAFPending=false;
   window.addEventListener("scroll",function(){
-    cards.forEach(function(s){ s.tsh=dist(s.el)*S_PORT; });
-    var pEl=document.getElementById("potwSection");
-    if(pEl&&pEl.classList.contains("visible")) potwTgt=dist(pEl)*S_POTW;
+    if(_scrollRAFPending) return;
+    _scrollRAFPending=true;
+    requestAnimationFrame(function(){
+      _scrollRAFPending=false;
+      cards.forEach(function(s){ s.tsh=dist(s.el)*S_PORT; });
+      var pEl=document.getElementById("potwSection");
+      if(pEl&&pEl.classList.contains("visible")) potwTgt=dist(pEl)*S_POTW;
+    });
   },{passive:true});
 
   // Continuous lerp loop — glides toward targets. Two perf fixes on top of
@@ -3041,6 +3099,35 @@ function _roomComposeKey(){
   return pid+'|'+_roomCurrent+'|'+_roomSize+'|'+frame;
 }
 
+// Rough on-wall width as a % of the (square) room viewport, per print size —
+// illustrative scaling only, not physically calibrated like the real Gemini
+// composite is. Frame colors approximate the FRAME_STYLES options in
+// compose-room.js.
+var ROOM_FALLBACK_SIZE_PCT={a4:16,a3:22,a2:29,a1:37};
+var ROOM_FALLBACK_FRAME_COLOR={walnut:'#3b2a1d',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
+
+function _hideRoomFallback(){
+  var fb=document.getElementById('pdRoomFallback');
+  if(fb) fb.style.display='none';
+}
+
+// Shown when the real content-aware composite fails (almost always the
+// Gemini API being out of quota — see CLAUDE.md). Not perspective-matched
+// or physically precise, just a reasonably-placed, reasonably-sized framed
+// print so the page isn't showing a totally empty room while that's sorted
+// out on the API side.
+function _showRoomFallback(){
+  var fb=document.getElementById('pdRoomFallback');
+  var frameEl=document.getElementById('pdRoomFallbackFrame');
+  var img=document.getElementById('pdRoomFallbackImg');
+  if(!fb||!frameEl||!img||!currentPrint||!currentPrint.img) return;
+  img.src=currentPrint.img;
+  img.alt=currentPrint.title||'';
+  frameEl.style.background=ROOM_FALLBACK_FRAME_COLOR[currentPrint.frame||'walnut']||ROOM_FALLBACK_FRAME_COLOR.walnut;
+  fb.style.width=(ROOM_FALLBACK_SIZE_PCT[_roomSize]||22)+'%';
+  fb.style.display='block';
+}
+
 function setRoom(btn,room){
   _roomCurrent=room;
   if(btn){
@@ -3067,12 +3154,14 @@ function _loadRoomComposite(){
   var key=_roomComposeKey();
   var cached=_roomComposeCache[key];
   if(cached){
+    _hideRoomFallback();
     bg.src='data:'+cached.mimeType+';base64,'+cached.image;
     if(status) status.style.display='none';
     return;
   }
 
   // Show the plain room while we wait, with a status note over it.
+  _hideRoomFallback();
   bg.src='/images/rooms/'+_roomCurrent+'.jpg';
   if(status){
     status.className='pd-room-status';
@@ -3088,15 +3177,18 @@ function _loadRoomComposite(){
       if(token!==_roomReqToken) return;
       if(d&&d.image){
         _roomComposeCache[key]={image:d.image,mimeType:d.mimeType||'image/png'};
+        _hideRoomFallback();
         bg.src='data:'+(d.mimeType||'image/png')+';base64,'+d.image;
         if(status) status.style.display='none';
       } else {
-        if(status){status.className='pd-room-status err';status.textContent='Preview unavailable right now — showing the plain room.';}
+        if(status){status.className='pd-room-status err';status.textContent='Exact placement unavailable right now — here’s an approximate preview.';}
+        _showRoomFallback();
       }
     })
     .catch(function(){
       if(token!==_roomReqToken) return;
-      if(status){status.className='pd-room-status err';status.textContent='Preview unavailable right now — showing the plain room.';}
+      if(status){status.className='pd-room-status err';status.textContent='Exact placement unavailable right now — here’s an approximate preview.';}
+      _showRoomFallback();
     });
 }
 
@@ -3947,11 +4039,17 @@ document.addEventListener("keydown",function(e){
 (function(){
   // Hero nav — frosted glass on scroll
   var heroNav=document.querySelector('#page-home nav');
+  var _navScrollRAFPending=false;
   window.addEventListener('scroll',function(){
-    if(heroNav) heroNav.classList.toggle('scrolled', window.scrollY > 60);
-    // Inner navs — elevated on scroll
-    document.querySelectorAll('.inner-nav').forEach(function(n){
-      n.classList.toggle('scrolled', window.scrollY > 10);
+    if(_navScrollRAFPending) return;
+    _navScrollRAFPending=true;
+    requestAnimationFrame(function(){
+      _navScrollRAFPending=false;
+      if(heroNav) heroNav.classList.toggle('scrolled', window.scrollY > 60);
+      // Inner navs — elevated on scroll
+      document.querySelectorAll('.inner-nav').forEach(function(n){
+        n.classList.toggle('scrolled', window.scrollY > 10);
+      });
     });
   },{passive:true});
 })();

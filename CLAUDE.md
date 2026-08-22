@@ -477,6 +477,112 @@ artifact specific to the custom Fontshare typeface on a cold cache, or
 something intermittent tied to mobile network timing that a fast desktop
 session with Chrome's disk cache warm doesn't reproduce).
 
+## Footer recolor, force-zoom, scroll jank round 2, room preview fallback (2026-08-22)
+Four more issues from Jeff in one message.
+
+**1. All footers except Hero now share the About page footer's look (black
+bg, white text).** Hero never had a footer to begin with (`injectFooters()`'s
+id list never included `"home"`), so no change needed there. Recolored the
+shared `.mini-footer` (used by Portfolio/Detail/Shop/Contact/Terms/Privacy/
+Print-Detail/Journal) from its old light theme to `var(--ink)` bg / white-ish
+text, matching `.site-footer` (the big 4-column About footer). Also gave it a
+darkroom (dark-mode toggle) override matching `.site-footer`'s (`#111008`).
+On phone, the link row (Instagram/Contact/Terms of Sale/Privacy) now always
+centers on its own full-width line for every one of these footers, via a
+`.mini-footer-links{flex:1 1 100%;justify-content:center;}` rule at the
+existing 580px breakpoint — previously only Shop had this, and it dragged
+the copyright text into centering too via a blanket `.mini-footer-centered`
+class. That class is gone now; the copyright text keeps its normal left
+alignment on every page, including Shop specifically per Jeff's callout.
+Desktop layout (copy left / links right, single row) is untouched everywhere.
+
+**2. Force-zoom on focusing form fields, on phone.** Classic iOS Safari (and
+some other mobile browser) behavior: it force-zooms the whole page in when a
+focused input's *computed* font-size is under 16px, as an accessibility
+measure. Every form field on the site (contact form, newsletter signup, cart
+checkout name/email, review form, certificate signature, print-detail country
+select) was sized for desktop at 12-14px. Fixed with a `@media
+(pointer:coarse)` block bumping all of them to 16px on touch devices only —
+desktop keeps its original sizing. **Placement matters here**: this has to be
+the literal last rule in the stylesheet, after every plain (non-media-query)
+rule that sets these same properties — a media query doesn't add specificity,
+so if it appears earlier in source order than a later plain rule targeting
+the same selector, the plain rule wins the cascade regardless of whether the
+media query is active. Learned this the hard way mid-session: an earlier
+attempt placed the block near the top of the stylesheet (next to the
+existing `scroll-behavior` touch override) and it was silently overridden by
+the real `.field-input` etc. rules further down — caught by testing against
+a real touch-emulated `getComputedStyle()`, not just eyeballing the CSS.
+
+**3. Mobile scroll jank / "slam" at the bottom — round 2, still a problem
+after the round-1 fix.** Worth being honest about why: the round-1 fix
+(`scroll-behavior:auto` on `pointer:coarse`) only affects scrolls *triggered
+by script* (anchor jumps, `scrollIntoView`, etc.) — it was a real fix for a
+real problem, but `scroll-behavior` has never had any effect on native
+finger-driven touch scrolling in the first place, so it couldn't have
+touched what Jeff is actually describing. Two real fixes this round, both
+targeting native-scroll jank directly:
+  - The portfolio/shop parallax's `window.addEventListener('scroll', ...)`
+    handler was calling `getBoundingClientRect()` (which forces a
+    synchronous layout recalculation) for every card on the page — up to 87
+    of them — on *every single raw scroll event*. Touch scrolling can fire
+    scroll events much more often than the screen even repaints, so this was
+    doing dozens of forced layouts per rendered frame during a scroll
+    gesture — a direct, measurable source of stutter, independent of the RAF
+    loop that was already throttled in an earlier session. Same fix applied
+    to a second, unthrottled scroll listener (the nav-bar "scrolled" class
+    toggle) for the same reason. Both now gate their work to run at most
+    once per animation frame via a pending-flag + `requestAnimationFrame`,
+    regardless of how many raw scroll events fire in between.
+  - `.potw-editorial` (the big photo-of-the-week block partway down
+    Portfolio) was sized with a plain `62vh`/`55vh`. Plain `vh` is measured
+    against the browser's *full* viewport including the address bar — and
+    mobile browsers resize that address bar as you scroll, especially near
+    the bottom of a page, which means a `vh`-sized block actually changes
+    height mid-scroll, shoving everything below it up or down without
+    warning. That is exactly what a sudden "slam"/"goes up and comes down"
+    feels like. Fixed the same way `.hero` already correctly handled this
+    (that one was already right): repeat the property with `svh` — measured
+    against the *smallest* the viewport ever gets, so it can't move mid-
+    scroll — as a progressive enhancement after the plain `vh` value.
+    Applied the same `vh`+`svh` pairing to `.detail-hero-ph` (Print Detail
+    page) for consistency, same risk.
+  - Verified via a simulated rapid-scroll-event burst (40 scroll events
+    fired faster than a frame) with no thrown errors, and confirmed the POTW
+    block now resolves to a real, stable height. Flagged honestly to Jeff
+    that neither of these can be fully confirmed as *the* fix without an
+    actual phone — they're both real, well-understood bugs with the classic
+    symptom he described, not guesses, but I can't feel the "slam" myself
+    from here.
+
+**4. "See it in a room" preview — still the same Gemini quota exhaustion**,
+re-confirmed live (fetched `/api/compose-room` directly from the production
+site via the Chrome bridge): identical `429 "You exceeded your current
+quota"` error, same as the 2026-08-21 diagnosis above. This is not fixable
+from the code side — see that section for what Jeff needs to check on the
+Google side. What *is* fixable: the failure experience. Previously, a failed
+composite showed the bare empty room with an apologetic status message and
+nothing else — the print itself was nowhere to be seen. Added a fallback:
+on failure, show the plain print image, framed and matted via CSS (frame
+color follows the print's own `frame` setting — walnut/black/white/oak),
+positioned over the empty wall area of `/images/rooms/living.jpg` (eyeballed
+against the actual image, not computed — see `ROOM_FALLBACK_SIZE_PCT`/
+`ROOM_FALLBACK_FRAME_COLOR` and the `.pd-room-fallback*` CSS), sized roughly
+by the selected print size (A4 smallest through A1 largest). This is
+explicitly *not* perspective-matched or physically precise like the real
+Gemini composite is — it's a reasonable placeholder so the page shows
+*something* useful while quota/billing gets sorted, not a replacement for
+the real feature. Status text changed from "Preview unavailable" to "Exact
+placement unavailable right now — here's an approximate preview" to set that
+expectation. Verified: fallback shows correctly on both a JSON-error
+response and a network failure, stays hidden on a successful composite
+(including the KV/in-memory cached-hit path), and rescales when switching
+print size. All three room photos (`living`/`bedroom`/`gallery`) exist as
+assets but only `living` is wired into `ROOM_BACKGROUNDS` — if a second room
+is ever activated, it needs its own fallback-position entry (currently
+hardcoded to the "living" wall coordinates via a fixed CSS position, not a
+per-room map — worth revisiting if/when that happens).
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not
