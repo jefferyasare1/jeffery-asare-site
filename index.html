@@ -372,10 +372,10 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 /* ── Smart features ── */
 .shop-social-proof{font-size:11px;color:var(--muted);letter-spacing:.04em;padding:.5rem var(--pad) .2rem;text-align:center;}
 .recently-viewed-wrap{border-top:1px solid var(--rule);padding:2.5rem var(--pad) 1.5rem;}
-.recently-viewed-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.recently-viewed-label,.continue-tray-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
 .recently-viewed-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
 @media(max-width:700px){.recently-viewed-grid{grid-template-columns:repeat(2,1fr);}}
-.recently-viewed-card{text-decoration:none;color:var(--ink);}
+.recently-viewed-card{text-decoration:none;color:var(--ink);cursor:pointer;}
 .recently-viewed-img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:4px;background:var(--warm);display:block;}
 .recently-viewed-title{font-size:12px;font-weight:500;margin-top:.4rem;}
 .journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
@@ -1119,6 +1119,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       </div>
     </div>
   </div>
+  <div id="continueTray" style="display:none;"></div>
   <div id="home-mini-footer"></div>
 </div>
 
@@ -1647,6 +1648,7 @@ function navigate(page) {
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
     if (page==="shop") { renderShop(0); renderSocialProof(); renderRecentlyViewed(); }
+    if (page==="home") { renderContinueWhereLeftOff(); }
     if (page==="journal") { renderJournal(); }
     if (page==="contact") { renderReviews(); prefillContactFromUrl(); }
     setPageTitle(page);
@@ -2776,30 +2778,73 @@ function renderSocialProof(){
     .catch(function(){ el.style.display='none'; });
 }
 
-// ── Recently viewed prints tray ──────────────────────────────
-function renderRecentlyViewed(){
-  var tray = document.getElementById('recentlyViewedTray');
+// ── Recently viewed prints: record + render ──────────────────
+// Records a print-detail view to localStorage so the Shop tray and the
+// homepage "Continue where you left off" strip both have something real to
+// show. NOTE: before 2026-08-23 this key was only ever *read*, never
+// *written* — nothing on the site called localStorage.setItem for it, so
+// both trays always saw an empty list and stayed permanently hidden. This
+// is the fix for that, plus two more bugs found alongside it: the reader
+// matched entries by `title` (fragile — breaks on a rename) instead of the
+// stable `id`, and the card link pointed at `/prints/<slug>`, a route that
+// doesn't exist — the real print-detail URL scheme is `?print=<id>` (see
+// the deep-link handling in INIT and the pushState call above).
+function _recordRecentlyViewed(print){
+  if(!print || !print.id) return;
+  try{
+    var list = JSON.parse(localStorage.getItem('ja_recently_viewed')||'[]');
+    if(!Array.isArray(list)) list=[];
+  } catch(e){ list=[]; }
+  list = list.filter(function(rv){ return rv && rv.id !== print.id; });
+  list.unshift({id:print.id, title:print.title, img:print.img||'', ts:Date.now()});
+  list = list.slice(0,8);
+  try{ localStorage.setItem('ja_recently_viewed', JSON.stringify(list)); } catch(e){}
+}
+
+// Shared renderer for both trays — same card markup, different container
+// and heading. `excludeId` drops the print currently open (relevant if this
+// is ever called from the print-detail page itself; harmless elsewhere).
+function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId){
+  var tray = document.getElementById(containerId);
   if(!tray) return;
   var list;
   try { list = JSON.parse(localStorage.getItem('ja_recently_viewed')||'[]'); } catch(e){ list=[]; }
-  // Filter to prints still in PRINTS array
+  if(!Array.isArray(list)) list=[];
   var valid = list.filter(function(rv){
-    return PRINTS.some(function(p){ return p.title===rv.title; });
+    return rv && rv.id!==excludeId && PRINTS.some(function(p){ return p.id===rv.id; });
   }).slice(0,4);
   if(!valid.length){ tray.style.display='none'; return; }
-  var heading = 'Recently viewed';
-  // Try fetching heading from smart-features.json (use cached)
   tray.innerHTML = '<div class="recently-viewed-wrap">'
-    +'<div class="recently-viewed-label">'+heading+'</div>'
+    +'<div class="'+(headingClass||'recently-viewed-label')+'">'+heading+'</div>'
     +'<div class="recently-viewed-grid">'
     +valid.map(function(rv){
-      return '<a class="recently-viewed-card" href="/prints/'+rv.slug+'">'
+      // A div + click handler, not <a href="?print=...">, to match the same
+      // SPA-navigation idiom pdRelated uses just above (openPrintDetail()
+      // directly, no full page reload) rather than a hard link.
+      return '<div class="recently-viewed-card" data-pid="'+rv.id+'">'
         +(rv.img?'<img class="recently-viewed-img" src="'+rv.img+'" alt="'+rv.title+'" loading="lazy">':'<div class="recently-viewed-img" style="background:var(--warm);"></div>')
         +'<div class="recently-viewed-title">'+rv.title+'</div>'
-        +'</a>';
+        +'</div>';
     }).join('')
     +'</div></div>';
+  tray.querySelectorAll('.recently-viewed-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var found = PRINTS.find(function(p){ return p.id === card.dataset.pid; });
+      if(found){ navigate('shop'); setTimeout(function(){ openPrintDetail(found); }, 260); }
+    });
+  });
   tray.style.display = '';
+}
+
+function renderRecentlyViewed(){
+  _renderRecentlyViewedInto('recentlyViewedTray', 'Recently viewed', 'recently-viewed-label');
+}
+
+// Homepage personalization: only ever shows anything for a genuine
+// returning visitor, since nothing is recorded until someone opens a print
+// — a first-time visitor's localStorage is empty and this stays hidden.
+function renderContinueWhereLeftOff(){
+  _renderRecentlyViewedInto('continueTray', 'Continue where you left off', 'continue-tray-label');
 }
 
 // ── Journal reading suggestions ──────────────────────────────
@@ -2978,6 +3023,7 @@ function openPrintDetail(print){
   var rp=document.getElementById('pdRoomPreview'); if(rp) rp.style.display='none';
   // Give this print its own shareable URL
   history.pushState({print:print.id}, print.title+' — Jeffery Asare', '?print='+print.id);
+  _recordRecentlyViewed(print);
 
   // Render "You might also like" after navigation
   setTimeout(function(){
@@ -4172,6 +4218,12 @@ fetch('/_data/settings/series.json')
   })
   .catch(function(){ _portfolioCmsLoaded=true; if(_portfolioPageActive()) renderPortfolio('all'); });
 renderShop();
+// Homepage starts pre-rendered as the active page (no navigate('home') ever
+// fires for the initial landing — see the "home" branch inside navigate()
+// above, which only runs on a later click back to Home), so it needs its
+// own one-time call here to pick up "Continue where you left off" on a
+// direct landing.
+renderContinueWhereLeftOff();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Deep link: ?print=s1 opens that print; /portfolio or ?page=portfolio goes to that section
 (function(){
