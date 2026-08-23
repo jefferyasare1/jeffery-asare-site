@@ -796,12 +796,43 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
    the entire feature: the Gemini call was removed 2026-08-23 (quota
    exhaustion Jeff didn't want to pay to lift), so this renders immediately
    with no network round trip and no loading/error state. Positioned by eye
-   against /images/rooms/living.jpg specifically, low over the couch's
-   backrest per Jeff's request; if a second room photo is ever wired up in
-   ROOM_BACKGROUNDS, give it a matching entry with its own coordinates. */
-.pd-room-fallback{position:absolute;left:63%;top:52%;transform:translate(-50%,-50%);pointer-events:none;}
-.pd-room-fallback-frame{padding:3%;box-shadow:0 10px 26px rgba(0,0,0,.4);}
-.pd-room-fallback-frame img{display:block;width:100%;background:#fff;padding:6%;box-sizing:border-box;}
+   against /images/rooms/living.jpg specifically; if a second room photo is
+   ever wired up in ROOM_BACKGROUNDS, give it a matching entry with its own
+   coordinates. Anchored by its BOTTOM edge (`bottom:38%`), not centered —
+   centering (top:50%/translateY(-50%)) made a taller frame's bottom edge
+   sit lower than a shorter frame's, since both grew equally in both
+   directions from the same center point, so the gap to the couch shrank as
+   size went up (A1 nearly touched it). Anchoring the bottom edge instead
+   means every size grows upward from the same fixed line, so the gap above
+   the couch is identical at every size — that was Jeff's explicit ask
+   (2026-08-23). Horizontally still centered on the image
+   (left:50%/translateX(-50%)). */
+.pd-room-fallback{position:absolute;left:50%;bottom:38%;transform:translateX(-50%);pointer-events:none;}
+/* Shadow-box frame treatment (style "D" of 4 concepts) with a light-realism
+   pass: inset box-shadows simulate a beveled edge catching light from the
+   left (matching the actual window light in living.jpg), and the ::after
+   diagonal gradient simulates a glass/acrylic glare. Jeff approved this
+   style + the charcoal colorway 2026-08-23 ("Charcoal work perfectly.
+   Apply to website"). */
+.pd-room-fallback-frame{
+  position:relative;
+  padding:5.5%;
+  box-shadow:
+    0 24px 46px rgba(0,0,0,.5),
+    0 3px 10px rgba(0,0,0,.3),
+    inset 3px 0 7px rgba(255,255,255,.22),
+    inset -3px 0 7px rgba(0,0,0,.4),
+    inset 0 3px 6px rgba(255,255,255,.12),
+    inset 0 -3px 6px rgba(0,0,0,.3);
+}
+.pd-room-fallback-frame::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(112deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.07) 16%, transparent 34%);
+  pointer-events:none;
+}
+.pd-room-fallback-frame img{display:block;width:100%;background:#fff;padding:4.5%;box-sizing:border-box;box-shadow:inset 0 6px 14px rgba(0,0,0,.18);}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
 @media(max-width:600px){.pd-room-sizes{width:100%;}.pd-room-tabs{gap:.35rem;}}
 @media print{.cert-print-btn,.detail-back,.inner-nav,.wa-float{display:none!important;}}
@@ -1448,12 +1479,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <button class="pd-room-close" onclick="document.getElementById('pdRoomPreview').style.display='none'">Close &times;</button>
     </div>
     <div class="pd-room-tabs">
-      <div class="pd-room-sizes">
-        <button class="pd-room-size" data-size="a4" onclick="setRoomSize(this,'a4')">A4</button>
-        <button class="pd-room-size active" data-size="a3" onclick="setRoomSize(this,'a3')">A3</button>
-        <button class="pd-room-size" data-size="a2" onclick="setRoomSize(this,'a2')">A2</button>
-        <button class="pd-room-size" data-size="a1" onclick="setRoomSize(this,'a1')">A1</button>
-      </div>
+      <div class="pd-room-sizes" id="pdRoomSizes"><!-- built by openRoomPreview() from currentPrint.sizes — not every print offers every size --></div>
     </div>
     <div class="pd-room-viewport" id="pdRoomViewport">
       <img class="pd-room-bg" id="pdRoomBg" src="/images/rooms/living.jpg" alt="Living room">
@@ -3144,7 +3170,11 @@ var _roomCurrent='living', _roomSize='a3';
 // approximate the walnut/black/white/oak options a print can have.
 // 2026-08-23: sized down 20% at Jeff's request (was a4:16,a3:22,a2:29,a1:37).
 var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
-var ROOM_FALLBACK_FRAME_COLOR={walnut:'#3b2a1d',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
+// walnut updated to charcoal (#2a2725) 2026-08-23 per Jeff's approval — the
+// only material actually in use in _data/prints.json today, so this is the
+// only swatch changed; black/white/oak left as-is since they weren't part
+// of the comparison Jeff reviewed.
+var ROOM_FALLBACK_FRAME_COLOR={walnut:'#2a2725',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
 
 function _renderRoomComposite(){
   var bg=document.getElementById('pdRoomBg');
@@ -3178,14 +3208,44 @@ function setRoomSize(btn,size){
   _renderRoomComposite();
 }
 
+// Builds the room-preview size tabs from currentPrint.sizes rather than a
+// fixed A4/A3/A2/A1 set — not every print has every size configured in the
+// dashboard, so the preview must only ever offer sizes that print actually
+// has. Defaults to whatever size is active on the main purchase pills when
+// that size exists for this print, so the two selectors stay in sync;
+// otherwise falls back to the print's first configured size. (2026-08-23,
+// Jeff: "not all images will have all sizes... should sync accordingly")
+function _buildRoomSizeTabs(){
+  var wrap=document.getElementById('pdRoomSizes');
+  if(!wrap) return '';
+  wrap.innerHTML='';
+  if(!currentPrint||!currentPrint.sizes||!currentPrint.sizes.length) return '';
+  var activePill=document.querySelector('#pdSizes .size-pill.active');
+  var activeLabel=activePill?activePill.textContent:currentPrint.sizes[0].label;
+  var hasActiveLabel=currentPrint.sizes.some(function(s){return s.label===activeLabel;});
+  var defaultLabel=hasActiveLabel?activeLabel:currentPrint.sizes[0].label;
+  var defaultKey='';
+  currentPrint.sizes.forEach(function(s){
+    var key=s.label.toLowerCase();
+    var isDefault=s.label===defaultLabel;
+    if(isDefault) defaultKey=key;
+    var btn=document.createElement('button');
+    btn.className='pd-room-size'+(isDefault?' active':'');
+    btn.dataset.size=key;
+    btn.textContent=s.label;
+    btn.addEventListener('click',function(){ setRoomSize(btn,key); });
+    wrap.appendChild(btn);
+  });
+  return defaultKey;
+}
+
 function openRoomPreview(){
   var preview=document.getElementById('pdRoomPreview');
   if(preview){ preview.style.display='block'; preview.scrollIntoView({behavior:'smooth',block:'start'}); }
-  _roomCurrent='living'; _roomSize='a3';
+  _roomCurrent='living';
   document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
   var mt=document.querySelector('.pd-room-tab[data-room="living"]'); if(mt) mt.classList.add('active');
-  document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
-  var ms=document.querySelector('.pd-room-size[data-size="a3"]'); if(ms) ms.classList.add('active');
+  _roomSize=_buildRoomSizeTabs();
   _renderRoomComposite();
 }
 // Expose room preview functions to global scope (onclick attributes need them)

@@ -749,6 +749,52 @@ placement: closer to the couch, 20% smaller.
   the only room wired into `ROOM_BACKGROUNDS`/this fallback. Same caveat as
   before: a second room photo needs its own coordinates, not a shared one.
 
+## Room preview: equal gap across sizes, shadow-box charcoal frame, per-print sizes (2026-08-23)
+
+Three follow-up requests from Jeff on the same room-preview feature, same day.
+
+**Equal gap across sizes.** `.pd-room-fallback` was center-anchored
+(`top:50%;transform:translate(-50%,-50%)`), which meant a taller frame (A1)
+grew further downward than a shorter one (A4) from the same center point —
+the gap to the couch shrank as size went up, and A1 nearly touched it.
+Switched to bottom-anchoring (`bottom:38%;transform:translateX(-50%)`) so
+every size grows upward from a fixed line instead. Verified via
+`getBoundingClientRect()` that the gap (viewport bottom minus frame bottom)
+is now pixel-identical across A4/A3/A2/A1.
+
+**Frame style + charcoal colorway.** Jeff called the plain frame "boring"
+and asked for other styles; showed him 4 concepts (float mount, thin line,
+museum mat, shadow box) and he picked the shadow box. Then asked for a
+color suited to the room's brown palette plus "an illusion of realness...
+a glint of light from the left side" (the room photo's actual window light
+is on the left). Landed on:
+- `.pd-room-fallback-frame`: padding 3%→5.5%, plus a layered `box-shadow`
+  (drop shadow + inset highlights/shadows on alternating edges) to fake a
+  beveled edge catching light from the left.
+- `.pd-room-fallback-frame::after`: a diagonal `linear-gradient` overlay
+  simulating a glass/acrylic glare, motivated by the same left-side light.
+- `.pd-room-fallback-frame img`: padding 6%→4.5%, plus an inset shadow so
+  the mat reads as recessed rather than flush.
+- `ROOM_FALLBACK_FRAME_COLOR.walnut` changed from `#3b2a1d` to `#2a2725`
+  (charcoal) — this is the only swatch touched, since walnut is the only
+  material any print in `_data/prints.json` currently uses; black/white/oak
+  were left as-is.
+Re-verified the equal-gap fix still holds with the new (larger) padding
+percentages — still pixel-identical across all four sizes.
+
+**Per-print size sync.** Jeff flagged that not every print will have every
+size configured in the dashboard, so the room preview's size tabs shouldn't
+assume a fixed A4/A3/A2/A1 set. The tabs (`#pdRoomSizes`) are now built at
+`openRoomPreview()` time from `currentPrint.sizes` (the same array the main
+purchase-pill selector already uses), via a new `_buildRoomSizeTabs()`
+helper — so a print with only 2 sizes configured only ever shows 2 tabs.
+Default tab now follows whichever size is active on the main purchase
+pills when that size exists for the print (falls back to the print's first
+size otherwise), so the two selectors stay in sync rather than always
+defaulting to A3. Tested by intercepting the `_data/prints.json` fetch to
+simulate a print with only A4+A2 configured — main pills and room tabs both
+correctly showed only those two, and clicking between them worked.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not
