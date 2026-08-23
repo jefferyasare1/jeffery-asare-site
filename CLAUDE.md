@@ -840,10 +840,12 @@ public print page and the dashboard's mirror of it and sized up both.
 He corrected that — he meant the dashboard's admin preview tool only, not
 the public site customers see. Reverted `ROOM_FALLBACK_SIZE_PCT` in
 index.html back to `{a4:13,a3:18,a2:23,a1:30}` (unchanged from earlier
-that day). `CMS_ROOM_SIZE_PCT` in dashboard.html stays at the larger
-`{a4:16,a3:22,a2:28,a1:36}` (×1.2 of the public values, rounded) — bigger
+that day). `CMS_ROOM_SIZE_PCT` in dashboard.html stays larger — bigger
 and easier to inspect while sanity-checking a print, which is the actual
-point of an admin-only tool.
+point of an admin-only tool. Went through two passes on the multiplier:
++20% off the public values first, then corrected same day to +25% off the
+public values (not +25% stacked on the already-enlarged numbers) ->
+`{a4:16,a3:23,a2:29,a1:38}`.
 
 This is now the one place the two files deliberately diverge on purpose —
 everywhere else (frame styling, colors, positioning) they're still meant
