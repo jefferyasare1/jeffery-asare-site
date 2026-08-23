@@ -929,6 +929,34 @@ with no local sandbox credentials configured (no `.dev.vars` at all in this
 checkout) — each one degrades gracefully with its own message and would
 work normally against Jeff's real Cloudflare env vars.
 
+## "Recently viewed" never worked; fixed + extended to homepage as "Continue where you left off" (2026-08-23)
+
+Found while building the homepage personalization idea. `ja_recently_viewed`
+in localStorage was only ever *read* (`renderRecentlyViewed()`) — nothing
+anywhere called `setItem` for it, so the Shop page's "Recently viewed" tray
+has been permanently empty and hidden since it was built. Two more bugs
+alongside it: the reader matched entries by `title` (fragile — breaks on a
+rename), and the card linked to `/prints/<slug>`, a route that has never
+existed on this site — the real print-detail URL scheme is `?print=<id>`
+(see the `history.pushState` call in `openPrintDetail()` and the deep-link
+handling in INIT).
+
+Fixed all three: `openPrintDetail()` now calls `_recordRecentlyViewed(print)`
+(id/title/img/timestamp, deduped, capped at 8, newest first). The shared
+renderer `_renderRecentlyViewedInto(containerId, heading, headingClass,
+excludeId)` matches by stable `id` and opens prints via the same SPA
+click-handler idiom `pdRelated` ("You might also like") already used —
+`data-pid` + `openPrintDetail()` directly — instead of a dead href.
+
+Same data now also drives a new homepage section, `#continueTray` /
+`renderContinueWhereLeftOff()`, right under the hero. It only ever shows
+anything when localStorage genuinely has a prior view, so a first-time
+visitor never sees it — this is real personalization, not a fake "welcome
+back" that fires for everyone. Called both from `navigate()`'s `"home"`
+branch (for a later click back to Home) and once directly in INIT (since
+the homepage starts pre-rendered `active` — no `navigate('home')` ever
+fires for the initial landing).
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not
