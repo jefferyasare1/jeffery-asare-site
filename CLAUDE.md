@@ -795,6 +795,44 @@ defaulting to A3. Tested by intercepting the `_data/prints.json` fetch to
 simulate a print with only A4+A2 configured — main pills and room tabs both
 correctly showed only those two, and clicking between them worked.
 
+## Dashboard: fixed "Preview a print in this room" (2026-08-23)
+
+This admin-only tool (Content → Site Text → Room Preview Images) let Jeff
+sanity-check a print's room placement before customers see it. It was still
+wired to the same Gemini-backed `/api/compose-room` endpoint the public
+"See it in a room" used to call — since that quota was exhausted and the
+public preview moved to pure CSS earlier the same day (see the entry
+above), this admin tool always failed too.
+
+Fix: switched it to render the exact same CSS composite as the public
+preview — a framed print positioned over the room photo — instead of
+calling the dead endpoint. Concretely:
+- New `.cms-room-viewport`/`.cms-room-frame-wrap`/`.cms-room-frame` CSS in
+  dashboard.html's own `<style>` block, a literal copy of
+  `.pd-room-viewport`/`.pd-room-fallback`/`.pd-room-fallback-frame` from
+  index.html (charcoal shadow-box, bevel, glass-glare — the whole
+  treatment). No shared code between the two pages (no-build-step,
+  file-per-page site), so if the public preview's styling changes again,
+  mirror it here too.
+- `CMS_ROOM_SIZE_PCT`/`CMS_ROOM_FRAME_COLOR` in dashboard.html duplicate
+  `ROOM_FALLBACK_SIZE_PCT`/`ROOM_FALLBACK_FRAME_COLOR` from index.html for
+  the same reason.
+- Also applied the "not all sizes" fix here at the same time: the size
+  dropdown (`room-preview-size-living`) used to be a hardcoded
+  A4/A3/A2/A1 list. New `cmsSyncRoomPreviewSizes()` rebuilds it from the
+  selected print's own `sizes` array whenever the print dropdown changes,
+  same as the public print page.
+- Print select's `value` changed from the print's image path to its `id`,
+  since the tool now needs to look up that print's full record (frame
+  material + sizes), not just its image.
+- `functions/api/compose-room.js` is untouched — still dead code, same as
+  before. Nothing else calls it now.
+Verified: The Herdsman (4 sizes, walnut/charcoal) renders correctly and
+matches the public page's look exactly; a synthetic print with only
+A4+A2 and a black frame correctly only offered those two sizes and
+rendered the right frame color; switching between prints resyncs the
+size dropdown each time.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

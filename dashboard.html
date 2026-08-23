@@ -1019,6 +1019,35 @@
       #clientsList{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block;}
       #clientsList table{min-width:520px;}
     }
+    /* "Preview a print in this room" — mirrors the live public-site CSS
+       composite exactly (see .pd-room-* in index.html) so this actually
+       shows what customers see. Kept as a literal copy rather than shared
+       code since this is a no-build-step, single-file-per-page site; if
+       the public preview's frame/positioning ever changes, mirror it here
+       too. Replaced the old Gemini-backed /api/compose-room call on
+       2026-08-23 — that quota was exhausted, so this tool always failed. */
+    .cms-room-viewport{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--rule);margin-top:8px;}
+    .cms-room-bg{width:100%;display:block;min-height:160px;background:#e8e3dc;object-fit:cover;}
+    .cms-room-frame-wrap{position:absolute;left:50%;bottom:38%;transform:translateX(-50%);pointer-events:none;}
+    .cms-room-frame{
+      position:relative;
+      padding:5.5%;
+      box-shadow:
+        0 24px 46px rgba(0,0,0,.5),
+        0 3px 10px rgba(0,0,0,.3),
+        inset 3px 0 7px rgba(255,255,255,.22),
+        inset -3px 0 7px rgba(0,0,0,.4),
+        inset 0 3px 6px rgba(255,255,255,.12),
+        inset 0 -3px 6px rgba(0,0,0,.3);
+    }
+    .cms-room-frame::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(112deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.07) 16%, transparent 34%);
+      pointer-events:none;
+    }
+    .cms-room-frame img{display:block;width:100%;background:#fff;padding:4.5%;box-sizing:border-box;box-shadow:inset 0 6px 14px rgba(0,0,0,.18);}
   </style>
 </head>
 <body>
@@ -1562,16 +1591,19 @@
 
               <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--rule);">
                 <label style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;">Preview a print in this room</label>
-                <p style="font-size:11.5px;color:var(--muted);margin:0 0 8px;">Content-aware compositing — same call the public site makes. Use this to sanity-check a print before customers see it.</p>
+                <p style="font-size:11.5px;color:var(--muted);margin:0 0 8px;">Same CSS placement the public site uses. Use this to sanity-check a print before customers see it.</p>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                  <select id="room-preview-print-living" style="flex:2;min-width:160px;"><option value="">Loading prints…</option></select>
-                  <select id="room-preview-size-living" style="flex:1;min-width:80px;">
-                    <option value="a4">A4</option><option value="a3" selected>A3</option><option value="a2">A2</option><option value="a1">A1</option>
-                  </select>
+                  <select id="room-preview-print-living" onchange="cmsSyncRoomPreviewSizes('living')" style="flex:2;min-width:160px;"><option value="">Loading prints…</option></select>
+                  <select id="room-preview-size-living" onchange="cmsPreviewRoomComposite('living')" style="flex:1;min-width:80px;"></select>
                   <button class="btn-card primary" onclick="cmsPreviewRoomComposite('living')">Preview</button>
                 </div>
                 <div class="cms-status" id="room-composite-status-living"></div>
-                <img id="room-composite-result-living" style="display:none;width:100%;border-radius:4px;margin-top:8px;aspect-ratio:3/4;object-fit:cover;" alt="Composited preview">
+                <div class="cms-room-viewport" id="room-composite-viewport-living" style="display:none;">
+                  <img class="cms-room-bg" src="/images/rooms/living.jpg" alt="Living room">
+                  <div class="cms-room-frame-wrap" id="room-composite-wrap-living">
+                    <div class="cms-room-frame" id="room-composite-frame-living"><img id="room-composite-img-living" alt=""></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -6178,6 +6210,11 @@ function cmsUploadChosenRoomImg(room,b64,mime,source,st,picker){
     .catch(function(err){if(st){st.className='cms-status err';st.textContent='Error: '+err.message;}});
 }
 
+// Print data cache for the "preview a print in this room" tool, keyed by
+// room, so cmsSyncRoomPreviewSizes/cmsPreviewRoomComposite can look up a
+// print's own frame material + configured sizes without re-fetching.
+var _cmsRoomPreviewPrints={};
+
 // Load print options into the room preview print selector
 function cmsLoadPrintsForPreview(room){
   var sel=document.getElementById('room-preview-print-'+room);
@@ -6186,36 +6223,77 @@ function cmsLoadPrintsForPreview(room){
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       var prints=(d&&d.prints)||[];
+      _cmsRoomPreviewPrints[room]=prints;
       if(!prints.length){sel.innerHTML='<option value="">No prints found</option>';return;}
       sel.innerHTML=prints.map(function(p){
-        return '<option value="'+p.img+'" data-frame="'+(p.frame||'walnut')+'">'+(p.title||p.img)+'</option>';
+        return '<option value="'+p.id+'">'+(p.title||p.img)+'</option>';
       }).join('');
+      cmsSyncRoomPreviewSizes(room);
     })
     .catch(function(){sel.innerHTML='<option value="">Could not load prints</option>';});
 }
 
-// Content-aware room compositing — same endpoint the public "See it in a room" uses.
+// Rebuilds the size dropdown from the currently selected print's own
+// configured sizes — not every print has every size, so this must never be
+// a fixed A4/A3/A2/A1 list (mirrors the same fix on the public print page,
+// 2026-08-23: "not all images will have all sizes... should sync
+// accordingly"). Preserves the current size selection when it's still valid
+// for the newly picked print, otherwise falls back to the first size.
+function cmsSyncRoomPreviewSizes(room){
+  var sel=document.getElementById('room-preview-print-'+room);
+  var sizeSel=document.getElementById('room-preview-size-'+room);
+  if(!sel||!sizeSel) return;
+  var prints=_cmsRoomPreviewPrints[room]||[];
+  var print=prints.filter(function(p){return p.id===sel.value;})[0];
+  var prevSize=sizeSel.value;
+  sizeSel.innerHTML='';
+  if(!print||!print.sizes||!print.sizes.length){
+    sizeSel.innerHTML='<option value="">No sizes</option>';
+    return;
+  }
+  var hasPrev=print.sizes.some(function(s){return s.label.toLowerCase()===prevSize;});
+  print.sizes.forEach(function(s,si){
+    var key=s.label.toLowerCase();
+    var opt=document.createElement('option');
+    opt.value=key;
+    opt.textContent=s.label;
+    if(hasPrev?key===prevSize:si===0) opt.selected=true;
+    sizeSel.appendChild(opt);
+  });
+}
+
+// "Preview a print in this room" — renders the exact same CSS composite the
+// public print page uses (a framed print positioned over the room photo).
+// This used to call the Gemini-backed /api/compose-room endpoint (same as
+// the old public "See it in a room"), but that quota was exhausted so this
+// tool always failed. The public preview moved to pure CSS on 2026-08-23;
+// this switches over the same way so it actually works — and now shows
+// admins exactly what customers see, not an approximation of it. Keep
+// CMS_ROOM_SIZE_PCT/CMS_ROOM_FRAME_COLOR and .cms-room-frame in sync with
+// ROOM_FALLBACK_SIZE_PCT/ROOM_FALLBACK_FRAME_COLOR/.pd-room-fallback-frame
+// in index.html if the public preview's styling ever changes.
+var CMS_ROOM_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
+var CMS_ROOM_FRAME_COLOR={walnut:'#2a2725',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
+
 function cmsPreviewRoomComposite(room){
   var sel=document.getElementById('room-preview-print-'+room);
   var sizeSel=document.getElementById('room-preview-size-'+room);
   var st=document.getElementById('room-composite-status-'+room);
-  var img=document.getElementById('room-composite-result-'+room);
+  var viewport=document.getElementById('room-composite-viewport-'+room);
+  var wrap=document.getElementById('room-composite-wrap-'+room);
+  var frameEl=document.getElementById('room-composite-frame-'+room);
+  var img=document.getElementById('room-composite-img-'+room);
   if(!sel||!sel.value){if(st){st.className='cms-status err';st.textContent='Pick a print first.';}return;}
-  if(st){st.className='cms-status';st.textContent='Compositing… (about 10–20s)';}
-  if(img) img.style.display='none';
-  var frameVal=(sel.options[sel.selectedIndex]&&sel.options[sel.selectedIndex].dataset.frame)||'walnut';
-  var qs='room='+encodeURIComponent(room)+'&print='+encodeURIComponent(sel.value)+'&size='+encodeURIComponent(sizeSel?sizeSel.value:'a3')+'&frame='+encodeURIComponent(frameVal);
-  fetch('/api/compose-room?'+qs)
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d&&d.image){
-        if(img){img.src='data:'+(d.mimeType||'image/png')+';base64,'+d.image;img.style.display='block';}
-        if(st){st.className='cms-status ok';st.textContent=(d.cached?'From cache':'Generated via '+d.source)+' ✓';}
-      } else {
-        if(st){st.className='cms-status err';st.textContent=(d&&d.error)||'Preview failed';}
-      }
-    })
-    .catch(function(err){if(st){st.className='cms-status err';st.textContent='Error: '+err.message;}});
+  var prints=_cmsRoomPreviewPrints[room]||[];
+  var print=prints.filter(function(p){return p.id===sel.value;})[0];
+  if(!print){if(st){st.className='cms-status err';st.textContent='Could not find that print.';}return;}
+  var size=sizeSel?sizeSel.value:'';
+  if(!size){if(st){st.className='cms-status err';st.textContent='This print has no sizes configured.';}return;}
+  if(img){img.src=print.img;img.alt=print.title||'';}
+  if(frameEl) frameEl.style.background=CMS_ROOM_FRAME_COLOR[print.frame||'walnut']||CMS_ROOM_FRAME_COLOR.walnut;
+  if(wrap) wrap.style.width=(CMS_ROOM_SIZE_PCT[size]||18)+'%';
+  if(viewport) viewport.style.display='block';
+  if(st){st.className='cms-status ok';st.textContent='Preview updated ✓';}
 }
 
 // Call /api/ai-suggest — Claude + Grok run in parallel on the server, synthesised into one result
