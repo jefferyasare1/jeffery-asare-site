@@ -775,8 +775,9 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .cert-print-btn:hover{opacity:.8;}
 @media(max-width:900px){.print-detail-grid{grid-template-columns:1fr;}.print-detail-img-wrap{position:static;}.cert-sig-grid{grid-template-columns:1fr;}}
 /* ROOM PREVIEW */
-.pd-room-trigger{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:none;border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink);cursor:pointer;margin-top:.8rem;transition:border-color .2s;}
-.pd-room-trigger:hover{border-color:#999;}
+.pd-room-trigger{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;background:var(--ink);border:1px solid var(--ink);border-radius:999px;padding:.55rem 1.2rem;font-family:var(--sans);font-size:11.5px;font-weight:500;letter-spacing:.03em;color:var(--bg);cursor:pointer;margin-top:.8rem;transition:opacity .2s;}
+.pd-room-trigger:hover{opacity:.85;}
+.pd-room-trigger svg{width:13px;height:13px;flex-shrink:0;}
 .pd-room-preview{padding:0 var(--pad) 4rem;max-width:930px;margin:0 auto;}
 .pd-room-header{display:flex;align-items:center;justify-content:space-between;padding:2.5rem 0 1.2rem;border-top:1px solid var(--rule);}
 .pd-room-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
@@ -1469,7 +1470,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
       <div class="print-detail-actions" id="pdActions"></div>
       <p style="font-size:11px;color:var(--muted);margin-top:1rem;line-height:1.6;">By purchasing you agree to our <button onclick="navigate('terms')" style="background:none;border:none;font-family:inherit;font-size:inherit;color:var(--ink);cursor:pointer;text-decoration:underline;padding:0;">Terms of Sale</button>.</p>
-      <button id="pdRoomPreviewBtn" class="pd-room-trigger" onclick="openRoomPreview()">&#9671;&ensp;See it in a room</button>
+      <button id="pdRoomPreviewBtn" class="pd-room-trigger" onclick="openRoomPreview()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="3" width="16" height="16" rx="1"/><path d="M4 15l4-4 3 3 5-6 4 5" /></svg><span>See it in a room</span></button>
     </div>
   </div>
   <!-- ROOM PREVIEW -->
@@ -4122,11 +4123,26 @@ document.addEventListener("keydown",function(e){
 // INIT
 // ============================================================
 injectFooters();
+// Only actually render the grid here if Portfolio is the page someone's
+// looking at right now — this fetch runs on EVERY page load regardless of
+// which page is active (it has to, so PHOTOS/_portfolioCmsLoaded are ready
+// whenever the user does visit), but navigate('portfolio') already calls
+// renderPortfolio('all') itself on every visit. Without this guard, landing
+// on Home and then clicking Portfolio built the entire 80+ card grid TWICE
+// — once here into the still-hidden #page-portfolio the instant this fetch
+// resolves, once again from navigate() — each card protected/registered for
+// lazy-draw twice over, doubling in-flight image fetches for no visible
+// benefit (found while investigating the "some grid thumbnails don't
+// render" case below). (2026-08-23)
+function _portfolioPageActive(){
+  var el=document.getElementById('page-portfolio');
+  return !!el && el.classList.contains('active');
+}
 // Load portfolio series + photos from CMS, then render
 fetch('/_data/settings/series.json')
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(d){
-    if(!d || !Array.isArray(d.series) || !d.series.length){ _portfolioCmsLoaded=true; renderPortfolio('all'); return; }
+    if(!d || !Array.isArray(d.series) || !d.series.length){ _portfolioCmsLoaded=true; if(_portfolioPageActive()) renderPortfolio('all'); return; }
     SERIES_LIST = d.series;
     buildFilterBar();
     return Promise.all(d.series.map(function(s){
@@ -4140,7 +4156,7 @@ fetch('/_data/settings/series.json')
     }));
   })
   .then(function(allArrays){
-    if(!allArrays) { renderPortfolio('all'); return; }
+    if(!allArrays) { if(_portfolioPageActive()) renderPortfolio('all'); return; }
     var flat=[].concat.apply([],allArrays).map(function(p){
       var id=p.title?p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'p'+Math.random().toString(36).slice(2);
       return {id:id,series:p.series,title:p.title,loc:p.loc||'',date:p.date||'',
@@ -4149,10 +4165,10 @@ fetch('/_data/settings/series.json')
     });
     if(flat.length) PHOTOS=flat;
     _portfolioCmsLoaded=true;
-    renderPortfolio('all');
+    if(_portfolioPageActive()) renderPortfolio('all');
     renderPhotoOfWeek();
   })
-  .catch(function(){ _portfolioCmsLoaded=true; renderPortfolio('all'); });
+  .catch(function(){ _portfolioCmsLoaded=true; if(_portfolioPageActive()) renderPortfolio('all'); });
 renderShop();
 setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
 // Deep link: ?print=s1 opens that print; /portfolio or ?page=portfolio goes to that section
@@ -4448,6 +4464,17 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
       draw();
       return;
     }
+    // Fallback safety net, on top of the IntersectionObserver below: an
+    // instant/very fast scroll (jump-to-bottom, a flick on a trackpad, a
+    // scroll-to-anchor) can carry a card's bounding box across the entire
+    // rootMargin band between two sampled frames, so some engines never
+    // fire an intersection entry for it at all — it just stays undrawn
+    // forever with no error. Reproduced 2026-08-23: an instant jump to the
+    // bottom of the 87-card Portfolio grid consistently left 4-12 canvases
+    // permanently blank even after a 2s settle, across repeated trials.
+    // Registering every not-yet-drawn canvas here means the scroll-sweep
+    // below will still catch it even if IntersectionObserver never does.
+    _pendingGridDraws.push({cv:cv,draw:draw});
     if('IntersectionObserver' in window){
       var io=new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
@@ -4461,6 +4488,28 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
       draw(); // no IntersectionObserver support — fall back to eager (old behavior)
     }
   }
+  // See the big comment inside _protectGridImg above for why this exists.
+  // draw() itself already guards against double-drawing (the `drawn` flag),
+  // so it's harmless for both this sweep and an IntersectionObserver to
+  // independently call draw() on the same canvas — whichever gets there
+  // first wins, and calling draw() on this list past that point is a no-op.
+  var _pendingGridDraws=[];
+  function _sweepPendingGridDraws(){
+    if(!_pendingGridDraws.length) return;
+    var vh=window.innerHeight;
+    _pendingGridDraws=_pendingGridDraws.filter(function(entry){
+      var r=entry.cv.getBoundingClientRect();
+      var near=r.bottom>-600 && r.top<(vh+600);
+      if(near){ entry.draw(); return false; }
+      return true;
+    });
+  }
+  var _sweepTicking=false;
+  window.addEventListener('scroll',function(){
+    if(_sweepTicking) return;
+    _sweepTicking=true;
+    requestAnimationFrame(function(){ _sweepPendingGridDraws(); _sweepTicking=false; });
+  },{passive:true});
   [{id:'photoGrid',cls:''},{id:'shopList',cls:'shop-card-img'}].forEach(function(g){
     var el=document.getElementById(g.id);
     if(!el) return;

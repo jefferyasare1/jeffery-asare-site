@@ -852,6 +852,83 @@ everywhere else (frame styling, colors, positioning) they're still meant
 to mirror each other, and both files' comments now say so explicitly so
 this doesn't look like drift the next time either one changes.
 
+## Site-wide audit: Portfolio grid canvas race + double-render, dashboard analytics guard (2026-08-23)
+
+Jeff asked for a full pass over the public site and dashboard for errors and
+imperfections. Two real bugs found and fixed in index.html's Portfolio grid,
+one real bug found and fixed in dashboard.html's Analytics tab, and one real
+bug found but NOT fixed (needs Jeff's call — see below). Everything else
+investigated turned out to be a false positive from my own test methodology,
+not the site — see "Testing locally" section for the general caveats; the
+specific false positives are recorded here since they're easy to re-trip:
+
+- **Portfolio grid canvas lazy-draw race.** `_protectGridImg` swaps every
+  `<img>` for a canvas and only decodes+draws it once an `IntersectionObserver`
+  says the card is near the viewport (see "Shop/portfolio grid image clarity"
+  section above for why). An instant/fast scroll (jump-to-bottom, a flick,
+  a scroll-to-anchor) can carry a card's bounding box across the entire
+  600px rootMargin band between two sampled frames, so some browsers never
+  fire an intersection entry for it — it just stays a blank canvas forever,
+  no error. Reproduced consistently on the 87-card Portfolio grid (4-12
+  canvases left permanently blank after an instant jump to the bottom).
+  Fixed with a scroll-event sweep fallback (`_pendingGridDraws` +
+  `_sweepPendingGridDraws()`, throttled via `requestAnimationFrame`) that
+  independently catches anything the IntersectionObserver missed — harmless
+  to double-fire since `draw()` already no-ops past the first call.
+- **Portfolio grid double-render.** The CMS photo-loading `fetch()` chain in
+  the INIT section runs on every page load (it has to, so `PHOTOS`/
+  `_portfolioCmsLoaded` are ready whenever Portfolio is visited) but was
+  unconditionally calling `renderPortfolio('all')` itself in every branch —
+  while `navigate('portfolio')` also calls it on every actual visit. Landing
+  on Home then clicking Portfolio built the entire grid twice (confirmed via
+  a debug hook: 167 pending-draw entries registered vs. 87 real cards).
+  Fixed by gating the INIT-section calls behind a `_portfolioPageActive()`
+  check so only an actual visit renders.
+- **Dashboard Analytics tab — uncaught error on a config/auth failure.**
+  `/api/analytics` reports its own failures (`CF_TOKEN` not set, bad
+  dashboard key, request-read failure) as `{error: '...'}` — a different,
+  singular shape from Cloudflare's own GraphQL `{errors: [...]}` array. The
+  client only checked `json.errors` before reading
+  `json.data.viewer.accounts[0]`, so the `{error: ...}` shape fell through
+  and threw an uncaught TypeError, leaving the panel stuck on "Loading…"
+  forever instead of showing the actual message. Added a guard that treats
+  either shape as a failure and calls `anError()`. Low-severity in practice
+  (only fires if `CF_TOKEN` itself has a problem) but a real gap — verified
+  via a direct `anInit()` call against the local 500 response.
+- **Dashboard secret-key gate — found, NOT fixed, flagged to Jeff.**
+  `dashboard.html`'s `<head>` has a `?key=...` check meant to make the whole
+  page 404 for anyone without the secret key, via `document.write(...)` +
+  `document.close()`. Because that script runs synchronously during initial
+  parsing (not after page load), `document.write` just inserts the fake-404
+  HTML at that point in the stream instead of replacing the document — the
+  browser then keeps parsing the rest of the real `<head>`/`<body>` right
+  after it. Net effect: visiting `/dashboard.html` with no key (or a wrong
+  one) shows a fake "404 / Page not found" banner stacked on top of the
+  real, fully-functional dashboard sidebar and password gate — the key
+  check doesn't block or hide anything, it's purely cosmetic. The actual
+  password gate (SHA-256 hash check, separate mechanism) still works
+  correctly and is the real barrier. Left unfixed since it's an
+  access-control decision, not just a visual bug — see the delivered
+  report for the recommended fix.
+
+False positives ruled out during the same pass (recorded so they don't get
+re-reported as bugs next time): the About page's word-reveal headline and
+`.reveal`-class Location/Philosophy/CTA sections looked broken/missing in a
+non-scrolled `fullPage` Playwright screenshot — both are working
+scroll-triggered animations, confirmed correct after an actual scroll. The
+same `.reveal` mechanism makes the lower sections of Terms of Sale and
+Privacy Policy look faded in a fullPage capture for the same reason. The
+About page's nav bar appearing to float mid-content in a fullPage screenshot
+is a stitching artifact of `.inner-nav{position:sticky;top:0}` — confirmed
+via `getBoundingClientRect()` that only one `.inner-nav` is ever actually
+laid out (the rest belong to inactive pages and collapse to 0×0), and it's
+correctly pinned at the top under a real scroll. The various dashboard tab
+500s/blank states (Content, Newsletter subscriber counts, Messages, the
+Today tab's `/api/messages` call) are all `GH_PAT`/`CF_TOKEN`/Brevo calls
+with no local sandbox credentials configured (no `.dev.vars` at all in this
+checkout) — each one degrades gracefully with its own message and would
+work normally against Jeff's real Cloudflare env vars.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

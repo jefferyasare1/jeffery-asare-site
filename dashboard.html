@@ -2701,6 +2701,16 @@ function anLoad(days){
       anError('API error: ' + json.errors[0].message);
       return;
     }
+    // /api/analytics reports its own failures (CF_TOKEN not configured, bad
+    // dashboard key, request read failure) as {error: '...'} — a different,
+    // singular shape from Cloudflare GraphQL's own {errors:[...]} above. That
+    // path used to fall through straight to `json.data.viewer`, which doesn't
+    // exist on an error response and threw an uncaught TypeError, leaving the
+    // panel stuck rather than showing a message (2026-08-23).
+    if(json.error || !json.data || !json.data.viewer || !json.data.viewer.accounts || !json.data.viewer.accounts[0]){
+      anError(json.error || 'Analytics data unavailable.');
+      return;
+    }
     var acct = json.data.viewer.accounts[0];
 
     // ── Totals ──
