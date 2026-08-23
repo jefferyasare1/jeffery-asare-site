@@ -833,6 +833,20 @@ A4+A2 and a black frame correctly only offered those two sizes and
 rendered the right frame color; switching between prints resyncs the
 size dropdown each time.
 
+## Room preview: sized back up 20% (2026-08-23)
+
+Jeff asked to make the previews (both the public print page and the
+dashboard's mirror of it) 20% larger, same day he'd had them sized down
+20%. Bumped `ROOM_FALLBACK_SIZE_PCT` (index.html) and the identical
+`CMS_ROOM_SIZE_PCT` (dashboard.html) from `{a4:13,a3:18,a2:23,a1:30}` to
+`{a4:16,a3:22,a2:28,a1:36}` (×1.2, rounded). Not a perfect round-trip to
+the original pre-reduction values (`{a4:16,a3:22,a2:29,a1:37}`) — a2 and
+a1 land 1pt lower than before, since rounding compounds across the two
+passes. Re-verified the equal-gap-to-couch fix still holds at the new,
+larger sizes (still pixel-identical across A4–A1), and checked A1
+specifically for ceiling/lamp-cord clearance — still comfortable headroom
+above the frame.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

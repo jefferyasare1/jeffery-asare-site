@@ -6272,7 +6272,9 @@ function cmsSyncRoomPreviewSizes(room){
 // CMS_ROOM_SIZE_PCT/CMS_ROOM_FRAME_COLOR and .cms-room-frame in sync with
 // ROOM_FALLBACK_SIZE_PCT/ROOM_FALLBACK_FRAME_COLOR/.pd-room-fallback-frame
 // in index.html if the public preview's styling ever changes.
-var CMS_ROOM_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
+// Kept identical to ROOM_FALLBACK_SIZE_PCT in index.html — see that file's
+// comment for the sizing history (2026-08-23: down 20%, then back up 20%).
+var CMS_ROOM_SIZE_PCT={a4:16,a3:22,a2:28,a1:36};
 var CMS_ROOM_FRAME_COLOR={walnut:'#2a2725',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
 
 function cmsPreviewRoomComposite(room){
