@@ -585,7 +585,15 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
   .hero-headline{font-size:clamp(2.2rem,9vw,3.4rem);}
 }
 
-/* ── HERO PLACEHOLDER (before real images) ── */
+/* ── HERO PLACEHOLDER (before real images) ──
+   Fallback for a hero slot with no CMS image set yet — just the gradient,
+   no text. Used to also render "Add Hero Image N via CMS" over the
+   gradient, but that only ever got hidden per-slot once that specific slot
+   had an image (see the hero-loading fetch below) — so any slot left
+   unconfigured showed literal dashboard-authoring instructions to real
+   site visitors, cycling through the live homepage hero. Removed the text
+   entirely (2026-08-23): the dashboard's own "Hero Images (1–5)" section
+   already tells Jeff what to do — the public page never should. */
 .hero-slide-ph{
   position:absolute;inset:0;
   background:linear-gradient(160deg,#1a1208 0%,#3d2810 40%,#6b4520 70%,#c8a870 100%);
@@ -594,11 +602,6 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .hero-slide-ph-3{background:linear-gradient(140deg,#1a0d08 0%,#401808 50%,#803020 100%);}
 .hero-slide-ph-4{background:linear-gradient(170deg,#0a0a12 0%,#1a1a30 40%,#2a2850 70%,#6060a0 100%);}
 .hero-slide-ph-5{background:linear-gradient(150deg,#0d1208 0%,#1a2810 40%,#304820 70%,#608040 100%);}
-.hero-slide-ph-label{
-  position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:.25em;text-transform:uppercase;
-  color:rgba(255,255,255,.25);white-space:nowrap;
-}
 
 /* ── HERO HEADLINE SPLIT ANIMATION ── */
 .hero-headline-line{display:block;overflow:hidden;padding-bottom:0.15em;margin-bottom:-0.15em;}
@@ -1082,27 +1085,22 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="hero-slide active">
       <img id="heroImg1" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph"></div>
-      <div class="hero-slide-ph-label">Add Hero Image 1 via CMS</div>
     </div>
     <div class="hero-slide">
       <img id="heroImg2" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-2"></div>
-      <div class="hero-slide-ph-label">Add Hero Image 2 via CMS</div>
     </div>
     <div class="hero-slide">
       <img id="heroImg3" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-3"></div>
-      <div class="hero-slide-ph-label">Add Hero Image 3 via CMS</div>
     </div>
     <div class="hero-slide">
       <img id="heroImg4" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-4"></div>
-      <div class="hero-slide-ph-label">Add Hero Image 4 via CMS</div>
     </div>
     <div class="hero-slide">
       <img id="heroImg5" src="" alt="" onerror="this.style.display='none'">
       <div class="hero-slide-ph hero-slide-ph-5"></div>
-      <div class="hero-slide-ph-label">Add Hero Image 5 via CMS</div>
     </div>
     <div class="hero-dots" id="heroDots"></div>
     <div class="hero-overlay"></div>
@@ -4608,7 +4606,6 @@ fetch('/_data/settings/general.json')
           var slide=img.closest('.hero-slide');
           if(slide){
             var ph=slide.querySelector('.hero-slide-ph'); if(ph) ph.style.display='none';
-            var lbl=slide.querySelector('.hero-slide-ph-label'); if(lbl) lbl.style.display='none';
           }
         }
       }
