@@ -3168,13 +3168,14 @@ var _roomCurrent='living', _roomSize='a3';
 // On-wall width as a % of the (square) room viewport, per print size —
 // illustrative scaling only, never physically calibrated. Frame colors
 // approximate the walnut/black/white/oak options a print can have.
-// 2026-08-23: sized down 20% at Jeff's request (was a4:16,a3:22,a2:29,a1:37,
-// -> a4:13,a3:18,a2:23,a1:30), then back up 20% from that same day, same
-// request wording ("make the previews 20% larger") -> a4:16,a3:22,a2:28,a1:36.
-// Not a perfect round-trip to the original values since rounding compounds
-// each pass (a2/a1 land 1pt lower) — flagging that rather than quietly
-// fudging the numbers to match the old ones.
-var ROOM_FALLBACK_SIZE_PCT={a4:16,a3:22,a2:28,a1:36};
+// 2026-08-23: sized down 20% at Jeff's request (was a4:16,a3:22,a2:29,a1:37
+// -> a4:13,a3:18,a2:23,a1:30). Briefly bumped back up 20% the same day on
+// a "make the previews 20% larger" request, but that turned out to mean
+// the dashboard's admin preview tool only (see CMS_ROOM_SIZE_PCT in
+// dashboard.html) — reverted here, public site unchanged since. The two
+// are NOT kept in sync on size percentages anymore; everything else
+// (frame styling, colors, positioning) still is.
+var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
 // walnut updated to charcoal (#2a2725) 2026-08-23 per Jeff's approval — the
 // only material actually in use in _data/prints.json today, so this is the
 // only swatch changed; black/white/oak left as-is since they weren't part
