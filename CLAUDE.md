@@ -705,6 +705,50 @@ genuinely on-screen canvas), not against a scripted repeat of Jeff's exact
 click sequence. Flagging that honestly rather than claiming a full repro I
 don't actually have.
 
+## Room preview: removed Gemini entirely, CSS placement is now the whole feature (2026-08-23)
+
+Jeff wasn't ready to take on Gemini billing to fix the quota exhaustion
+(see the 2026-08-21 entries above), and asked to just remove the Gemini
+path from the room preview, make it load faster, and adjust the CSS
+placement: closer to the couch, 20% smaller.
+
+- Deleted `_loadRoomComposite()`'s `fetch('/api/compose-room?...')` call
+  entirely, along with `_roomComposeCache`/`_roomComposeKey`/`_roomReqToken`
+  (no longer needed — there's no async request to dedupe/cache/race-guard
+  against anymore). What used to be the error-path fallback
+  (`_showRoomFallback`/`_hideRoomFallback`, the CSS-positioned framed print
+  over a static room photo) is now the only rendering path, renamed to
+  `_renderRoomComposite()` since "fallback" no longer describes what it is.
+- Removed the `#pdRoomStatus` element and both its states — the
+  "Placing your print in the room… (about 10–20s)" loading message and the
+  "Exact placement unavailable right now — here's an approximate preview."
+  error message. Neither applies anymore: there's no wait and no failure
+  mode to report on.
+- `functions/api/compose-room.js` (the Pages Function itself, and its
+  `GEMINI_API_KEY` dependency) is left in place but is now dead code —
+  nothing calls it. Didn't delete it since Jeff only asked to remove it
+  "from this preview" (the client experience), not tear out the backend
+  function/secret; worth revisiting if he decides he's done with it for
+  good.
+- Speed: this was the actual ask behind "make the preview show up faster."
+  There was never anything slow about the CSS rendering itself — the delay
+  was entirely the network round trip to Gemini (which, when it wasn't
+  outright failing, was a real API call taking real time). Removing that
+  call is the whole fix; confirmed via Playwright that the frame is on
+  screen ~28ms after clicking "See it in a room" with zero requests to
+  `/api/compose-room`.
+- Placement: `.pd-room-fallback` moved from `top:33%` to `top:52%` (`left`
+  unchanged at `63%`) — was sitting high up near the pendant lamp, now sits
+  low over the couch's backrest, the normal "art above the sofa" spot.
+  Checked both size extremes (A1 largest, A4 smallest) since a taller/wider
+  frame at the same center point risks colliding with the couch — neither
+  does, there's a clean gap above the cushions at every size.
+- Sizing: `ROOM_FALLBACK_SIZE_PCT` cut 20% across the board — a4 16→13,
+  a3 22→18, a2 29→23, a1 37→30 (rounded from the literal ×0.8).
+- All of this only touches `/images/rooms/living.jpg` positioning — still
+  the only room wired into `ROOM_BACKGROUNDS`/this fallback. Same caveat as
+  before: a second room photo needs its own coordinates, not a shared one.
+
 ## Working style notes
 - Jeff's own local WIP (splash screen work, `draft-reply.js` switched to Cloudflare
   Workers AI / llama-3.2-3b-instruct with corrected facts — phone photography not

@@ -790,15 +790,16 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-room-size.active{background:var(--ink);border-color:var(--ink);color:#fff;}
 .pd-room-viewport{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--rule);}
 .pd-room-bg{width:100%;display:block;min-height:200px;background:#e8e3dc;object-fit:cover;}
-.pd-room-status{position:absolute;bottom:0;left:0;right:0;padding:.6rem 1rem;background:rgba(0,0,0,.52);color:#fff;font-size:11px;letter-spacing:.04em;text-align:center;}
-.pd-room-status.err{background:rgba(180,40,40,.7);}
-/* Fallback: a plain, un-perspective-matched framed print roughly placed on
-   the wall, shown only when the real (Gemini-composited) preview fails —
-   see _loadRoomComposite(). Positioned by eye against the empty wall area
-   in /images/rooms/living.jpg specifically; if a second room photo is ever
-   wired up in ROOM_BACKGROUNDS (ROOM_FALLBACK_POS below only has 'living'),
-   give it a matching entry with its own coordinates. */
-.pd-room-fallback{position:absolute;left:63%;top:33%;transform:translate(-50%,-50%);pointer-events:none;}
+/* A plain, un-perspective-matched framed print placed on the wall via CSS —
+   this used to be the error-path fallback for a Gemini-composited preview
+   (see the "See it in a room" CLAUDE.md entries from 2026-08-21) and is now
+   the entire feature: the Gemini call was removed 2026-08-23 (quota
+   exhaustion Jeff didn't want to pay to lift), so this renders immediately
+   with no network round trip and no loading/error state. Positioned by eye
+   against /images/rooms/living.jpg specifically, low over the couch's
+   backrest per Jeff's request; if a second room photo is ever wired up in
+   ROOM_BACKGROUNDS, give it a matching entry with its own coordinates. */
+.pd-room-fallback{position:absolute;left:63%;top:52%;transform:translate(-50%,-50%);pointer-events:none;}
 .pd-room-fallback-frame{padding:3%;box-shadow:0 10px 26px rgba(0,0,0,.4);}
 .pd-room-fallback-frame img{display:block;width:100%;background:#fff;padding:6%;box-sizing:border-box;}
 .pd-room-note{font-size:11px;color:var(--muted);margin-top:.75rem;text-align:center;font-style:italic;}
@@ -1459,7 +1460,6 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="pd-room-fallback" id="pdRoomFallback" style="display:none;">
         <div class="pd-room-fallback-frame" id="pdRoomFallbackFrame"><img id="pdRoomFallbackImg" alt=""></div>
       </div>
-      <div class="pd-room-status" id="pdRoomStatus" style="display:none;">Placing your print in the room&hellip;</div>
     </div>
     <p class="pd-room-note">Room settings are illustrative. Actual print size, mat, and frame may vary.</p>
   </div>
@@ -3123,45 +3123,40 @@ function openPrintDetail(print){
 }
 
 // ===========================================================
-// ROOM PREVIEW — content-aware compositing via /api/compose-room
+// ROOM PREVIEW — CSS-composited "print on the wall" preview
 // ===========================================================
-var _roomCurrent='living', _roomSize='a3', _roomReqToken=0;
-// In-memory cache so flipping between size/room tabs for the same print
-// doesn't re-hit the API (the server also caches, this just skips the round trip).
-var _roomComposeCache={};
+// Originally called a Gemini image-editing API (/api/compose-room) to
+// generate a photorealistic composite, with this CSS-positioned framed
+// print as the error-path fallback for whenever that call failed — see the
+// "See it in a room" CLAUDE.md entries from 2026-08-21. Removed the Gemini
+// call entirely on 2026-08-23 at Jeff's request (the free-tier quota was
+// exhausted and he didn't want to take on the billing to keep it running).
+// What was the fallback is now the whole feature: no network call, no
+// loading wait, no error state — it renders immediately from the room photo
+// and the print's own image, both already on the page. The
+// functions/api/compose-room.js Pages Function still exists but nothing
+// calls it anymore; left in place rather than deleted in case Jeff wants to
+// revisit real compositing later, but it's dead code as of this change.
+var _roomCurrent='living', _roomSize='a3';
 
-function _roomComposeKey(){
-  var pid=(currentPrint&&(currentPrint.id||currentPrint.img))||'';
-  var frame=(currentPrint&&currentPrint.frame)||'walnut';
-  return pid+'|'+_roomCurrent+'|'+_roomSize+'|'+frame;
-}
-
-// Rough on-wall width as a % of the (square) room viewport, per print size —
-// illustrative scaling only, not physically calibrated like the real Gemini
-// composite is. Frame colors approximate the FRAME_STYLES options in
-// compose-room.js.
-var ROOM_FALLBACK_SIZE_PCT={a4:16,a3:22,a2:29,a1:37};
+// On-wall width as a % of the (square) room viewport, per print size —
+// illustrative scaling only, never physically calibrated. Frame colors
+// approximate the walnut/black/white/oak options a print can have.
+// 2026-08-23: sized down 20% at Jeff's request (was a4:16,a3:22,a2:29,a1:37).
+var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
 var ROOM_FALLBACK_FRAME_COLOR={walnut:'#3b2a1d',black:'#1a1a1a',white:'#efece6',oak:'#c9a876'};
 
-function _hideRoomFallback(){
-  var fb=document.getElementById('pdRoomFallback');
-  if(fb) fb.style.display='none';
-}
-
-// Shown when the real content-aware composite fails (almost always the
-// Gemini API being out of quota — see CLAUDE.md). Not perspective-matched
-// or physically precise, just a reasonably-placed, reasonably-sized framed
-// print so the page isn't showing a totally empty room while that's sorted
-// out on the API side.
-function _showRoomFallback(){
+function _renderRoomComposite(){
+  var bg=document.getElementById('pdRoomBg');
   var fb=document.getElementById('pdRoomFallback');
   var frameEl=document.getElementById('pdRoomFallbackFrame');
   var img=document.getElementById('pdRoomFallbackImg');
-  if(!fb||!frameEl||!img||!currentPrint||!currentPrint.img) return;
+  if(!bg||!fb||!frameEl||!img||!currentPrint||!currentPrint.img) return;
+  bg.src='/images/rooms/'+_roomCurrent+'.jpg';
   img.src=currentPrint.img;
   img.alt=currentPrint.title||'';
   frameEl.style.background=ROOM_FALLBACK_FRAME_COLOR[currentPrint.frame||'walnut']||ROOM_FALLBACK_FRAME_COLOR.walnut;
-  fb.style.width=(ROOM_FALLBACK_SIZE_PCT[_roomSize]||22)+'%';
+  fb.style.width=(ROOM_FALLBACK_SIZE_PCT[_roomSize]||18)+'%';
   fb.style.display='block';
 }
 
@@ -3171,7 +3166,7 @@ function setRoom(btn,room){
     document.querySelectorAll('.pd-room-tab').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
   }
-  _loadRoomComposite();
+  _renderRoomComposite();
 }
 
 function setRoomSize(btn,size){
@@ -3180,53 +3175,7 @@ function setRoomSize(btn,size){
     document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
   }
-  _loadRoomComposite();
-}
-
-function _loadRoomComposite(){
-  var bg=document.getElementById('pdRoomBg');
-  var status=document.getElementById('pdRoomStatus');
-  if(!bg||!currentPrint||!currentPrint.img) return;
-
-  var key=_roomComposeKey();
-  var cached=_roomComposeCache[key];
-  if(cached){
-    _hideRoomFallback();
-    bg.src='data:'+cached.mimeType+';base64,'+cached.image;
-    if(status) status.style.display='none';
-    return;
-  }
-
-  // Show the plain room while we wait, with a status note over it.
-  _hideRoomFallback();
-  bg.src='/images/rooms/'+_roomCurrent+'.jpg';
-  if(status){
-    status.className='pd-room-status';
-    status.style.display='block';
-    status.textContent='Placing your print in the room… (about 10–20s)';
-  }
-
-  var token=++_roomReqToken;
-  var qs='room='+encodeURIComponent(_roomCurrent)+'&print='+encodeURIComponent(currentPrint.img)+'&size='+encodeURIComponent(_roomSize)+'&frame='+encodeURIComponent(currentPrint.frame||'walnut');
-  fetch('/api/compose-room?'+qs)
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(token!==_roomReqToken) return;
-      if(d&&d.image){
-        _roomComposeCache[key]={image:d.image,mimeType:d.mimeType||'image/png'};
-        _hideRoomFallback();
-        bg.src='data:'+(d.mimeType||'image/png')+';base64,'+d.image;
-        if(status) status.style.display='none';
-      } else {
-        if(status){status.className='pd-room-status err';status.textContent='Exact placement unavailable right now — here’s an approximate preview.';}
-        _showRoomFallback();
-      }
-    })
-    .catch(function(){
-      if(token!==_roomReqToken) return;
-      if(status){status.className='pd-room-status err';status.textContent='Exact placement unavailable right now — here’s an approximate preview.';}
-      _showRoomFallback();
-    });
+  _renderRoomComposite();
 }
 
 function openRoomPreview(){
@@ -3237,7 +3186,7 @@ function openRoomPreview(){
   var mt=document.querySelector('.pd-room-tab[data-room="living"]'); if(mt) mt.classList.add('active');
   document.querySelectorAll('.pd-room-size').forEach(function(b){b.classList.remove('active');});
   var ms=document.querySelector('.pd-room-size[data-size="a3"]'); if(ms) ms.classList.add('active');
-  _loadRoomComposite();
+  _renderRoomComposite();
 }
 // Expose room preview functions to global scope (onclick attributes need them)
 window.openRoomPreview = openRoomPreview;
