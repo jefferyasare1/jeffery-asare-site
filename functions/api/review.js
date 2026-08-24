@@ -40,15 +40,21 @@ async function ghPut(token, path, data, sha, message) {
   return r.json();
 }
 
-async function sendEmail(brevoKey, { name, rating, message }) {
+async function sendEmail(brevoKey, dashboardKey, { name, rating, message }) {
   const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  // Built from env.DASHBOARD_KEY at request time rather than hardcoded, so
+  // the live key isn't baked into this public source file.
+  // (security assessment, Finding 4, 2026-08-24)
+  const dashboardUrl = dashboardKey
+    ? `https://jefferyasare.com/dashboard?key=${encodeURIComponent(dashboardKey)}`
+    : 'https://jefferyasare.com/dashboard';
   const html = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
       <p style="font-size:13px;color:#888;margin-bottom:4px;">New review on jefferyasare.com</p>
       <h2 style="font-size:22px;font-weight:700;margin:0 0 6px;">${name}</h2>
       <p style="font-size:18px;color:#c8a870;letter-spacing:3px;margin:0 0 16px;">${stars}</p>
       <p style="font-size:15px;line-height:1.7;color:#333;border-left:3px solid #ddd;padding-left:14px;margin:0 0 24px;">${message}</p>
-      <a href="https://jefferyasare.com/dashboard?key=jA9kx2vP7m" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;">Review in dashboard →</a>
+      <a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;">Review in dashboard →</a>
     </div>
   `;
 
@@ -106,7 +112,7 @@ export async function onRequest(context) {
 
   // Send email notification (non-blocking — don't fail the response if email fails)
   if (env.BREVO_API_KEY) {
-    sendEmail(env.BREVO_API_KEY, { name, rating, message }).catch(() => {});
+    sendEmail(env.BREVO_API_KEY, env.DASHBOARD_KEY, { name, rating, message }).catch(() => {});
   }
 
   return json({ ok: true });

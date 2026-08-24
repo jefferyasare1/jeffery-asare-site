@@ -5,7 +5,7 @@
 // Returns: { ok: true, title: string, description: string }
 // Requires ANTHROPIC_API_KEY (required) and XAI_API_KEY (optional) in Cloudflare env variables.
 
-const DASHBOARD_KEY = 'jA9kx2vP7m';
+// DASHBOARD_KEY read from env.DASHBOARD_KEY below — see security assessment, Finding 4 (2026-08-24)
 
 const STYLE_PROMPT = `You are helping Jeffery Asare — a Ghanaian fine art phone photographer based in Accra — write titles and descriptions for his photographs.
 
@@ -118,7 +118,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  if (url.searchParams.get('key') !== DASHBOARD_KEY) return json({ error: 'Unauthorized' }, 401);
+  if (!env.DASHBOARD_KEY || url.searchParams.get('key') !== env.DASHBOARD_KEY) return json({ error: 'Unauthorized' }, 401);
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const ANTHROPIC_KEY = env.ANTHROPIC_API_KEY;

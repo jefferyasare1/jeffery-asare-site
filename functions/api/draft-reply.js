@@ -6,15 +6,15 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://jefferyasare.com',
     'Content-Type': 'application/json'
   };
 
   try {
     const body = await request.json();
 
-    // Auth check
-    if (body.key !== 'jA9kx2vP7m') {
+    // Auth check — env.DASHBOARD_KEY must be set (unset = deny); see security assessment, Finding 4 (2026-08-24)
+    if (!env.DASHBOARD_KEY || body.key !== env.DASHBOARD_KEY) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
 
@@ -85,7 +85,7 @@ Write only the reply text. Nothing else.`;
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://jefferyasare.com',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }

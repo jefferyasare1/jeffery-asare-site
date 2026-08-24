@@ -6,7 +6,7 @@
 //      file examples: journal, prints, settings/general, portfolio/abstract
 // PUT  /api/content?key=...              → writes updated content back to GitHub
 
-const DASHBOARD_KEY = 'jA9kx2vP7m';
+// DASHBOARD_KEY read from env.DASHBOARD_KEY below — see security assessment, Finding 4/5 (2026-08-24)
 const REPO          = 'jefferyasare1/jeffery-asare-site';
 const BRANCH        = 'main';
 
@@ -32,8 +32,8 @@ export async function onRequest(context) {
   const url  = new URL(request.url);
   const key  = url.searchParams.get('key');
 
-  // ── Auth ────────────────────────────────────────────────────────
-  if (key !== DASHBOARD_KEY) {
+  // ── Auth ──────────────────────────────────────────────────────── (unset env key = deny)
+  if (!env.DASHBOARD_KEY || key !== env.DASHBOARD_KEY) {
     return json({ error: 'Unauthorized' }, 401);
   }
 

@@ -58,11 +58,22 @@ function doPost(e) {
     var sheet = getSheet();
     ensureHeaders(sheet);
 
-    // Special case: update buyer name on existing row by order_ref
-    if (data.action === 'Update Buyer' && data.order_ref && data.buyer_name) {
+    // Special case: update buyer name on existing row by order_ref.
+    // buyer_email must also be supplied and match the row's existing email —
+    // previously order_ref alone was enough, which meant anyone who knew or
+    // guessed an order_ref could silently rename a stranger's order.
+    // (security assessment, Finding 3, 2026-08-24 — the Cloudflare proxy in
+    // orders.js requires this field too, but this checks it independently
+    // rather than trusting the proxy blindly.)
+    if (data.action === 'Update Buyer' && data.order_ref && data.buyer_name && data.buyer_email) {
       var rows = sheet.getDataRange().getValues();
       for (var i = 1; i < rows.length; i++) {
         if (String(rows[i][10]).trim() === String(data.order_ref).trim()) {
+          var existingEmail = String(rows[i][3]).trim().toLowerCase();
+          var suppliedEmail = String(data.buyer_email).trim().toLowerCase();
+          if (existingEmail && existingEmail !== suppliedEmail) {
+            return jsonResponse({ status: 'forbidden', reason: 'email does not match this order' });
+          }
           sheet.getRange(i + 1, 3).setValue(data.buyer_name); // Column C = Buyer Name
           return jsonResponse({ status: 'updated', row: i + 1 });
         }

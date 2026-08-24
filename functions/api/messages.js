@@ -1,10 +1,11 @@
 // Cloudflare Pages Function — serves stored contact messages to the dashboard
-// GET /api/messages?key=jA9kx2vP7m
+// GET /api/messages?key=...
 //
 // Required env vars:
 //   GH_PAT — GitHub PAT with repo scope
+//   DASHBOARD_KEY — shared secret the dashboard sends as ?key=
+//   (2026-08-24: moved off a hardcoded literal — see security assessment, Finding 4)
 
-const DASHBOARD_KEY = 'jA9kx2vP7m';
 const REPO = 'jefferyasare1/jeffery-asare-site';
 const FILE_PATH = 'data/messages.json';
 const GH_API = 'https://api.github.com';
@@ -17,8 +18,8 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // Auth gate
-  if (url.searchParams.get('key') !== DASHBOARD_KEY) {
+  // Auth gate — env.DASHBOARD_KEY must be set (unset = deny, never fall open)
+  if (!env.DASHBOARD_KEY || url.searchParams.get('key') !== env.DASHBOARD_KEY) {
     return new Response('Unauthorized', { status: 401 });
   }
 

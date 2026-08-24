@@ -9,13 +9,43 @@
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyShJsvo8THYIXHqSqOvDxtCI4H2VfkVeoR32BZKF9i1shh2Kcdb4cX8cM1j1D2va51Zw/exec';
 
+// Paystack signs every webhook body with HMAC-SHA512 using your secret key,
+// sent as the x-paystack-signature header — this was never checked before,
+// meaning any POST claiming to be a successful charge got the same treatment
+// as a real one, modulo the secondary verify-API call below.
+// (security assessment, Finding 7, 2026-08-24)
+// Source: https://paystack.com/docs/payments/webhooks/
+async function verifyPaystackSignature(rawBody, signatureHeader, secretKey) {
+  if (!signatureHeader || !secretKey) return false;
+  const keyData = new TextEncoder().encode(secretKey);
+  const key = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']
+  );
+  const sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(rawBody));
+  const computedHex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // Constant-time-ish comparison — length check first, then char-by-char
+  if (computedHex.length !== signatureHeader.length) return false;
+  let diff = 0;
+  for (let i = 0; i < computedHex.length; i++) diff |= computedHex.charCodeAt(i) ^ signatureHeader.charCodeAt(i);
+  return diff === 0;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
+
+  // Read the raw body once — needed for signature verification, then parsed
+  const rawBody = await request.text();
+  const signature = request.headers.get('x-paystack-signature');
+  const signatureOk = await verifyPaystackSignature(rawBody, signature, env.PAYSTACK_SECRET_KEY);
+  if (!signatureOk) {
+    console.error('paystack-webhook: signature verification failed or missing');
+    return new Response('Invalid signature', { status: 401 });
+  }
 
   // Parse incoming Paystack event
   let event;
   try {
-    event = await request.json();
+    event = JSON.parse(rawBody);
   } catch {
     return new Response('Bad Request', { status: 400 });
   }
@@ -66,8 +96,15 @@ export async function onRequestPost(context) {
           return; // Don't log unverified transactions
         }
       } catch (e) {
-        console.error('Paystack verify error:', e);
-        // Allow through if verify endpoint is unreachable — rare edge case
+        // Previously this fell through and logged the order anyway on a
+        // network error — a transient blip on Paystack's verify endpoint
+        // would have silently turned into a free, unverified order. Now it
+        // fails closed: the signature check above already confirmed this
+        // request came from Paystack, but skip logging until verify
+        // actually succeeds, and record it for manual follow-up instead of
+        // trusting it. (security assessment, Finding 7, 2026-08-24)
+        console.error('Paystack verify error — order NOT logged, needs manual check:', reference, e);
+        return;
       }
     }
 

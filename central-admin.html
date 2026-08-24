@@ -397,6 +397,7 @@ emailjs.init('fTeaXZvU78Yu3TSVl');
 var SHEET_URL = 'https://script.google.com/macros/s/AKfycbyShJsvo8THYIXHqSqOvDxtCI4H2VfkVeoR32BZKF9i1shh2Kcdb4cX8cM1j1D2va51Zw/exec';
 var SITE_URL  = 'www.jefferyasare.com';
 var ORDERS_KEY = 'ja_orders_v2';
+var DASH_KEY = 'aaa789085995ffaeb102a156fa3060085a698464ccfb7956'; // shared with dashboard.html — rotated 2026-08-24, see security assessment Finding 4
 
 // ── Tab switching ───────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(function(tab){
@@ -476,7 +477,7 @@ function logToSheet(data){
   data.date = new Date().toLocaleString('en-GB', {timeZone:'Africa/Accra'});
   fetch('/api/orders', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json', 'X-Dashboard-Key': DASH_KEY},
     body: JSON.stringify(data)
   }).catch(function(){});
 }
@@ -490,8 +491,9 @@ function syncFromSheet(){
   if(btn) btn.classList.add('spinning');
   if(info) info.textContent = 'Syncing…';
 
-  // Proxy via Cloudflare Pages Function /api/orders — no CORS issues, sheet stays private
-  fetch('/api/orders')
+  // Proxy via Cloudflare Pages Function /api/orders — no CORS issues, sheet stays private.
+  // X-Dashboard-Key gets the full admin view; without it orders.js now strips PII (Finding 3).
+  fetch('/api/orders', { headers: { 'X-Dashboard-Key': DASH_KEY } })
     .then(function(r){
       if(!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
@@ -1036,16 +1038,25 @@ document.getElementById('wl-send').addEventListener('click', function(){
   logToSheet({action:'Waitlist Notified',buyer_name:v('wl-name'),buyer_email:v('wl-email'),print_title:v('wl-title'),notes:'',order_ref:''});
 });
 
-// ── Init ─────────────────────────────────────────────────────────
-renderOrders();
-syncFromSheet();
-
 // ── Password gate ─────────────────────────────────────────────────
+// renderOrders/syncFromSheet used to fire unconditionally here, before this
+// IIFE ever ran — the gate below only hid the DOM, it never stopped the page
+// from fetching real order data. Moved inside unlock(). (security assessment,
+// Finding 2, 2026-08-24)
 (function(){
   var HASH = '68b603d5efa0f07e15dac40c0380db98d5c500935472da317b7f8f60de9a5786';
   var AUTH_KEY = 'ja_admin_auth';
+  var initialized = false;
+
+  function loadDashboardData(){
+    if(initialized) return;
+    initialized = true;
+    renderOrders();
+    syncFromSheet();
+  }
 
   function unlock(){
+    loadDashboardData();
     document.getElementById('pw-gate').classList.add('hidden');
   }
 

@@ -8,6 +8,20 @@ echo "Syncing with GitHub..."
 git fetch origin
 rm -f .git/HEAD.lock .git/index.lock
 
+# git reset --hard throws away any local changes with no confirmation — if
+# something's been edited here since the last commit (a photo swap, a CMS
+# save that hasn't pushed yet), this used to discard it silently.
+# (security assessment, Finding 13, 2026-08-24)
+if [ -n "$(git status --porcelain)" ]; then
+  echo ""
+  echo "⚠️  You have uncommitted local changes — stopping before they'd be lost:"
+  git status --porcelain
+  echo ""
+  echo "Commit or stash these first, then run this again."
+  read -p "Press Enter to close..."
+  exit 1
+fi
+
 git reset --hard origin/main
 rm -f .git/HEAD.lock .git/index.lock
 

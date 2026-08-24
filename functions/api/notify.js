@@ -1,9 +1,15 @@
 // Cloudflare Pages Function — sends a general-purpose notification email via Brevo
 // Used by the dashboard follow-up digest button and any future alerts
+//
+// Only ever called from the password-protected dashboard (never from the
+// public site), so unlike orders.js / send-coa.js this can be a straight
+// admin-key gate with no anonymous path.
+// (security assessment, Finding 4, 2026-08-24)
 
 const ALLOWED_ORIGINS = ['https://jefferyasare.com', 'https://www.jefferyasare.com'];
 
 export async function onRequest(context) {
+  const { env } = context;
   const origin = context.request.headers.get('Origin') || '';
   const referer = context.request.headers.get('Referer') || '';
   const allowed = ALLOWED_ORIGINS.some(o => origin === o || referer.startsWith(o));
@@ -11,7 +17,7 @@ export async function onRequest(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': allowed ? (origin || 'https://jefferyasare.com') : 'https://jefferyasare.com',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Dashboard-Key',
   };
 
   if (context.request.method === 'OPTIONS') {
@@ -27,6 +33,13 @@ export async function onRequest(context) {
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'POST only' }), {
       status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+
+  const suppliedKey = context.request.headers.get('X-Dashboard-Key');
+  if (!env.DASHBOARD_KEY || suppliedKey !== env.DASHBOARD_KEY) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
     });
   }
 

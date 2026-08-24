@@ -3,7 +3,18 @@
 //
 // Required env var (set in Cloudflare Pages → Settings → Environment variables):
 //   BREVO_API_KEY  — get from Brevo dashboard → SMTP & API → API Keys
-
+//
+// Called from two places: the public checkout flow in index.html (right
+// after a real Paystack payment, with that payment's own reference in
+// hand) and the password-protected dashboard's resend flows (sometimes
+// with no order_ref at all — a manual resend). A blanket key requirement
+// would break the public post-checkout send, so this accepts either:
+//   - a valid X-Dashboard-Key (admin/dashboard callers), or
+//   - an order_ref that verifies as a real, successful Paystack transaction
+//     (public post-checkout callers).
+// Without this, anyone could make this endpoint send an arbitrary PDF
+// attachment to an arbitrary address on Jeff's Brevo account, for free.
+// (security assessment, Finding 4, 2026-08-24)
 const ALLOWED_ORIGINS = ['https://jefferyasare.com', 'https://www.jefferyasare.com'];
 
 export async function onRequestPost(context) {
@@ -20,7 +31,7 @@ export async function onRequestPost(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': origin || 'https://jefferyasare.com',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Dashboard-Key',
     'Cache-Control': 'no-store'
   };
   const jsonHeaders = Object.assign({ 'Content-Type': 'application/json' }, corsHeaders);
@@ -43,6 +54,29 @@ export async function onRequestPost(context) {
 
   if (!to_email || !pdf_base64) {
     return new Response(JSON.stringify({ error: 'Missing to_email or pdf_base64' }), { status: 400, headers: jsonHeaders });
+  }
+
+  const suppliedKey = request.headers.get('X-Dashboard-Key');
+  const isAdmin = !!env.DASHBOARD_KEY && suppliedKey === env.DASHBOARD_KEY;
+
+  if (!isAdmin) {
+    let verified = false;
+    if (order_ref && env.PAYSTACK_SECRET_KEY) {
+      try {
+        const verify = await fetch(
+          `https://api.paystack.co/transaction/verify/${encodeURIComponent(order_ref)}`,
+          { headers: { Authorization: `Bearer ${env.PAYSTACK_SECRET_KEY}` } }
+        );
+        const vData = await verify.json();
+        verified = !!vData.status && vData.data?.status === 'success';
+      } catch (e) {
+        console.error('send-coa.js Paystack verify error:', e);
+        verified = false; // fail closed
+      }
+    }
+    if (!verified) {
+      return new Response(JSON.stringify({ error: 'Could not verify this order — refusing to send.' }), { status: 403, headers: jsonHeaders });
+    }
   }
 
   const BREVO_API_KEY = env.BREVO_API_KEY;
@@ -143,12 +177,14 @@ export async function onRequestPost(context) {
 }
 
 // Handle CORS preflight
-export async function onRequestOptions() {
+export async function onRequestOptions(context) {
+  const origin = context.request.headers.get('Origin') || '';
+  const allowed = ALLOWED_ORIGINS.includes(origin);
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowed ? origin : 'https://jefferyasare.com',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type, X-Dashboard-Key'
     }
   });
 }

@@ -16,7 +16,6 @@ const JSON_HEADERS = { 'Content-Type': 'application/json', ...CORS };
 const REPO = 'jefferyasare1/jeffery-asare-site';
 const FILE_PATH = 'data/messages.json';
 const GH_API = 'https://api.github.com';
-const DASHBOARD_URL = 'https://jefferyasare.com/dashboard?key=jA9kx2vP7m';
 const JEFF_EMAIL = 'jeffery.asare1@gmail.com';
 
 function ok(data) { return new Response(JSON.stringify(data), { status: 200, headers: JSON_HEADERS }); }
@@ -95,6 +94,14 @@ export async function onRequestPost(context) {
   }
 
   // ── 2. Send notification email via Brevo ─────────────────────
+  // The one-click dashboard link is built here (not hardcoded as a module
+  // constant) so the live DASHBOARD_KEY is never baked into this source
+  // file, which is public. If DASHBOARD_KEY isn't set, the link falls back
+  // to a plain /dashboard URL and Jeff logs in manually.
+  // (security assessment, Finding 4, 2026-08-24)
+  const DASHBOARD_URL = env.DASHBOARD_KEY
+    ? `https://jefferyasare.com/dashboard?key=${encodeURIComponent(env.DASHBOARD_KEY)}`
+    : 'https://jefferyasare.com/dashboard';
   if (BREVO_API_KEY) {
     try {
       await fetch('https://api.brevo.com/v3/smtp/email', {

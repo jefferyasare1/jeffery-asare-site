@@ -6,7 +6,9 @@
 //   BREVO_API_KEY — Brevo API key
 //   GH_PAT        — GitHub PAT with repo scope
 
-const DASHBOARD_KEY = 'jA9kx2vP7m';
+// DASHBOARD_KEY read from env.DASHBOARD_KEY below — this used to be a
+// hardcoded literal here too, the same leaked value shared across every
+// other endpoint. (security assessment, Finding 4, 2026-08-24)
 const REPO = 'jefferyasare1/jeffery-asare-site';
 const FILE_PATH = 'data/messages.json';
 const GH_API = 'https://api.github.com';
@@ -66,7 +68,7 @@ export async function onRequestPost(context) {
   }
 
   const { key, messageId, replyText } = body;
-  if (key !== DASHBOARD_KEY) return new Response('Unauthorized', { status: 401 });
+  if (!env.DASHBOARD_KEY || key !== env.DASHBOARD_KEY) return new Response('Unauthorized', { status: 401 });
   if (!messageId || !replyText?.trim()) {
     return new Response(JSON.stringify({ error: 'messageId and replyText required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }

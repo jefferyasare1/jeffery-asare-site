@@ -2,7 +2,7 @@
 // Generates 3 room background image options for the print room preview feature.
 // Uses Gemini Imagen 3 (with Workers AI FLUX fallback).
 //
-// Usage: /api/generate-room?room=living&key=jA9kx2vP7m
+// Admin-only (dashboard). Usage: /api/generate-room?room=living&key=<DASHBOARD_KEY>
 // Returns: { images: [b64_1, b64_2, b64_3], mimeType, room, source }
 
 export async function onRequestGet(context) {
@@ -12,11 +12,12 @@ export async function onRequestGet(context) {
   const key = url.searchParams.get('key');
 
   const headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://jefferyasare.com',
     'Content-Type': 'application/json'
   };
 
-  if (key !== 'jA9kx2vP7m') {
+  // env.DASHBOARD_KEY must be set (unset = deny); see security assessment, Finding 4 (2026-08-24)
+  if (!env.DASHBOARD_KEY || key !== env.DASHBOARD_KEY) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
   }
 
@@ -143,7 +144,7 @@ export async function onRequestGet(context) {
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://jefferyasare.com',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }

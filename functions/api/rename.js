@@ -5,7 +5,7 @@
 // 2. Finds every _data/**/*.json that references the old name and updates it
 // 3. All changes land in one single commit
 
-const DASHBOARD_KEY = 'jA9kx2vP7m';
+// DASHBOARD_KEY read from env.DASHBOARD_KEY below — see security assessment, Finding 4 (2026-08-24)
 const REPO          = 'jefferyasare1/jeffery-asare-site';
 const BRANCH        = 'main';
 
@@ -32,7 +32,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  if (url.searchParams.get('key') !== DASHBOARD_KEY)
+  if (!env.DASHBOARD_KEY || url.searchParams.get('key') !== env.DASHBOARD_KEY)
     return json({ error: 'Unauthorized' }, 401);
   if (request.method !== 'POST')
     return json({ error: 'Method not allowed' }, 405);

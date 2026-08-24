@@ -11,10 +11,10 @@
  *   CF_TOKEN — a Cloudflare API token with Analytics:Read permission
  */
 
-const ALLOWED_KEY = 'jA9kx2vP7m'; // matches the dashboard secret URL key
+// ALLOWED_KEY now read from env.DASHBOARD_KEY below — see security assessment, Finding 4 (2026-08-24)
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Origin':  'https://jefferyasare.com',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Dashboard-Key',
 };
@@ -35,9 +35,9 @@ export async function onRequestPost(context) {
     });
   }
 
-  // Basic auth — require the dashboard key header
+  // Basic auth — require the dashboard key header (env.DASHBOARD_KEY must be set — unset = deny)
   const key = context.request.headers.get('X-Dashboard-Key');
-  if (key !== ALLOWED_KEY) {
+  if (!context.env.DASHBOARD_KEY || key !== context.env.DASHBOARD_KEY) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },

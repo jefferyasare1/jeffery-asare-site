@@ -4,7 +4,7 @@
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jefferyasare.com' };
 
   try {
     const body = await request.json();
@@ -56,12 +56,15 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestGet(context) {
-  // Dashboard reads all waitlist entries
+  // Dashboard reads all waitlist entries — admin-only, so this can be
+  // scoped to the site's own origin rather than '*'.
+  // (security assessment, Finding 11, 2026-08-24)
   const { request, env } = context;
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jefferyasare.com' };
 
   const url = new URL(request.url);
-  if (url.searchParams.get('key') !== 'jA9kx2vP7m') {
+  // env.DASHBOARD_KEY must be set (unset = deny); see security assessment, Finding 4 (2026-08-24)
+  if (!env.DASHBOARD_KEY || url.searchParams.get('key') !== env.DASHBOARD_KEY) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
   }
 
@@ -81,7 +84,7 @@ export async function onRequestGet(context) {
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://jefferyasare.com',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }

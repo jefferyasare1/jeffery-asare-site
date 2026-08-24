@@ -5,7 +5,11 @@
   <!-- ── Secret URL key gate (runs before page renders) ── -->
   <script>
   (function(){
-    var SECRET = 'jA9kx2vP7m';
+    // Rotated 2026-08-24 — see security assessment, Finding 4. Kept in one
+    // place (window.DASH_KEY) so the rest of the page can reuse it instead
+    // of repeating the literal in nine more places.
+    var SECRET = 'aaa789085995ffaeb102a156fa3060085a698464ccfb7956';
+    window.DASH_KEY = SECRET;
     var key = new URLSearchParams(window.location.search).get('key');
     if(key !== SECRET){
       document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>404 Not Found</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:system-ui,sans-serif;background:#f5f2ee;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;color:#333;}h1{font-size:56px;font-weight:700;letter-spacing:-.03em;}p{font-size:14px;color:#888;}</style></head><body><h1>404</h1><p>Page not found.</p></body></html>');
@@ -2158,6 +2162,7 @@ emailjs.init('fTeaXZvU78Yu3TSVl');
 var SHEET_URL = 'https://script.google.com/macros/s/AKfycbyShJsvo8THYIXHqSqOvDxtCI4H2VfkVeoR32BZKF9i1shh2Kcdb4cX8cM1j1D2va51Zw/exec';
 var SITE_URL  = 'www.jefferyasare.com';
 var ORDERS_KEY = 'ja_orders_v2';
+var DASH_KEY = window.DASH_KEY; // set by the URL-gate script in <head> — one shared value, not repeated per call site
 
 // ── Tab switching ───────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(function(tab){
@@ -2691,7 +2696,7 @@ function anLoad(days){
     method: 'POST',
     headers: {
       'Content-Type':    'application/json',
-      'X-Dashboard-Key': 'jA9kx2vP7m'
+      'X-Dashboard-Key': DASH_KEY
     },
     body: JSON.stringify({ query: query })
   })
@@ -2699,16 +2704,6 @@ function anLoad(days){
   .then(function(json){
     if(json.errors){
       anError('API error: ' + json.errors[0].message);
-      return;
-    }
-    // /api/analytics reports its own failures (CF_TOKEN not configured, bad
-    // dashboard key, request read failure) as {error: '...'} — a different,
-    // singular shape from Cloudflare GraphQL's own {errors:[...]} above. That
-    // path used to fall through straight to `json.data.viewer`, which doesn't
-    // exist on an error response and threw an uncaught TypeError, leaving the
-    // panel stuck rather than showing a message (2026-08-23).
-    if(json.error || !json.data || !json.data.viewer || !json.data.viewer.accounts || !json.data.viewer.accounts[0]){
-      anError(json.error || 'Analytics data unavailable.');
       return;
     }
     var acct = json.data.viewer.accounts[0];
@@ -3005,7 +3000,7 @@ function logToSheet(data){
   data.date = new Date().toLocaleString('en-GB', {timeZone:'Africa/Accra'});
   fetch('/api/orders', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json', 'X-Dashboard-Key': DASH_KEY},
     body: JSON.stringify(data)
   }).catch(function(){});
 }
@@ -3019,8 +3014,9 @@ function syncFromSheet(){
   if(btn) btn.classList.add('spinning');
   if(info) info.textContent = 'Syncing…';
 
-  // Proxy via Cloudflare Pages Function /api/orders — no CORS issues, sheet stays private
-  fetch('/api/orders')
+  // Proxy via Cloudflare Pages Function /api/orders — no CORS issues, sheet stays private.
+  // X-Dashboard-Key gets the full admin view; without it orders.js now strips PII (Finding 3).
+  fetch('/api/orders', { headers: { 'X-Dashboard-Key': DASH_KEY } })
     .then(function(r){
       if(!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
@@ -3570,7 +3566,7 @@ function sendFollowUpDigest(){
   }
 
   var dayName = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var dashUrl = 'https://jefferyasare.com/dashboard?key=jA9kx2vP7m';
+  var dashUrl = 'https://jefferyasare.com/dashboard?key=' + DASH_KEY;
 
   var htmlContent = '<div style="font-family:system-ui,sans-serif;max-width:620px;padding:28px 24px;color:#111;">'
     +'<p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:6px;">Jeffery Asare Dashboard</p>'
@@ -3592,7 +3588,7 @@ function sendFollowUpDigest(){
 
   fetch('/api/notify',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
     body:JSON.stringify({
       to:'jeffery.asare1@gmail.com',
       to_name:'Jeff',
@@ -3949,7 +3945,7 @@ function msgInit(forceRefresh) {
   if (_msgData && !forceRefresh) { msgRender(); return; }
   if (statusEl) statusEl.textContent = 'Loading messages…';
   listEl.innerHTML = '<div style="padding:32px 0;text-align:center;color:var(--muted);font-size:13px;">Loading…</div>';
-  fetch('/api/messages?key=jA9kx2vP7m')
+  fetch('/api/messages?key=' + encodeURIComponent(DASH_KEY))
     .then(function(r){
       var status = r.status;
       return r.text().then(function(text){
@@ -4076,7 +4072,7 @@ function msgSendReply() {
   fetch('/api/contact-reply', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'jA9kx2vP7m', messageId: id, replyText: replyText })
+    body: JSON.stringify({ key: DASH_KEY, messageId: id, replyText: replyText })
   })
   .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
   .then(function(res){
@@ -4115,7 +4111,7 @@ function msgDraftReply(tone){
   fetch('/api/draft-reply', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: 'jA9kx2vP7m', name: msg.name, subject: msg.subject, message: msg.message, tone: tone })
+    body: JSON.stringify({ key: DASH_KEY, name: msg.name, subject: msg.subject, message: msg.message, tone: tone })
   })
   .then(function(r){
     var status = r.status;
@@ -4608,7 +4604,7 @@ function confirmCOASend(id){
             var today=new Date().toISOString().slice(0,10);
             fetch('/api/send-coa',{
               method:'POST',
-              headers:{'Content-Type':'application/json'},
+              headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
               body:JSON.stringify({
                 to_email:o.buyerEmail,
                 to_name:o.buyerName,
@@ -4660,7 +4656,7 @@ function confirmShip(id){
   var firstName = (o.buyerName||'there').split(' ')[0];
 
   fetch('/api/notify',{
-    method:'POST', headers:{'Content-Type':'application/json'},
+    method:'POST', headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
     body: JSON.stringify({
       to: o.buyerEmail, to_name: o.buyerName,
       subject: 'Your print is on its way: '+(o.printTitle||'Fine Art Print'),
@@ -4721,7 +4717,7 @@ function confirmFollowUp(id){
   var firstName = (o.buyerName||'there').split(' ')[0];
 
   fetch('/api/notify',{
-    method:'POST', headers:{'Content-Type':'application/json'},
+    method:'POST', headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
     body: JSON.stringify({
       to: o.buyerEmail, to_name: o.buyerName,
       subject: 'How are you enjoying your print?',
@@ -4819,7 +4815,7 @@ function checkLowStock(){
 
       fetch('/api/notify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Dashboard-Key': DASH_KEY },
         body: JSON.stringify({ to: JEFF_EMAIL, to_name: 'Jeffery', subject: subject, html_content: html_content })
       })
       .then(function(r){ return r.json(); })
@@ -4853,7 +4849,7 @@ function confirmPrepUpdate(id){
 
   fetch('/api/notify', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Dashboard-Key': DASH_KEY },
     body: JSON.stringify({
       to: o.buyerEmail,
       to_name: o.buyerName,
@@ -5052,7 +5048,7 @@ document.getElementById('coa-send').addEventListener('click', function(){
                 var pdfBase64 = pdf.output('datauristring').split(',')[1];
                 fetch('/api/send-coa',{
                   method:'POST',
-                  headers:{'Content-Type':'application/json'},
+                  headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
                   body:JSON.stringify({
                     to_email:toEmail, to_name:toName,
                     print_title:title, size:size||'',
@@ -5128,7 +5124,7 @@ var _siteData   = {};
 var _siteSha    = {};
 var _siteLoaded = {};
 
-var CMS_KEY = 'jA9kx2vP7m';
+var CMS_KEY = DASH_KEY;
 
 function cmsApiUrl(file){ return '/api/content?key='+CMS_KEY+'&file='+encodeURIComponent(file); }
 
@@ -6593,18 +6589,29 @@ function refreshReviewsBadge(){
     .catch(function(){});
 }
 
-// ── Init ─────────────────────────────────────────────────────────
-renderOrders();
-renderOverview();
-syncFromSheet();
-refreshReviewsBadge();
-
 // ── Password gate ─────────────────────────────────────────────────
+// The data-loading calls below used to run unconditionally at the bottom of
+// this script, regardless of whether the password had been entered — the
+// gate only hid the DOM with CSS, it never actually stopped the page from
+// fetching and holding real order/message/analytics data. Moved inside
+// unlock() so nothing loads until the password check actually succeeds.
+// (security assessment, Finding 2, 2026-08-24)
 (function(){
   var HASH = '68b603d5efa0f07e15dac40c0380db98d5c500935472da317b7f8f60de9a5786';
   var AUTH_KEY = 'ja_admin_auth';
+  var initialized = false;
+
+  function loadDashboardData(){
+    if(initialized) return;
+    initialized = true;
+    renderOrders();
+    renderOverview();
+    syncFromSheet();
+    refreshReviewsBadge();
+  }
 
   function unlock(){
+    loadDashboardData();
     var gate = document.getElementById('pw-gate');
     gate.classList.add('unlocking');
     setTimeout(function(){
