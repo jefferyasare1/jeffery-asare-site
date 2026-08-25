@@ -6651,9 +6651,9 @@ function refreshReviewsBadge(){
   document.getElementById('pw-input').focus();
 })();
 
-// ── Inactivity lock — 1 hour of no activity re-shows the password gate ──
+// ── Inactivity lock — 30 minutes of no activity re-shows the password gate ──
 (function(){
-  var TIMEOUT  = 60 * 60 * 1000; // 1 hour
+  var TIMEOUT  = 30 * 60 * 1000; // 30 minutes
   var AUTH_KEY = 'ja_admin_auth';
   var TS_KEY   = 'ja_last_active';
 
