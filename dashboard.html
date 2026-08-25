@@ -12,8 +12,15 @@
     window.DASH_KEY = SECRET;
     var key = new URLSearchParams(window.location.search).get('key');
     if(key !== SECRET){
-      document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>404 Not Found</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:system-ui,sans-serif;background:#f5f2ee;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;color:#333;}h1{font-size:56px;font-weight:700;letter-spacing:-.03em;}p{font-size:14px;color:#888;}</style></head><body><h1>404</h1><p>Page not found.</p></body></html>');
-      document.close();
+      // Fixed 2026-08-25 — the old document.write() trick only pasted the
+      // fake-404 text on top of the real page instead of replacing it,
+      // because it ran while the browser was still mid-way through loading
+      // the rest of this file (it kept loading the real dashboard right
+      // underneath the fake message). A real navigation always fully
+      // replaces the page no matter when it runs, so send the browser to
+      // the site's real 404 page instead of faking one in place.
+      window.location.replace('/404.html');
+      throw new Error('blocked');
     }
   })();
   </script>
