@@ -2,26 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- ── Secret URL key gate (runs before page renders) ── -->
+  <!-- ── Dashboard key (used to authorize API calls below) ── -->
   <script>
   (function(){
-    // Rotated 2026-08-24 — see security assessment, Finding 4. Kept in one
-    // place (window.DASH_KEY) so the rest of the page can reuse it instead
-    // of repeating the literal in nine more places.
+    // Removed 2026-08-25 — this used to also gate the page itself (block
+    // anyone without ?key=... in the address) via a document.write() trick
+    // that never actually worked (see security assessment, Finding 4 /
+    // 2026-08-24 fix): it pasted a fake "404" over the real page instead of
+    // replacing it, then later, once properly fixed to replace the page,
+    // it started blocking Jeff's own normal bookmark visits too — since the
+    // key was only ever meant to be in the "Follow-up Digest" email links,
+    // not something to remember day-to-day. Cloudflare Access (the sign-in
+    // wall in front of /dashboard) is the real front door now, so this
+    // value is kept only to authorize the dashboard's own API calls below,
+    // not to block the page.
     var SECRET = 'aaa789085995ffaeb102a156fa3060085a698464ccfb7956';
     window.DASH_KEY = SECRET;
-    var key = new URLSearchParams(window.location.search).get('key');
-    if(key !== SECRET){
-      // Fixed 2026-08-25 — the old document.write() trick only pasted the
-      // fake-404 text on top of the real page instead of replacing it,
-      // because it ran while the browser was still mid-way through loading
-      // the rest of this file (it kept loading the real dashboard right
-      // underneath the fake message). A real navigation always fully
-      // replaces the page no matter when it runs, so send the browser to
-      // the site's real 404 page instead of faking one in place.
-      window.location.replace('/404.html');
-      throw new Error('blocked');
-    }
   })();
   </script>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
