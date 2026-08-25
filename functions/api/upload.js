@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — Image Upload
+// Cloudflare Pages Function — Image & Ambient-Sound Upload
 // POST /api/upload?key=...
 // Body: { filename: string, content: string (base64), folder?: string, sha?: string }
 // Routes files to the correct folder in the repo based on filename.
@@ -31,6 +31,15 @@ function bytesMatchExtension(bytes, ext) {
   return true;
 }
 
+// MP3 has no single fixed signature — either an ID3v2 tag up front, or a bare
+// MPEG frame sync (11 set bits: 0xFF followed by a byte whose top 3 bits are
+// all set). Either is accepted as "genuinely looks like audio".
+function bytesLookLikeMp3(bytes) {
+  const isId3 = bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33; // "ID3"
+  const isFrameSync = bytes[0] === 0xFF && (bytes[1] & 0xE0) === 0xE0;
+  return isId3 || isFrameSync;
+}
+
 // Known filenames (stem only) → correct repo folder
 const FOLDER_MAP = {
   'about-portrait':  'images/ui',
@@ -40,7 +49,20 @@ const FOLDER_MAP = {
   'hero-3':          'images/ui',
   'hero-4':          'images/ui',
   'hero-5':          'images/ui',
+  'ambient':         'audio',
 };
+
+// The one MP3 this endpoint is allowed to write — the site's background
+// ambient track. Kept narrow on purpose: unlike images (any reasonable
+// filename), an arbitrary audio upload has no natural home in the repo, so
+// this only ever replaces the single known file the dashboard's "Ambient
+// Background Sound" control offers.
+const ALLOWED_MP3_FILENAME = 'ambient.mp3';
+
+// Keep the background track light — it's quiet, looping music, not a
+// download. 8MB comfortably covers a good MP3 encode while staying well
+// inside GitHub's Contents API limits.
+const MAX_MP3_BYTES = 8 * 1024 * 1024;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -68,13 +90,22 @@ export async function onRequest(context) {
   if (!filename || !content) return json({ error: 'Missing filename or content.' }, 400);
 
   // Only allow safe filenames — no path separators
-  const extMatch = /^[a-zA-Z0-9_\-]+\.(jpg|jpeg|png|webp|gif)$/i.exec(filename);
+  const extMatch = /^[a-zA-Z0-9_\-]+\.(jpg|jpeg|png|webp|gif|mp3)$/i.exec(filename);
   if (!extMatch) {
     return json({ error: 'Invalid filename. Use letters, numbers, hyphens, underscores only.' }, 400);
+  }
+  const ext = extMatch[1].toLowerCase();
+  const isAudio = ext === 'mp3';
+
+  // MP3 uploads only ever replace the one ambient-sound file — there's no
+  // repo location for an arbitrary audio filename the way there is for images.
+  if (isAudio && filename.toLowerCase() !== ALLOWED_MP3_FILENAME) {
+    return json({ error: `Audio uploads must be named "${ALLOWED_MP3_FILENAME}".` }, 400);
   }
 
   // Confirm the actual bytes match the claimed extension — a renamed non-image
   // file with the right extension used to sail through here (Finding 12).
+  // Same idea applied to mp3: a renamed non-audio file gets caught here too.
   let headerBytes;
   try {
     const headerB64 = content.slice(0, 32).replace(/[^A-Za-z0-9+/]/g, '');
@@ -83,13 +114,23 @@ export async function onRequest(context) {
   } catch {
     return json({ error: 'Could not decode file content.' }, 400);
   }
-  if (!bytesMatchExtension(headerBytes, extMatch[1])) {
+  const bytesOk = isAudio ? bytesLookLikeMp3(headerBytes) : bytesMatchExtension(headerBytes, ext);
+  if (!bytesOk) {
     return json({ error: 'File content doesn\'t match its extension — refusing to upload.' }, 400);
   }
 
-  // Resolve destination folder: explicit > FOLDER_MAP by stem > images/ui
+  // Keep the ambient track light — same 8MB ceiling the dashboard warns
+  // about before it even sends the file.
+  if (isAudio) {
+    const approxBytes = Math.floor(content.length * 3 / 4);
+    if (approxBytes > MAX_MP3_BYTES) {
+      return json({ error: `That file is too large (max ${(MAX_MP3_BYTES / 1024 / 1024).toFixed(0)}MB for the ambient track).` }, 400);
+    }
+  }
+
+  // Resolve destination folder: mp3 always → audio; otherwise explicit > FOLDER_MAP by stem > images/ui
   const stem   = filename.replace(/\.[^.]+$/, '');
-  const folder = providedFolder || FOLDER_MAP[stem] || 'images/ui';
+  const folder = isAudio ? 'audio' : (providedFolder || FOLDER_MAP[stem] || 'images/ui');
   const repoPath = `${folder}/${filename}`;
 
   const ghHeaders = {

@@ -1630,6 +1630,21 @@
         </div>
       </div>
 
+      <!-- Ambient Sound -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Ambient Sound</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <div class="cms-field">
+            <p style="font-size:12px;color:var(--muted);margin:0 0 10px;">The quiet music that plays when a visitor taps the speaker icon on your portfolio page. Uploading a new MP3 replaces it directly — keep it soft and under 8MB.</p>
+            <audio id="ambient-sound-preview" controls style="width:100%;max-width:360px;display:block;margin-bottom:8px;" src="/audio/ambient.mp3"></audio>
+            <label class="btn-upload">Replace sound<input type="file" accept="audio/mpeg,.mp3" onchange="cmsUploadAmbientSound(this)"></label>
+            <div class="cms-status" id="ambient-sound-status"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- About -->
       <div class="cms-section">
         <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
@@ -6158,6 +6173,52 @@ function cmsUploadRoomImg(input, room){
       })
       .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
   });
+}
+
+// Replace the site's ambient background track (always /audio/ambient.mp3 —
+// no compression step like the image uploads get, since re-encoding audio
+// isn't something the browser can do without a dedicated MP3 encoder, so the
+// file goes up as-is. The 8MB check just catches an obviously-wrong or overly
+// heavy file before spending a round trip on it.
+function cmsUploadAmbientSound(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var st=document.getElementById('ambient-sound-status');
+  if(!/\.mp3$/i.test(file.name)){
+    if(st){st.className='cms-status err';st.textContent='Please choose an MP3 file.';}
+    input.value='';
+    return;
+  }
+  var MAX_BYTES=8*1024*1024;
+  if(file.size>MAX_BYTES){
+    if(st){st.className='cms-status err';st.textContent='That file is '+(file.size/1024/1024).toFixed(1)+'MB — please keep it under 8MB. It plays quiet and in the background, so a smaller encode works just as well.';}
+    input.value='';
+    return;
+  }
+  if(st){st.className='cms-status';st.textContent='Reading…';}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var base64=e.target.result.split(',')[1];
+    if(st){st.textContent='Uploading…';}
+    fetch('/api/upload?key='+CMS_KEY,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filename:'ambient.mp3',content:base64,folder:'audio'})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){
+          var prev=document.getElementById('ambient-sound-preview');
+          if(prev){prev.src=d.path+'?t='+Date.now();}
+          if(st){st.className='cms-status ok';st.textContent='Uploaded ✓ — live in ~2 min';}
+        } else {
+          if(st){st.className='cms-status err';st.textContent=d.error||'Upload failed';}
+        }
+      })
+      .catch(function(err){if(st){st.className='cms-status err';st.textContent='Upload error: '+err.message;}});
+    input.value='';
+  };
+  reader.onerror=function(){
+    if(st){st.className='cms-status err';st.textContent='Could not read that file.';}
+    input.value='';
+  };
+  reader.readAsDataURL(file);
 }
 
 // Generate 3 room background image options via Gemini Imagen 3 (or FLUX fallback)
