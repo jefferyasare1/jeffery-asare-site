@@ -799,7 +799,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
    the entire feature: the Gemini call was removed 2026-08-23 (quota
    exhaustion Jeff didn't want to pay to lift), so this renders immediately
    with no network round trip and no loading/error state. Positioned by eye
-   against /images/rooms/living.jpg specifically; if a second room photo is
+   against /images/rooms/living.webp specifically; if a second room photo is
    ever wired up in ROOM_BACKGROUNDS, give it a matching entry with its own
    coordinates. Anchored by its BOTTOM edge (`bottom:38%`), not centered —
    centering (top:50%/translateY(-50%)) made a taller frame's bottom edge
@@ -1486,7 +1486,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="pd-room-sizes" id="pdRoomSizes"><!-- built by openRoomPreview() from currentPrint.sizes — not every print offers every size --></div>
     </div>
     <div class="pd-room-viewport" id="pdRoomViewport">
-      <img class="pd-room-bg" id="pdRoomBg" src="/images/rooms/living.jpg" alt="Living room">
+      <img class="pd-room-bg" id="pdRoomBg" src="/images/rooms/living.webp" alt="Living room">
       <div class="pd-room-fallback" id="pdRoomFallback" style="display:none;">
         <div class="pd-room-fallback-frame" id="pdRoomFallbackFrame"><img id="pdRoomFallbackImg" alt=""></div>
       </div>
@@ -3237,7 +3237,7 @@ function _renderRoomComposite(){
   var frameEl=document.getElementById('pdRoomFallbackFrame');
   var img=document.getElementById('pdRoomFallbackImg');
   if(!bg||!fb||!frameEl||!img||!currentPrint||!currentPrint.img) return;
-  bg.src='/images/rooms/'+_roomCurrent+'.jpg';
+  bg.src='/images/rooms/'+_roomCurrent+'.webp';
   img.src=currentPrint.img;
   img.alt=currentPrint.title||'';
   frameEl.style.background=ROOM_FALLBACK_FRAME_COLOR[currentPrint.frame||'walnut']||ROOM_FALLBACK_FRAME_COLOR.walnut;
