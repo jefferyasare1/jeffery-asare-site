@@ -1,20 +1,53 @@
 {
   "shipping": {
-    "gh": { "name": "Ghana", "time": "3–5 business days" },
-    "us": { "name": "United States", "time": "10–14 business days" },
-    "gb": { "name": "United Kingdom", "time": "7–10 business days" },
-    "de": { "name": "Germany", "time": "7–12 business days" },
-    "fr": { "name": "France", "time": "7–12 business days" },
-    "ca": { "name": "Canada", "time": "10–15 business days" },
-    "au": { "name": "Australia", "time": "12–18 business days" },
-    "ng": { "name": "Nigeria", "time": "5–8 business days" },
-    "za": { "name": "South Africa", "time": "8–12 business days" },
-    "ke": { "name": "Kenya", "time": "8–12 business days" },
-    "default": { "name": "International", "time": "10–20 business days" }
+    "gh": {
+      "name": "Ghana",
+      "time": "3\u20135 business days"
+    },
+    "us": {
+      "name": "United States",
+      "time": "10\u201314 business days"
+    },
+    "gb": {
+      "name": "United Kingdom",
+      "time": "7\u201310 business days"
+    },
+    "de": {
+      "name": "Germany",
+      "time": "7\u201312 business days"
+    },
+    "fr": {
+      "name": "France",
+      "time": "7\u201312 business days"
+    },
+    "ca": {
+      "name": "Canada",
+      "time": "10\u201315 business days"
+    },
+    "au": {
+      "name": "Australia",
+      "time": "12\u201318 business days"
+    },
+    "ng": {
+      "name": "Nigeria",
+      "time": "5\u20138 business days"
+    },
+    "za": {
+      "name": "South Africa",
+      "time": "8\u201312 business days"
+    },
+    "ke": {
+      "name": "Kenya",
+      "time": "8\u201312 business days"
+    },
+    "default": {
+      "name": "International",
+      "time": "10\u201320 business days"
+    }
   },
   "waitlist": {
-    "heading": "Join the waitlist",
-    "subtext": "Be the first to know when this edition comes back.",
+    "heading": "Stay in the loop",
+    "subtext": "This edition is sold. I never reprint \u2014 once they're gone, they're gone. But I'll email you if a reserved print opens up, or if this photograph gets a brand new edition down the line.",
     "placeholder": "Your email address",
     "cta": "Notify me",
     "success": "You're on the list. I'll reach out as soon as it's available."
