@@ -3046,7 +3046,11 @@ function syncFromSheet(){
       return r.json();
     })
     .then(function(rows){
-      if(Array.isArray(rows) && rows.length) mergeSheetOrders(rows);
+      // Always merge, even when the Sheet comes back empty — an empty
+      // array is real signal (every row was deleted there) and dashboard
+      // orders pulled from the Sheet need to be pruned to match, not just
+      // skipped over because there's nothing new to add.
+      if(Array.isArray(rows)) mergeSheetOrders(rows);
       lastSyncTime = new Date();
       if(info) info.innerHTML = 'Synced at <strong>' + lastSyncTime.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + '</strong>';
       if(btn) btn.classList.remove('spinning');
@@ -3184,6 +3188,12 @@ function updateOrder(id, patch){
 
 function deleteOrder(id){
   showDashConfirm('Remove this order? This cannot be undone.', 'Remove', function(){
+    var order = loadOrders().find(function(o){ return o.id === id; });
+    // Also remove the matching row(s) from the Google Sheet, so a deleted
+    // order doesn't stay behind there or come back on the next Sync.
+    if(order && order.orderRef){
+      logToSheet({ action: 'Delete Order', order_ref: order.orderRef });
+    }
     saveOrders(loadOrders().filter(function(o){ return o.id !== id; }));
     renderOrders();
   });

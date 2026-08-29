@@ -71,6 +71,9 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
 .success-box.show{display:block;}
 .success-box .check{font-size:2rem;margin-bottom:.5rem;}
 .success-box p{font-size:13px;color:#2e7d32;}
+.notice-box{display:none;background:#F5F2EE;border:1px solid #E5E0DA;border-radius:8px;padding:1.1rem 1.3rem;text-align:center;margin-top:1rem;}
+.notice-box.show{display:block;}
+.notice-box p{font-size:13px;color:#666;margin:0;}
 
 /* ── Loading/Error ── */
 .loading{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted);font-size:13px;}
@@ -178,6 +181,9 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
           <div class="check">&#10003;</div>
           <p>Payment received. Check your inbox for confirmation, and your Certificate of Authenticity will follow when your print ships.</p>
         </div>
+        <div class="notice-box" id="noticeBox">
+          <p>Payment not completed &mdash; no charge was made. You can try again whenever you're ready.</p>
+        </div>
       </div>
 
       <div id="soldSection" style="display:none;">
@@ -235,7 +241,7 @@ function slugify(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').rep
 function getSlug(){ return window.location.pathname.split('/').filter(Boolean).pop() || ''; }
 
 // ── Price formatter ────────────────────────────────────────────
-function fmt(priceGHC){ return 'GH&#8373; '+Number(priceGHC).toLocaleString(); }
+function fmt(priceGHC){ return 'GH₵ '+Number(priceGHC).toLocaleString(); }
 
 // ── Live GHS→USD exchange rate ─────────────────────────────────
 var USD_RATE = 0.065;
@@ -369,7 +375,7 @@ function setupCountry(){
     var d = DELIVERY[sel.value];
     if(!d){ note.innerHTML=''; return; }
     if(d.region==='gh'){
-      note.innerHTML = '<strong>Local delivery: GH&#8373; '+DELIVERY_FEE_GHC+'</strong> &middot; '+d.time;
+      note.innerHTML = '<strong>Local delivery: GH₵ '+DELIVERY_FEE_GHC+'</strong> &middot; '+d.time;
     } else {
       note.innerHTML = '<strong>International shipping:</strong> Quote on request &middot; '+d.time+'<br>We\'ll confirm a shipping cost before production begins.';
     }
@@ -400,6 +406,7 @@ function setupBuyBtn(p){
     var totalUSD = isIntl ? Math.round(total * USD_RATE) : 0;
     var ref = 'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now();
     var displayName = name || email.split('@')[0];
+    var paid = false;
 
     var handler = PaystackPop.setup({
       key: PAYSTACK_KEY,
@@ -411,8 +418,16 @@ function setupBuyBtn(p){
         {display_name:'Print',variable_name:'print',value:p.title},
         {display_name:'Size',variable_name:'size',value:selectedSize}
       ]},
-      onClose: function(){},
+      onClose: function(){
+        if(!paid){
+          var nb=document.getElementById('noticeBox');
+          if(nb) nb.classList.add('show');
+        }
+      },
       callback: function(response){
+        paid=true;
+        var nb2=document.getElementById('noticeBox');
+        if(nb2) nb2.classList.remove('show');
         var paidPlain = isIntl ? '$'+totalUSD : 'GH₵ '+total.toLocaleString();
         // Confirmation email to buyer
         emailjs.send('service_qf961dj','template_hhpdh27',{

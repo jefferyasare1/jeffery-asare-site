@@ -81,6 +81,42 @@ function doPost(e) {
       return jsonResponse({ status: 'not_found', order_ref: data.order_ref });
     }
 
+    // Special case: delete every row tied to an order_ref. Used when a
+    // Client/Order is removed on the dashboard, so a deleted order doesn't
+    // linger in the Sheet or get pulled back in on the next Sync.
+    // Only the password-protected dashboard can send this — the Cloudflare
+    // proxy in orders.js only forwards a "Delete Order" action when the
+    // request carried a valid X-Dashboard-Key, so no separate identity
+    // check is needed here (unlike "Update Buyer", which anonymous
+    // checkout code can also send).
+    if (data.action === 'Delete Order' && data.order_ref) {
+      var delRows = sheet.getDataRange().getValues();
+      var deleted = 0;
+      for (var j = delRows.length - 1; j >= 1; j--) {
+        if (String(delRows[j][10]).trim() === String(data.order_ref).trim()) {
+          sheet.deleteRow(j + 1);
+          deleted++;
+        }
+      }
+      return jsonResponse({ status: deleted ? 'deleted' : 'not_found', order_ref: data.order_ref, rows_deleted: deleted });
+    }
+
+    // Guard against double-logging the same order. Two different things can
+    // both try to log "Order Received" for the same purchase — the buyer's
+    // own browser right after payment, and the Paystack webhook acting as a
+    // backup in case the browser closed too soon — and normally both fire,
+    // which used to create two identical rows for every single sale.
+    // Skip the second write instead of skipping the safety net entirely.
+    if (data.action === 'Order Received' && data.order_ref) {
+      var existingRows = sheet.getDataRange().getValues();
+      for (var k = 1; k < existingRows.length; k++) {
+        if (String(existingRows[k][1]).trim() === 'Order Received' &&
+            String(existingRows[k][10]).trim() === String(data.order_ref).trim()) {
+          return jsonResponse({ status: 'duplicate_skipped', order_ref: data.order_ref, row: k + 1 });
+        }
+      }
+    }
+
     sheet.appendRow([
       formatNow(),
       data.action      || '',
