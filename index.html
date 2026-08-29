@@ -3654,14 +3654,12 @@ function checkoutCart(){
       updateCartBadge();
       closeCart();
       showPurchaseToast('success','Purchase successful','Your Certificate of Authenticity is on its way to '+email+'.');
-      // ── Auto-send thank-you email immediately on payment ──
-      emailjs.send('service_50jojio','template_hnd30nb',{
+      // ── Auto-send branded thank-you / order-confirmation email ──
+      fetch('/api/order-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email:email, to_name:cartBuyerDisplayName,
-        reply_to:'hello@jefferyasare.com', site_url:'www.jefferyasare.com',
         order_ref:response.reference||'', print_title:itemSummary,
-        print_size:'Multiple', qty:String(totalQty), price:paidStr,
-        next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'
-      }).catch(function(e){ console.error('Thank-you email failed:',e); });
+        size:'Multiple', qty:String(totalQty), price:paidStr, country:'Ghana'
+      })}).catch(function(e){ console.error('Order-confirm email failed:',e); });
       if(cartItems.length) openCert(cartItems,email,response.reference,cartBuyerDisplayName,{price:paidStr,country:'Ghana',qty:totalQty,next_steps:'Your prints are now in production (7–14 business days). We will contact you with tracking details once they ship.'});
     }
   });
@@ -3728,14 +3726,12 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
         price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
       showPurchaseToast('success','Purchase successful','Your Certificate of Authenticity is on its way to '+email+'.');
-      // ── Auto-send thank-you email immediately on payment ──
-      emailjs.send('service_50jojio','template_hnd30nb',{
+      // ── Auto-send branded thank-you / order-confirmation email ──
+      fetch('/api/order-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email:email, to_name:displayName,
-        reply_to:'hello@jefferyasare.com', site_url:'www.jefferyasare.com',
         order_ref:response.reference||'', print_title:print.title,
-        print_size:selectedSize, qty:String(qty), price:paidStr,
-        next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-      }).catch(function(e){ console.error('Thank-you email failed:',e); });
+        size:selectedSize, qty:String(qty), price:paidStr, country:ctryName
+      })}).catch(function(e){ console.error('Order-confirm email failed:',e); });
       openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName,{price:paidStr,country:ctryName,qty:qty,next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'});
       // ── Auto-send PDF COA to buyer via Brevo (runs in background) ──
       (function(_email,_name,_ref,_title){

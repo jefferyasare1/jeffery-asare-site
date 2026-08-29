@@ -3019,6 +3019,55 @@ function sendEmail(templateId, params, btnId, statusId, fieldIds, onSuccess){
     });
 }
 
+// ── Branded email sender — same look as the order-card emails, used by
+// the standalone Ship / Follow-up / Waitlist tabs (manual sends not tied
+// to a saved order). Replaces the old EmailJS-based sendEmail() above,
+// which sent unbranded emails via templates now locked on EmailJS's plan.
+function sendBrandedEmail(toEmail, toName, subject, htmlContent, btnId, statusId, fieldIds, onSuccess){
+  var btn = document.getElementById(btnId);
+  setMsg(statusId, '', 'Sending…');
+  if(btn) btn.disabled = true;
+  fetch('/api/notify',{
+    method:'POST', headers:{'Content-Type':'application/json','X-Dashboard-Key':DASH_KEY},
+    body: JSON.stringify({ to: toEmail, to_name: toName, subject: subject, html_content: htmlContent })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    if(result.ok){
+      setMsg(statusId, 'ok', 'Sent to ' + toEmail + '.');
+      if(fieldIds) clrFields(fieldIds);
+      if(btn) btn.disabled = false;
+      if(onSuccess) onSuccess();
+    } else { throw new Error(result.error || 'Send failed'); }
+  })
+  .catch(function(err){
+    setMsg(statusId, 'err', 'Send failed — ' + String(err.message||err));
+    console.error('Branded email:', err);
+    if(btn) btn.disabled = false;
+  });
+}
+
+// Shared branded email skeleton (logo, General Sans font, warm palette) —
+// pass the heading and body HTML rows, get back the full document.
+function brandedEmailShell(heading, bodyRowsHtml){
+  var F = "'General Sans',system-ui,-apple-system,sans-serif";
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+    +'<body style="margin:0;padding:0;background:#f9f7f4;font-family:'+F+';">'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;"><tr><td align="center">'
+    +'<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">'
+    +'<tr><td style="padding-bottom:36px;"><img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;"></td></tr>'
+    +'<tr><td style="font-family:'+F+';font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">'+heading+'</td></tr>'
+    +bodyRowsHtml
+    +'<tr><td style="padding:24px 0 0;border-top:1px solid #e8e4df;">'
+      +'<p style="font-family:'+F+';font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>'
+      +'<p style="font-family:'+F+';font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>'
+    +'</td></tr>'
+    +'<tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:'+F+';font-size:11px;color:#bbb;line-height:1.6;">'
+      +'Accra, Ghana &nbsp;&middot;&nbsp; hello@jefferyasare.com &nbsp;&middot;&nbsp; jefferyasare.com'
+    +'</td></tr>'
+    +'</table></td></tr></table></body></html>';
+}
+
 // ── Google Sheets log (POST via Cloudflare proxy — no CORS issues) ──
 function logToSheet(data){
   data.date = new Date().toLocaleString('en-GB', {timeZone:'Africa/Accra'});
@@ -4960,11 +5009,24 @@ document.getElementById('ao-save').addEventListener('click', function(){
 // SHIP (standalone tab)
 document.getElementById('sh-send').addEventListener('click', function(){
   if(!requireFields(['sh-email','sh-name','sh-title','sh-tracking'],'sh-status')) return;
-  sendEmail('template_ufkb3dt',{
-    to_email:v('sh-email'), to_name:v('sh-name'),
-    print_title:v('sh-title'), tracking_number:v('sh-tracking'), site_url:SITE_URL
-  },'sh-send','sh-status',['sh-email','sh-name','sh-title','sh-tracking']);
-  logToSheet({action:'Shipped',buyer_name:v('sh-name'),buyer_email:v('sh-email'),print_title:v('sh-title'),notes:'Tracking: '+v('sh-tracking'),order_ref:''});
+  var name=v('sh-name'), email=v('sh-email'), title=v('sh-title'), tracking=v('sh-tracking');
+  var firstName=(name||'there').split(' ')[0];
+  var F="'General Sans',system-ui,-apple-system,sans-serif";
+  var body=
+    '<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+      +'Hi '+firstName+', great news. Your <strong style="color:#111;">'+title+'</strong> has been carefully packed and dispatched.'
+    +'</td></tr>'
+    +'<tr><td style="background:#f5f2ee;padding:24px 28px;display:block;">'
+      +'<p style="font-family:'+F+';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 10px;">DHL Tracking Number</p>'
+      +'<p style="font-family:'+F+';font-size:20px;font-weight:600;color:#111;margin:0 0 10px;">'+tracking+'</p>'
+      +'<p style="font-family:'+F+';font-size:13px;color:#888;margin:0;">Track at <a href="https://www.dhl.com/track?trackingNumber='+tracking+'" style="color:#111;">dhl.com</a></p>'
+    +'</td></tr>'
+    +'<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-top:24px;padding-bottom:24px;">'
+      +'Your print ships in a protective tube to ensure it arrives in perfect condition. Reply to this email if you have any questions.'
+    +'</td></tr>';
+  var html=brandedEmailShell('Your print is on its way.', body);
+  sendBrandedEmail(email, name, 'Your print is on its way: '+title, html, 'sh-send','sh-status',['sh-email','sh-name','sh-title','sh-tracking']);
+  logToSheet({action:'Shipped',buyer_name:name,buyer_email:email,print_title:title,notes:'Tracking: '+tracking,order_ref:''});
 });
 
 // COA — generates PDF via html2canvas + jsPDF, sends via Brevo (same flow as order cards)
@@ -5119,21 +5181,43 @@ document.getElementById('coa-send').addEventListener('click', function(){
 // FOLLOW-UP (standalone tab)
 document.getElementById('fu-send').addEventListener('click', function(){
   if(!requireFields(['fu-email','fu-name','fu-title'],'fu-status')) return;
-  sendEmail('template_postdel01',{
-    to_email:v('fu-email'), to_name:v('fu-name'),
-    print_title:v('fu-title'), site_url:SITE_URL
-  },'fu-send','fu-status',['fu-email','fu-name','fu-title']);
-  logToSheet({action:'Follow-up Sent',buyer_name:v('fu-name'),buyer_email:v('fu-email'),print_title:v('fu-title'),notes:'',order_ref:''});
+  var name=v('fu-name'), email=v('fu-email'), title=v('fu-title');
+  var firstName=(name||'there').split(' ')[0];
+  var F="'General Sans',system-ui,-apple-system,sans-serif";
+  var body=
+    '<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+      +'Hi '+firstName+', it\'s been a little while since your <strong style="color:#111;">'+title+'</strong> was delivered. I just wanted to check in.'
+    +'</td></tr>'
+    +'<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+      +'I hope it arrived in perfect condition and that you\'re happy with it. If anything isn\'t right, please reply and I\'ll take care of it right away.'
+    +'</td></tr>'
+    +'<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+      +'If you\'re enjoying the piece, sharing a photo or leaving a short review means a great deal. Thank you.'
+    +'</td></tr>';
+  var html=brandedEmailShell('I hope it arrived safely.', body);
+  sendBrandedEmail(email, name, 'How are you enjoying your print?', html, 'fu-send','fu-status',['fu-email','fu-name','fu-title']);
+  logToSheet({action:'Follow-up Sent',buyer_name:name,buyer_email:email,print_title:title,notes:'',order_ref:''});
 });
 
 // WAITLIST
 document.getElementById('wl-send').addEventListener('click', function(){
   if(!requireFields(['wl-email','wl-name','wl-title','wl-url'],'wl-status')) return;
-  sendEmail('template_waitlist01',{
-    to_email:v('wl-email'), to_name:v('wl-name'),
-    print_title:v('wl-title'), print_url:v('wl-url'), site_url:SITE_URL
-  },'wl-send','wl-status',['wl-email','wl-name','wl-title','wl-url']);
-  logToSheet({action:'Waitlist Notified',buyer_name:v('wl-name'),buyer_email:v('wl-email'),print_title:v('wl-title'),notes:'',order_ref:''});
+  var name=v('wl-name'), email=v('wl-email'), title=v('wl-title'), url=v('wl-url');
+  var firstName=(name||'there').split(' ')[0];
+  var F="'General Sans',system-ui,-apple-system,sans-serif";
+  var body=
+    '<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:24px;">'
+      +'Hi '+firstName+', good news — the piece you were interested in, <strong style="color:#111;">'+title+'</strong>, is available again.'
+    +'</td></tr>'
+    +'<tr><td style="font-family:'+F+';font-size:15px;color:#444;line-height:1.8;padding-bottom:28px;">'
+      +'Editions are limited, so if you\'d still like this one, I\'d suggest securing it soon.'
+    +'</td></tr>'
+    +'<tr><td style="padding-bottom:28px;">'
+      +'<a href="'+url+'" style="display:inline-block;background:#111;color:#fff;font-family:'+F+';font-size:14px;font-weight:600;text-decoration:none;padding:14px 28px;">View '+title+'</a>'
+    +'</td></tr>';
+  var html=brandedEmailShell('Still thinking of it?', body);
+  sendBrandedEmail(email, name, 'Good news — '+title+' is available', html, 'wl-send','wl-status',['wl-email','wl-name','wl-title','wl-url']);
+  logToSheet({action:'Waitlist Notified',buyer_name:name,buyer_email:email,print_title:title,notes:'',order_ref:''});
 });
 
 // ════════════════════════════════════════════════════════════════

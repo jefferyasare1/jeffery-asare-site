@@ -429,17 +429,13 @@ function setupBuyBtn(p){
         var nb2=document.getElementById('noticeBox');
         if(nb2) nb2.classList.remove('show');
         var paidPlain = isIntl ? '$'+totalUSD : 'GH₵ '+total.toLocaleString();
-        // Confirmation email to buyer
-        emailjs.send('service_qf961dj','template_hhpdh27',{
+        // Branded confirmation email to buyer (via Brevo, same design as the rest of the site)
+        fetch('/api/order-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email:email, to_name:displayName,
-          print_title:p.title, print_size:selectedSize, qty:'1',
-          price:paidPlain, country:ctryData.name, order_ref:response.reference,
-          site_url:'https://jefferyasare.com',
-          next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'
-        }).then(function(){
-          console.log('Confirmation email sent to '+email);
-        }).catch(function(err){
-          console.error('EmailJS confirmation failed:', err);
+          print_title:p.title, size:selectedSize, qty:'1',
+          price:paidPlain, country:ctryData.name, order_ref:response.reference
+        })}).catch(function(err){
+          console.error('Order-confirm email failed:', err);
         });
         // Alert to Jeff via Formspree
         var body=new URLSearchParams({
