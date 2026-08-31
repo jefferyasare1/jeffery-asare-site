@@ -81,7 +81,7 @@ function doPost(e) {
       return jsonResponse({ status: 'not_found', order_ref: data.order_ref });
     }
 
-    // Special case: delete every row tied to an order_ref. Used when a
+    // Special case: delete every row tied to an order. Used when a
     // Client/Order is removed on the dashboard, so a deleted order doesn't
     // linger in the Sheet or get pulled back in on the next Sync.
     // Only the password-protected dashboard can send this — the Cloudflare
@@ -89,16 +89,26 @@ function doPost(e) {
     // request carried a valid X-Dashboard-Key, so no separate identity
     // check is needed here (unlike "Update Buyer", which anonymous
     // checkout code can also send).
-    if (data.action === 'Delete Order' && data.order_ref) {
+    //
+    // Some orders have no Order Ref (added by hand on the dashboard with
+    // that field left blank) — for those, match by buyer email + print
+    // title instead. Without this fallback, a ref-less order could never
+    // actually be removed from the Sheet: nothing to match on means
+    // nothing gets deleted, and the next Sync pulls it right back in.
+    if (data.action === 'Delete Order' && (data.order_ref || (data.buyer_email && data.print_title))) {
       var delRows = sheet.getDataRange().getValues();
       var deleted = 0;
       for (var j = delRows.length - 1; j >= 1; j--) {
-        if (String(delRows[j][10]).trim() === String(data.order_ref).trim()) {
+        var matchByRef = data.order_ref && String(delRows[j][10]).trim() === String(data.order_ref).trim();
+        var matchByFallback = !data.order_ref && data.buyer_email && data.print_title &&
+          String(delRows[j][3]).trim().toLowerCase() === String(data.buyer_email).trim().toLowerCase() &&
+          String(delRows[j][4]).trim().toLowerCase() === String(data.print_title).trim().toLowerCase();
+        if (matchByRef || matchByFallback) {
           sheet.deleteRow(j + 1);
           deleted++;
         }
       }
-      return jsonResponse({ status: deleted ? 'deleted' : 'not_found', order_ref: data.order_ref, rows_deleted: deleted });
+      return jsonResponse({ status: deleted ? 'deleted' : 'not_found', order_ref: data.order_ref || '', rows_deleted: deleted });
     }
 
     // Guard against double-logging the same order. Two different things can

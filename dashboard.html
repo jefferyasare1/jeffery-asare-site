@@ -3240,8 +3240,14 @@ function deleteOrder(id){
     var order = loadOrders().find(function(o){ return o.id === id; });
     // Also remove the matching row(s) from the Google Sheet, so a deleted
     // order doesn't stay behind there or come back on the next Sync.
-    if(order && order.orderRef){
-      logToSheet({ action: 'Delete Order', order_ref: order.orderRef });
+    // Orders without a saved Order Ref (e.g. added by hand via "Add Order"
+    // with that field left blank) used to be skipped here entirely — the
+    // Sheet was never told, so the row stayed behind and the next Sync
+    // pulled it right back into the dashboard. Now we always tell the
+    // Sheet, and include buyer email + print title as a fallback match
+    // for when there's no ref to go by.
+    if(order){
+      logToSheet({ action: 'Delete Order', order_ref: order.orderRef||'', buyer_email: order.buyerEmail||'', print_title: order.printTitle||'' });
     }
     saveOrders(loadOrders().filter(function(o){ return o.id !== id; }));
     renderOrders();
