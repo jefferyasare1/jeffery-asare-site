@@ -7,7 +7,9 @@
     "message": "How do I make payment and how long does it take to get to me?",
     "timestamp": "2026-08-17T15:13:26.715Z",
     "read": false,
-    "replied": false
+    "replied": true,
+    "repliedAt": "2026-08-30T02:31:15.273Z",
+    "replyText": "To make a purchase, just go to my website and select the print you want, then follow the Paystack link to complete the transaction. Payment typically takes 24-48 hours to process, and then I ship the print from Accra."
   },
   {
     "id": "1786911983656",
