@@ -1928,8 +1928,16 @@
     <h2 class="panel-title mob-skip">Messages</h2>
     <p class="panel-sub">Contact form submissions from the site. Click any message to read it and send a reply.</p>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div id="msg-status-line" style="font-size:12px;color:var(--muted);"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <input type="checkbox" id="msg-select-all-cb" onchange="msgToggleSelectAll(this.checked)" title="Select all" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">
+      <div style="flex:1;display:flex;align-items:center;gap:10px;min-width:0;">
+        <span id="msg-status-line" style="font-size:12px;color:var(--muted);white-space:nowrap;"></span>
+        <span id="msg-bulk-bar" style="display:none;align-items:center;gap:6px;">
+          <button class="btn-card" onclick="msgBulkAction('read')" style="font-size:11px;padding:4px 9px;">Mark read</button>
+          <button class="btn-card" onclick="msgBulkAction('unread')" style="font-size:11px;padding:4px 9px;">Mark unread</button>
+          <button class="btn-card" onclick="msgBulkAction('delete')" style="font-size:11px;padding:4px 9px;color:#c0392b;">Delete</button>
+        </span>
+      </div>
       <button class="btn-card" id="msg-refresh-btn" onclick="msgInit(true)" style="font-size:11px;padding:6px 12px;">↻ Refresh</button>
     </div>
 
@@ -4026,6 +4034,7 @@ function scrollToCard(id){
 // ══════════════════════════════════════════════════════════════
 var _msgData = null;
 var _msgReplyId = null;
+var _msgSelected = {};
 
 function msgInit(forceRefresh) {
   var listEl = document.getElementById('msg-list');
@@ -4076,25 +4085,88 @@ function msgRender() {
   }
   listEl.innerHTML = msgs.map(function(m){
     var date = new Date(m.timestamp);
-    var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     var _lastEntry = (m.replies && m.replies.length) ? m.replies[m.replies.length-1] : null;
     var _previewSrc = _lastEntry ? _lastEntry.text : m.message;
-    var preview = _previewSrc.length > 100 ? _previewSrc.slice(0,100) + '…' : _previewSrc;
-    var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;font-weight:600;">Replied</span>' : '';
-    var unreadDot = !m.read ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4a3b2e;margin-right:6px;flex-shrink:0;margin-top:3px;"></span>' : '';
+    var preview = _previewSrc.length > 90 ? _previewSrc.slice(0,90) + '…' : _previewSrc;
+    var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:9px;letter-spacing:.05em;padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">Replied</span>' : '';
+    // "Smart" read/unread cue: exactly one of these ever shows for a given
+    // message — a plain grey "Read" tag once you've opened it, or the small
+    // solid dot while it's still new. Never both, never neither.
+    var readBadge = m.read ? '<span style="display:inline-block;background:#ece7e0;color:#8a7f72;font-size:9px;letter-spacing:.05em;padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">Read</span>' : '';
+    var unreadDot = !m.read ? '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4a3b2e;flex-shrink:0;"></span>' : '';
     var readBg = m.read ? 'background:linear-gradient(145deg,#ddd5c8,#c2b8a9);' : '';
-    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rc);padding:18px 20px;margin-bottom:10px;cursor:pointer;'+readBg+'" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
-      + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">'
+    var checked = _msgSelected[m.id] ? ' checked' : '';
+    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rb);padding:9px 14px;margin-bottom:5px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;'+readBg+'" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
+      + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelect(\''+m.id+'\',this.checked)"'+checked+' style="width:14px;height:14px;margin-top:3px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">'
       + unreadDot
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">'
-      + '<span style="font-size:13px;font-weight:'+(m.read?'600':'700')+';color:'+(m.read?'#2b2118':'var(--ink)')+';">' + m.name + ' &lt;' + m.email + '&gt;</span>'
-      + '<span style="font-size:11px;color:var(--muted);white-space:nowrap;">' + dateStr + '</span>'
+      + '<div style="display:flex;align-items:center;gap:6px;">'
+      + '<span style="font-size:12.5px;font-weight:'+(m.read?'600':'700')+';color:'+(m.read?'#2b2118':'var(--ink)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + m.name + ' &lt;' + m.email + '&gt;</span>'
+      + '<span style="font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;">— ' + m.subject + '</span>'
+      + readBadge + repliedBadge
+      + '<span style="font-size:10.5px;color:var(--muted);white-space:nowrap;margin-left:auto;padding-left:8px;">' + dateStr + '</span>'
       + '</div>'
-      + '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;">' + m.subject + ' ' + repliedBadge + '</div>'
-      + '<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;">' + preview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
-      + '</div></div></div>';
+      + '<div style="font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      + '</div></div>';
   }).join('');
+}
+
+// ── Selection + bulk actions (Gmail-style) ─────────────────────
+function msgToggleSelect(id, checked) {
+  if (checked) _msgSelected[id] = true; else delete _msgSelected[id];
+  msgUpdateToolbar();
+}
+function msgToggleSelectAll(checked) {
+  _msgSelected = {};
+  if (checked) (_msgData||[]).forEach(function(m){ _msgSelected[m.id] = true; });
+  msgRender();
+  msgUpdateToolbar();
+}
+function msgUpdateToolbar() {
+  var ids = Object.keys(_msgSelected);
+  var bar = document.getElementById('msg-bulk-bar');
+  var statusEl = document.getElementById('msg-status-line');
+  var allCb = document.getElementById('msg-select-all-cb');
+  var total = (_msgData||[]).length;
+  if (bar) bar.style.display = ids.length ? 'inline-flex' : 'none';
+  if (statusEl) statusEl.textContent = ids.length ? ids.length + ' selected' : (total + ' message' + (total !== 1 ? 's' : '') + (msgUnreadCount() ? ' · ' + msgUnreadCount() + ' unread' : ''));
+  if (allCb) allCb.checked = total > 0 && ids.length === total;
+}
+function msgUnreadCount() {
+  return (_msgData||[]).filter(function(m){ return !m.read; }).length;
+}
+function msgBulkAction(action) {
+  var ids = Object.keys(_msgSelected);
+  if (!ids.length) return;
+  var run = function(){
+    fetch('/api/messages-bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: DASH_KEY, ids: ids, action: action })
+    })
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { alert(res.data.error || 'Action failed.'); return; }
+      if (action === 'delete') {
+        _msgData = (_msgData||[]).filter(function(m){ return !_msgSelected[m.id]; });
+      } else {
+        (_msgData||[]).forEach(function(m){ if (_msgSelected[m.id]) m.read = (action === 'read'); });
+      }
+      _msgSelected = {};
+      msgRender();
+      msgUpdateToolbar();
+      var badge = document.getElementById('sn-messages-badge');
+      var unread = msgUnreadCount();
+      if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+    })
+    .catch(function(){ alert('Network error — try again.'); });
+  };
+  if (action === 'delete') {
+    showDashConfirm('Delete ' + ids.length + ' message' + (ids.length > 1 ? 's' : '') + '? This cannot be undone.', 'Delete', run);
+  } else {
+    run();
+  }
 }
 
 var _msgOpenId = null;
