@@ -22,10 +22,33 @@ function fromB64(str) {
   return decodeURIComponent(Array.from(atob(str), c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
 }
 
-function buildReplyHtml(name, replyText) {
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Same branded shell as the rest of the site's transactional emails
+// (functions/api/order-confirm.js, functions/api/send-coa.js, and the
+// dashboard's confirmShip/confirmFollowUp): logo + big heading in one
+// white card on a warm ground, a soft box for supporting context, a
+// signature block, and the Accra/Ghana footer. The old version here was
+// a plainer, separate layout — a bordered header row instead of the
+// logo sitting in the card, no heading, and no reference back to what
+// the person actually wrote in.
+function buildReplyHtml(name, replyText, originalMessage) {
+  const firstName = (name || '').split(' ')[0] || 'there';
   const paras = replyText.split('\n\n').filter(p => p.trim())
-    .map(p => `<p style="font-family:${GS};font-size:15px;color:#444;line-height:1.85;margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`)
+    .map(p => `<p style="font-family:${GS};font-size:15px;color:#444;line-height:1.85;margin:0 0 16px;">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
     .join('');
+
+  const trimmedOriginal = (originalMessage || '').trim();
+  const quoted = trimmedOriginal.length > 320 ? trimmedOriginal.slice(0, 320).trim() + '…' : trimmedOriginal;
+  const quotedRow = quoted ? `
+      <tr><td style="background:#f5f2ee;padding:22px 26px;">
+        <p style="font-family:${GS};font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin:0 0 10px;">Your message</p>
+        <p style="font-family:${GS};font-size:13px;font-style:italic;color:#666;line-height:1.75;margin:0;">${escapeHtml(quoted).replace(/\n/g, '<br>')}</p>
+      </td></tr>` : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,21 +60,22 @@ function buildReplyHtml(name, replyText) {
 <body style="margin:0;padding:0;background:#f9f7f4;font-family:${GS};">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
   <tr><td align="center">
-    <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;max-width:600px;">
-      <tr><td style="padding:24px 48px 20px;border-bottom:1px solid #e8e4df;">
-        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
+      <tr><td style="padding-bottom:36px;">
+        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;">
       </td></tr>
-      <tr><td style="padding:40px 48px 32px;">
-        <p style="font-family:${GS};font-size:14px;color:#999;margin:0 0 20px;">Hi ${name},</p>
+      <tr><td style="font-family:${GS};font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">
+        Hi ${escapeHtml(firstName)},
+      </td></tr>
+      <tr><td style="padding-bottom:${quoted ? '8' : '0'}px;">
         ${paras}
-        <hr style="border:none;border-top:1px solid #e8e4df;margin:28px 0 24px;">
-        <p style="font-family:${GS};font-size:13px;color:#999;margin:0 0 4px;">With gratitude,</p>
+      </td></tr>${quotedRow}
+      <tr><td style="padding:28px 0 0;border-top:1px solid #e8e4df;">
+        <p style="font-family:${GS};font-size:14px;color:#888;font-style:italic;margin:0 0 4px;">With gratitude,</p>
         <p style="font-family:${GS};font-size:15px;color:#111;font-weight:600;margin:0;">Jeffery Asare</p>
       </td></tr>
-      <tr><td style="background:#f9f7f4;padding:16px 48px;border-top:1px solid #e8e4df;">
-        <p style="font-family:${GS};font-size:11px;color:#bbb;margin:0;">
-          Accra, Ghana &nbsp;·&nbsp; <a href="https://jefferyasare.com" style="color:#bbb;text-decoration:none;">jefferyasare.com</a>
-        </p>
+      <tr><td style="padding-top:28px;border-top:1px solid #e8e4df;font-family:${GS};font-size:11px;color:#bbb;line-height:1.6;">
+        Accra, Ghana &nbsp;·&nbsp; <a href="https://jefferyasare.com" style="color:#bbb;text-decoration:none;">jefferyasare.com</a>
       </td></tr>
     </table>
   </td></tr>
@@ -108,7 +132,7 @@ export async function onRequestPost(context) {
       to: [{ email: msg.email, name: msg.name }],
       replyTo: { email: 'hello@jefferyasare.com' },
       subject: `Re: ${msg.subject}`,
-      htmlContent: buildReplyHtml(msg.name, replyText.trim()),
+      htmlContent: buildReplyHtml(msg.name, replyText.trim(), msg.message),
     }),
   });
 
