@@ -117,10 +117,11 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: errData.message || 'Email send failed' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Mark as replied in GitHub
+  // Mark as replied (and read — you can't reply without having opened it)
   msg.replied = true;
   msg.repliedAt = new Date().toISOString();
   msg.replyText = replyText.trim();
+  msg.read = true;
 
   await fetch(`${GH_API}/repos/${REPO}/contents/${FILE_PATH}`, {
     method: 'PUT',

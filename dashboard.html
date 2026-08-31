@@ -4101,13 +4101,21 @@ function msgOpen(id) {
   if (!msg) return;
   _msgOpenId = id;
 
-  // Mark as read locally
+  // Mark as read — locally right away (so the badge updates instantly),
+  // and on the server so it actually sticks. Before this, msg.read was
+  // only ever flipped in the browser's own memory — the next dashboard
+  // reload pulled the message back down still marked unread, which is
+  // why the unread count never seemed to go down for good.
   if (!msg.read) {
     msg.read = true;
-    // Update badge silently (no re-render needed — we just refresh counts)
     var unread = _msgData.filter(function(m){ return !m.read; }).length;
     var badge = document.getElementById('sn-messages-badge');
     if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+    fetch('/api/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: DASH_KEY, messageId: id })
+    }).catch(function(e){ console.error('mark-read failed:', e); });
   }
 
   var date = new Date(msg.timestamp).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
