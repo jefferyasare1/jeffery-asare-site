@@ -19,8 +19,16 @@ var LABELS = {
   coa:      'JA Shop/COA',
   followup: 'JA Shop/Follow-up',
   waitlist: 'JA Shop/Waitlist',
-  imported: 'ja-imported'
+  imported: 'ja-imported',
+  websiteImported: 'ja-website-imported'
 };
+
+// Where a client's email reply gets sent so it can be folded into the
+// matching conversation in the dashboard's Messages tab.
+// The DASHBOARD_KEY script property must be set (Project Settings →
+// Script Properties) to the same value as Cloudflare's DASHBOARD_KEY —
+// see importMessagesFromGmail() below.
+var IMPORT_ENDPOINT = 'https://jefferyasare.com/api/import-message';
 
 // ── GET — returns all orders as JSON ───────────────────────────
 function doGet(e) {
@@ -237,6 +245,66 @@ function importOrdersFromGmail() {
   buildSummaryTab();
 }
 
+// ── Import client email replies into the dashboard (runs hourly) ──
+// A client who replies to one of Jeff's dashboard-sent emails writes
+// straight back to hello@jefferyasare.com — which lands here, in this
+// inbox, with no link back to the website. This pulls any such message
+// in and forwards it to the site, which folds it into the matching
+// conversation in data/messages.json so the whole back-and-forth shows
+// up in the Messages tab instead of only sitting in Gmail.
+function importMessagesFromGmail() {
+  var key = PropertiesService.getScriptProperties().getProperty('DASHBOARD_KEY');
+  if (!key) {
+    Logger.log('importMessagesFromGmail: no DASHBOARD_KEY script property set — skipping. ' +
+      'Set it under Project Settings \u2192 Script Properties.');
+    return;
+  }
+
+  var importedLabel = getOrCreateLabel(LABELS.websiteImported);
+  var threads = GmailApp.search('to:hello@jefferyasare.com -label:' + LABELS.websiteImported, 0, 50);
+
+  threads.forEach(function(thread) {
+    thread.getMessages().forEach(function(msg) {
+      var to = (msg.getTo() || '').toLowerCase();
+      if (to.indexOf('hello@jefferyasare.com') === -1) return;
+
+      var fromRaw = msg.getFrom() || '';
+      var emailMatch = fromRaw.match(/<([^>]+)>/);
+      var fromEmail = emailMatch ? emailMatch[1] : fromRaw;
+      var fromName = fromRaw.replace(/<[^>]+>/, '').replace(/"/g, '').trim() || fromEmail;
+
+      // Never import Jeff's own address as if it were a client message.
+      if (fromEmail.toLowerCase() === 'hello@jefferyasare.com') return;
+
+      var payload = {
+        key: key,
+        from_name: fromName,
+        from_email: fromEmail,
+        subject: msg.getSubject() || '',
+        body: msg.getPlainBody().trim(),
+        at: msg.getDate().toISOString()
+      };
+
+      try {
+        var res = UrlFetchApp.fetch(IMPORT_ENDPOINT, {
+          method: 'post',
+          contentType: 'application/json',
+          payload: JSON.stringify(payload),
+          muteHttpExceptions: true
+        });
+        if (res.getResponseCode() >= 300) {
+          Logger.log('importMessagesFromGmail: site rejected a message — ' + res.getContentText());
+          return; // leave unlabeled so it retries next hour
+        }
+      } catch (e) {
+        Logger.log('importMessagesFromGmail: failed to reach the site — ' + e);
+        return; // leave unlabeled so it retries next hour
+      }
+    });
+    thread.addLabel(importedLabel);
+  });
+}
+
 // ── Label sent emails by type ──────────────────────────────────
 function labelSentEmails() {
   setupLabels();
@@ -269,10 +337,12 @@ function labelSentEmails() {
 // ── Run once to create hourly trigger ─────────────────────────
 function createTrigger() {
   ScriptApp.getProjectTriggers().forEach(function(t) {
-    if (t.getHandlerFunction() === 'importOrdersFromGmail') ScriptApp.deleteTrigger(t);
+    var fn = t.getHandlerFunction();
+    if (fn === 'importOrdersFromGmail' || fn === 'importMessagesFromGmail') ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('importOrdersFromGmail').timeBased().everyHours(1).create();
-  Logger.log('Hourly trigger created for importOrdersFromGmail');
+  ScriptApp.newTrigger('importMessagesFromGmail').timeBased().everyHours(1).create();
+  Logger.log('Hourly triggers created for importOrdersFromGmail and importMessagesFromGmail');
 }
 
 // ── Run once to create all Gmail labels ───────────────────────
