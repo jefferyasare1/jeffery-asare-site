@@ -4186,6 +4186,10 @@ function msgOpen(id) {
     var unread = _msgData.filter(function(m){ return !m.read; }).length;
     var badge = document.getElementById('sn-messages-badge');
     if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
+    // Redraw the list right away too — before this, the row behind the
+    // modal kept showing as unread (dot, bold text) until you manually
+    // hit Refresh, even though it had actually been marked read.
+    msgRender();
     fetch('/api/mark-read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
