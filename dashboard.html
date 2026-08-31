@@ -4077,7 +4077,9 @@ function msgRender() {
   listEl.innerHTML = msgs.map(function(m){
     var date = new Date(m.timestamp);
     var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    var preview = m.message.length > 100 ? m.message.slice(0,100) + '…' : m.message;
+    var _lastEntry = (m.replies && m.replies.length) ? m.replies[m.replies.length-1] : null;
+    var _previewSrc = _lastEntry ? _lastEntry.text : m.message;
+    var preview = _previewSrc.length > 100 ? _previewSrc.slice(0,100) + '…' : _previewSrc;
     var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;font-weight:600;">Replied</span>' : '';
     var unreadDot = !m.read ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4a3b2e;margin-right:6px;flex-shrink:0;margin-top:3px;"></span>' : '';
     return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rc);padding:18px 20px;margin-bottom:10px;cursor:pointer;" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
@@ -4085,7 +4087,7 @@ function msgRender() {
       + unreadDot
       + '<div style="flex:1;min-width:0;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">'
-      + '<span style="font-size:13px;font-weight:'+(m.read?'500':'700')+';color:var(--ink);">' + m.name + ' &lt;' + m.email + '&gt;</span>'
+      + '<span style="font-size:13px;font-weight:'+(m.read?'600':'700')+';color:'+(m.read?'#2b2118':'var(--ink)')+';">' + m.name + ' &lt;' + m.email + '&gt;</span>'
       + '<span style="font-size:11px;color:var(--muted);white-space:nowrap;">' + dateStr + '</span>'
       + '</div>'
       + '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;">' + m.subject + ' ' + repliedBadge + '</div>'
@@ -4125,9 +4127,25 @@ function msgOpen(id) {
   var overlay = document.getElementById('msg-reply-overlay');
   if (!replyToEl || !bodyEl || !overlay) return;
 
+  var _thread = [{ from: 'client', text: msg.message, at: msg.timestamp }];
+  if (msg.replies && msg.replies.length) {
+    _thread = _thread.concat(msg.replies);
+  } else if (msg.replied && msg.replyText) {
+    _thread.push({ from: 'jeff', text: msg.replyText, at: msg.repliedAt });
+  }
+  var _threadHtml = _thread.map(function(e){
+    var isJeff = e.from === 'jeff';
+    var who = isJeff ? 'You' : msg.name;
+    var when = e.at ? (new Date(e.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' at ' + new Date(e.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})) : '';
+    return '<div style="background:'+(isJeff?'#f5f2ee':'#f9f7f4')+';border-radius:8px;padding:12px 16px;margin-top:10px;font-size:13px;line-height:1.75;color:#444;">'
+      + '<div style="font-size:11px;font-weight:600;color:'+(isJeff?'#4a3b2e':'#888')+';margin-bottom:4px;">' + who + (when ? ' · ' + when : '') + '</div>'
+      + String(e.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+      + '</div>';
+  }).join('');
+
   replyToEl.innerHTML = '<strong>' + msg.name + '</strong> &lt;' + msg.email + '&gt;'
     + '<br><span style="font-size:12px;color:var(--muted);font-weight:400;">' + msg.subject + ' — ' + date + '</span>'
-    + '<div style="background:#f9f7f4;border-radius:6px;padding:12px 16px;margin-top:12px;font-size:13px;line-height:1.75;color:#444;">' + msg.message.replace(/\n/g,'<br>').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+    + _threadHtml;
 
   // If already replied, show reply text
   if (msg.replied && msg.replyText) {
@@ -4177,7 +4195,11 @@ function msgSendReply() {
       if (statusEl) { statusEl.textContent = '✓ Reply sent!'; statusEl.style.color = '#166534'; }
       // Update local data
       var msg = (_msgData||[]).find(function(m){ return m.id === id; });
-      if (msg) { msg.replied = true; msg.replyText = replyText; msg.repliedAt = new Date().toISOString(); }
+      if (msg) {
+        msg.replied = true; msg.replyText = replyText; msg.repliedAt = new Date().toISOString();
+        msg.replies = msg.replies || [];
+        msg.replies.push({ from: 'jeff', text: replyText, at: msg.repliedAt });
+      }
       if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Reply'; }
       // Re-render list, close modal after a moment
       msgRender();

@@ -141,11 +141,15 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: errData.message || 'Email send failed' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Mark as replied (and read — you can't reply without having opened it)
+  // Mark as replied (and read — you can't reply without having opened it).
+  // Also logged onto msg.replies so the dashboard can show the full
+  // back-and-forth as one thread, not just the latest reply.
   msg.replied = true;
   msg.repliedAt = new Date().toISOString();
   msg.replyText = replyText.trim();
   msg.read = true;
+  msg.replies = msg.replies || [];
+  msg.replies.push({ from: 'jeff', text: msg.replyText, at: msg.repliedAt });
 
   await fetch(`${GH_API}/repos/${REPO}/contents/${FILE_PATH}`, {
     method: 'PUT',
