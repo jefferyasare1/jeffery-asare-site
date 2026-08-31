@@ -4082,7 +4082,8 @@ function msgRender() {
     var preview = _previewSrc.length > 100 ? _previewSrc.slice(0,100) + '…' : _previewSrc;
     var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:999px;font-weight:600;">Replied</span>' : '';
     var unreadDot = !m.read ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4a3b2e;margin-right:6px;flex-shrink:0;margin-top:3px;"></span>' : '';
-    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rc);padding:18px 20px;margin-bottom:10px;cursor:pointer;" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
+    var readBg = m.read ? 'background:linear-gradient(145deg,#ddd5c8,#c2b8a9);' : '';
+    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rc);padding:18px 20px;margin-bottom:10px;cursor:pointer;'+readBg+'" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
       + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">'
       + unreadDot
       + '<div style="flex:1;min-width:0;">'
