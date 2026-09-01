@@ -862,6 +862,7 @@
     .msg-bubble.them{background:#f1ede7;color:#3a332c;align-self:flex-start;border-bottom-left-radius:3px;}
     .msg-bubble.you{background:#4a3b2e;color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
     .msg-bubble .b-meta{font-size:9px;letter-spacing:.04em;text-transform:uppercase;margin-top:5px;opacity:.65;}
+    .msg-row-desktop{display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .1s;}
     .msg-row-mobile{display:none;}
     .msg-row-mono{border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:.02em;}
     @media(max-width:700px){
@@ -4204,7 +4205,7 @@ function msgRender() {
     var subjColor = g.unread ? 'var(--ink)' : '#4d453c';
     var countTag = g.count > 1 ? '<span style="font-size:9.5px;color:#a89f93;background:rgba(0,0,0,.05);padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">' + g.count + '</span>' : '';
     var unreadBadge = g.unreadCount > 0 ? '<span style="min-width:15px;height:15px;padding:0 4px;border-radius:999px;background:#4a3b2e;color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + g.unreadCount + '</span>' : '';
-    var desktopRow = '<div class="msg-row msg-row-desktop" onclick="msgOpen(\''+g.primaryId+'\')" style="display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .1s;" onmouseenter="this.style.background=\'rgba(0,0,0,.025)\'" onmouseleave="this.style.background=\'\'">'
+    var desktopRow = '<div class="msg-row msg-row-desktop" onclick="msgOpen(\''+g.primaryId+'\')" onmouseenter="this.style.background=\'rgba(0,0,0,.025)\'" onmouseleave="this.style.background=\'\'">'
       + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelectGroup(\''+idsAttr+'\',this.checked)"' + (allChecked ? ' checked' : '') + ' style="width:13px;height:13px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">'
       + '<span style="width:16px;height:16px;border-radius:3px;flex-shrink:0;' + sqStyle + '"></span>'
       + '<span style="font-size:13px;font-weight:' + nameWeight + ';color:' + nameColor + ';width:132px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escH(g.name) + '</span>'
