@@ -4072,49 +4072,100 @@ function msgInit(forceRefresh) {
     });
 }
 
+function msgGroupData(msgs) {
+  // Groups flat message records into one row per contact (conversation),
+  // merging each record's own message + replies into a single chronological
+  // timeline so "who spoke last" and "how many messages" reflect the whole
+  // back-and-forth with that person, not just a single form submission.
+  var groups = {};
+  var order = [];
+  msgs.forEach(function(m){
+    var key = (m.email || '').trim().toLowerCase() || m.id;
+    if (!groups[key]) { groups[key] = { email: m.email, records: [] }; order.push(key); }
+    groups[key].records.push(m);
+  });
+  return order.map(function(key){
+    var g = groups[key];
+    var recs = g.records.slice().sort(function(a,b){ return new Date(a.timestamp) - new Date(b.timestamp); });
+    var entries = [];
+    recs.forEach(function(m){
+      entries.push({ from: 'client', text: m.message, at: m.timestamp });
+      var replies = (m.replies && m.replies.length) ? m.replies : ((m.replied && m.replyText) ? [{ from: 'jeff', text: m.replyText, at: m.repliedAt }] : []);
+      replies.forEach(function(r){ entries.push({ from: r.from, text: r.text, at: r.at }); });
+    });
+    entries.sort(function(a,b){ return new Date(a.at) - new Date(b.at); });
+    var latestRec = recs[recs.length - 1];
+    var lastEntry = entries.length ? entries[entries.length - 1] : null;
+    var ids = recs.map(function(m){ return m.id; });
+    var unreadCount = recs.filter(function(m){ return !m.read; }).length;
+    return {
+      email: g.email,
+      name: latestRec.name,
+      subject: latestRec.subject,
+      ids: ids,
+      primaryId: latestRec.id,
+      unread: unreadCount > 0,
+      unreadCount: unreadCount,
+      count: entries.length,
+      lastEntry: lastEntry,
+      date: lastEntry ? lastEntry.at : latestRec.timestamp
+    };
+  }).sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+}
+
 function msgRender() {
   var listEl = document.getElementById('msg-list');
   var statusEl = document.getElementById('msg-status-line');
   if (!listEl) return;
   var msgs = _msgData || [];
-  var unread = msgs.filter(function(m){ return !m.read; }).length;
-  if (statusEl) statusEl.textContent = msgs.length + ' message' + (msgs.length !== 1 ? 's' : '') + (unread ? ' · ' + unread + ' unread' : '');
+  var unread = msgUnreadCount();
   if (!msgs.length) {
+    if (statusEl) statusEl.textContent = '';
     listEl.innerHTML = '<div style="padding:48px 0;text-align:center;color:var(--muted);font-size:13px;">No messages yet. Contact form submissions will appear here.</div>';
     return;
   }
-  listEl.innerHTML = msgs.map(function(m){
-    var date = new Date(m.timestamp);
-    var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + date.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    var _lastEntry = (m.replies && m.replies.length) ? m.replies[m.replies.length-1] : null;
-    var _previewSrc = _lastEntry ? _lastEntry.text : m.message;
-    var preview = _previewSrc.length > 90 ? _previewSrc.slice(0,90) + '…' : _previewSrc;
-    var repliedBadge = m.replied ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-size:9px;letter-spacing:.05em;padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">Replied</span>' : '';
-    // "Smart" read/unread cue: exactly one of these ever shows for a given
-    // message — a plain grey "Read" tag once you've opened it, or the small
-    // solid dot while it's still new. Never both, never neither.
-    var readBadge = m.read ? '<span style="display:inline-block;background:#ece7e0;color:#8a7f72;font-size:9px;letter-spacing:.05em;padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">Read</span>' : '';
-    var unreadDot = !m.read ? '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4a3b2e;flex-shrink:0;"></span>' : '';
-    var readBg = m.read ? 'background:linear-gradient(145deg,#ddd5c8,#c2b8a9);' : '';
-    var checked = _msgSelected[m.id] ? ' checked' : '';
-    return '<div class="msg-card" onclick="msgOpen(\''+m.id+'\')" style="border-radius:var(--rb);padding:9px 14px;margin-bottom:5px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;'+readBg+'" onmouseenter="this.style.boxShadow=\'var(--card-shadow-hover)\'" onmouseleave="this.style.boxShadow=\'\'">'
-      + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelect(\''+m.id+'\',this.checked)"'+checked+' style="width:14px;height:14px;margin-top:3px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">'
-      + unreadDot
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="display:flex;align-items:center;gap:6px;">'
-      + '<span style="font-size:12.5px;font-weight:'+(m.read?'600':'700')+';color:'+(m.read?'#2b2118':'var(--ink)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + m.name + ' &lt;' + m.email + '&gt;</span>'
-      + '<span style="font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;">— ' + m.subject + '</span>'
-      + readBadge + repliedBadge
-      + '<span style="font-size:10.5px;color:var(--muted);white-space:nowrap;margin-left:auto;padding-left:8px;">' + dateStr + '</span>'
-      + '</div>'
-      + '<div style="font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
-      + '</div></div>';
+  var groups = msgGroupData(msgs);
+  if (statusEl) statusEl.textContent = groups.length + ' conversation' + (groups.length !== 1 ? 's' : '') + (unread ? ' · ' + unread + ' unread' : '');
+  listEl.innerHTML = groups.map(function(g){
+    var date = new Date(g.date);
+    var dateStr = date.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    var isJeffLast = g.lastEntry && g.lastEntry.from === 'jeff';
+    var previewSrc = g.lastEntry ? g.lastEntry.text : '';
+    var preview = previewSrc.length > 90 ? previewSrc.slice(0,90) + '…' : previewSrc;
+    var previewEsc = escH(preview);
+    var previewPrefix = isJeffLast ? '<strong style="color:#8a7f72;font-weight:600;">You:</strong> ' : '';
+    var allChecked = g.ids.length && g.ids.every(function(id){ return _msgSelected[id]; });
+    var idsAttr = g.ids.join(',');
+    var sqStyle = g.unread ? 'background:#4a3b2e;' : 'background:transparent;border:1.5px solid #c9c0b3;';
+    var nameWeight = g.unread ? '600' : '400';
+    var nameColor = g.unread ? 'var(--ink)' : '#4d453c';
+    var subjWeight = g.unread ? '600' : '500';
+    var subjColor = g.unread ? 'var(--ink)' : '#4d453c';
+    var countTag = g.count > 1 ? '<span style="font-size:9.5px;color:#a89f93;background:rgba(0,0,0,.05);padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">' + g.count + '</span>' : '';
+    var unreadBadge = g.unreadCount > 0 ? '<span style="min-width:15px;height:15px;padding:0 4px;border-radius:999px;background:#4a3b2e;color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + g.unreadCount + '</span>' : '';
+    return '<div class="msg-row" onclick="msgOpen(\''+g.primaryId+'\')" style="display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .1s;" onmouseenter="this.style.background=\'rgba(0,0,0,.025)\'" onmouseleave="this.style.background=\'\'">'
+      + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelectGroup(\''+idsAttr+'\',this.checked)"' + (allChecked ? ' checked' : '') + ' style="width:13px;height:13px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">'
+      + '<span style="width:16px;height:16px;border-radius:3px;flex-shrink:0;' + sqStyle + '"></span>'
+      + '<span style="font-size:13px;font-weight:' + nameWeight + ';color:' + nameColor + ';width:132px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escH(g.name) + '</span>'
+      + '<span style="flex:1;min-width:0;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong style="font-weight:' + subjWeight + ';color:' + subjColor + ';">' + escH(g.subject) + '</strong> — ' + previewPrefix + previewEsc + '</span>'
+      + countTag
+      + unreadBadge
+      + '<span style="font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:#a89f93;white-space:nowrap;flex-shrink:0;">' + dateStr + '</span>'
+      + '</div>';
   }).join('');
 }
 
 // ── Selection + bulk actions (Gmail-style) ─────────────────────
 function msgToggleSelect(id, checked) {
   if (checked) _msgSelected[id] = true; else delete _msgSelected[id];
+  msgUpdateToolbar();
+}
+function msgToggleSelectGroup(idsCsv, checked) {
+  // Same as msgToggleSelect, but a grouped row represents every message
+  // record for that contact, so its checkbox selects/deselects all of them
+  // together — selecting a conversation selects the whole conversation.
+  var ids = idsCsv.split(',');
+  ids.forEach(function(id){ if (checked) _msgSelected[id] = true; else delete _msgSelected[id]; });
   msgUpdateToolbar();
 }
 function msgToggleSelectAll(checked) {
@@ -4130,7 +4181,17 @@ function msgUpdateToolbar() {
   var allCb = document.getElementById('msg-select-all-cb');
   var total = (_msgData||[]).length;
   if (bar) bar.style.display = ids.length ? 'inline-flex' : 'none';
-  if (statusEl) statusEl.textContent = ids.length ? ids.length + ' selected' : (total + ' message' + (total !== 1 ? 's' : '') + (msgUnreadCount() ? ' · ' + msgUnreadCount() + ' unread' : ''));
+  if (statusEl) {
+    if (ids.length) {
+      statusEl.textContent = ids.length + ' selected';
+    } else {
+      // Nothing selected — hand the status line back to whatever msgRender()
+      // already worked out (conversation count · unread count) instead of
+      // overwriting it with a flat message count.
+      var groupCount = msgGroupData(_msgData||[]).length;
+      statusEl.textContent = groupCount + ' conversation' + (groupCount !== 1 ? 's' : '') + (msgUnreadCount() ? ' · ' + msgUnreadCount() + ' unread' : '');
+    }
+  }
   if (allCb) allCb.checked = total > 0 && ids.length === total;
 }
 function msgUnreadCount() {
