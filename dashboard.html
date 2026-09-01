@@ -1239,6 +1239,7 @@
       <div style="display:flex;gap:6px;">
         <button class="btn-sync" id="syncBtn" onclick="syncFromSheet()">Sync</button>
         <button class="btn-sync" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-sync" onclick="clearLocalOrders()" title="Wipe every order stored on this device and rebuild fresh from the Sheet">Clear placeholders</button>
       </div>
     </div>
 
@@ -3339,6 +3340,27 @@ function deleteOrder(id){
     saveOrders(loadOrders().filter(function(o){ return o.id !== id; }));
     renderOrders();
   });
+}
+
+// Orders live in each device's own browser storage, seeded from the Sheet
+// on Sync — there's no single shared list. A "placeholder"/test order
+// added by hand on one device (or left over from early setup) only ever
+// gets deleted on the device you delete it from; it keeps showing up on
+// any other device/browser that never had that delete applied, and looks
+// exactly like it "came back" even though nothing actually restored it.
+// This wipes this device's local copy entirely and rebuilds it fresh from
+// the Sheet, so run it on every device where old/placeholder orders show
+// up — a phone and a computer each need it run separately.
+function clearLocalOrders(){
+  showDashConfirm(
+    'This removes every order stored on THIS device — including anything added by hand — and rebuilds fresh from your order log. Orders on other devices/browsers are untouched until you run this there too. This cannot be undone.',
+    'Clear this device',
+    function(){
+      localStorage.removeItem(ORDERS_KEY);
+      renderOrders();
+      syncFromSheet();
+    }
+  );
 }
 
 // ════════════════════════════════════════════════════════════════
