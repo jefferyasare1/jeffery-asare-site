@@ -276,7 +276,7 @@
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px);padding:20px;}
     .modal-overlay.open{display:flex;}
     .modal{background:#fff;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:32px 28px 44px;position:relative;border-radius:var(--rc);box-shadow:0 8px 40px rgba(120,100,80,.18),0 2px 8px rgba(120,100,80,.1);}
-    .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:4px;}
+    .modal-close,.client-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:4px;}
     .modal-close:hover{color:var(--ink);background:#f5f0ea;}
     .modal-title{font-size:17px;font-weight:700;margin-bottom:4px;}
     .modal-sub{font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
@@ -377,6 +377,8 @@
     .cms-setup-note strong{display:block;margin-bottom:4px;font-weight:700;}
     /* CMS modal */
     #cmsModal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);overflow-y:auto;padding:40px 16px;}
+    .client-modal-overlay{position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);}
+    .client-modal-box{background:#fff;width:100%;max-width:480px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.08);overflow:hidden;position:relative;}
     #cmsModal.open{display:flex;}
     .cms-modal-box{background:#fff;width:100%;max-width:600px;padding:36px 32px 44px;position:relative;margin:auto;border-radius:var(--rc);box-shadow:0 20px 60px rgba(0,0,0,.15),0 4px 16px rgba(0,0,0,.08);}
     .cms-modal-title{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
@@ -602,6 +604,8 @@
       .nl-stat-row{gap:8px;}
       /* ── Modals → bottom sheet ── */
       #cmsModal{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;overflow-y:hidden;}
+      .client-modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
+      .client-modal-box{width:100%;max-width:100%;border-radius:var(--rc) var(--rc) 0 0;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
       .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
       .modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));max-width:100%;}
@@ -621,7 +625,7 @@
         100%{transform:scale(.4);opacity:0;}
       }
       /* ── Close buttons: sticky so they don't scroll away ── */
-      .modal-close,.cms-modal-close{position:sticky;top:8px;float:right;z-index:10;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+      .modal-close,.cms-modal-close,.client-modal-close{position:sticky;top:8px;float:right;z-index:10;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.1);}
       /* ── Save row / CMS items ── */
       .cms-save-row{flex-wrap:wrap;}
       .cms-item{flex-wrap:wrap;gap:8px;}
@@ -839,15 +843,41 @@
     /* today stat block padding override (class handles bg + shadow via raised cards rule) */
     .today-stat-block{border-radius:var(--rc);padding:14px 16px;}
     .msg-card{border-radius:var(--rc);cursor:pointer;}
-    /* ── Reply drawer (slides in from the right instead of a centered popup) ── */
-    .msg-drawer{width:520px;max-width:92vw;}
-    @media(max-width:700px){ .msg-drawer{width:100%;max-width:100%;} }
-    .msg-drawer{transform:translateX(100%);transition:transform .22s ease;}
+    /* ── Reply drawer: side panel on desktop, bottom sheet on phone ── */
+    .msg-drawer{
+      position:absolute;top:0;right:0;bottom:0;width:520px;max-width:92vw;
+      background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.16);
+      display:flex;flex-direction:column;overflow:hidden;
+      transform:translateX(100%);transition:transform .22s ease;
+    }
     .msg-drawer.open{transform:translateX(0);}
+    .msg-drawer-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:6px;line-height:1;}
+    .msg-drawer-head{padding:20px 26px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;position:relative;}
+    .msg-drawer-thread{flex:1;min-height:0;overflow-y:auto;padding:16px 26px;display:flex;flex-direction:column;gap:10px;background:#fbfaf8;-webkit-overflow-scrolling:touch;}
+    .msg-drawer-compose{padding:16px 26px 20px;border-top:1px solid var(--rule);flex-shrink:0;background:#fff;}
     .msg-bubble{max-width:88%;padding:10px 14px;border-radius:11px;font-size:12.5px;line-height:1.65;}
     .msg-bubble.them{background:#f1ede7;color:#3a332c;align-self:flex-start;border-bottom-left-radius:3px;}
     .msg-bubble.you{background:#4a3b2e;color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
     .msg-bubble .b-meta{font-size:9px;letter-spacing:.04em;text-transform:uppercase;margin-top:5px;opacity:.65;}
+    @media(max-width:700px){
+      /* Bottom sheet, matching the same mobile pattern the rest of the
+         dashboard's modals use — slides up from the bottom instead of in
+         from the side, rounded top corners, capped height with its own
+         scroll, clear of the bottom nav bar and the home-indicator area. */
+      .msg-drawer{
+        top:auto;left:0;right:0;bottom:0;width:100%;max-width:100%;
+        max-height:min(88vh,calc(100dvh - 64px));
+        border-radius:var(--rc) var(--rc) 0 0;
+        box-shadow:0 -8px 30px rgba(0,0,0,.16);
+        transform:translateY(100%);
+      }
+      .msg-drawer.open{transform:translateY(0);}
+      .msg-drawer-head{padding:16px 20px 14px;}
+      .msg-drawer-thread{padding:14px 20px;}
+      .msg-drawer-compose{padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px));}
+      .msg-bubble{max-width:92%;}
+      #msg-reply-body{font-size:16px!important;}
+    }
 
     /* ── Series selector ── */
     .series-selector{background:linear-gradient(145deg,#ddd8d1,#eae5de);box-shadow:inset 8px 8px 18px rgba(160,148,135,.58),inset -5px -5px 12px rgba(255,255,255,.88);border-radius:50px;}
@@ -1957,14 +1987,14 @@
          popup, so the conversation history gets its own fixed, scrolling
          area and the window never grows unbounded as a thread gets longer. -->
     <div id="msg-reply-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;">
-      <div id="msg-drawer" class="msg-drawer" style="position:absolute;top:0;right:0;bottom:0;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.16);display:flex;flex-direction:column;overflow:hidden;">
-        <div style="padding:20px 26px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;position:relative;">
-          <button onclick="msgCloseReply()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>
+      <div id="msg-drawer" class="msg-drawer">
+        <div class="msg-drawer-head">
+          <button onclick="msgCloseReply()" class="msg-drawer-close">✕</button>
           <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Reply to</div>
           <div id="msg-reply-to" style="font-size:14px;font-weight:600;color:var(--ink);padding-right:24px;"></div>
         </div>
-        <div id="msg-thread" style="flex:1;min-height:0;overflow-y:auto;padding:16px 26px;display:flex;flex-direction:column;gap:10px;background:#fbfaf8;"></div>
-        <div style="padding:16px 26px 20px;border-top:1px solid var(--rule);flex-shrink:0;background:#fff;">
+        <div id="msg-thread" class="msg-drawer-thread"></div>
+        <div class="msg-drawer-compose">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
             <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Suggestions</span>
             <button class="btn-card" onclick="msgDraftReply('warm')" style="font-size:11px;padding:4px 10px;">Warm</button>
@@ -2186,8 +2216,8 @@
 </div>
 
 <!-- Client detail modal -->
-<div id="clientModal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);" onclick="if(event.target===this)closeClientModal()">
-  <div id="clientModalBox" style="background:#fff;width:100%;max-width:480px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.08);overflow:hidden;position:relative;">
+<div id="clientModal" class="client-modal-overlay" role="dialog" aria-modal="true" style="display:none;" onclick="if(event.target===this)closeClientModal()">
+  <div id="clientModalBox" class="client-modal-box">
     <div id="clientModalBody"></div>
   </div>
 </div>
@@ -4549,7 +4579,7 @@ function showClientModal(id){
   var initials = (o.buyerName||'?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
 
   var html = '<div style="padding:28px 28px 0;">'
-    +'<button onclick="closeClientModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:4px;">✕</button>'
+    +'<button onclick="closeClientModal()" class="client-modal-close">✕</button>'
     +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">'
       +'<div id="client-modal-avatar" style="width:48px;height:48px;border-radius:50%;background:#f0ebe3;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--ink);flex-shrink:0;">'+escH(initials)+'</div>'
       +'<div style="flex:1;min-width:0;">'
