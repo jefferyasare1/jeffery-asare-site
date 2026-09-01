@@ -3187,6 +3187,17 @@ function syncFromSheet(){
 function mergeSheetOrders(rows){
   // Rows shape (11 cols): {Date, Action, "Buyer Name", "Buyer Email", "Print Title", "Size", "Country", "Price", "Qty", Notes, "Order Ref"}
   var map = {};
+  // A "Delete Order" row is a permanent tombstone for its key. deleteOrder()
+  // already asks the Sheet's own backend to remove the underlying row(s)
+  // when an order is deleted on the dashboard — but that only works once
+  // apps-script-order-log.js has actually been re-pasted into Apps Script
+  // (see CLAUDE.md); until then, or if that request ever fails silently,
+  // the old row(s) stay in the Sheet and every sync was pulling the
+  // "deleted" order right back in. This makes deletion authoritative from
+  // the dashboard's side regardless of the Sheet's own state: once a
+  // "Delete Order" row exists anywhere in the log for a key, that key is
+  // never reconstructed as an order again, full stop.
+  var deletedKeys = {};
   rows.forEach(function(row){
     var email   = row['Buyer Email'] || row.buyer_email || '';
     var title   = row['Print Title'] || row.print_title || '';
@@ -3202,6 +3213,8 @@ function mergeSheetOrders(rows){
 
     var key = ref || (email + '||' + title);
     if(!key || !email) return;
+
+    if(action === 'Delete Order'){ deletedKeys[key] = true; return; }
 
     if(!map[key]){
       map[key] = {
@@ -3229,6 +3242,10 @@ function mergeSheetOrders(rows){
       case 'Follow-up Sent': o.followedUp = true; o.followDate = date; break;
     }
   });
+
+  // Strip anything ever marked deleted, no matter what other action rows
+  // for that same key are still sitting in the Sheet.
+  Object.keys(deletedKeys).forEach(function(key){ delete map[key]; });
 
   // Merge with local orders — sheet is always authoritative
   var local = loadOrders();
