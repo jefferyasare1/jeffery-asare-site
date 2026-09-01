@@ -5,19 +5,16 @@
   <!-- ── Dashboard key (used to authorize API calls below) ── -->
   <script>
   (function(){
-    // Removed 2026-08-25 — this used to also gate the page itself (block
-    // anyone without ?key=... in the address) via a document.write() trick
-    // that never actually worked (see security assessment, Finding 4 /
-    // 2026-08-24 fix): it pasted a fake "404" over the real page instead of
-    // replacing it, then later, once properly fixed to replace the page,
-    // it started blocking Jeff's own normal bookmark visits too — since the
-    // key was only ever meant to be in the "Follow-up Digest" email links,
-    // not something to remember day-to-day. Cloudflare Access (the sign-in
-    // wall in front of /dashboard) is the real front door now, so this
-    // value is kept only to authorize the dashboard's own API calls below,
-    // not to block the page.
-    var SECRET = 'aaa789085995ffaeb102a156fa3060085a698464ccfb7956';
-    window.DASH_KEY = SECRET;
+    // Updated 2026-09-01 (security assessment, Finding 7) — this used to
+    // hardcode the real dashboard key here and set it on every single page
+    // load, whether or not the password below had actually been entered.
+    // That meant the key, and everything it unlocks, was reachable by
+    // anyone who simply loaded this URL — the password box was only ever a
+    // visual gate, not a real one. Now this starts empty. The real key is
+    // only ever handed back by /api/verify-password, and only after the
+    // password gate below has re-checked the entered password's hash with
+    // the server itself (see checkPassword(), further down this file).
+    window.DASH_KEY = null;
   })();
   </script>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -7087,8 +7084,38 @@ function refreshReviewsBadge(){
     var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
     var hash = Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
     if(hash === HASH){
-      sessionStorage.setItem(AUTH_KEY, '1');
-      unlock();
+      // Local check passed — now confirm with the server before unlocking,
+      // so the real dashboard key only ever reaches a browser that proved
+      // it knows the password (security assessment, Finding 7, 2026-09-01).
+      // The server independently re-checks this same hash; it never sees
+      // the actual password, only this one-way hash of it.
+      var btn = document.getElementById('pw-btn');
+      if(btn) btn.disabled = true;
+      errEl.textContent = '';
+      try{
+        var res = await fetch('/api/verify-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hash: hash })
+        });
+        var data = await res.json().catch(function(){ return {}; });
+        if(res.ok && data.ok && data.key){
+          // Release the real key to the rest of the app only now.
+          DASH_KEY = data.key;
+          window.DASH_KEY = data.key;
+          CMS_KEY = data.key;
+          sessionStorage.setItem(AUTH_KEY, '1');
+          unlock();
+        } else {
+          errEl.textContent = 'Could not verify password. Please try again.';
+          document.getElementById('pw-input').value = '';
+          document.getElementById('pw-input').focus();
+        }
+      } catch(e){
+        errEl.textContent = 'Network error — please try again.';
+      } finally {
+        if(btn) btn.disabled = false;
+      }
     } else {
       errEl.textContent = 'Wrong password. Try again.';
       document.getElementById('pw-input').value = '';
@@ -7376,7 +7403,10 @@ function refreshReviewsBadge(){
   var _origMsgRender = msgRender;
   msgRender = function(){ _origMsgRender(); _syncAlerts(); };
   // Pre-fetch messages in background so badge shows without visiting the tab
-  setTimeout(function(){ if(_msgData === null) msgInit(); }, 1800);
+  // — only once actually logged in (defense in depth alongside the
+  // verify-password fix: DASH_KEY is null for anyone who hasn't logged in,
+  // so this fetch would already fail closed, but it shouldn't even fire).
+  setTimeout(function(){ if(_msgData === null && sessionStorage.getItem('ja_admin_auth') === '1') msgInit(); }, 1800);
 
   // Close overlay on Escape
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') mobNavClose(); });
