@@ -379,6 +379,10 @@
     #cmsModal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);overflow-y:auto;padding:40px 16px;}
     .client-modal-overlay{position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);}
     .client-modal-box{background:#fff;width:100%;max-width:480px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.08);overflow:hidden;position:relative;}
+    /* Clients tab: cards on phone instead of the table, so nothing needs
+       to scroll sideways to be read. */
+    .clients-mobile{display:none;}
+    .client-card-mobile{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:13px 15px;margin:0 0 10px;cursor:pointer;}
     #cmsModal.open{display:flex;}
     .cms-modal-box{background:#fff;width:100%;max-width:600px;padding:36px 32px 44px;position:relative;margin:auto;border-radius:var(--rc);box-shadow:0 20px 60px rgba(0,0,0,.15),0 4px 16px rgba(0,0,0,.08);}
     .cms-modal-title{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
@@ -606,6 +610,8 @@
       #cmsModal{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;overflow-y:hidden;}
       .client-modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
       .client-modal-box{width:100%;max-width:100%;border-radius:var(--rc) var(--rc) 0 0;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
+      .clients-desktop{display:none;}
+      .clients-mobile{display:block;padding-top:4px;}
       .cms-modal-box{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));overflow-y:auto;margin:0;}
       .modal-overlay{padding:0;padding-bottom:env(safe-area-inset-bottom,0px);align-items:flex-end;}
       .modal{border-radius:var(--rc) var(--rc) 0 0;padding:24px 20px 36px;max-height:min(88vh,calc(100dvh - 64px));max-width:100%;}
@@ -859,6 +865,8 @@
     .msg-bubble.them{background:#f1ede7;color:#3a332c;align-self:flex-start;border-bottom-left-radius:3px;}
     .msg-bubble.you{background:#4a3b2e;color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
     .msg-bubble .b-meta{font-size:9px;letter-spacing:.04em;text-transform:uppercase;margin-top:5px;opacity:.65;}
+    .msg-row-mobile{display:none;}
+    .msg-row-mono{border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:.02em;}
     @media(max-width:700px){
       /* Bottom sheet, matching the same mobile pattern the rest of the
          dashboard's modals use — slides up from the bottom instead of in
@@ -877,6 +885,11 @@
       .msg-drawer-compose{padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px));}
       .msg-bubble{max-width:92%;}
       #msg-reply-body{font-size:16px!important;}
+      /* Messages list: monogram row instead of the single-line hairline
+         row — approved as "Option 2" for phone (round 2 of the mockups). */
+      .msg-row-desktop{display:none;}
+      .msg-row-mobile{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-bottom:1px solid var(--rule);cursor:pointer;}
+      .msg-row-mono{width:32px;height:32px;font-size:12px;margin-top:1px;}
     }
 
     /* ── Series selector ── */
@@ -4189,7 +4202,7 @@ function msgRender() {
     var subjColor = g.unread ? 'var(--ink)' : '#4d453c';
     var countTag = g.count > 1 ? '<span style="font-size:9.5px;color:#a89f93;background:rgba(0,0,0,.05);padding:1px 6px;border-radius:999px;font-weight:600;flex-shrink:0;">' + g.count + '</span>' : '';
     var unreadBadge = g.unreadCount > 0 ? '<span style="min-width:15px;height:15px;padding:0 4px;border-radius:999px;background:#4a3b2e;color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + g.unreadCount + '</span>' : '';
-    return '<div class="msg-row" onclick="msgOpen(\''+g.primaryId+'\')" style="display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .1s;" onmouseenter="this.style.background=\'rgba(0,0,0,.025)\'" onmouseleave="this.style.background=\'\'">'
+    var desktopRow = '<div class="msg-row msg-row-desktop" onclick="msgOpen(\''+g.primaryId+'\')" style="display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .1s;" onmouseenter="this.style.background=\'rgba(0,0,0,.025)\'" onmouseleave="this.style.background=\'\'">'
       + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelectGroup(\''+idsAttr+'\',this.checked)"' + (allChecked ? ' checked' : '') + ' style="width:13px;height:13px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;">'
       + '<span style="width:16px;height:16px;border-radius:3px;flex-shrink:0;' + sqStyle + '"></span>'
       + '<span style="font-size:13px;font-weight:' + nameWeight + ';color:' + nameColor + ';width:132px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escH(g.name) + '</span>'
@@ -4198,6 +4211,27 @@ function msgRender() {
       + unreadBadge
       + '<span style="font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;color:#a89f93;white-space:nowrap;flex-shrink:0;">' + dateStr + '</span>'
       + '</div>';
+
+    // Phone layout — a monogram row: the same initials-square identity used
+    // on desktop, brought forward and grown into a proper avatar, with the
+    // subject/preview wrapping to a second line instead of being squeezed
+    // onto one. Approved as "Option 2" for Messages.
+    var initials = escH((g.name||'?').trim().split(/\s+/).map(function(w){ return w[0]||''; }).slice(0,2).join('').toUpperCase() || '?');
+    var monoStyle = g.unread ? 'background:#4a3b2e;color:#fff;' : 'background:transparent;border:1.5px solid #c9c0b3;color:#8a7f72;';
+    var mobileMeta = unreadBadge || countTag;
+    var mobileRow = '<div class="msg-row msg-row-mobile" onclick="msgOpen(\''+g.primaryId+'\')">'
+      + '<input type="checkbox" onclick="event.stopPropagation()" onchange="msgToggleSelectGroup(\''+idsAttr+'\',this.checked)"' + (allChecked ? ' checked' : '') + ' style="width:13px;height:13px;cursor:pointer;flex-shrink:0;accent-color:#4a3b2e;margin-top:9px;">'
+      + '<span class="msg-row-mono" style="' + monoStyle + '">' + initials + '</span>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="display:flex;align-items:baseline;gap:6px;">'
+      + '<span style="font-size:13px;font-weight:' + nameWeight + ';color:' + nameColor + ';flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escH(g.name) + '</span>'
+      + '<span style="font-size:10px;color:#a89f93;flex-shrink:0;">' + dateStr + '</span>'
+      + '</div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong style="font-weight:' + subjWeight + ';color:' + subjColor + ';">' + escH(g.subject) + '</strong> — ' + previewPrefix + previewEsc + '</div>'
+      + (mobileMeta ? '<div style="margin-top:4px;">' + mobileMeta + '</div>' : '')
+      + '</div></div>';
+
+    return desktopRow + mobileRow;
   }).join('');
 }
 
@@ -4529,7 +4563,7 @@ function renderClients(){
   var html = '';
   if(chips) html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;">'+chips+'</div>';
 
-  html += '<table style="width:100%;border-collapse:collapse;">';
+  html += '<table class="clients-desktop" style="width:100%;border-collapse:collapse;">';
   html += '<thead><tr>'
     +'<th style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);">Buyer</th>'
     +'<th style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);">Print</th>'
@@ -4539,14 +4573,15 @@ function renderClients(){
     +'<th style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);"></th>'
     +'</tr></thead><tbody>';
 
-  html += complete.map(function(o){
+  var rows = complete.map(function(o){
     var date = o.followDate ? fmtDate(o.followDate) : o.dateAdded ? fmtDate(o.dateAdded) : '—';
     var tag = '';
     if(o._clientCount > 2) tag = '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fef9c3;color:#854d0e;">VIP</span>';
     else if(o._clientCount > 1) tag = '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#dbeafe;color:#1e40af;">Repeat</span>';
     else if(o._daysSinceOrder > 120) tag = '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#fee2e2;color:#991b1b;">At risk</span>';
     var spent = o._clientSpent ? '$'+Math.round(o._clientSpent) : '—';
-    return '<tr onclick="showClientModal(\''+o.id+'\')" style="cursor:pointer;transition:background .1s;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">'
+
+    var tr = '<tr onclick="showClientModal(\''+o.id+'\')" style="cursor:pointer;transition:background .1s;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">'
       +'<td style="padding:9px 10px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:500;color:var(--ink);">'+escH(o.buyerName||'—')+'</td>'
       +'<td style="padding:9px 10px;border-bottom:1px solid #f3f4f6;font-size:12px;color:var(--muted);">'+escH(o.printTitle||'—')+(o.size?' · '+escH(o.size):'')+'</td>'
       +'<td style="padding:9px 10px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:right;font-variant-numeric:tabular-nums;">'+spent+'</td>'
@@ -4554,9 +4589,31 @@ function renderClients(){
       +'<td style="padding:9px 10px;border-bottom:1px solid #f3f4f6;font-size:12px;color:var(--muted);text-align:right;">'+escH(date)+'</td>'
       +'<td style="padding:9px 10px;border-bottom:1px solid #f3f4f6;text-align:right;">'+tag+'</td>'
       +'</tr>';
-  }).join('');
 
+    // Phone layout — a small card per client instead of a table row, so
+    // nothing needs to scroll sideways to be read. Approved as "Option 1"
+    // for Clients (round 1 of the mockups): name + tag on top, print
+    // underneath, spent/orders/last-order as three quiet stats along the
+    // bottom. Tapping still opens the same detail panel.
+    var card = '<div class="client-card-mobile" onclick="showClientModal(\''+o.id+'\')">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<span style="font-size:13.5px;font-weight:600;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escH(o.buyerName||'—')+'</span>'
+        +tag
+      +'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escH(o.printTitle||'—')+(o.size?' · '+escH(o.size):'')+'</div>'
+      +'<div style="display:flex;gap:16px;margin-top:9px;padding-top:9px;border-top:1px solid var(--rule);">'
+        +'<div style="font-size:11px;"><b style="display:block;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;">'+spent+'</b><span style="color:#a89f93;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;">Spent</span></div>'
+        +'<div style="font-size:11px;"><b style="display:block;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;">'+(o._clientCount||1)+'</b><span style="color:#a89f93;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;">Orders</span></div>'
+        +'<div style="font-size:11px;"><b style="display:block;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;">'+escH(date)+'</b><span style="color:#a89f93;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;">Last order</span></div>'
+      +'</div>'
+      +'</div>';
+
+    return { tr: tr, card: card };
+  });
+
+  html += rows.map(function(r){ return r.tr; }).join('');
   html += '</tbody></table>';
+  html += '<div class="clients-mobile">' + rows.map(function(r){ return r.card; }).join('') + '</div>';
   panel.innerHTML = html;
 }
 
