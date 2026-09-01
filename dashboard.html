@@ -839,6 +839,15 @@
     /* today stat block padding override (class handles bg + shadow via raised cards rule) */
     .today-stat-block{border-radius:var(--rc);padding:14px 16px;}
     .msg-card{border-radius:var(--rc);cursor:pointer;}
+    /* ── Reply drawer (slides in from the right instead of a centered popup) ── */
+    .msg-drawer{width:520px;max-width:92vw;}
+    @media(max-width:700px){ .msg-drawer{width:100%;max-width:100%;} }
+    .msg-drawer{transform:translateX(100%);transition:transform .22s ease;}
+    .msg-drawer.open{transform:translateX(0);}
+    .msg-bubble{max-width:88%;padding:10px 14px;border-radius:11px;font-size:12.5px;line-height:1.65;}
+    .msg-bubble.them{background:#f1ede7;color:#3a332c;align-self:flex-start;border-bottom-left-radius:3px;}
+    .msg-bubble.you{background:#4a3b2e;color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+    .msg-bubble .b-meta{font-size:9px;letter-spacing:.04em;text-transform:uppercase;margin-top:5px;opacity:.65;}
 
     /* ── Series selector ── */
     .series-selector{background:linear-gradient(145deg,#ddd8d1,#eae5de);box-shadow:inset 8px 8px 18px rgba(160,148,135,.58),inset -5px -5px 12px rgba(255,255,255,.88);border-radius:50px;}
@@ -1944,24 +1953,31 @@
     <!-- Message list -->
     <div id="msg-list"></div>
 
-    <!-- Reply modal overlay -->
-    <div id="msg-reply-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;align-items:center;justify-content:center;">
-      <div style="background:#fff;border-radius:10px;padding:32px 36px;width:100%;max-width:540px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18);">
-        <button onclick="msgCloseReply()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>
-        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Reply to</div>
-        <div id="msg-reply-to" style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:16px;"></div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-          <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Suggestions</span>
-          <button class="btn-card" onclick="msgDraftReply('warm')" style="font-size:11px;padding:4px 10px;">Warm</button>
-          <button class="btn-card" onclick="msgDraftReply('professional')" style="font-size:11px;padding:4px 10px;">Professional</button>
-          <button class="btn-card" onclick="msgDraftReply('brief')" style="font-size:11px;padding:4px 10px;">Brief</button>
-          <span id="msg-draft-status" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
+    <!-- Reply drawer: slides in from the right edge instead of a centered
+         popup, so the conversation history gets its own fixed, scrolling
+         area and the window never grows unbounded as a thread gets longer. -->
+    <div id="msg-reply-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;">
+      <div id="msg-drawer" class="msg-drawer" style="position:absolute;top:0;right:0;bottom:0;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.16);display:flex;flex-direction:column;overflow:hidden;">
+        <div style="padding:20px 26px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;position:relative;">
+          <button onclick="msgCloseReply()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>
+          <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Reply to</div>
+          <div id="msg-reply-to" style="font-size:14px;font-weight:600;color:var(--ink);padding-right:24px;"></div>
         </div>
-        <textarea id="msg-reply-body" rows="7" placeholder="Generating reply…" style="width:100%;border:1.5px solid var(--rule);border-radius:6px;padding:12px 14px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;resize:vertical;line-height:1.7;outline:none;"></textarea>
-        <div style="display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-primary" id="msg-reply-send-btn" onclick="msgSendReply()" style="width:auto;padding:11px 22px;">Send Reply</button>
-          <button class="btn-card" onclick="msgCloseReply()">Cancel</button>
-          <div id="msg-reply-status" style="font-size:12px;color:var(--muted);margin-left:auto;max-width:200px;text-align:right;"></div>
+        <div id="msg-thread" style="flex:1;min-height:0;overflow-y:auto;padding:16px 26px;display:flex;flex-direction:column;gap:10px;background:#fbfaf8;"></div>
+        <div style="padding:16px 26px 20px;border-top:1px solid var(--rule);flex-shrink:0;background:#fff;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Suggestions</span>
+            <button class="btn-card" onclick="msgDraftReply('warm')" style="font-size:11px;padding:4px 10px;">Warm</button>
+            <button class="btn-card" onclick="msgDraftReply('professional')" style="font-size:11px;padding:4px 10px;">Professional</button>
+            <button class="btn-card" onclick="msgDraftReply('brief')" style="font-size:11px;padding:4px 10px;">Brief</button>
+            <span id="msg-draft-status" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
+          </div>
+          <textarea id="msg-reply-body" rows="5" placeholder="Generating reply…" style="width:100%;border:1.5px solid var(--rule);border-radius:6px;padding:12px 14px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;resize:vertical;line-height:1.7;outline:none;"></textarea>
+          <div style="display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-primary" id="msg-reply-send-btn" onclick="msgSendReply()" style="width:auto;padding:11px 22px;">Send Reply</button>
+            <button class="btn-card" onclick="msgCloseReply()">Cancel</button>
+            <div id="msg-reply-status" style="font-size:12px;color:var(--muted);margin-left:auto;max-width:200px;text-align:right;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -4260,10 +4276,12 @@ function msgOpen(id) {
 
   var date = new Date(msg.timestamp).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   var replyToEl = document.getElementById('msg-reply-to');
+  var threadEl = document.getElementById('msg-thread');
   var bodyEl = document.getElementById('msg-reply-body');
   var statusEl = document.getElementById('msg-reply-status');
   var overlay = document.getElementById('msg-reply-overlay');
-  if (!replyToEl || !bodyEl || !overlay) return;
+  var drawer = document.getElementById('msg-drawer');
+  if (!replyToEl || !threadEl || !bodyEl || !overlay || !drawer) return;
 
   var _thread = [{ from: 'client', text: msg.message, at: msg.timestamp }];
   if (msg.replies && msg.replies.length) {
@@ -4271,19 +4289,21 @@ function msgOpen(id) {
   } else if (msg.replied && msg.replyText) {
     _thread.push({ from: 'jeff', text: msg.replyText, at: msg.repliedAt });
   }
-  var _threadHtml = _thread.map(function(e){
+  // Chat-style bubbles — yours on the right, theirs on the left — in their
+  // own scrolling strip, so the drawer stays a fixed size no matter how
+  // long the conversation gets.
+  threadEl.innerHTML = _thread.map(function(e){
     var isJeff = e.from === 'jeff';
     var who = isJeff ? 'You' : msg.name;
-    var when = e.at ? (new Date(e.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' at ' + new Date(e.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})) : '';
-    return '<div style="background:'+(isJeff?'#f5f2ee':'#f9f7f4')+';border-radius:8px;padding:12px 16px;margin-top:10px;font-size:13px;line-height:1.75;color:#444;">'
-      + '<div style="font-size:11px;font-weight:600;color:'+(isJeff?'#4a3b2e':'#888')+';margin-bottom:4px;">' + who + (when ? ' · ' + when : '') + '</div>'
+    var when = e.at ? (new Date(e.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' · ' + new Date(e.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})) : '';
+    return '<div class="msg-bubble ' + (isJeff ? 'you' : 'them') + '">'
       + String(e.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+      + '<div class="b-meta">' + who + (when ? ' · ' + when : '') + '</div>'
       + '</div>';
   }).join('');
 
   replyToEl.innerHTML = '<strong>' + msg.name + '</strong> &lt;' + msg.email + '&gt;'
-    + '<br><span style="font-size:12px;color:var(--muted);font-weight:400;">' + msg.subject + ' — ' + date + '</span>'
-    + _threadHtml;
+    + '<br><span style="font-size:12px;color:var(--muted);font-weight:400;">' + msg.subject + ' — ' + date + '</span>';
 
   // If already replied, show reply text
   if (msg.replied && msg.replyText) {
@@ -4296,7 +4316,12 @@ function msgOpen(id) {
     if (statusEl) statusEl.textContent = '';
   }
 
-  overlay.style.display = 'flex';
+  overlay.style.display = 'block';
+  threadEl.scrollTop = threadEl.scrollHeight;
+  // Force a reflow before adding the "open" class so the slide-in transition
+  // actually plays instead of the drawer just appearing in place.
+  void drawer.offsetWidth;
+  drawer.classList.add('open');
   // Auto-generate a warm draft for messages not yet replied to (fail silently)
   if (!msg.replied) {
     _msgAutoDraft = true;
@@ -4308,7 +4333,13 @@ function msgOpen(id) {
 
 function msgCloseReply() {
   var overlay = document.getElementById('msg-reply-overlay');
-  if (overlay) overlay.style.display = 'none';
+  var drawer = document.getElementById('msg-drawer');
+  if (drawer) drawer.classList.remove('open');
+  if (overlay) {
+    // Wait for the slide-out transition to finish before hiding the
+    // backdrop, so the drawer doesn't just vanish mid-slide.
+    setTimeout(function(){ overlay.style.display = 'none'; }, 220);
+  }
   _msgOpenId = null;
 }
 
