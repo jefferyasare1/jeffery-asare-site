@@ -7074,8 +7074,52 @@ function refreshReviewsBadge(){
     }, 450);
   }
 
-  // Already authenticated this session?
-  if(sessionStorage.getItem(AUTH_KEY) === '1'){ unlock(); return; }
+  // Asks the server for the real dashboard key given a (locally-computed)
+  // password hash, and releases it into the app on success. window.DASH_KEY
+  // always starts null on every page load now (security assessment,
+  // Finding 7, 2026-09-01) — so this is used both for a fresh password
+  // submit AND for the "already logged in this session" fast-path below,
+  // since sessionStorage only remembers THAT you logged in, not the key
+  // itself, and a reload always needs to fetch it again.
+  async function fetchKeyAndUnlock(hash){
+    try{
+      var res = await fetch('/api/verify-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hash: hash })
+      });
+      var data = await res.json().catch(function(){ return {}; });
+      if(res.ok && data.ok && data.key){
+        DASH_KEY = data.key;
+        window.DASH_KEY = data.key;
+        CMS_KEY = data.key;
+        sessionStorage.setItem(AUTH_KEY, '1');
+        unlock();
+        return true;
+      }
+    } catch(e){}
+    return false;
+  }
+
+  // Already authenticated this session? Re-fetch the real key rather than
+  // trusting sessionStorage alone — it doesn't survive a reload by design.
+  // Runs in the background (gate stays hidden already); if it fails (key
+  // fetch down, or the session genuinely expired) it falls back to showing
+  // the gate again instead of leaving the app silently running without a
+  // working key.
+  if(sessionStorage.getItem(AUTH_KEY) === '1'){
+    fetchKeyAndUnlock(HASH).then(function(ok){
+      if(!ok){
+        sessionStorage.removeItem(AUTH_KEY);
+        var gate = document.getElementById('pw-gate');
+        var errEl = document.getElementById('pw-error');
+        if(gate){ gate.style.display = 'flex'; gate.classList.remove('hidden'); }
+        if(errEl) errEl.textContent = 'Session expired. Please log in again.';
+        var inp = document.getElementById('pw-input');
+        if(inp) inp.focus();
+      }
+    });
+  }
 
   async function checkPassword(){
     var input = document.getElementById('pw-input').value;
@@ -7092,30 +7136,13 @@ function refreshReviewsBadge(){
       var btn = document.getElementById('pw-btn');
       if(btn) btn.disabled = true;
       errEl.textContent = '';
-      try{
-        var res = await fetch('/api/verify-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ hash: hash })
-        });
-        var data = await res.json().catch(function(){ return {}; });
-        if(res.ok && data.ok && data.key){
-          // Release the real key to the rest of the app only now.
-          DASH_KEY = data.key;
-          window.DASH_KEY = data.key;
-          CMS_KEY = data.key;
-          sessionStorage.setItem(AUTH_KEY, '1');
-          unlock();
-        } else {
-          errEl.textContent = 'Could not verify password. Please try again.';
-          document.getElementById('pw-input').value = '';
-          document.getElementById('pw-input').focus();
-        }
-      } catch(e){
-        errEl.textContent = 'Network error — please try again.';
-      } finally {
-        if(btn) btn.disabled = false;
+      var ok = await fetchKeyAndUnlock(hash);
+      if(!ok){
+        errEl.textContent = 'Could not verify password. Please try again.';
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-input').focus();
       }
+      if(btn) btn.disabled = false;
     } else {
       errEl.textContent = 'Wrong password. Try again.';
       document.getElementById('pw-input').value = '';
