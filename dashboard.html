@@ -3186,12 +3186,15 @@ function syncFromSheet(){
 
 // Keep every device showing the same orders without a manual Sync tap.
 // The Sheet is the shared source of truth (see mergeSheetOrders above) —
-// this just re-pulls it on a timer, and immediately whenever the tab/app
+// this checks in on a short timer, and immediately whenever the tab/app
 // comes back into view, since that's the moment a device is most likely
 // to be showing something stale (you switched back from the phone's home
 // screen, or clicked back into a desktop tab that's been sitting open).
-// (Sept 2026 — "desktop and phone should stay linked" request.)
-var AUTO_SYNC_INTERVAL_MS = 45000;
+// This is a tight check-in, not a live push connection like a chat app —
+// a change can take up to this many seconds to show up on another device
+// that isn't the one that made it. (Sept 2026 — "desktop and phone should
+// stay linked" request.)
+var AUTO_SYNC_INTERVAL_MS = 8000;
 function startAutoSync(){
   setInterval(function(){
     if(document.visibilityState === 'visible') syncFromSheet();
