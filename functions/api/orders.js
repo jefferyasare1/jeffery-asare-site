@@ -86,8 +86,15 @@ export async function onRequest(context) {
       const data = await resp.json();
       return new Response(JSON.stringify(data), { headers: jsonHeaders });
     } catch (e) {
+      // Cloudflare's edge silently swallows a Worker-returned 502/503/504 and
+      // substitutes its own generic "Bad gateway" HTML page in the response
+      // body — hiding this error message from the caller entirely (Sept
+      // 2026 investigation into /api/orders failing silently). 500 is not
+      // one of the intercepted codes, so the real error actually reaches
+      // the dashboard/browser instead of being replaced.
+      console.error('orders.js POST error:', e);
       return new Response(JSON.stringify({ error: e.toString() }), {
-        status: 502, headers: jsonHeaders
+        status: 500, headers: jsonHeaders
       });
     }
   }
@@ -109,8 +116,11 @@ export async function onRequest(context) {
     }));
     return new Response(JSON.stringify(stripped), { headers: jsonHeaders });
   } catch (e) {
+    // See the note above the POST handler's catch block — Cloudflare
+    // intercepts 502 at the edge and replaces the body, so use 500 here too.
+    console.error('orders.js GET error:', e);
     return new Response(JSON.stringify({ error: e.toString() }), {
-      status: 502, headers: jsonHeaders
+      status: 500, headers: jsonHeaders
     });
   }
 }
