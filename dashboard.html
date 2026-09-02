@@ -1665,8 +1665,8 @@
                 <label style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;">Preview a print in this room</label>
                 <p style="font-size:11.5px;color:var(--muted);margin:0 0 8px;">Same CSS placement the public site uses. Use this to sanity-check a print before customers see it.</p>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                  <select id="room-preview-print-living" onchange="cmsSyncRoomPreviewSizes('living')" style="flex:2;min-width:160px;"><option value="">Loading prints…</option></select>
-                  <select id="room-preview-size-living" onchange="cmsPreviewRoomComposite('living')" style="flex:1;min-width:80px;"></select>
+                  <select id="room-preview-print-living" class="client-sel" onchange="cmsSyncRoomPreviewSizes('living')" style="flex:2;min-width:160px;"><option value="">Loading prints…</option></select>
+                  <select id="room-preview-size-living" class="client-sel" onchange="cmsPreviewRoomComposite('living')" style="flex:1;min-width:80px;"></select>
                   <button class="btn-card primary" onclick="cmsPreviewRoomComposite('living')">Preview</button>
                 </div>
                 <div class="cms-status" id="room-composite-status-living"></div>
@@ -5805,11 +5805,13 @@ function cmsRenderPrints(){
   _setCmsCount('prints', prints.length);
   if(!prints.length){el.innerHTML='<div class="empty-state"><p>No prints yet. Add one above.</p></div>';return;}
   el.innerHTML=prints.map(function(p,i){
+    var thumb=p.img?'<img class="img-preview" src="'+escAttr(p.img)+'" alt="" onerror="this.style.opacity=.2">':'<div class="img-preview"></div>';
     return '<div class="cms-item">'
       +'<div class="cms-item-reorder">'
         +'<button class="btn-reorder" onclick="cmsMovePrint('+i+',-1)"'+(i===0?' disabled':'')+'>↑</button>'
         +'<button class="btn-reorder" onclick="cmsMovePrint('+i+',1)"'+(i===prints.length-1?' disabled':'')+'>↓</button>'
       +'</div>'
+      +thumb
       +'<div class="cms-item-body"><div class="cms-item-title">'+escH(p.title||'Untitled')+'</div>'
         +'<div class="cms-item-meta">'+escH(p.series||'')+'&nbsp;·&nbsp;'+escH(p.edition||'')+'</div></div>'
       +'<div class="cms-item-actions">'
@@ -5878,7 +5880,7 @@ function cmsOpenPrintEdit(idx){
   var pickerRow= allSlugs.length
     ? '<div class="cms-field" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule)">'
       +'<label>Fill from portfolio photo <span class="opt">(optional — copies title, series, description &amp; image)</span></label>'
-      +'<select id="cms-p-portfolio-pick" style="width:100%;border:1.5px solid var(--rule);padding:8px 10px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);appearance:none;cursor:pointer;" onchange="cmsApplyPortfolioPhoto(this.value)">'+pickerOptions+'</select>'
+      +'<select id="cms-p-portfolio-pick" class="client-sel" onchange="cmsApplyPortfolioPhoto(this.value)">'+pickerOptions+'</select>'
       +'</div>'
     : '<div class="cms-field" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--rule)">'
       +'<p style="font-size:12px;color:var(--muted);">Open the Portfolio tab first to enable the "Fill from photo" picker.</p>'
@@ -5893,7 +5895,7 @@ function cmsOpenPrintEdit(idx){
     +'<div class="cms-field" style="margin-top:16px"><label>Available Sizes <span class="opt">(check each size you offer)</span></label>'
       +'<div class="cms-sizes-wrap">'+sizeRows+'</div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Frame style <span class="opt">(used for the "See it in a room" preview)</span></label>'
-      +'<select id="cms-p-frame" style="width:100%;border:1.5px solid var(--rule);padding:8px 10px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);appearance:none;cursor:pointer;">'+frameOptionsHtml+'</select></div>'
+      +'<select id="cms-p-frame" class="client-sel">'+frameOptionsHtml+'</select></div>'
     +'<div class="cms-field"><label>Image</label>'
       +'<div class="img-upload-row"><input type="text" id="cms-p-img" value="'+escAttr(print.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-p-img\',\'cms-p-upload-status\')"></label></div>'
