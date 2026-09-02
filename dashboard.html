@@ -5843,8 +5843,8 @@ function cmsOpenPrintEdit(idx){
   var frameOptionsHtml=FRAME_OPTIONS.map(function(f){
     return '<option value="'+f.value+'"'+(f.value===curFrame?' selected':'')+'>'+escH(f.label)+'</option>';
   }).join('');
-  // Build size rows: A4, A3, A2, A1
-  var SIZE_LABELS=['A4','A3','A2','A1'];
+  // Build size rows: A4, A3, A2, A1, A0
+  var SIZE_LABELS=['A4','A3','A2','A1','A0'];
   var sizeRows=SIZE_LABELS.map(function(lbl){
     var found=existSizes.find(function(s){return s.label===lbl;});
     var chk=found?'checked':'';
@@ -5933,7 +5933,7 @@ function cmsApplyPortfolioPhoto(val){
 function cmsSavePrint(idx,printId){
   var st=document.getElementById('cms-p-status'); st.className='cms-status'; st.textContent='Saving…';
   // Collect sizes
-  var SIZE_LABELS=['A4','A3','A2','A1'];
+  var SIZE_LABELS=['A4','A3','A2','A1','A0'];
   var sizes=[];
   SIZE_LABELS.forEach(function(lbl){
     var chk=document.getElementById('cms-sz-chk-'+lbl);
