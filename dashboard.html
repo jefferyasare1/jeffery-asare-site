@@ -3184,6 +3184,23 @@ function syncFromSheet(){
     });
 }
 
+// Keep every device showing the same orders without a manual Sync tap.
+// The Sheet is the shared source of truth (see mergeSheetOrders above) —
+// this just re-pulls it on a timer, and immediately whenever the tab/app
+// comes back into view, since that's the moment a device is most likely
+// to be showing something stale (you switched back from the phone's home
+// screen, or clicked back into a desktop tab that's been sitting open).
+// (Sept 2026 — "desktop and phone should stay linked" request.)
+var AUTO_SYNC_INTERVAL_MS = 45000;
+function startAutoSync(){
+  setInterval(function(){
+    if(document.visibilityState === 'visible') syncFromSheet();
+  }, AUTO_SYNC_INTERVAL_MS);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') syncFromSheet();
+  });
+}
+
 // Reconstruct order objects from Sheet rows and merge with localStorage
 function mergeSheetOrders(rows){
   // Rows shape (11 cols): {Date, Action, "Buyer Name", "Buyer Email", "Print Title", "Size", "Country", "Price", "Qty", Notes, "Order Ref"}
@@ -7106,6 +7123,7 @@ function refreshReviewsBadge(){
     renderOverview();
     syncFromSheet();
     refreshReviewsBadge();
+    startAutoSync();
   }
 
   function unlock(){
