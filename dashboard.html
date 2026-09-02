@@ -5583,6 +5583,51 @@ var _cmsData   = { journal: null, prints: null };
 var _cmsSha    = { journal: null, prints: null };
 var _cmsLoaded = { journal: false, prints: false };
 
+// Print pricing suggestions — auto-fill, but editable (Sept 2026).
+// Suggested price = A4 price x size multiplier x edition-scarcity multiplier.
+// Multipliers are relative to the A4 price the user types in; the size
+// ladder is derived from Jeff's real live print's own pricing, and the
+// edition-scarcity bands are a standard fine-art-market convention (a
+// tighter edition costs more per print; an open/unlimited edition costs
+// less). This never overwrites a price the user has actually typed —
+// only fields that are still untouched ("not dirty") get auto-filled.
+var CMS_SIZE_MULTIPLIERS = { A4: 1, A3: 1.95, A2: 3.35, A1: 6.65, A0: 12 };
+var _cmsPriceDirty = {};
+
+function cmsEditionMultiplier(editionStr){
+  var s = (editionStr || '').toString().trim().toLowerCase();
+  if(!s || s.indexOf('open') !== -1 || s.indexOf('unlimited') !== -1) return 0.65;
+  var m = s.match(/\d+/);
+  if(!m) return 0.65;
+  var n = parseInt(m[0], 10);
+  if(n <= 5) return 1.3;
+  if(n <= 15) return 1.0;
+  if(n <= 30) return 0.85;
+  return 0.65;
+}
+
+function cmsRoundPrice(v){
+  return Math.round(v / 10) * 10;
+}
+
+function cmsRecomputePriceSuggestions(){
+  var a4Field = document.getElementById('cms-sz-price-A4');
+  if(!a4Field) return;
+  var a4Price = parseFloat(a4Field.value);
+  if(!a4Price || a4Price <= 0) return;
+  var editionField = document.getElementById('cms-p-edition');
+  var editMult = cmsEditionMultiplier(editionField ? editionField.value : '');
+  Object.keys(CMS_SIZE_MULTIPLIERS).forEach(function(lbl){
+    if(lbl === 'A4') return;
+    if(_cmsPriceDirty[lbl]) return;
+    var field = document.getElementById('cms-sz-price-' + lbl);
+    if(!field) return;
+    var suggested = cmsRoundPrice(a4Price * CMS_SIZE_MULTIPLIERS[lbl] * editMult);
+    field.value = suggested;
+  });
+}
+
+
 // Portfolio: per-series
 var _portfolioData   = {};   // { slug: photos[] }
 var _portfolioSha    = {};   // { slug: sha }
@@ -5847,15 +5892,21 @@ function cmsOpenPrintEdit(idx){
   }).join('');
   // Build size rows: A4, A3, A2, A1, A0
   var SIZE_LABELS=['A4','A3','A2','A1','A0'];
+  // Reset the "has the user actually typed into this price field" tracker
+  // for this modal session. Existing saved prices are pre-marked dirty so
+  // opening a saved print to edit it never silently recalculates a real,
+  // already-chosen price out from under it.
+  _cmsPriceDirty = {};
   var sizeRows=SIZE_LABELS.map(function(lbl){
     var found=existSizes.find(function(s){return s.label===lbl;});
     var chk=found?'checked':'';
     var price=found?found.price:'';
     var display=found?'':'display:none;';
+    if(found) _cmsPriceDirty[lbl]=true;
     return '<div class="cms-size-row" id="cms-sz-row-'+lbl+'">'
       +'<label class="cms-size-chk-lbl"><input type="checkbox" id="cms-sz-chk-'+lbl+'" '+chk+' onchange="cmsSizeToggle(\''+lbl+'\')">'
       +'<span>'+lbl+'</span></label>'
-      +'<input type="number" id="cms-sz-price-'+lbl+'" class="cms-size-price" placeholder="Price (GHC)" value="'+escAttr(String(price))+'" style="'+display+'">'
+      +'<input type="number" id="cms-sz-price-'+lbl+'" class="cms-size-price" placeholder="Price (GHC)" value="'+escAttr(String(price))+'" style="'+display+'" oninput="_cmsPriceDirty[\''+lbl+'\']=true;cmsRecomputePriceSuggestions();">'
       +'</div>';
   }).join('');
   document.getElementById('cmsModalTitle').textContent=isNew?'New Print':'Edit Print';
@@ -5890,7 +5941,7 @@ function cmsOpenPrintEdit(idx){
     pickerRow
     +'<div class="cms-field"><label>Title</label><input type="text" id="cms-p-title" value="'+escAttr(print.title||'')+'"></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Series</label><input type="text" id="cms-p-series" value="'+escAttr(print.series||'')+'"></div>'
-    +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'"></div></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Edition</label><input type="text" id="cms-p-edition" value="'+escAttr(print.edition||'')+'" oninput="cmsRecomputePriceSuggestions()"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Description <span class="opt">(shown on print detail)</span></label><textarea id="cms-p-desc" rows="3" style="width:100%;border:1.5px solid var(--rule);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;border-radius:var(--rb);resize:vertical;">'+escH(print.desc||'')+'</textarea></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Available Sizes <span class="opt">(check each size you offer)</span></label>'
       +'<div class="cms-sizes-wrap">'+sizeRows+'</div></div>'
@@ -5909,6 +5960,7 @@ function cmsSizeToggle(lbl){
   var chk=document.getElementById('cms-sz-chk-'+lbl);
   var price=document.getElementById('cms-sz-price-'+lbl);
   if(price) price.style.display=chk&&chk.checked?'':'none';
+  if(chk&&chk.checked) cmsRecomputePriceSuggestions();
 }
 
 function cmsApplyPortfolioPhoto(val){
