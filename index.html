@@ -1396,11 +1396,11 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <div class="terms-wrap">
     <button class="detail-back" id="termsBackBtn" style="padding-left:0;">&#8592; Back</button>
     <h1 style="font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin:1.5rem 0 .3rem;">Terms of Sale</h1>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: June 2026</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: September 2026</p>
     <div class="terms-section"><h2>1. Ownership of Copyright</h2><p>All photographs on this website are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase of a print does not transfer any copyright or reproduction rights.</p></div>
     <div class="terms-section"><h2>2. What You Are Buying</h2><p>You are purchasing a single physical archival fine art print for personal, non-commercial display only. You are not purchasing reproduction rights, publishing rights, commercial use rights, or the right to create derivative works.</p></div>
     <div class="terms-section"><h2>3. Limited Editions</h2><p>Each print is a strictly limited edition as stated. Once sold out, no further prints of that image will be produced at that size. Each print is hand-signed, numbered, and accompanied by a Certificate of Authenticity.</p></div>
-    <div class="terms-section"><h2>4. Production and Delivery</h2><p>All prints are made to order. Please allow 7 to 14 business days for production before dispatch. Shipping costs are confirmed before production begins. Jeffery Asare is not responsible for delays caused by customs or postal services.</p><p>Buyers outside Ghana are solely responsible for any customs duties, import taxes, or fees applicable in their country. These charges are not included in the print or shipping price and will not be reimbursed.</p></div>
+    <div class="terms-section"><h2>4. Production and Delivery</h2><p>All prints are made to order. Please allow 7 to 14 business days for production before dispatch. Prints are offered either rolled in a protective tube, or framed and ready to hang; where framing is selected, the frame style is chosen by Jeffery Asare to suit the piece and is not customer-selectable. The listed price does not include delivery (within Ghana) or shipping (outside Ghana) &mdash; these are calculated separately and confirmed before production begins. Jeffery Asare is not responsible for delays caused by customs or postal services.</p><p>Buyers outside Ghana are solely responsible for any customs duties, import taxes, or fees applicable in their country. These charges are not included in the print, framing, or shipping price and will not be reimbursed.</p></div>
     <div class="terms-section"><h2>5. Returns and Refunds</h2><p>Returns are not accepted except for damaged prints (photographic evidence required within 48 hours of delivery) or incorrect prints sent. A replacement will be produced at no additional cost.</p></div>
     <div class="terms-section"><h2>6. Prohibited Uses</h2><p>Scanning, reproducing, reselling, or using the print commercially without prior written consent from Jeffery Asare is strictly prohibited and may result in legal action.</p></div>
     <div class="terms-section"><h2>7. Licensing</h2><p>For commercial, editorial, or licensed use of any image, contact <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>.</p></div>
@@ -1420,9 +1420,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <div class="terms-wrap">
     <button class="detail-back" id="privBackBtn" style="padding-left:0;">&#8592; Back</button>
     <h1 style="font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin:1.5rem 0 .3rem;">Privacy Policy</h1>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: July 2026</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: September 2026</p>
     <div class="terms-section"><h2>1. Who We Are</h2><p>This website is operated by Jeffery Asare, a fine art photographer based in Accra, Ghana. Contact: <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>.</p></div>
-    <div class="terms-section"><h2>2. Information We Collect</h2><p>When you purchase a print, we collect your name, email address, and delivery country to fulfil your order and send your Certificate of Authenticity. When you sign up for the newsletter, we collect only your email address. When you submit a contact or commission enquiry, we collect the details you provide in the form.</p></div>
+    <div class="terms-section"><h2>2. Information We Collect</h2><p>When you purchase a print, we collect your name, email address, delivery country, and chosen print format (Rolled or Framed) to fulfil your order and send your Certificate of Authenticity. When you sign up for the newsletter, we collect only your email address. When you submit a contact or commission enquiry, we collect the details you provide in the form.</p></div>
     <div class="terms-section"><h2>3. How We Use Your Information</h2><p>Your information is used solely to fulfil your order, send your Certificate of Authenticity, respond to your enquiry, and — if you signed up — send occasional updates about new work and print drops. We do not use your data for advertising or sell it to third parties.</p></div>
     <div class="terms-section"><h2>4. Payment Processing</h2><p>Payments are processed securely by Paystack. We do not store or have access to your card details. Paystack's privacy policy applies to all payment transactions.</p></div>
     <div class="terms-section"><h2>5. Email Communications</h2><p>Order confirmation and Certificate of Authenticity emails are sent via Brevo. Newsletter emails are sent via Brevo. You can unsubscribe from newsletter emails at any time by replying to any email with "unsubscribe" in the subject line, or by contacting us directly.</p></div>
@@ -1505,6 +1505,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
           <button type="button" class="size-pill active" data-format="rolled">Rolled</button>
           <button type="button" class="size-pill" data-format="framed">Framed</button>
         </div>
+        <div class="pd-format-desc" id="pdFormatDesc" style="font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.5;"></div>
       </div>
       <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">Production 7&ndash;14 business days after confirmation</div></div>
       <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
@@ -2946,6 +2947,7 @@ var currentPrint=null;
 function openPrintDetail(print){
   currentPrint=print;
   selectedFormat='rolled';
+  updatePdFormatDesc();
   var pdSeries=document.getElementById("pdSeries"),pdTitle=document.getElementById("pdTitle"),pdDesc=document.getElementById("pdDesc");
   var pdSpecs=document.getElementById("pdSpecs"),pdSizes=document.getElementById("pdSizes"),pdPrice=document.getElementById("pdPrice");
   var pdActions=document.getElementById("pdActions"),pdImgWrap=document.getElementById("pdImgWrap");
@@ -3011,12 +3013,11 @@ function openPrintDetail(print){
       if(country.region==='gh'){
         var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH₵ '+DELIVERY_FEE_GHC.toLocaleString();
         pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+country.time;
-        if(pdFormatRow) pdFormatRow.style.display='block';
       } else {
         pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
-        if(pdFormatRow) pdFormatRow.style.display='none';
-        resetPdFormat();
       }
+      if(pdFormatRow) pdFormatRow.style.display='block';
+      updatePdFormatDesc();
     };
   }
   if(pdActions){
@@ -3047,7 +3048,7 @@ function openPrintDetail(print){
         var selCountry=pdCountry?pdCountry.value:'';
         var selCountryData=COUNTRIES.find(function(c){return c.code===selCountry;})||{};
         var delivFee=selCountryData.region==='gh'?DELIVERY_FEE_GHC:0;
-        var frameFee=(selCountryData.region==='gh'&&selectedFormat==='framed')?frameSurchargeGHS(sizeLabel):0;
+        var frameFee=selectedFormat==='framed'?frameSurchargeGHS(sizeLabel):0;
         payWithPaystack(print,email,sizePrice*qty+delivFee+frameFee,qty,buyerName,selectedFormat);
       });
       var cb=document.getElementById("pdCartBtn");
@@ -3368,15 +3369,24 @@ window.setRoomSize = setRoomSize;
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067, IS_GHANA=true;
 var DELIVERY_FEE_GHC=50;
-// Framing surcharge (Ghana clients only, Sept 2026): flat cost per size,
-// quoted in USD, converted to GHS at the live rate above and rounded to
-// the nearest GHS 5. To change a price, just edit the number below.
+// Framing surcharge (Sept 2026): flat cost per size, available to every
+// client regardless of location, quoted in USD, converted to GHS at the
+// live rate above and rounded to the nearest GHS 5. To change a price,
+// just edit the number below.
 var FRAME_SURCHARGE_USD={A4:5,A3:8,A2:15,A1:25,A0:40};
-var selectedFormat='rolled'; // 'rolled' or 'framed' - framed offered to Ghana clients only
+var selectedFormat='rolled'; // 'rolled' or 'framed'
+var FORMAT_DESC={
+  rolled:'Shipped rolled in a protective tube, ready to be framed to your own taste.',
+  framed:'Arrives ready to hang, framed by Jeffery Asare in a style chosen to suit the piece.'
+};
 function frameSurchargeGHS(sizeLabel){
   var usd=FRAME_SURCHARGE_USD[sizeLabel];
   if(!usd) return 0;
   return Math.round((usd/USD_RATE)/5)*5;
+}
+function updatePdFormatDesc(){
+  var desc=document.getElementById('pdFormatDesc');
+  if(desc) desc.textContent=FORMAT_DESC[selectedFormat]||'';
 }
 function updatePdPrice(){
   var pdPrice=document.getElementById('pdPrice');
@@ -3396,6 +3406,7 @@ function resetPdFormat(){
     var rolledBtn=grid.querySelector('[data-format="rolled"]');
     if(rolledBtn) rolledBtn.classList.add('active');
   }
+  updatePdFormatDesc();
   updatePdPrice();
 }
 (function(){
@@ -3406,6 +3417,7 @@ function resetPdFormat(){
       grid.querySelectorAll('.size-pill').forEach(function(b){b.classList.remove('active');});
       btn.classList.add('active');
       selectedFormat=btn.dataset.format;
+      updatePdFormatDesc();
       updatePdPrice();
     });
   });
@@ -3578,8 +3590,9 @@ function setCurrency(c){
   }
 }
 function formatPrice(ghc){
-  if(CURRENCY==='USD') return '<strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> + shipping</span>';
-  return '<strong>GH₵ '+Number(ghc).toLocaleString()+'</strong><span class="ship"> + shipping</span>';
+  var label=IS_GHANA?'delivery not included':'shipping not included';
+  if(CURRENCY==='USD') return '<strong>$'+(ghc*USD_RATE).toFixed(0)+'</strong><span class="ship"> &middot; '+label+'</span>';
+  return '<strong>GH₵ '+Number(ghc).toLocaleString()+'</strong><span class="ship"> &middot; '+label+'</span>';
 }
 // Wire currency toggle buttons via addEventListener (not inline onclick)
 (function(){
@@ -3652,7 +3665,7 @@ function renderCartItems(){
   var total=cartTotal();
   var totalStr=CURRENCY==='USD'?'$'+(total*USD_RATE).toFixed(0):'GH₵ '+total.toLocaleString();
   foot.innerHTML='<div class="cart-total-row"><span>Total</span><span>'+totalStr+'</span></div>'
-    +'<p class="cart-note">+ shipping &middot; Production 7-14 business days. Certificate of Authenticity included with each print.</p>'
+    +'<p class="cart-note">'+(IS_GHANA?'Delivery':'Shipping')+' not included in the price above &middot; Production 7-14 business days. Certificate of Authenticity included with each print.</p>'
     +'<div class="cart-email-wrap"><input type="text" id="cartName" class="cart-email-input" placeholder="Your full name" style="margin-bottom:.5rem;" /><input type="email" id="cartEmail" class="cart-email-input" placeholder="Your email address" /></div>'
     +'<button class="btn-checkout" onclick="checkoutCart()">Checkout &rarr;</button>';
 }
