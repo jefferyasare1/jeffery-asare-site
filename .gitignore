@@ -29,3 +29,8 @@ PROJECT_HANDOFF.md
 
 # Scratch tooling from AI sessions
 commit_helper.html
+
+# Sandbox lock-file/junk staging area (this session's git workaround folder) —
+# never meant to be committed, just kept getting swept in by "commit all"
+_to_delete/
+_to-delete/
