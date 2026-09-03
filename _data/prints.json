@@ -26,37 +26,6 @@
           "price": 13200
         }
       ]
-    },
-    {
-      "id": "s1788398186681",
-      "title": "Unlocking New Horizons",
-      "series": "RANDOM-STORIES",
-      "edition": "20",
-      "desc": "The horizon was always there. What changed was what it was unlocked with.",
-      "img": "/images/portfolio/random-stories/rs-unlocking-new-horizons.webp",
-      "sizes": [
-        {
-          "label": "A4",
-          "price": 1980
-        },
-        {
-          "label": "A3",
-          "price": 2730
-        },
-        {
-          "label": "A2",
-          "price": 4690
-        },
-        {
-          "label": "A1",
-          "price": 9310
-        },
-        {
-          "label": "A0",
-          "price": 16800
-        }
-      ],
-      "frame": "walnut"
     }
   ]
 }
