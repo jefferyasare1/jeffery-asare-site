@@ -1623,6 +1623,7 @@
     <!-- Site Text panel -->
     <div class="cms-panel" id="cms-panel-site">
       <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Edit the text and images shown across your site. Each page saves independently.</p>
+      <div id="cms-site-load-err" class="cms-status err" style="display:none;margin-bottom:20px;"></div>
 
       <!-- Home -->
       <div class="cms-section">
@@ -5669,6 +5670,22 @@ document.querySelectorAll('.cms-sidenav-item').forEach(function(btn){
 // Pre-populate the room preview print selector on page load
 cmsLoadPrintsForPreview('living');
 
+// Shared: interpret a failed /api/content read. Only the specific "the
+// token was never set" case gets the "Setup required" banner — any other
+// failure (an expired/revoked token, a GitHub API hiccup, a bad file key)
+// shows the real error text instead, so it's never misdiagnosed as an
+// unset token when it's actually something else. (Sept 2026.)
+function cmsShowLoadError(which, msg, el){
+  console.error('CMS load error ('+which+'):', msg);
+  if(/GITHUB_TOKEN/i.test(msg||'')){
+    var banner=document.getElementById('cms-setup-banner');
+    if(banner) banner.style.display='block';
+    if(el) el.innerHTML='<div class="empty-state"><p style="color:var(--muted);">Configure GITHUB_TOKEN to enable editing.</p></div>';
+  } else if(el){
+    el.innerHTML='<div class="empty-state"><p style="color:var(--red);">'+escH(msg||'Could not load.')+'</p></div>';
+  }
+}
+
 function cmsLoad(which){
   _cmsLoaded[which] = true;
   var el = document.getElementById('cms-'+which+'-list');
@@ -5677,8 +5694,7 @@ function cmsLoad(which){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d.ok){
-        document.getElementById('cms-setup-banner').style.display='block';
-        if(el) el.innerHTML='<div class="empty-state"><p style="color:var(--muted);">Configure GITHUB_TOKEN to enable editing.</p></div>';
+        cmsShowLoadError(which, d.error, el);
         return;
       }
       _cmsSha[which]=d.sha; _cmsData[which]=d.content;
@@ -5686,8 +5702,7 @@ function cmsLoad(which){
       if(which==='prints')  cmsRenderPrints();
     })
     .catch(function(err){
-      if(el) el.innerHTML='<div class="empty-state"><p style="color:var(--red);">Could not load. Check console.</p></div>';
-      console.error('CMS load error:',err);
+      cmsShowLoadError(which, 'Network error: '+err.message, el);
     });
 }
 
@@ -6129,7 +6144,11 @@ function cmsInitPortfolio(){
   fetch(cmsApiUrl('settings/series'))
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d.ok){if(sel)sel.innerHTML='<p style="color:var(--red);font-size:12px;">Could not load series.</p>';return;}
+      if(!d.ok){
+        cmsShowLoadError('portfolio', d.error, null);
+        if(sel)sel.innerHTML='<p style="color:var(--red);font-size:12px;">'+escH(d.error||'Could not load series.')+'</p>';
+        return;
+      }
       _seriesList=(d.content&&d.content.series)||[]; _seriesSha=d.sha;
       cmsBuildSeriesSelector();
       if(_seriesList.length) cmsSelectSeries(_seriesList[0].slug);
@@ -6499,10 +6518,16 @@ function cmsSiteLoad(fileKey,cb){
 }
 
 function cmsSiteInit(){
+  var errEl=document.getElementById('cms-site-load-err');
+  if(errEl){errEl.style.display='none';errEl.textContent='';}
   [['settings/general',cmsSitePopulateHero],['settings/about-page',cmsSitePopulateAbout],
    ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact],
    ['settings/portfolio-page',cmsSitePopulatePortfolio]]
-  .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){if(!err)pair[1](data);});});
+  .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){
+    if(!err){pair[1](data);return;}
+    cmsShowLoadError('site', err, null);
+    if(errEl){errEl.style.display='block';errEl.textContent='Some Site Text fields could not load: '+err;}
+  });});
 }
 
 function cmsSitePopulateHero(d){
