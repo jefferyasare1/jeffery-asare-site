@@ -4851,6 +4851,23 @@ fetch('/_data/prints.json')
     });
     // Always refresh the shop list so data is ready whenever the user navigates there
     if(typeof window.renderShop === 'function') window.renderShop(0);
+    // A direct link/refresh to a specific print (e.g. ?print=the-herdsman)
+    // is parsed earlier, synchronously, before this real catalog data has
+    // arrived - at that point PRINTS only held the placeholder seed data,
+    // so a real print id wouldn't be found and the deep link silently
+    // failed, falling back to the homepage. Now that the real catalog is
+    // in, retry that same deep link if it still hasn't been opened.
+    try{
+      var _dlParams=new URLSearchParams(window.location.search);
+      var _dlPid=_dlParams.get('print');
+      if(_dlPid && (!currentPrint || currentPrint.id!==_dlPid)){
+        var _dlMatch=PRINTS.find(function(p){ return p.id===_dlPid; });
+        if(_dlMatch){
+          navigate('shop');
+          setTimeout(function(){ openPrintDetail(_dlMatch); },400);
+        }
+      }
+    }catch(e){}
       }).catch(function(){ window.__shopDataLoaded = true; });
 </script>
 
