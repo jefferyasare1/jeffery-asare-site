@@ -2942,6 +2942,7 @@ function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])|
 // PRINT DETAIL PAGE
 // ===========================================================
 var currentPrint=null;
+window.openPrintDetail = function(print){ openPrintDetail(print); }; // exposed: see CMS-catalog-loaded deep-link retry further down the page
 
 function openPrintDetail(print){
   currentPrint=print;
@@ -4860,11 +4861,17 @@ fetch('/_data/prints.json')
     try{
       var _dlParams=new URLSearchParams(window.location.search);
       var _dlPid=_dlParams.get('print');
-      if(_dlPid && (!currentPrint || currentPrint.id!==_dlPid)){
+      // Detect "already open" via the DOM (the print-detail page's own
+      // title field) rather than the internal currentPrint variable, which
+      // lives in a different <script> block's closure and isn't reachable
+      // from here.
+      var _pdTitleEl=document.getElementById('pdTitle');
+      var _alreadyOpen=_pdTitleEl && _pdTitleEl.textContent && document.getElementById('page-print-detail') && document.getElementById('page-print-detail').style.display==='block';
+      if(_dlPid && !_alreadyOpen && typeof window.openPrintDetail==='function'){
         var _dlMatch=PRINTS.find(function(p){ return p.id===_dlPid; });
-        if(_dlMatch){
-          navigate('shop');
-          setTimeout(function(){ openPrintDetail(_dlMatch); },400);
+        if(_dlMatch && typeof window.navigate==='function'){
+          window.navigate('shop');
+          setTimeout(function(){ window.openPrintDetail(_dlMatch); },400);
         }
       }
     }catch(e){}
