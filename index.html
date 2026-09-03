@@ -3009,6 +3009,7 @@ function openPrintDetail(print){
         resetPdFormat();
         return;
       }
+      try{ localStorage.setItem('ja_buyer_country', code); }catch(e){}
       var country=COUNTRIES.find(function(c){return c.code===code;})||{time:'12–20 business days',region:'row'};
       if(country.region==='gh'){
         var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH₵ '+DELIVERY_FEE_GHC.toLocaleString();
@@ -3019,6 +3020,18 @@ function openPrintDetail(print){
       if(pdFormatRow) pdFormatRow.style.display='block';
       updatePdFormatDesc();
     };
+    // Remember the buyer's country across page refreshes/deep-link reloads,
+    // so the delivery note and Rolled/Framed toggle don't appear to
+    // vanish just because the browser reloaded the page.
+    if(!print.soldOut){
+      try{
+        var savedCountry=localStorage.getItem('ja_buyer_country');
+        if(savedCountry&&pdCountry.querySelector('option[value="'+savedCountry+'"]')){
+          pdCountry.value=savedCountry;
+          pdCountry.onchange();
+        }
+      }catch(e){}
+    }
   }
   if(pdActions){
     if(print.soldOut){
