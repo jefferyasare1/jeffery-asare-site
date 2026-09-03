@@ -145,6 +145,15 @@ img{-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;user-select
         <div class="size-grid" id="sizeGrid"></div>
         <div class="size-price" id="priceDisplay"></div>
 
+        <!-- Format: Rolled or Framed (Ghana clients only) -->
+        <div id="formatSection" style="display:none;">
+          <div class="section-label">Format</div>
+          <div class="size-grid" id="formatGrid">
+            <button type="button" class="size-pill active" data-format="rolled">Rolled</button>
+            <button type="button" class="size-pill" data-format="framed">Framed</button>
+          </div>
+        </div>
+
         <!-- Geo shipping estimate -->
         <div class="geo-ship" id="geoShipBanner"></div>
 
@@ -252,10 +261,22 @@ var USD_RATE = 0.065;
     .catch(function(){});
 })();
 
+// Framing surcharge (Ghana clients only, Sept 2026) —
+// Flat cost per size, quoted in USD by Jeff, converted to GHS at the
+// live rate above and rounded to the nearest GHS 5. To change a price,
+// just edit the number below — no other code needs to change.
+var FRAME_SURCHARGE_USD = { A4: 5, A3: 8, A2: 15, A1: 25, A0: 40 };
+function frameSurchargeGHS(sizeLabel){
+  var usd = FRAME_SURCHARGE_USD[sizeLabel];
+  if(!usd) return 0;
+  return Math.round((usd / USD_RATE) / 5) * 5;
+}
+
 // ── Current print state ───────────────────────────────────────
 var PRINT = null;
 var selectedSize = null;
 var selectedPrice = 0;
+var selectedFormat = 'rolled'; // 'rolled' or 'framed' -- framed offered to Ghana clients only
 
 // ── Load print from CMS ───────────────────────────────────────
 var slug = getSlug();
@@ -338,6 +359,7 @@ function renderPrint(p){
   } else {
     renderSizes(p.sizes||[]);
     setupCountry();
+    setupFormat();
     setupBuyBtn(p);
   }
 
@@ -357,14 +379,32 @@ function renderSizes(sizes){
       btn.classList.add('active');
       selectedSize = s.label;
       selectedPrice = s.price;
-      document.getElementById('priceDisplay').innerHTML = fmt(s.price);
+      updatePriceDisplay();
     });
     grid.appendChild(btn);
     if(idx===0){
       selectedSize = s.label;
       selectedPrice = s.price;
-      document.getElementById('priceDisplay').innerHTML = fmt(s.price);
+      updatePriceDisplay();
     }
+  });
+}
+
+function updatePriceDisplay(){
+  var extra = (selectedFormat === 'framed') ? frameSurchargeGHS(selectedSize) : 0;
+  document.getElementById('priceDisplay').innerHTML = fmt(selectedPrice + extra);
+}
+
+function setupFormat(){
+  var grid = document.getElementById('formatGrid');
+  if(!grid) return;
+  grid.querySelectorAll('.size-pill').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      grid.querySelectorAll('.size-pill').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedFormat = btn.dataset.format;
+      updatePriceDisplay();
+    });
   });
 }
 
@@ -373,12 +413,25 @@ function setupCountry(){
   var note = document.getElementById('deliveryNote');
   sel.onchange = function(){
     var d = DELIVERY[sel.value];
-    if(!d){ note.innerHTML=''; return; }
-    if(d.region==='gh'){
+    if(!d){ note.innerHTML=''; }
+    else if(d.region==='gh'){
       note.innerHTML = '<strong>Local delivery: GH₵ '+DELIVERY_FEE_GHC+'</strong> &middot; '+d.time;
     } else {
       note.innerHTML = '<strong>International shipping:</strong> Quote on request &middot; '+d.time+'<br>We\'ll confirm a shipping cost before production begins.';
     }
+    var showFraming = !!d && d.region==='gh';
+    var fmtSection = document.getElementById('formatSection');
+    if(fmtSection) fmtSection.style.display = showFraming ? 'block' : 'none';
+    if(!showFraming && selectedFormat !== 'rolled'){
+      selectedFormat = 'rolled';
+      var fmtGrid = document.getElementById('formatGrid');
+      if(fmtGrid){
+        fmtGrid.querySelectorAll('.size-pill').forEach(function(b){ b.classList.remove('active'); });
+        var rolledBtn = fmtGrid.querySelector('[data-format="rolled"]');
+        if(rolledBtn) rolledBtn.classList.add('active');
+      }
+    }
+    updatePriceDisplay();
   };
 }
 
@@ -401,8 +454,10 @@ function setupBuyBtn(p){
     var ctryCode = document.getElementById('buyCountry').value;
     var ctryData = DELIVERY[ctryCode]||{region:'intl',name:'International'};
     var delivFee = ctryData.region==='gh' ? DELIVERY_FEE_GHC : 0;
-    var total = selectedPrice + delivFee;
+    var frameFee = (ctryData.region==='gh' && selectedFormat==='framed') ? frameSurchargeGHS(selectedSize) : 0;
+    var total = selectedPrice + delivFee + frameFee;
     var isIntl = ctryData.region !== 'gh';
+    var formatLabel = selectedFormat==='framed' ? 'Framed' : 'Rolled';
     var totalUSD = isIntl ? Math.round(total * USD_RATE) : 0;
     var ref = 'JA-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now();
     var displayName = name || email.split('@')[0];
@@ -416,7 +471,8 @@ function setupBuyBtn(p){
       ref: ref,
       metadata:{custom_fields:[
         {display_name:'Print',variable_name:'print',value:p.title},
-        {display_name:'Size',variable_name:'size',value:selectedSize}
+        {display_name:'Size',variable_name:'size',value:selectedSize},
+        {display_name:'Format',variable_name:'format',value:formatLabel}
       ]},
       onClose: function(){
         if(!paid){
@@ -432,7 +488,7 @@ function setupBuyBtn(p){
         // Branded confirmation email to buyer (via Brevo, same design as the rest of the site)
         fetch('/api/order-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           to_email:email, to_name:displayName,
-          print_title:p.title, size:selectedSize, qty:'1',
+          print_title:p.title, size:selectedSize, format:formatLabel, qty:'1',
           price:paidPlain, country:ctryData.name, order_ref:response.reference
         })}).catch(function(err){
           console.error('Order-confirm email failed:', err);
@@ -441,8 +497,8 @@ function setupBuyBtn(p){
         var body=new URLSearchParams({
           _subject:'New sale: '+p.title,
           buyer:email, buyer_name:displayName,
-          items:p.title+' | '+selectedSize+' x1',
-          size:selectedSize, qty:'1',
+          items:p.title+' | '+selectedSize+(selectedFormat==='framed'?' (Framed)':'')+' x1',
+          size:selectedSize, format:formatLabel, qty:'1',
           price:paidPlain,
           country:ctryData.name,
           order_ref:response.reference,
@@ -453,7 +509,7 @@ function setupBuyBtn(p){
         fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
           action:'Order Received',buyer_name:displayName,buyer_email:email,
           print_title:p.title,size:selectedSize,country:ctryData.name,
-          price:paidPlain,qty:'1',notes:'',order_ref:response.reference
+          price:paidPlain,qty:'1',notes:(selectedFormat==='framed'?'Framed':''),order_ref:response.reference
         })}).catch(function(){});
         // Show success
         btn.disabled = true;

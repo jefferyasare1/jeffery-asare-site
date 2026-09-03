@@ -39,7 +39,7 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: jsonHeaders });
   }
 
-  const { to_email, to_name, print_title, size, qty, price, country, order_ref } = body;
+  const { to_email, to_name, print_title, size, format, qty, price, country, order_ref } = body;
 
   if (!to_email || !print_title || !order_ref) {
     return new Response(JSON.stringify({ error: 'Missing to_email, print_title, or order_ref' }), { status: 400, headers: jsonHeaders });
@@ -108,6 +108,7 @@ export async function onRequestPost(context) {
           <table width="100%" cellpadding="0" cellspacing="0">
             ${summaryRow('Print', print_title)}
             ${summaryRow('Size', size)}
+            ${summaryRow('Format', format)}
             ${summaryRow('Quantity', qty)}
             ${summaryRow('Amount paid', price)}
             ${summaryRow('Shipping to', country)}
