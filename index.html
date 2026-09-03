@@ -1499,6 +1499,13 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         </select>
         <div class="pd-delivery-note" id="pdDeliveryNote"></div>
       </div>
+      <div class="pd-format-row" id="pdFormatRow" style="display:none;">
+        <div class="print-detail-size-label">Format</div>
+        <div class="print-detail-size-grid" id="pdFormatGrid">
+          <button type="button" class="size-pill active" data-format="rolled">Rolled</button>
+          <button type="button" class="size-pill" data-format="framed">Framed</button>
+        </div>
+      </div>
       <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">Production 7&ndash;14 business days after confirmation</div></div>
       <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
       <div class="print-detail-actions" id="pdActions"></div>
@@ -2938,6 +2945,7 @@ var currentPrint=null;
 
 function openPrintDetail(print){
   currentPrint=print;
+  selectedFormat='rolled';
   var pdSeries=document.getElementById("pdSeries"),pdTitle=document.getElementById("pdTitle"),pdDesc=document.getElementById("pdDesc");
   var pdSpecs=document.getElementById("pdSpecs"),pdSizes=document.getElementById("pdSizes"),pdPrice=document.getElementById("pdPrice");
   var pdActions=document.getElementById("pdActions"),pdImgWrap=document.getElementById("pdImgWrap");
@@ -2961,12 +2969,15 @@ function openPrintDetail(print){
       btn.addEventListener("click",function(){
         pdSizes.querySelectorAll(".size-pill").forEach(function(b){b.classList.remove("active");});
         btn.classList.add("active");
-        if(pdPrice&&!print.soldOut) pdPrice.innerHTML=formatPrice(s.price);
+        updatePdPrice();
       });
       pdSizes.appendChild(btn);
     });
   }
-  if(pdPrice) pdPrice.innerHTML=print.soldOut?"<span class=\"sold-out-badge\">Sold out</span>":formatPrice(print.sizes[0].price);
+  if(pdPrice){
+    if(print.soldOut) pdPrice.innerHTML="<span class=\"sold-out-badge\">Sold out</span>";
+    else updatePdPrice();
+  }
   // Qty controls in detail view
   var pdQtyRow=document.getElementById("pdQtyRow");
   var pdQtyVal=document.getElementById("pdQtyVal");
@@ -2989,13 +3000,22 @@ function openPrintDetail(print){
   if(pdCountry&&pdDeliveryNote){
     pdCountry.onchange=function(){
       var code=pdCountry.value;
-      if(!code){pdDeliveryNote.innerHTML='';return;}
+      var pdFormatRow=document.getElementById('pdFormatRow');
+      if(!code){
+        pdDeliveryNote.innerHTML='';
+        if(pdFormatRow) pdFormatRow.style.display='none';
+        resetPdFormat();
+        return;
+      }
       var country=COUNTRIES.find(function(c){return c.code===code;})||{time:'12–20 business days',region:'row'};
       if(country.region==='gh'){
         var fee=CURRENCY==='USD'?'$'+Math.round(DELIVERY_FEE_GHC*USD_RATE):'GH₵ '+DELIVERY_FEE_GHC.toLocaleString();
         pdDeliveryNote.innerHTML='<strong>Local delivery: '+fee+'</strong> &middot; '+country.time;
+        if(pdFormatRow) pdFormatRow.style.display='block';
       } else {
         pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
+        if(pdFormatRow) pdFormatRow.style.display='none';
+        resetPdFormat();
       }
     };
   }
@@ -3021,12 +3041,14 @@ function openPrintDetail(print){
         var email=emailEl?emailEl.value.trim():"";
         if(!email||!email.includes("@")){if(emailEl){emailEl.focus();emailEl.style.borderBottomColor="#e00";}return;}
         var activePill=pdSizes?pdSizes.querySelector(".size-pill.active"):null;
+        var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
         var selCountry=pdCountry?pdCountry.value:'';
         var selCountryData=COUNTRIES.find(function(c){return c.code===selCountry;})||{};
         var delivFee=selCountryData.region==='gh'?DELIVERY_FEE_GHC:0;
-        payWithPaystack(print,email,sizePrice*qty+delivFee,qty,buyerName);
+        var frameFee=(selCountryData.region==='gh'&&selectedFormat==='framed')?frameSurchargeGHS(sizeLabel):0;
+        payWithPaystack(print,email,sizePrice*qty+delivFee+frameFee,qty,buyerName,selectedFormat);
       });
       var cb=document.getElementById("pdCartBtn");
       if(cb) cb.addEventListener("click",function(){
@@ -3034,7 +3056,10 @@ function openPrintDetail(print){
         var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
-        addToCart(print,sizeLabel,sizePrice,qty);
+        var pdFormatRow=document.getElementById('pdFormatRow');
+        var cartFormat=(pdFormatRow&&pdFormatRow.style.display!=='none'&&selectedFormat==='framed')?'framed':'rolled';
+        var cartFrameFee=cartFormat==='framed'?frameSurchargeGHS(sizeLabel):0;
+        addToCart(print,sizeLabel,sizePrice+cartFrameFee,qty,cartFormat);
         openCart();
       });
     }
@@ -3342,7 +3367,49 @@ window.setRoomSize = setRoomSize;
 // CURRENCY
 // ===========================================================
 var CURRENCY='GHS', USD_RATE=0.067, IS_GHANA=true;
-var DELIVERY_FEE_GHC=50; // Ghana local delivery flat fee — update here to change site-wide
+var DELIVERY_FEE_GHC=50;
+// Framing surcharge (Ghana clients only, Sept 2026): flat cost per size,
+// quoted in USD, converted to GHS at the live rate above and rounded to
+// the nearest GHS 5. To change a price, just edit the number below.
+var FRAME_SURCHARGE_USD={A4:5,A3:8,A2:15,A1:25,A0:40};
+var selectedFormat='rolled'; // 'rolled' or 'framed' - framed offered to Ghana clients only
+function frameSurchargeGHS(sizeLabel){
+  var usd=FRAME_SURCHARGE_USD[sizeLabel];
+  if(!usd) return 0;
+  return Math.round((usd/USD_RATE)/5)*5;
+}
+function updatePdPrice(){
+  var pdPrice=document.getElementById('pdPrice');
+  var pdSizes=document.getElementById('pdSizes');
+  if(!pdPrice||!currentPrint||currentPrint.soldOut) return;
+  var activePill=pdSizes?pdSizes.querySelector('.size-pill.active'):null;
+  var sizeLabel=activePill?activePill.textContent:currentPrint.sizes[0].label;
+  var price=activePill?parseFloat(activePill.dataset.price):currentPrint.sizes[0].price;
+  var extra=selectedFormat==='framed'?frameSurchargeGHS(sizeLabel):0;
+  pdPrice.innerHTML=formatPrice(price+extra);
+}
+function resetPdFormat(){
+  selectedFormat='rolled';
+  var grid=document.getElementById('pdFormatGrid');
+  if(grid){
+    grid.querySelectorAll('.size-pill').forEach(function(b){b.classList.remove('active');});
+    var rolledBtn=grid.querySelector('[data-format="rolled"]');
+    if(rolledBtn) rolledBtn.classList.add('active');
+  }
+  updatePdPrice();
+}
+(function(){
+  var grid=document.getElementById('pdFormatGrid');
+  if(!grid) return;
+  grid.querySelectorAll('.size-pill').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      grid.querySelectorAll('.size-pill').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      selectedFormat=btn.dataset.format;
+      updatePdPrice();
+    });
+  });
+})(); // Ghana local delivery flat fee — update here to change site-wide
 // EmailJS — order confirmation emails
 emailjs.init('fTeaXZvU78Yu3TSVl');
 
@@ -3504,13 +3571,7 @@ function setCurrency(c){
   if(usdBtn) usdBtn.classList.toggle('cur-active',c==='USD');
   renderShop(SHOP_PAGE);
   // Update open print detail price
-  var pdSizes=document.getElementById('pdSizes');
-  var pdPrice=document.getElementById('pdPrice');
-  if(pdPrice&&currentPrint&&!currentPrint.soldOut){
-    var activePill=pdSizes?pdSizes.querySelector('.size-pill.active'):null;
-    var price=activePill?parseFloat(activePill.dataset.price):currentPrint.sizes[0].price;
-    pdPrice.innerHTML=formatPrice(price);
-  }
+  updatePdPrice();
   // Update open cart if visible
   if(document.getElementById('cartSidebar')&&document.getElementById('cartSidebar').classList.contains('open')){
     renderCartItems();
@@ -3532,11 +3593,12 @@ function formatPrice(ghc){
 // CART
 // ===========================================================
 var CART=[];
-function addToCart(print,size,price,qty){
+function addToCart(print,size,price,qty,format){
   if(price===undefined) price=print.priceGHC;
   qty=Math.max(1,parseInt(qty)||1);
-  var ex=CART.find(function(i){return i.print.id===print.id&&i.size===size;});
-  if(ex){ex.qty+=qty;}else{CART.push({print:print,size:size,price:price,qty:qty});}
+  format=format||'rolled';
+  var ex=CART.find(function(i){return i.print.id===print.id&&i.size===size&&(i.format||'rolled')===format;});
+  if(ex){ex.qty+=qty;}else{CART.push({print:print,size:size,price:price,qty:qty,format:format});}
   updateCartBadge();
   renderCartItems();
 }
@@ -3582,7 +3644,7 @@ function renderCartItems(){
     return '<div class="cart-item">'+imgEl
       +'<div class="cart-item-info">'
       +'<div class="cart-item-title">'+item.print.title+'</div>'
-      +'<div class="cart-item-sub">'+item.size+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
+      +'<div class="cart-item-sub">'+item.size+(item.format==='framed'?' &nbsp;·&nbsp; Framed':'')+' &nbsp;·&nbsp; Qty '+item.qty+'</div>'
       +'<div class="cart-item-price">'+priceStr+'</div>'
       +'<button class="cart-item-remove" data-id="'+item.print.id+'" data-size="'+item.size+'" onclick="removeFromCart(this.dataset.id,this.dataset.size)">Remove</button>'
       +'</div></div>';
@@ -3632,14 +3694,14 @@ function checkoutCart(){
     amount:total*100,
     currency:'GHS',
     ref:'JA-CART-'+Math.floor(1000+Math.random()*9000)+'-'+Date.now(),
-    metadata:{custom_fields:CART.map(function(i){return {display_name:i.print.title,variable_name:'print',value:i.size+' x'+i.qty};})},
+    metadata:{custom_fields:CART.map(function(i){return {display_name:i.print.title,variable_name:'print',value:i.size+(i.format==='framed'?' (Framed)':'')+' x'+i.qty};})},
     onClose:function(){
       if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made — your cart is still saved, try again anytime.');
     },
     callback:function(response){
       paid=true;
       var cartItems=CART.slice();
-      var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+' x'+i.qty;}).join('; ');
+      var itemSummary=cartItems.map(function(i){return i.print.title+' | '+i.size+(i.format==='framed'?' (Framed)':'')+' x'+i.qty;}).join('; ');
       var totalQty=cartItems.reduce(function(s,i){return s+(parseInt(i.qty)||1);},0);
       var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
       var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
@@ -3692,9 +3754,10 @@ function sendOrderAlert(opts){
 // ===========================================================
 // PAYSTACK PAYMENT
 // ===========================================================
-function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
+function payWithPaystack(print,email,priceGHC,qty,buyerFullName,format){
   var activePill=document.getElementById('pdSizes')?document.getElementById('pdSizes').querySelector('.size-pill.active'):null;
   var selectedSize=activePill?activePill.textContent:(print.sizes[0]?print.sizes[0].label:'');
+  var formatLabel=format==='framed'?'Framed':'Rolled';
   if(priceGHC===undefined) priceGHC=activePill?parseFloat(activePill.dataset.price):print.priceGHC;
   qty=Math.max(1,parseInt(qty)||1);
   var paid=false;
@@ -3707,6 +3770,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
     metadata:{custom_fields:[
       {display_name:"Print",variable_name:"print",value:print.title},
       {display_name:"Size",variable_name:"size",value:selectedSize},
+      {display_name:"Format",variable_name:"format",value:formatLabel},
       {display_name:"Qty",variable_name:"qty",value:qty}
     ]},
     onClose:function(){
@@ -3718,19 +3782,20 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName){
       var ctryName=selCtry&&selCtry.selectedIndex>0?selCtry.options[selCtry.selectedIndex].text:'Ghana';
       var paidStr=CURRENCY==='USD'?'$'+Math.round(priceGHC*USD_RATE):'GH₵ '+priceGHC.toLocaleString();
       var displayName=buyerFullName||email.split('@')[0];
-      sendOrderAlert({buyer:email,buyer_name:displayName,items:print.title+' | '+selectedSize+' x'+qty,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
+      var itemLine=print.title+' | '+selectedSize+(format==='framed'?' (Framed)':'')+' x'+qty;
+      sendOrderAlert({buyer:email,buyer_name:displayName,items:itemLine,size:selectedSize,qty:String(qty),price:paidStr,country:ctryName,ref:response.reference});
       // Log to Sheet
       fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         action:'Order Received',buyer_name:displayName,buyer_email:email,
         print_title:print.title,size:selectedSize,country:ctryName,
-        price:paidStr,qty:String(qty),notes:print.title+' | '+selectedSize+' x'+qty,order_ref:response.reference
+        price:paidStr,qty:String(qty),notes:itemLine,order_ref:response.reference
       })}).catch(function(err){ console.error('Sheet log error:', err); });
       showPurchaseToast('success','Purchase successful','Your Certificate of Authenticity is on its way to '+email+'.');
       // ── Auto-send branded thank-you / order-confirmation email ──
       fetch('/api/order-confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         to_email:email, to_name:displayName,
         order_ref:response.reference||'', print_title:print.title,
-        size:selectedSize, qty:String(qty), price:paidStr, country:ctryName
+        size:selectedSize, format:formatLabel, qty:String(qty), price:paidStr, country:ctryName
       })}).catch(function(e){ console.error('Order-confirm email failed:',e); });
       openCert([{print:print,size:selectedSize,qty:qty}],email,response.reference,displayName,{price:paidStr,country:ctryName,qty:qty,next_steps:'Your print is now in production (7–14 business days). We will contact you with tracking details once it ships.'});
       // ── Auto-send PDF COA to buyer via Brevo (runs in background) ──
