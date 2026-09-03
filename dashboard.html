@@ -5586,13 +5586,22 @@ var _cmsLoaded = { journal: false, prints: false };
 
 // Print pricing suggestions — auto-fill, but editable (Sept 2026).
 // Suggested price = A4 price x size multiplier x edition-scarcity multiplier.
-// Multipliers are relative to the A4 price the user types in; the size
-// ladder is derived from Jeff's real live print's own pricing, and the
-// edition-scarcity bands are a standard fine-art-market convention (a
-// tighter edition costs more per print; an open/unlimited edition costs
-// less). This never overwrites a price the user has actually typed —
-// only fields that are still untouched ("not dirty") get auto-filled.
-var CMS_SIZE_MULTIPLIERS = { A4: 1, A3: 1.95, A2: 3.35, A1: 6.65, A0: 12 };
+// Multipliers are relative to the A4 price the user types in.
+//
+// The size ladder is the EXACT ratio of each size to A4 in The Herdsman —
+// Jeff's one real, already-selling print (A4 1980 / A3 3850 / A2 6600 /
+// A1 13200) — written as literal fractions of those real prices, not
+// rounded approximations, so plugging in The Herdsman's own numbers
+// reproduces its own real prices exactly, to the cedi. A0 has no real
+// print to anchor to yet, so it continues the same doubling The Herdsman
+// itself shows from A2 to A1 (6600 -> 13200, exactly 2x).
+//
+// The edition-scarcity curve (see cmsEditionMultiplier below) is a
+// standard fine-art-market convention layered on top: a tighter edition
+// costs more per print, a larger or open edition costs less. Together
+// these never overwrite a price the user has actually typed — only
+// fields still untouched ("not dirty") get auto-filled.
+var CMS_SIZE_MULTIPLIERS = { A4: 1, A3: 3850/1980, A2: 6600/1980, A1: 13200/1980, A0: 26400/1980 };
 var _cmsPriceDirty = {};
 
 // Anchored on The Herdsman — Jeff's one real live print, an edition of 10 —
