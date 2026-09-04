@@ -1709,12 +1709,17 @@
           <div class="cms-field"><label>Bio — paragraph 5</label><textarea id="st-bio5" rows="3"></textarea></div>
           <div class="cms-field"><label>Portrait caption</label><input type="text" id="st-about-caption"></div>
           <div class="cms-field"><label>Location heading</label><input type="text" id="st-loc-heading"></div>
-          <div class="cms-field"><label>Location paragraph</label><textarea id="st-loc-p1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Location — paragraph 1</label><textarea id="st-loc-p1" rows="2"></textarea></div>
+          <div class="cms-field"><label>Location — paragraph 2</label><textarea id="st-loc-p2" rows="2"></textarea></div>
+          <div class="cms-field"><label>Location — paragraph 3</label><textarea id="st-loc-p3" rows="2"></textarea></div>
           <div class="cms-field"><label>Philosophy heading</label><input type="text" id="st-phil-heading"></div>
-          <div class="cms-field"><label>Philosophy paragraph</label><textarea id="st-phil-p1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Philosophy — paragraph 1</label><textarea id="st-phil-p1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Philosophy — paragraph 2</label><textarea id="st-phil-p2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Philosophy — paragraph 3</label><textarea id="st-phil-p3" rows="3"></textarea></div>
           <div class="cms-field"><label>Street photography heading</label><input type="text" id="st-street-heading"></div>
           <div class="cms-field"><label>Street photography - paragraph 1</label><textarea id="st-street-p1" rows="3"></textarea></div>
           <div class="cms-field"><label>Street photography - paragraph 2</label><textarea id="st-street-p2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Street photography - paragraph 3</label><textarea id="st-street-p3" rows="3"></textarea></div>
           <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteAbout()">Save</button><div class="cms-status" id="cms-about-status"></div></div>
         </div>
       </div>
@@ -6656,9 +6661,9 @@ function cmsSitePopulateAbout(d){
   function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
   set('st-bio1',d.about_bio1);set('st-bio2',d.about_bio2);set('st-bio3',d.about_bio3);set('st-bio4',d.about_bio4);set('st-bio5',d.about_bio5);
   set('st-about-caption',d.about_caption);set('st-loc-heading',d.about_loc_heading);
-  set('st-loc-p1',d.about_loc_p1);
-  set('st-phil-heading',d.about_phil_heading);set('st-phil-p1',d.about_phil_p1);
-  set('st-street-heading',d.about_street_heading);set('st-street-p1',d.about_street_p1);set('st-street-p2',d.about_street_p2);
+  set('st-loc-p1',d.about_loc_p1);set('st-loc-p2',d.about_loc_p2);set('st-loc-p3',d.about_loc_p3);
+  set('st-phil-heading',d.about_phil_heading);set('st-phil-p1',d.about_phil_p1);set('st-phil-p2',d.about_phil_p2);set('st-phil-p3',d.about_phil_p3);
+  set('st-street-heading',d.about_street_heading);set('st-street-p1',d.about_street_p1);set('st-street-p2',d.about_street_p2);set('st-street-p3',d.about_street_p3);
 }
 
 function cmsSitePopulateShop(d){if(!d)return;function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}set('st-shop-title',d.shop_title);set('st-shop-desc',d.shop_desc);}
@@ -6727,9 +6732,9 @@ function cmsSaveSiteAbout(){
   cmsSiteSave('settings/about-page',function(){
     return{about_bio1:g('st-bio1'),about_bio2:g('st-bio2'),about_bio3:g('st-bio3'),about_bio4:g('st-bio4'),about_bio5:g('st-bio5'),
       about_caption:g('st-about-caption'),about_loc_heading:g('st-loc-heading'),
-      about_loc_p1:g('st-loc-p1'),
-      about_phil_heading:g('st-phil-heading'),about_phil_p1:g('st-phil-p1'),
-      about_street_heading:g('st-street-heading'),about_street_p1:g('st-street-p1'),about_street_p2:g('st-street-p2')};
+      about_loc_p1:g('st-loc-p1'),about_loc_p2:g('st-loc-p2'),about_loc_p3:g('st-loc-p3'),
+      about_phil_heading:g('st-phil-heading'),about_phil_p1:g('st-phil-p1'),about_phil_p2:g('st-phil-p2'),about_phil_p3:g('st-phil-p3'),
+      about_street_heading:g('st-street-heading'),about_street_p1:g('st-street-p1'),about_street_p2:g('st-street-p2'),about_street_p3:g('st-street-p3')};
   },'cms-about-status');
 }
 function cmsSaveSiteShop(){cmsSiteSave('settings/shop-page',function(){return{shop_title:g('st-shop-title'),shop_desc:g('st-shop-desc')};},'cms-shop-status');}
