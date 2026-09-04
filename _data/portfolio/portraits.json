@@ -113,12 +113,14 @@
     {
       "title": "In the Red",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-in-the-red.webp",
+      "date": "Nov 2023",
       "desc": "The hours that are not gold or blue but red — urgent, heated, unmistakable.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-in-the-red.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Somewhere Else",
