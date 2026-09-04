@@ -29,12 +29,14 @@
     {
       "title": "Chaos of Desires",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-chaos-of-desires.webp",
+      "date": "Jan 2022",
       "desc": "Wanting too many things at once. The face rarely lies about that.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-chaos-of-desires.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile and Snapseed",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Limitations",
