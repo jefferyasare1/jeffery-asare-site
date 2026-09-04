@@ -101,12 +101,14 @@
     {
       "title": "Vicky",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-vicky.webp",
+      "date": "Feb 2023",
       "desc": "A portrait of Vicky. The name says more than any description could.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-vicky.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "In the Red",
