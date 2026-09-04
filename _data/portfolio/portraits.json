@@ -149,12 +149,14 @@
     {
       "title": "Hands Pressed",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-hands-pressed.webp",
+      "date": "Feb 2022",
       "desc": "The moment of gathering oneself before speaking to something larger.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-hands-pressed.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "The Language of Stillness",
