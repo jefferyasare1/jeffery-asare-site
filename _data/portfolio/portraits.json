@@ -161,12 +161,14 @@
     {
       "title": "The Language of Stillness",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-the-language-of-stillness.webp",
+      "date": "Mar 2022",
       "desc": "Present in the same frame. Somewhere else entirely in the mind.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-the-language-of-stillness.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "The Crown",
