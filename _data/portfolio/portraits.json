@@ -137,12 +137,14 @@
     {
       "title": "The Burden of Awareness",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-the-burden-of-awareness.webp",
+      "date": "Feb 2023",
       "desc": "Two people. The space between them holds everything unsaid.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-the-burden-of-awareness.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Hands Pressed",
