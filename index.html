@@ -432,6 +432,11 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 #continueTray .recently-viewed-card{width:60%;margin:0 auto;}
 #continueTray .recently-viewed-label{font-size:9px;margin-bottom:.7rem;}
 #continueTray .recently-viewed-title{font-size:9.5px;margin-top:.25rem;}
+/* The band that houses this tray (border-top + generous padding, shared
+   by default with the shop tray's .recently-viewed-wrap) cut to 40% of
+   its previous height here specifically -- 60% smaller (Jeff's request,
+   2026-09-04) -- without touching the shop page's own version. */
+#continueTray .recently-viewed-wrap{padding:1rem var(--pad) .6rem;}
 @media(max-width:700px){
   #continueTray .recently-viewed-grid{grid-template-columns:repeat(2,1fr);}
   #continueTray .recently-viewed-card{width:30%;margin:0 auto;}
@@ -1730,7 +1735,14 @@ function navigate(page) {
     if(waFloatEl) waFloatEl.style.display = (page === 'contact') ? 'flex' : 'none';
     window.scrollTo(0,0);
     injectFooters();
-    if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
+    if (page==="portfolio") {
+      buildFilterBar(); renderPortfolio("all");
+      // 2026-09-04 (Jeff's request): being on the Portfolio page at all
+      // -- not just opening one specific photo -- should also be
+      // resumable from "Continue where you left off". Fixed id so
+      // repeat visits just move this to the top instead of piling up.
+      _recordRecentlyViewed({id:'_portfolio_overview', title:'Portfolio', img:(PHOTOS[0]&&PHOTOS[0].img)||''}, 'portfolio');
+    }
     if (page==="shop") { renderShop(0); renderSocialProof(); renderRecentlyViewed(); }
     if (page==="home") { renderContinueWhereLeftOff(); }
     if (page==="journal") { renderJournal(); }
@@ -2788,6 +2800,9 @@ function _buildJournalList(posts, seriesFilter){
 }
 
 function _openJournalPost(post, posts){
+  // 2026-09-04 (Jeff's request): journal posts now feed "Continue where
+  // you left off" too, same as portfolio photos and shop prints.
+  _recordRecentlyViewed(post, 'journal');
   var wrap = document.getElementById('journalListWrap');
   var postWrap = document.getElementById('journalPostWrap');
   var content = document.getElementById('journalPostContent');
@@ -2929,6 +2944,8 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
   var valid = list.filter(function(rv){
     if(!rv || rv.id===excludeId) return false;
     if(rv.type==='photo') return PHOTOS.some(function(p){ return p.id===rv.id; });
+    if(rv.type==='journal') return !!(_journalData && Array.isArray(_journalData.posts) && _journalData.posts.some(function(p){ return p.id===rv.id; }));
+    if(rv.type==='portfolio') return true;
     return PRINTS.some(function(p){ return p.id===rv.id; });
   }).slice(0,4);
   if(!valid.length){ tray.style.display='none'; return; }
@@ -2948,7 +2965,8 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
     +'</div></div>';
   tray.querySelectorAll('.recently-viewed-card').forEach(function(card){
     card.addEventListener('click', function(){
-      if(card.dataset.ptype==='photo'){
+      var ptype = card.dataset.ptype;
+      if(ptype==='photo'){
         var photo = PHOTOS.find(function(p){ return p.id === card.dataset.pid; });
         if(!photo) return;
         navigate('portfolio');
@@ -2957,6 +2975,16 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
           var idx = list.findIndex(function(p){ return p.id === photo.id; });
           if(idx>=0) openLightbox(idx, list);
         }, 260);
+      } else if(ptype==='journal'){
+        navigate('journal');
+        setTimeout(function(){
+          if(!_journalData || !Array.isArray(_journalData.posts)) return;
+          var live = _journalData.posts.filter(function(p){ return !p.status||p.status==='live'; });
+          var post = live.find(function(p){ return p.id === card.dataset.pid; });
+          if(post) _openJournalPost(post, live);
+        }, 260);
+      } else if(ptype==='portfolio'){
+        navigate('portfolio');
       } else {
         var found = PRINTS.find(function(p){ return p.id === card.dataset.pid; });
         if(found){ navigate('shop'); setTimeout(function(){ openPrintDetail(found); }, 260); }
@@ -4408,9 +4436,9 @@ document.addEventListener("keydown",function(e){
         setTimeout(function(){
           hide(document.getElementById("soundHint"));
           markShown();
-        }, 5500);
+        }, 3000);
       }, 450);
-    }, 4000);
+    }, 2200);
   }, 1400);
 })();
 
@@ -4529,6 +4557,20 @@ fetch('/_data/settings/series.json')
     renderPhotoOfWeek();
   })
   .catch(function(){ _portfolioCmsLoaded=true; if(_portfolioPageActive()) renderPortfolio('all'); });
+// Preload journal posts too, so a "journal" entry in Continue Where You
+// Left Off can resolve and link correctly even if the visitor hasn't
+// opened the Journal page yet this session (2026-09-04, same reasoning
+// as the PHOTOS re-render calls just above).
+fetch('/_data/journal.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(d && Array.isArray(d.posts)){
+      _journalData = d;
+      if(typeof window.renderRecentlyViewed === 'function' && document.getElementById('recentlyViewedTray')) window.renderRecentlyViewed();
+      if(typeof window.renderContinueWhereLeftOff === 'function' && document.getElementById('continueTray')) window.renderContinueWhereLeftOff();
+    }
+  })
+  .catch(function(){});
 renderShop();
 // Homepage starts pre-rendered as the active page (no navigate('home') ever
 // fires for the initial landing — see the "home" branch inside navigate()
