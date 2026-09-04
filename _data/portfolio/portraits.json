@@ -65,12 +65,14 @@
     {
       "title": "Petra",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-petra.webp",
+      "date": "Mar 2022",
       "desc": "A portrait named for the person in it. Sometimes that is enough.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-petra.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Preparation",
