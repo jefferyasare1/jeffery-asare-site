@@ -121,12 +121,14 @@
     {
       "title": "On Purple",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-on-purple.webp",
+      "date": "Apr 2024",
       "desc": "Not burning out. Burning forward. The kind of light that does not ask permission.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-on-purple.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Man and the Moon",
