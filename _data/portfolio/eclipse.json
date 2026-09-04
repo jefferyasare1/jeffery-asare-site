@@ -65,12 +65,14 @@
     {
       "title": "Half Hidden",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-half-hidden.webp",
+      "date": "Oct 2022",
       "desc": "To be gilded is not to be whole. But there is beauty in the covering.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-half-hidden.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "He Wore No Crown",
