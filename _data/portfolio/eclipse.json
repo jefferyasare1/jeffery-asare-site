@@ -161,12 +161,14 @@
     {
       "title": "Blood and Shadow",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-blood-and-shadow.webp",
+      "date": "Apr 2023",
       "desc": "The series ends where it began — in the body, in the dark, in the self.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-blood-and-shadow.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     }
   ]
 }
