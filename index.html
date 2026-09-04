@@ -1319,7 +1319,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <h1 id="shopTitle">Fine Art Prints</h1>
     <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
   </div>
-  <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" onclick="setCurrency('GHS')">GH₵</button><button id="btnUSD" onclick="setCurrency('USD')">USD</button></div></div>
+  <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" data-currency="GHS" onclick="setCurrency('GHS')">GH₵</button><button id="btnUSD" data-currency="USD" onclick="setCurrency('USD')">USD</button></div></div>
   <div id="shopSocialProof" style="display:none;"></div>
   <div class="shop-list" id="shopList"></div>
   <div id="recentlyViewedTray" style="display:none;"></div>
@@ -1519,7 +1519,10 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         </div>
         <div class="pd-format-desc" id="pdFormatDesc" style="font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.5;"></div>
       </div>
-      <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">Production 7&ndash;14 business days after confirmation</div></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:.6rem;">
+        <div><div class="print-detail-price" id="pdPrice"></div><div style="font-size:11px;color:var(--muted);margin-top:.3rem;">Production 7&ndash;14 business days after confirmation</div></div>
+        <div class="currency-toggle" id="pdCurrencyToggle"><button id="pdBtnGHS" class="cur-active" data-currency="GHS" onclick="setCurrency('GHS')">GH₵</button><button id="pdBtnUSD" data-currency="USD" onclick="setCurrency('USD')">USD</button></div>
+      </div>
       <div class="qty-row" id="pdQtyRow" style="display:none;"><span class="qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="pdQtyMinus">&#8722;</button><span class="qty-val" id="pdQtyVal">1</span><button class="qty-btn" id="pdQtyPlus">&#43;</button></div></div>
       <div class="print-detail-actions" id="pdActions"></div>
       <p style="font-size:11px;color:var(--muted);margin-top:1rem;line-height:1.6;">By purchasing you agree to our <button onclick="navigate('terms')" style="background:none;border:none;font-family:inherit;font-size:inherit;color:var(--ink);cursor:pointer;text-decoration:underline;padding:0;">Terms of Sale</button>.</p>
@@ -3569,24 +3572,28 @@ var COUNTRIES=[
 })();
 // Auto-detect user's country — show toggle only for Ghana visitors
 (function detectCurrency(){
+  function showAllToggles(){
+    // There are now two currency toggles in the page (shop page + print
+    // detail page) -- show every one of them, not just whichever comes
+    // first in the document.
+    document.querySelectorAll('.currency-toggle').forEach(function(t){ t.style.display = 'inline-flex'; });
+  }
   fetch('https://ipapi.co/json/')
     .then(function(r){ return r.json(); })
     .then(function(d){
-      var toggle = document.querySelector('.currency-toggle');
       if(d && d.country_code && d.country_code === 'GH'){
-        // Ghana visitor — show the toggle
+        // Ghana visitor — show the toggle(s)
         IS_GHANA = true;
-        if(toggle) toggle.style.display = 'inline-flex';
+        showAllToggles();
       } else {
-        // Non-Ghana visitor — lock to USD, keep toggle hidden
+        // Non-Ghana visitor — lock to USD, keep toggle(s) hidden
         IS_GHANA = false;
         setCurrency('USD');
       }
     })
     .catch(function(){
-      // On error, default: show toggle (assumes Ghana)
-      var toggle = document.querySelector('.currency-toggle');
-      if(toggle) toggle.style.display = 'inline-flex';
+      // On error, default: show toggle(s) (assumes Ghana)
+      showAllToggles();
     });
 })();
 // Wire up WhatsApp float button with default inquiry message
@@ -3600,10 +3607,10 @@ var COUNTRIES=[
 function setCurrency(c){
   if(c==='GHS' && !IS_GHANA) return; // locked for non-Ghana visitors
   CURRENCY=c;
-  var ghsBtn=document.getElementById('btnGHS');
-  var usdBtn=document.getElementById('btnUSD');
-  if(ghsBtn) ghsBtn.classList.toggle('cur-active',c==='GHS');
-  if(usdBtn) usdBtn.classList.toggle('cur-active',c==='USD');
+  // Keep every currency toggle on the page in sync (shop page + print detail page).
+  document.querySelectorAll('.currency-toggle button[data-currency]').forEach(function(btn){
+    btn.classList.toggle('cur-active', btn.dataset.currency===c);
+  });
   renderShop(SHOP_PAGE);
   // Update open print detail price
   updatePdPrice();
@@ -3619,10 +3626,10 @@ function formatPrice(ghc){
 }
 // Wire currency toggle buttons via addEventListener (not inline onclick)
 (function(){
-  var ghsBtn=document.getElementById('btnGHS');
-  var usdBtn=document.getElementById('btnUSD');
-  if(ghsBtn){ ghsBtn.removeAttribute('onclick'); ghsBtn.addEventListener('click',function(){ setCurrency('GHS'); }); }
-  if(usdBtn){ usdBtn.removeAttribute('onclick'); usdBtn.addEventListener('click',function(){ setCurrency('USD'); }); }
+  document.querySelectorAll('.currency-toggle button[data-currency]').forEach(function(btn){
+    btn.removeAttribute('onclick');
+    btn.addEventListener('click',function(){ setCurrency(btn.dataset.currency); });
+  });
 })();
 
 // ===========================================================
