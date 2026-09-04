@@ -1751,6 +1751,36 @@
         </div>
       </div>
 
+      <!-- Privacy Policy -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Privacy Policy</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Each numbered section below is a heading and a paragraph of text. Leave a section's heading and text both blank to remove it from the page. Any email address you type (like hello@jefferyasare.com) automatically becomes a clickable link on the site &mdash; no need to add formatting yourself.</p>
+          <div class="cms-field"><label>Last updated</label><input type="text" id="st-privacy-updated" placeholder="September 2026"></div>
+          <div class="cms-field"><label>Section 1 heading</label><input type="text" id="st-privacy-h1"></div>
+          <div class="cms-field"><label>Section 1 text</label><textarea id="st-privacy-b1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 2 heading</label><input type="text" id="st-privacy-h2"></div>
+          <div class="cms-field"><label>Section 2 text</label><textarea id="st-privacy-b2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 3 heading</label><input type="text" id="st-privacy-h3"></div>
+          <div class="cms-field"><label>Section 3 text</label><textarea id="st-privacy-b3" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 4 heading</label><input type="text" id="st-privacy-h4"></div>
+          <div class="cms-field"><label>Section 4 text</label><textarea id="st-privacy-b4" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 5 heading</label><input type="text" id="st-privacy-h5"></div>
+          <div class="cms-field"><label>Section 5 text</label><textarea id="st-privacy-b5" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 6 heading</label><input type="text" id="st-privacy-h6"></div>
+          <div class="cms-field"><label>Section 6 text</label><textarea id="st-privacy-b6" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 7 heading</label><input type="text" id="st-privacy-h7"></div>
+          <div class="cms-field"><label>Section 7 text</label><textarea id="st-privacy-b7" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 8 heading</label><input type="text" id="st-privacy-h8"></div>
+          <div class="cms-field"><label>Section 8 text</label><textarea id="st-privacy-b8" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 9 heading</label><input type="text" id="st-privacy-h9"></div>
+          <div class="cms-field"><label>Section 9 text</label><textarea id="st-privacy-b9" rows="3"></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSitePrivacy()">Save</button><div class="cms-status" id="cms-privacy-status"></div></div>
+        </div>
+      </div>
+
     </div><!-- /cms-panel-site -->
 
     <!-- Files panel -->
@@ -6545,7 +6575,7 @@ function cmsSiteInit(){
   if(errEl){errEl.style.display='none';errEl.textContent='';}
   [['settings/general',cmsSitePopulateHero],['settings/about-page',cmsSitePopulateAbout],
    ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact],
-   ['settings/portfolio-page',cmsSitePopulatePortfolio]]
+   ['settings/portfolio-page',cmsSitePopulatePortfolio],['settings/privacy-policy',cmsSitePopulatePrivacy]]
   .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){
     if(!err){pair[1](data);return;}
     cmsShowLoadError('site', err, null);
@@ -6609,6 +6639,15 @@ function cmsSitePopulateContact(d){
   set('st-contact-sub',d.contact_sub);set('st-contact-email',d.contact_email);set('st-contact-response',d.contact_response);
   set('st-instagram-handle',d.contact_instagram_handle);set('st-instagram-url',d.contact_instagram_url);
 }
+function cmsSitePopulatePrivacy(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-privacy-updated',d.privacy_last_updated);
+  for(var i=1;i<=9;i++){
+    set('st-privacy-h'+i,d['privacy_s'+i+'_heading']);
+    set('st-privacy-b'+i,d['privacy_s'+i+'_body']);
+  }
+}
 
 function cmsSiteSave(fileKey,dataFn,statusId){
   var st=document.getElementById(statusId); st.className='cms-status'; st.textContent='Saving…';
@@ -6660,6 +6699,16 @@ function cmsSaveSiteContact(){
     return{contact_sub:g('st-contact-sub'),contact_email:g('st-contact-email'),contact_response:g('st-contact-response'),
       contact_instagram_handle:g('st-instagram-handle'),contact_instagram_url:g('st-instagram-url')};
   },'cms-contact-status');
+}
+function cmsSaveSitePrivacy(){
+  cmsSiteSave('settings/privacy-policy',function(){
+    var d={privacy_last_updated:g('st-privacy-updated')};
+    for(var i=1;i<=9;i++){
+      d['privacy_s'+i+'_heading']=g('st-privacy-h'+i);
+      d['privacy_s'+i+'_body']=g('st-privacy-b'+i);
+    }
+    return d;
+  },'cms-privacy-status');
 }
 
 // ── Image Upload ─────────────────────────────────────────────────
