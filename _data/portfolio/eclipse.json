@@ -29,12 +29,14 @@
     {
       "title": "What You Could Still See",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-what-you-could-still-see.webp",
+      "date": "Oct 2022",
       "desc": "The last moment of being fully visible. Everything after is a kind of fading.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-what-you-could-still-see.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Searching for Signs",
