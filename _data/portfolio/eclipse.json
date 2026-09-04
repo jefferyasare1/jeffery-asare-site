@@ -5,12 +5,14 @@
     {
       "title": "The Covering",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
+      "date": "Aug 2022",
+      "desc": "Something unseen presses forward. The veil is not a barrier; it is a message.",
       "img": "/images/portfolio/eclipse/ec-the-covering.webp",
-      "desc": "Something unseen presses forward. The veil is not a barrier \u2014 it is a message.",
-      "device": "iPhone",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "The Halo He Didn't Ask For",
@@ -77,7 +79,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/eclipse/ec-the-joy-that-holds.webp",
-      "desc": "Not the joy that erupts. The joy that stays \u2014 quiet, steady, unexplained.",
+      "desc": "Not the joy that erupts. The joy that stays — quiet, steady, unexplained.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -137,7 +139,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/eclipse/ec-blood-and-shadow.webp",
-      "desc": "The series ends where it began \u2014 in the body, in the dark, in the self.",
+      "desc": "The series ends where it began — in the body, in the dark, in the self.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
