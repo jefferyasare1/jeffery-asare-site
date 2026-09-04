@@ -4831,10 +4831,28 @@ fetch('/_data/settings/contact-info.json')
 
 
 // Load shop prints from CMS
+// Retries on failure - a plain single-attempt fetch here was intermittently
+// failing on real page loads (likely simple connection contention with the
+// many other requests firing at once on first load), silently leaving the
+// page stuck on its placeholder demo prints with no visible error. That
+// turned out to be the real cause behind several "it works, then it
+// doesn't" reports - not caching, not a code bug in the visible feature
+// itself, just this one fetch occasionally losing the race.
 window.__shopDataLoaded = false;
-fetch('/_data/prints.json')
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(d){
+function _loadPrintsFromCMS(attempt){
+  attempt = attempt || 1;
+  fetch('/_data/prints.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('prints.json HTTP '+r.status)); })
+    .then(_onPrintsLoaded)
+    .catch(function(err){
+      if(attempt < 4){
+        setTimeout(function(){ _loadPrintsFromCMS(attempt+1); }, attempt*400);
+      } else {
+        window.__shopDataLoaded = true;
+      }
+    });
+}
+function _onPrintsLoaded(d){
     window.__shopDataLoaded = true;
     if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
     PRINTS = d.prints.map(function(p){
@@ -4875,7 +4893,8 @@ fetch('/_data/prints.json')
         }
       }
     }catch(e){}
-      }).catch(function(){ window.__shopDataLoaded = true; });
+}
+_loadPrintsFromCMS();
 </script>
 
 <!-- CART FLOAT -->
