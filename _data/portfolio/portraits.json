@@ -125,12 +125,14 @@
     {
       "title": "Somewhere Else",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-somewhere-else.webp",
+      "date": "Mar 2023",
       "desc": "Far enough to see clearly. Close enough to feel it.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-somewhere-else.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "The Burden of Awareness",
