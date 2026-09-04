@@ -149,12 +149,14 @@
     {
       "title": "Before the Words Come",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-before-the-words-come.webp",
+      "date": "Apr 2023",
       "desc": "The moment just before language arrives. Pure feeling, unmediated.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-before-the-words-come.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Blood and Shadow",
