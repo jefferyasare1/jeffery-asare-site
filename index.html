@@ -198,7 +198,7 @@ html.darkroom .size-pill.active{background:#c8c0b4;color:#0d0d0d;}
 .port-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
 .port-title-row h1{margin-bottom:0;}
 /* ---- Util Bar — inline in portfolio page header ---- */
-#utilBar{display:flex;flex-direction:row;gap:.5rem;flex-shrink:0;opacity:1;}
+#utilBar{display:flex;flex-direction:row;gap:.5rem;flex-shrink:0;opacity:1;margin-left:1.2rem;}
 /* Button base */
 .nav-util-btn{width:33px;height:33px;border-radius:50%;border:1px solid rgba(0,0,0,.14);background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;flex-shrink:0;}
 .nav-util-btn svg{display:block;flex-shrink:0;}
@@ -211,6 +211,15 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .nav-util-btn[data-tip]{position:relative;}
 .nav-util-btn[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:500;}
 .nav-util-btn[data-tip]:hover::after{opacity:1;}
+/* One-time, first-visit hint bubble for the dark room / ambient sound
+   toggles -- unlike the hover tooltip above (which touch devices never
+   see), this is a real element shown automatically once, then never
+   again. See the "FIRST-VISIT HINTS" script block. */
+.nav-hint-bubble{position:absolute;top:calc(100% + 10px);right:0;width:max-content;max-width:200px;background:rgba(0,0,0,.86);color:#fff;font-size:11.5px;line-height:1.55;text-align:left;padding:.7rem .9rem;border-radius:9px;pointer-events:none;opacity:0;transform:translateY(-5px);transition:opacity .45s ease,transform .45s ease;z-index:600;}
+.nav-hint-bubble.show{opacity:1;transform:translateY(0);}
+.nav-hint-bubble::before{content:'';position:absolute;bottom:100%;right:12px;border:5px solid transparent;border-bottom-color:rgba(0,0,0,.86);}
+html.darkroom .nav-hint-bubble{background:rgba(232,226,216,.94);color:#0d0d0d;}
+html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94);}
 /* Suppress tooltips on touch screens — hover state sticks and labels persist */
 @media(hover:none){.nav-util-btn[data-tip]::after{display:none;}}
 #surpriseBtn{display:none;}
@@ -1704,6 +1713,7 @@ function navigate(page) {
     // Show WhatsApp float only on Contact page
     var waFloatEl = document.getElementById('waFloat');
     if(waFloatEl) waFloatEl.style.display = (page === 'contact') ? 'flex' : 'none';
+    if(window._positionUtilBar) window._positionUtilBar();
     window.scrollTo(0,0);
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
@@ -4185,7 +4195,9 @@ document.addEventListener("keydown",function(e){
 // ===========================================================
 // LOADING SCREEN
 // ============================================================
-// UTIL BAR — dark room + ambient toggles, inline in portfolio header
+// UTIL BAR — dark room + ambient toggles, shown in every page's nav bar
+// (2026-09-04: moved out of the portfolio-only header so the toggles are
+// reachable from anywhere on the site, not just after finding Portfolio).
 // ============================================================
 (function(){
   var MOON='<svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 2A5 5 0 1 0 12 7 3.8 3.8 0 0 1 7 2Z"/></svg>';
@@ -4195,12 +4207,23 @@ document.addEventListener("keydown",function(e){
   var bar=document.createElement("div");
   bar.id="utilBar";
   bar.innerHTML=
-    '<button class="nav-util-btn darkroom-toggle" data-tip="Dark room" aria-label="Toggle dark room mode">'+MOON+SUN+'</button>'+
-    '<button class="nav-util-btn ambient-toggle" data-tip="Ambient melody" aria-label="Toggle ambient melody">'+SON+SOFF+'</button>';
-  // Insert into the portfolio page-header title row so it scrolls with content
-  var portRow=document.querySelector('.port-title-row');
-  if(portRow){ portRow.appendChild(bar); }
-  else { document.body.appendChild(bar); }
+    '<button class="nav-util-btn darkroom-toggle" data-tip="Dark room" aria-label="Toggle dark room mode">'+MOON+SUN+'<span class="nav-hint-bubble" id="darkHint">This works in the dark too.</span></button>'+
+    '<button class="nav-util-btn ambient-toggle" data-tip="Ambient melody" aria-label="Toggle ambient melody">'+SON+SOFF+'<span class="nav-hint-bubble" id="soundHint">Some quiet music, if you\u2019d like to sit with the photographs a little longer.</span></button>';
+
+  // Moves the single utilBar node into whichever page is currently active,
+  // right before that page's hamburger button so it reads as part of the
+  // nav rather than a stray floating element. Safe to call repeatedly --
+  // it no-ops if the bar is already in the right place.
+  window._positionUtilBar = function(){
+    var active=document.querySelector('.page.active');
+    if(!active) return;
+    var nav=active.querySelector('nav, .inner-nav');
+    if(!nav) return;
+    var ham=nav.querySelector('.ham-btn');
+    if(bar.parentElement===nav) return;
+    if(ham) nav.insertBefore(bar,ham); else nav.appendChild(bar);
+  };
+  window._positionUtilBar();
 })();
 
 // ============================================================
@@ -4309,6 +4332,53 @@ document.addEventListener("keydown",function(e){
       fadeTo(0,TOGGLE_FADE_MS);
     }
   });
+})();
+
+// ============================================================
+// FIRST-VISIT HINTS — quietly introduce dark room + ambient sound once,
+// then never again. These are real DOM bubbles (unlike the hover-only
+// data-tip tooltip on the buttons themselves), so, unlike that tooltip,
+// they actually reach mobile visitors, not just desktop hover. Jeff,
+// 2026-09-04: toggles were easy to miss entirely; wants a quiet one-time
+// hint rather than a permanent label or badge.
+// ============================================================
+(function(){
+  var KEY="jaHintsShown";
+  try{ if(localStorage.getItem(KEY)) return; }catch(e){ return; }
+  var shown=false;
+  function markShown(){
+    if(shown) return;
+    shown=true;
+    try{ localStorage.setItem(KEY,"1"); }catch(e){}
+  }
+  function hide(el){ if(el) el.classList.remove("show"); }
+  function show(el){ if(el) el.classList.add("show"); }
+
+  // Dismiss immediately (and remember) if the visitor finds either toggle
+  // on their own before the timed sequence below finishes.
+  document.addEventListener("click", function(e){
+    if(e.target.closest(".darkroom-toggle,.ambient-toggle")){
+      hide(document.getElementById("darkHint"));
+      hide(document.getElementById("soundHint"));
+      markShown();
+    }
+  });
+
+  setTimeout(function(){
+    if(shown) return;
+    show(document.getElementById("darkHint"));
+    setTimeout(function(){
+      hide(document.getElementById("darkHint"));
+      setTimeout(function(){
+        if(shown) return;
+        show(document.getElementById("soundHint"));
+        setTimeout(function(){
+          hide(document.getElementById("soundHint"));
+          markShown();
+        }, 5500);
+      }, 450);
+    }, 4000);
+  }, 1400);
 })();
 
 // ============================================================
