@@ -7275,9 +7275,20 @@ function refreshReviewsBadge(){
   // fetch down, or the session genuinely expired) it falls back to showing
   // the gate again instead of leaving the app silently running without a
   // working key.
+  // Retries a couple of times before giving up (Jeff's report, 2026-09-04):
+  // a single attempt here was occasionally losing a transient race on page
+  // reload (a slow/cold API call, a brief network blip) and logging Jeff
+  // out mid-work with no real session problem -- the same class of bug
+  // the shop page's catalog loader had earlier this week.
   if(sessionStorage.getItem(AUTH_KEY) === '1'){
-    fetchKeyAndUnlock(HASH).then(function(ok){
-      if(!ok){
+    (function reverify(attempt){
+      attempt = attempt || 1;
+      fetchKeyAndUnlock(HASH).then(function(ok){
+        if(ok) return;
+        if(attempt < 3){
+          setTimeout(function(){ reverify(attempt + 1); }, attempt * 900);
+          return;
+        }
         sessionStorage.removeItem(AUTH_KEY);
         var gate = document.getElementById('pw-gate');
         var errEl = document.getElementById('pw-error');
@@ -7285,8 +7296,8 @@ function refreshReviewsBadge(){
         if(errEl) errEl.textContent = 'Session expired. Please log in again.';
         var inp = document.getElementById('pw-input');
         if(inp) inp.focus();
-      }
-    });
+      });
+    })();
   }
 
   async function checkPassword(){
