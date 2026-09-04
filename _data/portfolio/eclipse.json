@@ -77,12 +77,14 @@
     {
       "title": "He Wore No Crown",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-he-wore-no-crown.webp",
+      "date": "Sep 2023",
       "desc": "Bathed in something warm and unearned. Stillness as its own kind of grace.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-he-wore-no-crown.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "The Joy That Holds",
