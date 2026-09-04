@@ -137,12 +137,14 @@
     {
       "title": "Man and the Moon",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-man-and-the-moon.webp",
+      "date": "Nov 2022",
       "desc": "Heavy and luminous at once. To carry gold is still to carry weight.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-man-and-the-moon.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Before the Words Come",
