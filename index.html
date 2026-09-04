@@ -198,7 +198,7 @@ html.darkroom .size-pill.active{background:#c8c0b4;color:#0d0d0d;}
 .port-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
 .port-title-row h1{margin-bottom:0;}
 /* ---- Util Bar — inline in portfolio page header ---- */
-#utilBar{display:flex;flex-direction:row;gap:.5rem;flex-shrink:0;opacity:1;margin-left:1.2rem;}
+#utilBar{display:flex;flex-direction:row;gap:.5rem;flex-shrink:0;opacity:1;}
 /* Button base */
 .nav-util-btn{width:33px;height:33px;border-radius:50%;border:1px solid rgba(0,0,0,.14);background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;flex-shrink:0;}
 .nav-util-btn svg{display:block;flex-shrink:0;}
@@ -421,6 +421,21 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
    so the thumbnails read noticeably smaller while the row layout (7
    across on desktop, 3 on mobile) stays the same. */
 #recentlyViewedTray .recently-viewed-card{width:75%;margin:0 auto;}
+/* Homepage's "Continue where you left off" tray, made 70% smaller than its
+   previous (full) size, and separately widened to cover anything recently
+   viewed on the site, not just shop prints (Jeff's request, 2026-09-04).
+   Same column-count + card-width% technique as the shop tray above: more
+   columns so each cell is narrower, then a card width percentage within
+   that cell for the final size -- 8 cols at 60% width, or 2 cols at 30%
+   width on mobile, both work out to 30% of the original card size. */
+#continueTray .recently-viewed-grid{grid-template-columns:repeat(8,1fr);gap:.6rem;}
+#continueTray .recently-viewed-card{width:60%;margin:0 auto;}
+#continueTray .recently-viewed-label{font-size:9px;margin-bottom:.7rem;}
+#continueTray .recently-viewed-title{font-size:9.5px;margin-top:.25rem;}
+@media(max-width:700px){
+  #continueTray .recently-viewed-grid{grid-template-columns:repeat(2,1fr);}
+  #continueTray .recently-viewed-card{width:30%;margin:0 auto;}
+}
 .journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
 .journal-suggestions-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
 .journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
@@ -1713,7 +1728,6 @@ function navigate(page) {
     // Show WhatsApp float only on Contact page
     var waFloatEl = document.getElementById('waFloat');
     if(waFloatEl) waFloatEl.style.display = (page === 'contact') ? 'flex' : 'none';
-    if(window._positionUtilBar) window._positionUtilBar();
     window.scrollTo(0,0);
     injectFooters();
     if (page==="portfolio") { buildFilterBar(); renderPortfolio("all"); }
@@ -2022,6 +2036,12 @@ function openLightbox(idx,photos){
   updateLightbox(false);
   document.getElementById("lightbox").classList.add("open");
   document.body.style.overflow="hidden";
+  // Feeds the same "recently viewed" list the shop print-detail page
+  // writes to, so Continue Where You Left Off (and the shop's own Recently
+  // Viewed tray) can surface a portfolio photo too, not just prints —
+  // see _recordRecentlyViewed above (Jeff's request, 2026-09-04).
+  var _p=photos&&photos[idx];
+  if(_p) _recordRecentlyViewed(_p,'photo');
 }
 function updateLightbox(crossfade){
   var p=currentLbPhotos[currentLbIdx];
@@ -2868,32 +2888,38 @@ function renderSocialProof(){
     .catch(function(){ el.style.display='none'; });
 }
 
-// ── Recently viewed prints: record + render ──────────────────
-// Records a print-detail view to localStorage so the Shop tray and the
-// homepage "Continue where you left off" strip both have something real to
-// show. NOTE: before 2026-08-23 this key was only ever *read*, never
-// *written* — nothing on the site called localStorage.setItem for it, so
-// both trays always saw an empty list and stayed permanently hidden. This
-// is the fix for that, plus two more bugs found alongside it: the reader
-// matched entries by `title` (fragile — breaks on a rename) instead of the
-// stable `id`, and the card link pointed at `/prints/<slug>`, a route that
-// doesn't exist — the real print-detail URL scheme is `?print=<id>` (see
-// the deep-link handling in INIT and the pushState call above).
-function _recordRecentlyViewed(print){
-  if(!print || !print.id) return;
+// ── Recently viewed: record + render ──────────────────
+// Records a print-detail OR portfolio-photo view to localStorage so the
+// Shop tray and the homepage "Continue where you left off" strip both have
+// something real to show. NOTE: before 2026-08-23 this key was only ever
+// *read*, never *written* — nothing on the site called localStorage.setItem
+// for it, so both trays always saw an empty list and stayed permanently
+// hidden. This is the fix for that, plus two more bugs found alongside it:
+// the reader matched entries by `title` (fragile — breaks on a rename)
+// instead of the stable `id`, and the card link pointed at `/prints/<slug>`,
+// a route that doesn't exist — the real print-detail URL scheme is
+// `?print=<id>` (see the deep-link handling in INIT and the pushState call
+// above).
+// 2026-09-04: widened from prints-only to also cover portfolio photos
+// (Jeff's request: "Continue where you left off" shouldn't be shop-only) —
+// each entry now carries a `type` ('print' or 'photo') so the renderer and
+// click handler below know which collection to look the item up in and
+// how to navigate back to it.
+function _recordRecentlyViewed(item, type){
+  if(!item || !item.id) return;
   try{
     var list = JSON.parse(localStorage.getItem('ja_recently_viewed')||'[]');
     if(!Array.isArray(list)) list=[];
   } catch(e){ list=[]; }
-  list = list.filter(function(rv){ return rv && rv.id !== print.id; });
-  list.unshift({id:print.id, title:print.title, img:print.img||'', ts:Date.now()});
+  list = list.filter(function(rv){ return rv && rv.id !== item.id; });
+  list.unshift({id:item.id, type:type||'print', title:item.title, img:item.img||'', ts:Date.now()});
   list = list.slice(0,8);
   try{ localStorage.setItem('ja_recently_viewed', JSON.stringify(list)); } catch(e){}
 }
 
 // Shared renderer for both trays — same card markup, different container
-// and heading. `excludeId` drops the print currently open (relevant if this
-// is ever called from the print-detail page itself; harmless elsewhere).
+// and heading. `excludeId` drops the item currently open (relevant if this
+// is ever called from a detail page itself; harmless elsewhere).
 function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId){
   var tray = document.getElementById(containerId);
   if(!tray) return;
@@ -2901,17 +2927,20 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
   try { list = JSON.parse(localStorage.getItem('ja_recently_viewed')||'[]'); } catch(e){ list=[]; }
   if(!Array.isArray(list)) list=[];
   var valid = list.filter(function(rv){
-    return rv && rv.id!==excludeId && PRINTS.some(function(p){ return p.id===rv.id; });
+    if(!rv || rv.id===excludeId) return false;
+    if(rv.type==='photo') return PHOTOS.some(function(p){ return p.id===rv.id; });
+    return PRINTS.some(function(p){ return p.id===rv.id; });
   }).slice(0,4);
   if(!valid.length){ tray.style.display='none'; return; }
   tray.innerHTML = '<div class="recently-viewed-wrap">'
     +'<div class="'+(headingClass||'recently-viewed-label')+'">'+heading+'</div>'
     +'<div class="recently-viewed-grid">'
     +valid.map(function(rv){
-      // A div + click handler, not <a href="?print=...">, to match the same
-      // SPA-navigation idiom pdRelated uses just above (openPrintDetail()
-      // directly, no full page reload) rather than a hard link.
-      return '<div class="recently-viewed-card" data-pid="'+rv.id+'">'
+      // A div + click handler, not an <a href>, to match the same
+      // SPA-navigation idiom used elsewhere (openPrintDetail()/
+      // openLightbox() directly, no full page reload) rather than a hard
+      // link.
+      return '<div class="recently-viewed-card" data-pid="'+rv.id+'" data-ptype="'+(rv.type||'print')+'">'
         +(rv.img?'<img class="recently-viewed-img" src="'+rv.img+'" alt="'+rv.title+'" loading="lazy">':'<div class="recently-viewed-img" style="background:var(--warm);"></div>')
         +'<div class="recently-viewed-title">'+rv.title+'</div>'
         +'</div>';
@@ -2919,8 +2948,19 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
     +'</div></div>';
   tray.querySelectorAll('.recently-viewed-card').forEach(function(card){
     card.addEventListener('click', function(){
-      var found = PRINTS.find(function(p){ return p.id === card.dataset.pid; });
-      if(found){ navigate('shop'); setTimeout(function(){ openPrintDetail(found); }, 260); }
+      if(card.dataset.ptype==='photo'){
+        var photo = PHOTOS.find(function(p){ return p.id === card.dataset.pid; });
+        if(!photo) return;
+        navigate('portfolio');
+        setTimeout(function(){
+          var list = PHOTOS.filter(function(p){ return p.title!=="Untitled" && !p.hidden; });
+          var idx = list.findIndex(function(p){ return p.id === photo.id; });
+          if(idx>=0) openLightbox(idx, list);
+        }, 260);
+      } else {
+        var found = PRINTS.find(function(p){ return p.id === card.dataset.pid; });
+        if(found){ navigate('shop'); setTimeout(function(){ openPrintDetail(found); }, 260); }
+      }
     });
   });
   tray.style.display = '';
@@ -3144,7 +3184,7 @@ function openPrintDetail(print){
   var rp=document.getElementById('pdRoomPreview'); if(rp) rp.style.display='none';
   // Give this print its own shareable URL
   history.pushState({print:print.id}, print.title+' — Jeffery Asare', '?print='+print.id);
-  _recordRecentlyViewed(print);
+  _recordRecentlyViewed(print, 'print');
 
   // Render "You might also like" after navigation
   setTimeout(function(){
@@ -4210,20 +4250,13 @@ document.addEventListener("keydown",function(e){
     '<button class="nav-util-btn darkroom-toggle" data-tip="Dark room" aria-label="Toggle dark room mode">'+MOON+SUN+'<span class="nav-hint-bubble" id="darkHint">This works in the dark too.</span></button>'+
     '<button class="nav-util-btn ambient-toggle" data-tip="Ambient melody" aria-label="Toggle ambient melody">'+SON+SOFF+'<span class="nav-hint-bubble" id="soundHint">Some quiet music, if you\u2019d like to sit with the photographs a little longer.</span></button>';
 
-  // Moves the single utilBar node into whichever page is currently active,
-  // right before that page's hamburger button so it reads as part of the
-  // nav rather than a stray floating element. Safe to call repeatedly --
-  // it no-ops if the bar is already in the right place.
-  window._positionUtilBar = function(){
-    var active=document.querySelector('.page.active');
-    if(!active) return;
-    var nav=active.querySelector('nav, .inner-nav');
-    if(!nav) return;
-    var ham=nav.querySelector('.ham-btn');
-    if(bar.parentElement===nav) return;
-    if(ham) nav.insertBefore(bar,ham); else nav.appendChild(bar);
-  };
-  window._positionUtilBar();
+  // Insert into the portfolio page-header title row so it scrolls with
+  // content (Jeff's request, 2026-09-04: keep this Portfolio-only, not
+  // site-wide -- an earlier version of this moved it into every page's
+  // nav, and that's been reverted).
+  var portRow=document.querySelector('.port-title-row');
+  if(portRow){ portRow.appendChild(bar); }
+  else { document.body.appendChild(bar); }
 })();
 
 // ============================================================
@@ -4486,6 +4519,11 @@ fetch('/_data/settings/series.json')
         tech:[["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]};
     });
     if(flat.length) PHOTOS=flat;
+    // Re-render trays that may have already drawn against the still-empty
+    // PHOTOS array before this CMS data arrived (2026-09-04, same reasoning
+    // as the PRINTS-side refresh in _onPrintsLoaded further down).
+    if(typeof window.renderRecentlyViewed === 'function' && document.getElementById('recentlyViewedTray')) window.renderRecentlyViewed();
+    if(typeof window.renderContinueWhereLeftOff === 'function' && document.getElementById('continueTray')) window.renderContinueWhereLeftOff();
     _portfolioCmsLoaded=true;
     if(_portfolioPageActive()) renderPortfolio('all');
     renderPhotoOfWeek();
