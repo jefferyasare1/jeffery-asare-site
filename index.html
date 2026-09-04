@@ -1298,7 +1298,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="about-col-body">
         <p id="aboutStreetP1">Much of my street and documentary work happens without asking first. A market stall, a corner, a face caught mid-thought: the moment exists because no one was told to hold still for it. Asking first would have made a different, lesser photograph. This isn't carelessness. It's a discipline with its own history, the same one behind a century of documentary work that now hangs in galleries.</p>
         <p id="aboutStreetP2">I photograph with care. I don't chase people into situations that could embarrass or endanger them, and a photograph earns its place in this body of work because it holds something true on its own, never because of who happens to be in the frame.</p>
-        <p id="aboutStreetP3">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
+        <p id="aboutStreetP3">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>. I take that seriously.</p>
       </div>
     </div>
   </div>
@@ -4828,10 +4828,18 @@ fetch('/_data/settings/about-page.json')
       aboutPhilHeading:'about_phil_heading',
       aboutPhilP1:'about_phil_p1',aboutPhilP2:'about_phil_p2',aboutPhilP3:'about_phil_p3',
       aboutStreetHeading:'about_street_heading',
-      aboutStreetP1:'about_street_p1',aboutStreetP2:'about_street_p2',aboutStreetP3:'about_street_p3'};
+      aboutStreetP1:'about_street_p1',aboutStreetP2:'about_street_p2'};
     Object.keys(map).forEach(function(id){
       var val=s[map[id]]; if(val){ var el=document.getElementById(id); if(el) el.textContent=val; }
     });
+    // Street photography, paragraph 3: mentions an email address, so it's
+    // rendered with the same escape + auto-linkify treatment Privacy Policy
+    // and Terms of Sale use, rather than plain textContent, so a plain
+    // email address typed in the dashboard still shows up clickable here.
+    if(s.about_street_p3){
+      var p3=document.getElementById('aboutStreetP3');
+      if(p3) p3.innerHTML=_legalLinkifyEmails(_legalEscapeHtml(s.about_street_p3));
+    }
   }).catch(function(){});
 
 // Load shop page text
