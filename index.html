@@ -391,6 +391,12 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 #recentlyViewedTray .recently-viewed-label{font-size:9px;margin-bottom:.8rem;}
 #recentlyViewedTray .recently-viewed-title{font-size:10.5px;margin-top:.3rem;}
 @media(max-width:700px){#recentlyViewedTray .recently-viewed-grid{grid-template-columns:repeat(3,1fr);}}
+/* A further 25% size cut on top of the above (Jeff's request, 2026-09-04).
+   Each card (photo + caption) is shrunk to 75% width and centred in its
+   grid cell -- exact math, rather than juggling column counts again --
+   so the thumbnails read noticeably smaller while the row layout (7
+   across on desktop, 3 on mobile) stays the same. */
+#recentlyViewedTray .recently-viewed-card{width:75%;margin:0 auto;}
 .journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
 .journal-suggestions-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
 .journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
