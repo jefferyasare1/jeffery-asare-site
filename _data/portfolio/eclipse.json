@@ -113,12 +113,14 @@
     {
       "title": "No More Than a Shadow",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-no-more-than-a-shadow.webp",
+      "date": "Nov 2022",
       "desc": "Reduced to outline. What remains when everything else is stripped away.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-no-more-than-a-shadow.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "On Purple",
