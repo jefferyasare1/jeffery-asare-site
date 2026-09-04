@@ -2950,6 +2950,8 @@ function openPrintDetail(print){
   currentPrint=print;
   selectedFormat='rolled';
   updatePdFormatDesc();
+  var pdFormatRow=document.getElementById('pdFormatRow');
+  if(pdFormatRow) pdFormatRow.style.display=print.soldOut?'none':'block';
   var pdSeries=document.getElementById("pdSeries"),pdTitle=document.getElementById("pdTitle"),pdDesc=document.getElementById("pdDesc");
   var pdSpecs=document.getElementById("pdSpecs"),pdSizes=document.getElementById("pdSizes"),pdPrice=document.getElementById("pdPrice");
   var pdActions=document.getElementById("pdActions"),pdImgWrap=document.getElementById("pdImgWrap");
@@ -3004,11 +3006,8 @@ function openPrintDetail(print){
   if(pdCountry&&pdDeliveryNote){
     pdCountry.onchange=function(){
       var code=pdCountry.value;
-      var pdFormatRow=document.getElementById('pdFormatRow');
       if(!code){
         pdDeliveryNote.innerHTML='';
-        if(pdFormatRow) pdFormatRow.style.display='none';
-        resetPdFormat();
         return;
       }
       try{ localStorage.setItem('ja_buyer_country', code); }catch(e){}
@@ -3019,12 +3018,11 @@ function openPrintDetail(print){
       } else {
         pdDeliveryNote.innerHTML='<strong>Shipping: Quote on request</strong> &middot; '+country.time+'<br>We\'ll reach out with a shipping quote before production begins.';
       }
-      if(pdFormatRow) pdFormatRow.style.display='block';
-      updatePdFormatDesc();
     };
     // Remember the buyer's country across page refreshes/deep-link reloads,
-    // so the delivery note and Rolled/Framed toggle don't appear to
-    // vanish just because the browser reloaded the page.
+    // so the delivery note doesn't appear to vanish just because the
+    // browser reloaded the page. (The Rolled/Framed toggle no longer
+    // depends on country selection -- it's shown by default in openPrintDetail.)
     if(!print.soldOut){
       try{
         var savedCountry=localStorage.getItem('ja_buyer_country');
@@ -3072,8 +3070,7 @@ function openPrintDetail(print){
         var sizeLabel=activePill?activePill.textContent:print.sizes[0].label;
         var sizePrice=activePill?parseFloat(activePill.dataset.price):print.sizes[0].price;
         var qty=pdQtyVal?parseInt(pdQtyVal.textContent)||1:1;
-        var pdFormatRow=document.getElementById('pdFormatRow');
-        var cartFormat=(pdFormatRow&&pdFormatRow.style.display!=='none'&&selectedFormat==='framed')?'framed':'rolled';
+        var cartFormat=selectedFormat==='framed'?'framed':'rolled';
         var cartFrameFee=cartFormat==='framed'?frameSurchargeGHS(sizeLabel):0;
         addToCart(print,sizeLabel,sizePrice+cartFrameFee,qty,cartFormat);
         openCart();
