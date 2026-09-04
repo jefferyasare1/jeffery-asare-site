@@ -1712,6 +1712,7 @@
           <div class="cms-field"><label>Location - paragraph 1</label><textarea id="st-loc-p1" rows="3"></textarea></div>
           <div class="cms-field"><label>Location - paragraph 2</label><textarea id="st-loc-p2" rows="3"></textarea></div>
           <div class="cms-field"><label>Location - paragraph 3</label><textarea id="st-loc-p3" rows="3"></textarea></div>
+          <div class="cms-field"><label>Location - paragraph 4</label><textarea id="st-loc-p4" rows="3"></textarea></div>
           <div class="cms-field"><label>Philosophy heading</label><input type="text" id="st-phil-heading"></div>
           <div class="cms-field"><label>Philosophy - paragraph 1</label><textarea id="st-phil-p1" rows="3"></textarea></div>
           <div class="cms-field"><label>Philosophy - paragraph 2</label><textarea id="st-phil-p2" rows="3"></textarea></div>
@@ -6661,7 +6662,7 @@ function cmsSitePopulateAbout(d){
   function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
   set('st-bio1',d.about_bio1);set('st-bio2',d.about_bio2);set('st-bio3',d.about_bio3);set('st-bio4',d.about_bio4);set('st-bio5',d.about_bio5);
   set('st-about-caption',d.about_caption);set('st-loc-heading',d.about_loc_heading);
-  set('st-loc-p1',d.about_loc_p1);set('st-loc-p2',d.about_loc_p2);set('st-loc-p3',d.about_loc_p3);
+  set('st-loc-p1',d.about_loc_p1);set('st-loc-p2',d.about_loc_p2);set('st-loc-p3',d.about_loc_p3);set('st-loc-p4',d.about_loc_p4);
   set('st-phil-heading',d.about_phil_heading);set('st-phil-p1',d.about_phil_p1);set('st-phil-p2',d.about_phil_p2);set('st-phil-p3',d.about_phil_p3);
   set('st-street-heading',d.about_street_heading);set('st-street-p1',d.about_street_p1);set('st-street-p2',d.about_street_p2);set('st-street-p3',d.about_street_p3);
 }
@@ -6732,7 +6733,7 @@ function cmsSaveSiteAbout(){
   cmsSiteSave('settings/about-page',function(){
     return{about_bio1:g('st-bio1'),about_bio2:g('st-bio2'),about_bio3:g('st-bio3'),about_bio4:g('st-bio4'),about_bio5:g('st-bio5'),
       about_caption:g('st-about-caption'),about_loc_heading:g('st-loc-heading'),
-      about_loc_p1:g('st-loc-p1'),about_loc_p2:g('st-loc-p2'),about_loc_p3:g('st-loc-p3'),
+      about_loc_p1:g('st-loc-p1'),about_loc_p2:g('st-loc-p2'),about_loc_p3:g('st-loc-p3'),about_loc_p4:g('st-loc-p4'),
       about_phil_heading:g('st-phil-heading'),about_phil_p1:g('st-phil-p1'),about_phil_p2:g('st-phil-p2'),about_phil_p3:g('st-phil-p3'),
       about_street_heading:g('st-street-heading'),about_street_p1:g('st-street-p1'),about_street_p2:g('st-street-p2'),about_street_p3:g('st-street-p3')};
   },'cms-about-status');
