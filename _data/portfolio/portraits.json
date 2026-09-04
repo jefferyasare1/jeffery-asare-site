@@ -53,12 +53,14 @@
     {
       "title": "Mysteries Untold",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-mysteries-untold.webp",
+      "date": "Apr 2022",
       "desc": "Some things the subject keeps. The photograph holds the space around them.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-mysteries-untold.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile and Snapseed",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Petra",
