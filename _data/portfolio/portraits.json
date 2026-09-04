@@ -5,12 +5,14 @@
     {
       "title": "Beyond the Surface",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-beyond-the-surface.webp",
+      "date": "Apr 2022",
       "desc": "What the camera catches is never the whole person. This one gets close.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-beyond-the-surface.webp",
+      "device": "Google Pixel 1",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Blinded by the Spotlight",
@@ -67,7 +69,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-preparation.webp",
-      "desc": "Before the moment, there is always this \u2014 the getting ready.",
+      "desc": "Before the moment, there is always this — the getting ready.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -97,7 +99,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-in-the-red.webp",
-      "desc": "The hours that are not gold or blue but red \u2014 urgent, heated, unmistakable.",
+      "desc": "The hours that are not gold or blue but red — urgent, heated, unmistakable.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -147,7 +149,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-the-crown.webp",
-      "desc": "Worn or implied \u2014 the crown is in the posture, in the gaze.",
+      "desc": "Worn or implied — the crown is in the posture, in the gaze.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -157,7 +159,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-the-sun-found-her.webp",
-      "desc": "The wind does not hold \u2014 it moves. But in this frame, it paused.",
+      "desc": "The wind does not hold — it moves. But in this frame, it paused.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -207,7 +209,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-before-he-looked-up.webp",
-      "desc": "Not the hours of crisis \u2014 the hours that simply weigh more than others.",
+      "desc": "Not the hours of crisis — the hours that simply weigh more than others.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -227,7 +229,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-the-gaze.webp",
-      "desc": "Something carried from before \u2014 a warmth that persists regardless of the temperature.",
+      "desc": "Something carried from before — a warmth that persists regardless of the temperature.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
@@ -327,7 +329,7 @@
       "loc": "Accra, Ghana",
       "date": "2026.01",
       "img": "/images/portfolio/portraits/pt-looking-past-it-all.webp",
-      "desc": "Looking up \u2014 at light, at possibility, at something just out of frame.",
+      "desc": "Looking up — at light, at possibility, at something just out of frame.",
       "device": "iPhone",
       "format": "ProRAW",
       "edited_in": "Lightroom Mobile"
