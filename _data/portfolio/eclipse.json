@@ -41,12 +41,14 @@
     {
       "title": "Searching for Signs",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-searching-for-signs.webp",
+      "date": "Oct 2022",
       "desc": "Eyes open, looking inward. The signs were always there.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-searching-for-signs.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Don't Look Away",
