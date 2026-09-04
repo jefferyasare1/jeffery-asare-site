@@ -411,36 +411,30 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
    to fit, 3 across on mobile where 2 used to fit. Label/title text is
    trimmed down slightly too, but kept a bit above a literal 40% cut so it
    stays comfortably readable at that size. */
-#recentlyViewedTray .recently-viewed-grid{grid-template-columns:repeat(7,1fr);gap:.7rem;}
-#recentlyViewedTray .recently-viewed-label{font-size:9px;margin-bottom:.8rem;}
-#recentlyViewedTray .recently-viewed-title{font-size:10.5px;margin-top:.3rem;}
-@media(max-width:700px){#recentlyViewedTray .recently-viewed-grid{grid-template-columns:repeat(3,1fr);}}
-/* A further 25% size cut on top of the above (Jeff's request, 2026-09-04).
-   Each card (photo + caption) is shrunk to 75% width and centred in its
-   grid cell -- exact math, rather than juggling column counts again --
-   so the thumbnails read noticeably smaller while the row layout (7
-   across on desktop, 3 on mobile) stays the same. */
-#recentlyViewedTray .recently-viewed-card{width:75%;margin:0 auto;}
-/* Homepage's "Continue where you left off" tray, made 70% smaller than its
-   previous (full) size, and separately widened to cover anything recently
-   viewed on the site, not just shop prints (Jeff's request, 2026-09-04).
-   Same column-count + card-width% technique as the shop tray above: more
-   columns so each cell is narrower, then a card width percentage within
-   that cell for the final size -- 8 cols at 60% width, or 2 cols at 30%
-   width on mobile, both work out to 30% of the original card size. */
-#continueTray .recently-viewed-grid{grid-template-columns:repeat(8,1fr);gap:.6rem;}
-#continueTray .recently-viewed-card{width:60%;margin:0 auto;}
-#continueTray .recently-viewed-label{font-size:9px;margin-bottom:.7rem;}
-#continueTray .recently-viewed-title{font-size:9.5px;margin-top:.25rem;}
-/* The band that houses this tray (border-top + generous padding, shared
-   by default with the shop tray's .recently-viewed-wrap) cut to 40% of
-   its previous height here specifically -- 60% smaller (Jeff's request,
-   2026-09-04) -- without touching the shop page's own version. */
-#continueTray .recently-viewed-wrap{padding:1rem var(--pad) .6rem;}
-@media(max-width:700px){
-  #continueTray .recently-viewed-grid{grid-template-columns:repeat(2,1fr);}
-  #continueTray .recently-viewed-card{width:30%;margin:0 auto;}
-}
+/* Both trays below now show a single card -- the one most-recently-
+   viewed eligible item -- instead of a row of several (Jeff's request,
+   2026-09-04). With just one card, the multi-column grid from earlier
+   rounds of shrinking is no longer needed, so it's replaced with a
+   single small block, and the band housing it (border-top + padding)
+   is cut roughly in half again on top of the sizing already in place.
+   Shop's tray only ever shows a print viewed in the Shop itself, never
+   a photo or journal post picked up elsewhere on the site -- see the
+   restrictTypes argument on the renderRecentlyViewed() call above. */
+#recentlyViewedTray .recently-viewed-grid{display:block;}
+#recentlyViewedTray .recently-viewed-card{width:60px;margin:0 auto;}
+#recentlyViewedTray .recently-viewed-label{font-size:9px;margin-bottom:.4rem;line-height:1.2;}
+#recentlyViewedTray .recently-viewed-title{font-size:9px;margin-top:.2rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#recentlyViewedTray .recently-viewed-wrap{padding:1.25rem var(--pad) .75rem;}
+#continueTray .recently-viewed-grid{display:block;}
+#continueTray .recently-viewed-card{width:42px;margin:0 auto;}
+#continueTray .continue-tray-label{font-size:9px;margin-bottom:.35rem;line-height:1.2;}
+/* Fixes a scoping mismatch carried over from earlier rounds of this same
+   sizing work: the tray's actual heading class is continue-tray-label,
+   not recently-viewed-label, so this override was silently never
+   applying and the heading was rendering at its full original size
+   (10px / 1.2rem margin) the whole time (caught 2026-09-04). */
+#continueTray .recently-viewed-title{font-size:8.5px;margin-top:.2rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#continueTray .recently-viewed-wrap{padding:.5rem var(--pad) .3rem;}
 .journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
 .journal-suggestions-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
 .journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
@@ -1941,17 +1935,29 @@ function renderPortfolio(filter, animate){
 // ============================================================
 // PHOTO OF THE WEEK
 // ============================================================
-function renderPhotoOfWeek(){
-  var section=document.getElementById("potwSection");
-  if(!section||!PHOTOS||!PHOTOS.length) return;
+// Shared with the Continue-where-you-left-off tray: when the last thing
+// a visitor did was browse the Portfolio without opening a specific
+// photo, that tray shows this same week's Photo of the Week rather than
+// a generic placeholder (Jeff's request, 2026-09-04). Pulled out here so
+// both places compute the exact same photo.
+function _currentPhotoOfWeek(){
+  if(!PHOTOS||!PHOTOS.length) return null;
   var pool=PHOTOS.filter(function(p){return p.title!=="Untitled"&&!p.hidden&&p.img;});
-  if(!pool.length) return;
+  if(!pool.length) return null;
   // Week resets on Sunday at 12:00 am
   var now=new Date();
   var thisSunday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-now.getDay());
   var weekNum=Math.floor(thisSunday.getTime()/(7*24*60*60*1000));
-  var photo=pool[weekNum%pool.length];
+  return pool[weekNum%pool.length];
+}
+
+function renderPhotoOfWeek(){
+  var section=document.getElementById("potwSection");
+  var photo=_currentPhotoOfWeek();
+  if(!section||!photo) return;
+  var now=new Date();
   // Week-of-year label (Sunday-based)
+  var thisSunday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-now.getDay());
   var startOfYear=new Date(now.getFullYear(),0,1);
   var firstSunday=new Date(startOfYear.getFullYear(),startOfYear.getMonth(),startOfYear.getDate()-startOfYear.getDay());
   var weekOfYear=Math.floor((thisSunday-firstSunday)/(7*24*60*60*1000))+1;
@@ -2935,7 +2941,13 @@ function _recordRecentlyViewed(item, type){
 // Shared renderer for both trays — same card markup, different container
 // and heading. `excludeId` drops the item currently open (relevant if this
 // is ever called from a detail page itself; harmless elsewhere).
-function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId){
+// `restrictTypes`, when given, limits which entry types are eligible at
+// all (used by the Shop tray below so it only ever shows something the
+// visitor actually did in the Shop, not a photo or journal post picked
+// up elsewhere on the site). Both trays now show a single card -- the
+// one most-recently-viewed eligible item -- not a row of several
+// (Jeff's request, 2026-09-04).
+function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId, restrictTypes){
   var tray = document.getElementById(containerId);
   if(!tray) return;
   var list;
@@ -2943,11 +2955,12 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
   if(!Array.isArray(list)) list=[];
   var valid = list.filter(function(rv){
     if(!rv || rv.id===excludeId) return false;
+    if(restrictTypes && restrictTypes.indexOf(rv.type||'print')===-1) return false;
     if(rv.type==='photo') return PHOTOS.some(function(p){ return p.id===rv.id; });
     if(rv.type==='journal') return !!(_journalData && Array.isArray(_journalData.posts) && _journalData.posts.some(function(p){ return p.id===rv.id; }));
     if(rv.type==='portfolio') return true;
     return PRINTS.some(function(p){ return p.id===rv.id; });
-  }).slice(0,4);
+  }).slice(0,1);
   if(!valid.length){ tray.style.display='none'; return; }
   tray.innerHTML = '<div class="recently-viewed-wrap">'
     +'<div class="'+(headingClass||'recently-viewed-label')+'">'+heading+'</div>'
@@ -2957,9 +2970,16 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
       // SPA-navigation idiom used elsewhere (openPrintDetail()/
       // openLightbox() directly, no full page reload) rather than a hard
       // link.
+      // A bare "you were browsing the Portfolio" entry shows that week's
+      // actual Photo of the Week instead of a generic placeholder.
+      var displayTitle = rv.title, displayImg = rv.img;
+      if(rv.type==='portfolio'){
+        var potw = _currentPhotoOfWeek();
+        if(potw){ displayTitle = potw.title||'Photo of the Week'; displayImg = potw.img||''; }
+      }
       return '<div class="recently-viewed-card" data-pid="'+rv.id+'" data-ptype="'+(rv.type||'print')+'">'
-        +(rv.img?'<img class="recently-viewed-img" src="'+rv.img+'" alt="'+rv.title+'" loading="lazy">':'<div class="recently-viewed-img" style="background:var(--warm);"></div>')
-        +'<div class="recently-viewed-title">'+rv.title+'</div>'
+        +(displayImg?'<img class="recently-viewed-img" src="'+displayImg+'" alt="'+displayTitle+'" loading="lazy">':'<div class="recently-viewed-img" style="background:var(--warm);"></div>')
+        +'<div class="recently-viewed-title">'+displayTitle+'</div>'
         +'</div>';
     }).join('')
     +'</div></div>';
@@ -2984,7 +3004,15 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
           if(post) _openJournalPost(post, live);
         }, 260);
       } else if(ptype==='portfolio'){
+        var potw = _currentPhotoOfWeek();
         navigate('portfolio');
+        if(potw){
+          setTimeout(function(){
+            var list = PHOTOS.filter(function(p){ return p.title!=="Untitled" && !p.hidden; });
+            var idx = list.findIndex(function(p){ return p.img === potw.img; });
+            if(idx>=0) openLightbox(idx, list);
+          }, 260);
+        }
       } else {
         var found = PRINTS.find(function(p){ return p.id === card.dataset.pid; });
         if(found){ navigate('shop'); setTimeout(function(){ openPrintDetail(found); }, 260); }
@@ -2994,8 +3022,10 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
   tray.style.display = '';
 }
 
+// Only 'print' entries -- nothing recorded from Portfolio or Journal
+// bleeds into the Shop page's own tray (Jeff's request, 2026-09-04).
 function renderRecentlyViewed(){
-  _renderRecentlyViewedInto('recentlyViewedTray', 'Recently viewed', 'recently-viewed-label');
+  _renderRecentlyViewedInto('recentlyViewedTray', 'Recently viewed', 'recently-viewed-label', null, ['print']);
 }
 window.renderRecentlyViewed = renderRecentlyViewed; // exposed: re-run once the real catalog loads, from the CMS-loader <script> block further down the page
 
