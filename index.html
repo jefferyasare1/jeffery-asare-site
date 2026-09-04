@@ -139,7 +139,7 @@ nav:not(.inner-nav) .nav-links a:hover::after{width:100%;}
 .potw-editorial-btn:hover{opacity:.85;}
 @media(max-width:640px){.potw-editorial{height:55vh;height:55svh;}.potw-editorial-desc{display:none;}}
 /* ---- Dark Room Mode ---- */
-html.darkroom{--bg:#0d0d0d;--warm:#1a1816;--rule:#242220;--muted:#585450;--ink:#c8c0b4;}
+html.darkroom{--bg:#0d0d0d;--warm:#1a1816;--rule:#242220;--muted:#585450;--ink:#c8c0b4;--shimmer-hi:#242220;}
 html.darkroom body{background:#0d0d0d;color:#c8c0b4;}
 html.darkroom .inner-nav{background:#0d0d0d;border-color:#242220;}
 html.darkroom .inner-nav .nav-links a{color:#c8c0b4;}
@@ -301,7 +301,11 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .shop-card-img-wrap{position:relative;overflow:hidden;aspect-ratio:4/5;margin-bottom:1rem;}
 .shop-card-img{position:absolute;top:-15%;left:0;width:100%;height:130%;object-fit:cover;display:block;transition:none;will-change:transform;}
 @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
-.shop-card-img-ph{width:100%;aspect-ratio:4/5;background:linear-gradient(90deg,var(--warm) 25%,#ebe8e3 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;}
+.shop-card-img-ph{width:100%;aspect-ratio:4/5;background:linear-gradient(90deg,var(--warm) 25%,var(--shimmer-hi,#ebe8e3) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;}
+/* Shared "this image is still loading" shimmer, used on shop print images and
+   portfolio grid images alike. Removed (via _imgOnLoad) once the image has
+   actually painted, so it never lingers behind a loaded photo. */
+.img-loading{background:linear-gradient(90deg,var(--warm) 25%,var(--shimmer-hi,#ebe8e3) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;}
 /* shop-card hover: parallax + 3D tilt via JS IIFE (same as photo-card) */
 .shop-card-body{display:flex;flex-direction:column;flex:1;}
 .shop-card-series{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
@@ -1840,6 +1844,26 @@ function shuffleArray(arr){
   return a;
 }
 
+// Shared image loading/retry helpers -- used by both the portfolio grid and
+// the shop print grid so a slow or briefly-failed image never just sits
+// blank. The shimmer (.img-loading) shows until the image actually paints;
+// on error it retries with a short backoff instead of giving up. (Jeff's
+// report, 2026-09-04: a shop image failed silently on mobile with no
+// loading state and no retry.)
+window._imgOnLoad = function(el){
+  el.classList.remove('img-loading');
+  el.removeAttribute('data-retry');
+};
+window._imgOnError = function(el){
+  var attempt=(parseInt(el.getAttribute('data-retry')||'0',10))+1;
+  el.setAttribute('data-retry', attempt);
+  var src=el.getAttribute('data-src')||el.src;
+  var base=src.split('?')[0];
+  setTimeout(function(){
+    el.src = base + '?_r=' + Date.now();
+  }, Math.min(attempt*700, 6000));
+};
+
 function renderPortfolio(filter, animate){
   var grid=document.getElementById("photoGrid");
   if(!grid) return;
@@ -1859,7 +1883,7 @@ function renderPortfolio(filter, animate){
     visible.forEach(function(p,i){
       var card=document.createElement("div");
       card.className="photo-card";
-      var inner=p.img?"<img src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\">":"<div class=\""+PH_C[i%PH_C.length]+"\" style=\"width:100%;height:100%;\"></div>";
+      var inner=p.img?"<img class=\"img-loading\" src=\""+p.img+"\" data-src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\" onload=\"_imgOnLoad(this)\" onerror=\"_imgOnError(this)\">":"<div class=\""+PH_C[i%PH_C.length]+"\" style=\"width:100%;height:100%;\"></div>";
       card.innerHTML=inner+"<div class=\"photo-card-info\"><div class=\"photo-card-title\">"+p.title+"</div><div class=\"photo-card-loc\">"+p.loc+"</div></div>";
       card.classList.add("card-in");
       card.style.animationDelay = (i * 0.055) + "s";
@@ -2074,7 +2098,7 @@ function renderShop(page){
     item.className="shop-card" + (p.soldOut ? " print-sold-out" : "");
     item.style.animationDelay = (visible.indexOf(p) * 0.08) + "s";
     var imgHtml=p.img
-      ? "<div class=\"shop-card-img-wrap\"><img class=\"shop-card-img\" src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\"></div>"
+      ? "<div class=\"shop-card-img-wrap\"><img class=\"shop-card-img img-loading\" src=\""+p.img+"\" data-src=\""+p.img+"\" alt=\""+p.title+"\" loading=\"lazy\" onload=\"_imgOnLoad(this)\" onerror=\"_imgOnError(this)\"></div>"
       : "<div class=\"shop-card-img-wrap\"><div class=\"shop-card-img-ph\"></div></div>";
     var basePrice=p.sizes[0].price;
     var priceText=CURRENCY==='USD'
