@@ -87,12 +87,14 @@
     {
       "title": "The Joy That Holds",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-the-joy-that-holds.webp",
+      "date": "Apr 2024",
       "desc": "Not the joy that erupts. The joy that stays — quiet, steady, unexplained.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-the-joy-that-holds.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Pause",
