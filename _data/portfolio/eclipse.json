@@ -53,12 +53,14 @@
     {
       "title": "Don't Look Away",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-dont-look-away.webp",
+      "date": "Apr 2024",
       "desc": "Coming apart is not always quiet. Sometimes it is vivid.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-dont-look-away.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Half Hidden",
