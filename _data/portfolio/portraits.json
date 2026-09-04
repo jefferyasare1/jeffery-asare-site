@@ -41,12 +41,14 @@
     {
       "title": "Limitations",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-limitations.webp",
+      "date": "Dec 2022",
       "desc": "Every frame is a limit. Every limit is a choice.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-limitations.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Mysteries Untold",
