@@ -1781,6 +1781,34 @@
         </div>
       </div>
 
+      <!-- Terms of Sale -->
+      <div class="cms-section">
+        <div class="cms-section-header" onclick="this.closest('.cms-section').classList.toggle('open')">
+          <div class="cms-section-title">Terms of Sale</div><span class="cms-chevron">▼</span>
+        </div>
+        <div class="cms-section-body">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Each numbered section below is a heading and its text. Leave a section's heading and text both blank to remove it from the page. To split a section into two paragraphs, leave one fully blank line between them. Any email address you type (like hello@jefferyasare.com) automatically becomes a clickable link on the site &mdash; no need to add formatting yourself.</p>
+          <div class="cms-field"><label>Last updated</label><input type="text" id="st-terms-updated" placeholder="September 2026"></div>
+          <div class="cms-field"><label>Section 1 heading</label><input type="text" id="st-terms-h1"></div>
+          <div class="cms-field"><label>Section 1 text</label><textarea id="st-terms-b1" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 2 heading</label><input type="text" id="st-terms-h2"></div>
+          <div class="cms-field"><label>Section 2 text</label><textarea id="st-terms-b2" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 3 heading</label><input type="text" id="st-terms-h3"></div>
+          <div class="cms-field"><label>Section 3 text</label><textarea id="st-terms-b3" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 4 heading</label><input type="text" id="st-terms-h4"></div>
+          <div class="cms-field"><label>Section 4 text</label><textarea id="st-terms-b4" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 5 heading</label><input type="text" id="st-terms-h5"></div>
+          <div class="cms-field"><label>Section 5 text</label><textarea id="st-terms-b5" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 6 heading</label><input type="text" id="st-terms-h6"></div>
+          <div class="cms-field"><label>Section 6 text</label><textarea id="st-terms-b6" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 7 heading</label><input type="text" id="st-terms-h7"></div>
+          <div class="cms-field"><label>Section 7 text</label><textarea id="st-terms-b7" rows="3"></textarea></div>
+          <div class="cms-field"><label>Section 8 heading</label><input type="text" id="st-terms-h8"></div>
+          <div class="cms-field"><label>Section 8 text</label><textarea id="st-terms-b8" rows="3"></textarea></div>
+          <div class="cms-save-row"><button class="btn-card primary" onclick="cmsSaveSiteTerms()">Save</button><div class="cms-status" id="cms-terms-status"></div></div>
+        </div>
+      </div>
+
     </div><!-- /cms-panel-site -->
 
     <!-- Files panel -->
@@ -6575,7 +6603,8 @@ function cmsSiteInit(){
   if(errEl){errEl.style.display='none';errEl.textContent='';}
   [['settings/general',cmsSitePopulateHero],['settings/about-page',cmsSitePopulateAbout],
    ['settings/shop-page',cmsSitePopulateShop],['settings/contact-info',cmsSitePopulateContact],
-   ['settings/portfolio-page',cmsSitePopulatePortfolio],['settings/privacy-policy',cmsSitePopulatePrivacy]]
+   ['settings/portfolio-page',cmsSitePopulatePortfolio],['settings/privacy-policy',cmsSitePopulatePrivacy],
+   ['settings/terms-of-sale',cmsSitePopulateTerms]]
   .forEach(function(pair){cmsSiteLoad(pair[0],function(err,data){
     if(!err){pair[1](data);return;}
     cmsShowLoadError('site', err, null);
@@ -6648,6 +6677,15 @@ function cmsSitePopulatePrivacy(d){
     set('st-privacy-b'+i,d['privacy_s'+i+'_body']);
   }
 }
+function cmsSitePopulateTerms(d){
+  if(!d)return;
+  function set(id,v){var e=document.getElementById(id);if(e&&v!==undefined)e.value=v;}
+  set('st-terms-updated',d.terms_last_updated);
+  for(var i=1;i<=8;i++){
+    set('st-terms-h'+i,d['terms_s'+i+'_heading']);
+    set('st-terms-b'+i,d['terms_s'+i+'_body']);
+  }
+}
 
 function cmsSiteSave(fileKey,dataFn,statusId){
   var st=document.getElementById(statusId); st.className='cms-status'; st.textContent='Saving…';
@@ -6709,6 +6747,16 @@ function cmsSaveSitePrivacy(){
     }
     return d;
   },'cms-privacy-status');
+}
+function cmsSaveSiteTerms(){
+  cmsSiteSave('settings/terms-of-sale',function(){
+    var d={terms_last_updated:g('st-terms-updated')};
+    for(var i=1;i<=8;i++){
+      d['terms_s'+i+'_heading']=g('st-terms-h'+i);
+      d['terms_s'+i+'_body']=g('st-terms-b'+i);
+    }
+    return d;
+  },'cms-terms-status');
 }
 
 // ── Image Upload ─────────────────────────────────────────────────

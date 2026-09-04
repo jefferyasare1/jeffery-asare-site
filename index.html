@@ -1408,15 +1408,8 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <div class="terms-wrap">
     <button class="detail-back" id="termsBackBtn" style="padding-left:0;">&#8592; Back</button>
     <h1 style="font-family:var(--title);font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.02em;margin:1.5rem 0 .3rem;">Terms of Sale</h1>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;">Last updated: September 2026</p>
-    <div class="terms-section"><h2>1. Ownership of Copyright</h2><p>All photographs on this website are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase of a print does not transfer any copyright or reproduction rights.</p></div>
-    <div class="terms-section"><h2>2. What You Are Buying</h2><p>You are purchasing a single physical archival fine art print for personal, non-commercial display only. You are not purchasing reproduction rights, publishing rights, commercial use rights, or the right to create derivative works.</p></div>
-    <div class="terms-section"><h2>3. Limited Editions</h2><p>Each print is a strictly limited edition as stated. Once sold out, no further prints of that image will be produced at that size. Each print is hand-signed, numbered, and accompanied by a Certificate of Authenticity.</p></div>
-    <div class="terms-section"><h2>4. Production and Delivery</h2><p>All prints are made to order. Please allow 7 to 14 business days for production before dispatch. Prints are offered either rolled in a protective tube, or framed and ready to hang; where framing is selected, the frame style is chosen by Jeffery Asare to suit the piece and is not customer-selectable. The listed price does not include delivery (within Ghana) or shipping (outside Ghana) &mdash; these are calculated separately and confirmed before production begins. Jeffery Asare is not responsible for delays caused by customs or postal services.</p><p>Buyers outside Ghana are solely responsible for any customs duties, import taxes, or fees applicable in their country. These charges are not included in the print, framing, or shipping price and will not be reimbursed.</p></div>
-    <div class="terms-section"><h2>5. Returns and Refunds</h2><p>Returns are not accepted except for damaged prints (photographic evidence required within 48 hours of delivery) or incorrect prints sent. A replacement will be produced at no additional cost.</p></div>
-    <div class="terms-section"><h2>6. Prohibited Uses</h2><p>Scanning, reproducing, reselling, or using the print commercially without prior written consent from Jeffery Asare is strictly prohibited and may result in legal action.</p></div>
-    <div class="terms-section"><h2>7. Licensing</h2><p>For commercial, editorial, or licensed use of any image, contact <a href="mailto:hello@jefferyasare.com">hello@jefferyasare.com</a>.</p></div>
-    <div class="terms-section"><h2>8. Governing Law</h2><p>These terms are governed by the laws of the Republic of Ghana.</p></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:2.5rem;" id="termsLastUpdated">Last updated: September 2026</p>
+    <div id="termsSections"></div>
   </div>
   <div id="terms-mini-footer"></div>
 </div>
@@ -4864,16 +4857,30 @@ var PRIVACY_FALLBACK = {
     { heading: '9. Governing Law', body: 'This policy is governed by the laws of the Republic of Ghana. For users in the European Union, we are committed to compliance with the GDPR.' }
   ]
 };
-function _ppEscapeHtml(s){
+// Shared by both legal pages (Privacy Policy + Terms of Sale).
+function _legalEscapeHtml(s){
   return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 // Turns a plain email address into a clickable mailto: link, so the
-// dashboard's Privacy Policy editor stays plain text -- no HTML needed --
-// while an email mentioned in the text still works as a link on the site.
-function _ppLinkifyEmails(escapedText){
+// dashboard's editors stay plain text -- no HTML needed -- while an email
+// mentioned in the text still works as a link on the site.
+function _legalLinkifyEmails(escapedText){
   return escapedText.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, function(m){
     return '<a href="mailto:'+m+'">'+m+'</a>';
   });
+}
+// A section's text can be more than one paragraph -- a blank line in the
+// dashboard textarea starts a new <p>, same convention as Markdown, so a
+// section like Terms of Sale's "Production and Delivery" can keep two
+// separate paragraphs instead of being forced into one.
+function _legalParagraphs(escapedLinkedText){
+  return escapedLinkedText.split(/\n\s*\n/).map(function(p){
+    return '<p>'+p.trim().replace(/\n/g,' ')+'</p>';
+  }).join('');
+}
+function _legalRenderSection(s){
+  return '<div class="terms-section"><h2>'+_legalEscapeHtml(s.heading)+'</h2>'
+    +_legalParagraphs(_legalLinkifyEmails(_legalEscapeHtml(s.body)))+'</div>';
 }
 function renderPrivacyPolicy(d){
   var wrap = document.getElementById('privacySections');
@@ -4888,9 +4895,7 @@ function renderPrivacyPolicy(d){
     if(h || b) sections.push({ heading: h||'', body: b||'' });
   }
   if(!sections.length) sections = PRIVACY_FALLBACK.sections;
-  wrap.innerHTML = sections.map(function(s){
-    return '<div class="terms-section"><h2>'+_ppEscapeHtml(s.heading)+'</h2><p>'+_ppLinkifyEmails(_ppEscapeHtml(s.body))+'</p></div>';
-  }).join('');
+  wrap.innerHTML = sections.map(_legalRenderSection).join('');
 }
 renderPrivacyPolicy(null); // fallback first, so the page is never blank
 (function loadPrivacyPolicy(attempt){
@@ -4900,6 +4905,49 @@ renderPrivacyPolicy(null); // fallback first, so the page is never blank
     .then(function(d){ renderPrivacyPolicy(d); })
     .catch(function(){
       if(attempt < 4) setTimeout(function(){ loadPrivacyPolicy(attempt+1); }, attempt*800);
+      // else: keep showing the fallback rendered above -- never worse than before.
+    });
+})();
+
+// Terms of Sale — same dashboard-editable treatment as Privacy Policy
+// (Jeff's request, 2026-09-04). Same fallback-first, retry-on-failure
+// pattern; see the Privacy Policy block just above for why.
+var TERMS_FALLBACK = {
+  terms_last_updated: 'September 2026',
+  sections: [
+    { heading: '1. Ownership of Copyright', body: 'All photographs on this website are the exclusive intellectual property of Jeffery Asare, protected under the Ghana Copyright Act 2005 (Act 690) and the Berne Convention. Purchase of a print does not transfer any copyright or reproduction rights.' },
+    { heading: '2. What You Are Buying', body: 'You are purchasing a single physical archival fine art print for personal, non-commercial display only. You are not purchasing reproduction rights, publishing rights, commercial use rights, or the right to create derivative works.' },
+    { heading: '3. Limited Editions', body: 'Each print is a strictly limited edition as stated. Once sold out, no further prints of that image will be produced at that size. Each print is hand-signed, numbered, and accompanied by a Certificate of Authenticity.' },
+    { heading: '4. Production and Delivery', body: 'All prints are made to order. Please allow 7 to 14 business days for production before dispatch. Prints are offered either rolled in a protective tube, or framed and ready to hang; where framing is selected, the frame style is chosen by Jeffery Asare to suit the piece and is not customer-selectable. The listed price does not include delivery (within Ghana) or shipping (outside Ghana): these are calculated separately and confirmed before production begins. Jeffery Asare is not responsible for delays caused by customs or postal services.\n\nBuyers outside Ghana are solely responsible for any customs duties, import taxes, or fees applicable in their country. These charges are not included in the print, framing, or shipping price and will not be reimbursed.' },
+    { heading: '5. Returns and Refunds', body: 'Returns are not accepted except for damaged prints (photographic evidence required within 48 hours of delivery) or incorrect prints sent. A replacement will be produced at no additional cost.' },
+    { heading: '6. Prohibited Uses', body: 'Scanning, reproducing, reselling, or using the print commercially without prior written consent from Jeffery Asare is strictly prohibited and may result in legal action.' },
+    { heading: '7. Licensing', body: 'For commercial, editorial, or licensed use of any image, contact hello@jefferyasare.com.' },
+    { heading: '8. Governing Law', body: 'These terms are governed by the laws of the Republic of Ghana.' }
+  ]
+};
+function renderTermsOfSale(d){
+  var wrap = document.getElementById('termsSections');
+  var updatedEl = document.getElementById('termsLastUpdated');
+  if(!wrap) return;
+  var lastUpdated = (d && d.terms_last_updated) || TERMS_FALLBACK.terms_last_updated;
+  if(updatedEl) updatedEl.textContent = 'Last updated: ' + lastUpdated;
+  var sections = [];
+  for(var i=1;i<=8;i++){
+    var h = d && d['terms_s'+i+'_heading'];
+    var b = d && d['terms_s'+i+'_body'];
+    if(h || b) sections.push({ heading: h||'', body: b||'' });
+  }
+  if(!sections.length) sections = TERMS_FALLBACK.sections;
+  wrap.innerHTML = sections.map(_legalRenderSection).join('');
+}
+renderTermsOfSale(null); // fallback first, so the page is never blank
+(function loadTermsOfSale(attempt){
+  attempt = attempt || 1;
+  fetch('/_data/settings/terms-of-sale.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('terms-of-sale.json HTTP '+r.status)); })
+    .then(function(d){ renderTermsOfSale(d); })
+    .catch(function(){
+      if(attempt < 4) setTimeout(function(){ loadTermsOfSale(attempt+1); }, attempt*800);
       // else: keep showing the fallback rendered above -- never worse than before.
     });
 })();
