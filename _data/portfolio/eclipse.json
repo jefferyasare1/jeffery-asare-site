@@ -17,12 +17,14 @@
     {
       "title": "The Halo He Didn't Ask For",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/eclipse/ec-the-halo-he-didnt-ask-for.webp",
+      "date": "Nov 2022",
       "desc": "When the dark does not threaten but absorbs. A self dissolving into something larger.",
-      "device": "iPhone",
+      "img": "/images/portfolio/eclipse/ec-the-halo-he-didnt-ask-for.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "What You Could Still See",
