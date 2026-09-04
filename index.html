@@ -2876,6 +2876,7 @@ function _renderRecentlyViewedInto(containerId, heading, headingClass, excludeId
 function renderRecentlyViewed(){
   _renderRecentlyViewedInto('recentlyViewedTray', 'Recently viewed', 'recently-viewed-label');
 }
+window.renderRecentlyViewed = renderRecentlyViewed; // exposed: re-run once the real catalog loads, from the CMS-loader <script> block further down the page
 
 // Homepage personalization: only ever shows anything for a genuine
 // returning visitor, since nothing is recorded until someone opens a print
@@ -2883,6 +2884,7 @@ function renderRecentlyViewed(){
 function renderContinueWhereLeftOff(){
   _renderRecentlyViewedInto('continueTray', 'Continue where you left off', 'continue-tray-label');
 }
+window.renderContinueWhereLeftOff = renderContinueWhereLeftOff; // exposed: same reason as renderRecentlyViewed above
 
 // ── Journal reading suggestions ──────────────────────────────
 function _renderJournalSuggestions(currentPost, allPosts, container){
@@ -4845,8 +4847,8 @@ function _loadPrintsFromCMS(attempt){
     .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('prints.json HTTP '+r.status)); })
     .then(_onPrintsLoaded)
     .catch(function(err){
-      if(attempt < 4){
-        setTimeout(function(){ _loadPrintsFromCMS(attempt+1); }, attempt*400);
+      if(attempt < 8){
+        setTimeout(function(){ _loadPrintsFromCMS(attempt+1); }, Math.min(attempt*600, 3000));
       } else {
         window.__shopDataLoaded = true;
       }
@@ -4870,6 +4872,11 @@ function _onPrintsLoaded(d){
     });
     // Always refresh the shop list so data is ready whenever the user navigates there
     if(typeof window.renderShop === 'function') window.renderShop(0);
+    // These may have already rendered once against the placeholder catalog
+    // (e.g. if the shop page or homepage was reached before this real data
+    // arrived) and won't otherwise know to update themselves.
+    if(typeof window.renderRecentlyViewed === 'function' && document.getElementById('recentlyViewedTray')) window.renderRecentlyViewed();
+    if(typeof window.renderContinueWhereLeftOff === 'function' && document.getElementById('continueTray')) window.renderContinueWhereLeftOff();
     // A direct link/refresh to a specific print (e.g. ?print=the-herdsman)
     // is parsed earlier, synchronously, before this real catalog data has
     // arrived - at that point PRINTS only held the placeholder seed data,
