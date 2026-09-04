@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Page Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page-bg:#f5f2ee;
+    --page-ink:#171512;
+    --page-muted:#8a8378;
+
+    --site-bg:#ffffff;
+    --site-ink:#111111;
+    --site-muted:#666666;
+    --site-rule:#e8e4df;
+
+    --flag:#a8512f;
+    --fix:#171512;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--page-bg);
+    color:var(--page-ink);
+    font-family:'Manrope',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:4.5rem 1.5rem 6rem;}
+
+  /* ---- Intro ---- */
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--flag);font-weight:600;margin-bottom:1.1rem;}
+  h1{font-family:'Manrope',sans-serif;font-weight:600;font-size:clamp(1.7rem,3.4vw,2.5rem);letter-spacing:-.02em;line-height:1.15;margin:0 0 1.1rem;max-width:16ch;}
+  .intro-body{font-size:14.5px;line-height:1.75;color:#4a453e;max-width:56ch;margin:0 0 3.4rem;}
+  .intro-body strong{color:var(--page-ink);font-weight:600;}
+
+  /* ---- Legend ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:1.6rem;margin-bottom:3.6rem;padding-bottom:2.6rem;border-bottom:1px solid #e2ddd4;}
+  .legend-item{display:flex;align-items:center;gap:.55rem;font-size:12px;color:#4a453e;}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .legend-dot.problem{background:var(--flag);}
+  .legend-dot.fix{background:var(--fix);}
+
+  /* ---- Columns ---- */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+  @media (max-width:900px){.compare{grid-template-columns:1fr;gap:5rem;}}
+
+  .col-head{margin-bottom:1.3rem;}
+  .col-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--page-muted);margin-bottom:.4rem;}
+  .col-title{font-family:'Manrope',sans-serif;font-weight:600;font-size:1.3rem;letter-spacing:-.01em;}
+  .col-title.problem{color:var(--flag);}
+  .col-title.fix{color:var(--fix);}
+
+  /* ---- Device frame ---- */
+  .frame{
+    background:var(--site-bg);
+    border:1px solid #e2ddd4;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 18px 40px -22px rgba(23,21,18,.25);
+  }
+  .frame-bar{
+    height:30px;display:flex;align-items:center;gap:5px;padding:0 12px;
+    background:#faf9f7;border-bottom:1px solid var(--site-rule);
+  }
+  .frame-bar span{width:7px;height:7px;border-radius:50%;background:#e2ddd4;}
+  .frame-url{margin-left:8px;font-size:9.5px;color:#a9a49b;font-family:'Manrope',sans-serif;}
+
+  .site{color:var(--site-ink);font-size:11px;}
+
+  /* mini site nav */
+  .m-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--site-rule);}
+  .m-logo{width:16px;height:16px;border:1.4px solid var(--site-ink);border-radius:50%;flex-shrink:0;}
+  .m-links{display:flex;gap:10px;}
+  .m-links span{font-size:7px;letter-spacing:.03em;color:var(--site-muted);}
+
+  /* generic section */
+  .m-sec{padding:20px 16px;border-top:1px solid var(--site-rule);}
+  .m-sec:first-of-type{border-top:none;}
+  .m-label{font-size:6.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--site-muted);margin-bottom:6px;}
+  .m-heading{font-family:'Manrope',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:-.01em;line-height:1.15;margin-bottom:8px;max-width:80%;}
+  .m-line{height:4.5px;background:#eae6e0;border-radius:2px;margin-bottom:4.5px;}
+  .m-line.short{width:55%;}
+  .m-line.med{width:88%;}
+  .m-line.full{width:100%;}
+
+  /* hero split */
+  .m-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;padding:20px 16px;}
+  .m-hero-heading{font-family:'Manrope',sans-serif;font-weight:600;font-size:14.5px;line-height:1.1;letter-spacing:-.01em;margin-bottom:12px;}
+  .m-portrait{background:linear-gradient(160deg,#e9e4dc,#cfc8bd);border-radius:2px;aspect-ratio:3/4;position:relative;}
+  .m-portrait::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 50% 42%, rgba(23,21,18,.14) 0 9px, transparent 10px);background-position:center;}
+
+  /* two-col grid section */
+  .m-2col{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px 16px;border-top:1px solid var(--site-rule);}
+
+  /* image break */
+  .m-imgbreak{aspect-ratio:16/6;background:linear-gradient(135deg,#d8d2c6,#a9a08f);position:relative;}
+  .m-imgbreak.optional{opacity:.55;border:1px dashed #ffffff88;}
+  .m-imgbreak svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.55;}
+
+  /* numbered panel */
+  .m-num-panel{display:flex;gap:10px;padding:16px;border-top:1px solid var(--site-rule);}
+  .m-num-panel:first-of-type{border-top:1px solid var(--site-rule);}
+  .m-num{flex-shrink:0;width:18px;height:18px;border-radius:50%;border:1.2px solid var(--site-ink);display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:600;}
+  .m-num-body{flex:1;}
+
+  /* cta row */
+  .m-cta{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 16px;border-top:1px solid var(--site-rule);}
+  .m-cta-btns{display:flex;gap:6px;flex-shrink:0;}
+  .m-pill{font-size:6.5px;padding:5px 9px;border-radius:20px;white-space:nowrap;}
+  .m-pill.dark{background:var(--site-ink);color:#fff;}
+  .m-pill.outline{border:1px solid var(--site-rule);color:var(--site-ink);}
+
+  /* shop strip */
+  .m-strip{background:var(--site-ink);padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .m-strip .m-line{background:rgba(255,255,255,.18);}
+
+  /* annotation strip beneath a block */
+  .note{display:flex;gap:8px;align-items:flex-start;padding:8px 14px 14px;background:#fbfaf8;}
+  .note-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .note-dot.problem{background:var(--flag);}
+  .note-dot.fix{background:var(--fix);}
+  .note p{margin:0;font-size:10.5px;line-height:1.5;color:#4a453e;font-family:'Manrope',sans-serif;}
+
+  /* result stat box */
+  .result{margin-top:16px;padding:14px 16px;border:1px solid #e2ddd4;border-radius:6px;background:#fff;font-size:11.5px;line-height:1.55;}
+  .result b{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--page-muted);margin-bottom:5px;font-weight:600;}
+
+  /* footer note */
+  .foot{margin-top:4.5rem;padding-top:2.2rem;border-top:1px solid #e2ddd4;font-size:12.5px;line-height:1.7;color:#4a453e;max-width:62ch;}
+  .foot em{font-style:italic;font-family:'EB Garamond',serif;color:var(--page-ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">About Page: Layout Review</div>
+  <h1>What's on the page now, and what I'd change.</h1>
+  <p class="intro-body">Two scaled-down versions of the About page, side by side. <strong>Left</strong> is what's live today. <strong>Right</strong> keeps the same white space and restraint you already like, nothing added, no photography, no new visual device, just Location, Philosophy, and Practice given one consistent shape instead of three.</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot problem"></span>What's causing the drift</div>
+    <div class="legend-item"><span class="legend-dot fix"></span>What changes</div>
+  </div>
+
+  <div class="compare">
+
+    <!-- ================= CURRENT ================= -->
+    <div class="col">
+      <div class="col-head">
+        <div class="col-label">Now</div>
+        <div class="col-title problem">Four shapes, no breather</div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span><div class="frame-url">jefferyasare.com/about</div></div>
+        <div class="site">
+
+          <div class="m-nav"><div class="m-logo"></div><div class="m-links"><span>About</span><span>Portfolio</span><span>Shop</span><span>Contact</span></div></div>
+
+          <div class="m-hero">
+            <div>
+              <div class="m-hero-heading">Something stops me.<br>Every time.</div>
+              <div class="m-line full"></div><div class="m-line full"></div><div class="m-line med"></div>
+              <div class="m-line full"></div><div class="m-line full"></div><div class="m-line short"></div>
+              <div class="m-line full"></div><div class="m-line med"></div>
+            </div>
+            <div class="m-portrait"></div>
+          </div>
+
+          <div class="m-2col">
+            <div>
+              <div class="m-label">Location</div>
+              <div class="m-heading">Accra holds<br>everything.</div>
+              <div class="m-line full"></div><div class="m-line full"></div><div class="m-line med"></div>
+              <div class="m-line full"></div><div class="m-line short"></div>
+            </div>
+            <div>
+              <div class="m-label">Philosophy</div>
+              <div class="m-heading">The pause<br>is the work.</div>
+              <div class="m-line full"></div><div class="m-line full"></div><div class="m-line full"></div>
+              <div class="m-line full"></div><div class="m-line med"></div>
+            </div>
+          </div>
+
+          <div class="m-sec" style="max-width:64%;">
+            <div class="m-label">Practice</div>
+            <div class="m-heading">The street doesn't<br>ask permission.</div>
+            <div class="m-line full"></div><div class="m-line full"></div><div class="m-line med"></div>
+            <div class="m-line full"></div><div class="m-line short"></div>
+          </div>
+
+          <div class="m-cta">
+            <div style="max-width:60%;">
+              <div class="m-heading" style="margin-bottom:4px;">Want to see the work?</div>
+              <div class="m-line med"></div>
+            </div>
+            <div class="m-cta-btns"><span class="m-pill dark">View portfolio</span><span class="m-pill outline">Get in touch</span></div>
+          </div>
+
+          <div class="m-strip">
+            <div style="flex:1;"><div class="m-line short" style="margin-bottom:6px;"></div><div class="m-line med"></div></div>
+            <span class="m-pill" style="background:#fff;color:#111;">Shop prints</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="note"><span class="note-dot problem"></span><p>Five paragraphs of bio before the page has said anything else: a long open with nothing to anchor on.</p></div>
+      <div class="note"><span class="note-dot problem"></span><p>Location and Philosophy are paired side by side, three paragraphs each. That sets up a two-column rhythm.</p></div>
+      <div class="note"><span class="note-dot problem"></span><p>&hellip;then Practice breaks it: same formula, but suddenly full-width and alone underneath. And its opening idea (unposed, no permission asked) already overlaps what Philosophy just said about shooting candidly.</p></div>
+      <div class="note"><span class="note-dot problem"></span><p>The CTA and the shop strip are two more shapes again. Four sections, four different layouts, and not one photograph in between any of them.</p></div>
+
+      <div class="result">
+        <b>Result</b>
+        14 paragraphs of same-size body text &middot; 4 unrelated section shapes &middot; 1 photograph on the whole page
+      </div>
+    </div>
+
+    <!-- ================= PROPOSED ================= -->
+    <div class="col">
+      <div class="col-head">
+        <div class="col-label">Suggested</div>
+        <div class="col-title fix">One system, used three times</div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-bar"><span></span><span></span><span></span><div class="frame-url">jefferyasare.com/about</div></div>
+        <div class="site">
+
+          <div class="m-nav"><div class="m-logo"></div><div class="m-links"><span>About</span><span>Portfolio</span><span>Shop</span><span>Contact</span></div></div>
+
+          <div class="m-hero">
+            <div>
+              <div class="m-hero-heading">Something stops me.<br>Every time.</div>
+              <div class="m-line full"></div><div class="m-line full"></div><div class="m-line med"></div>
+              <div class="m-line full"></div><div class="m-line short"></div>
+            </div>
+            <div class="m-portrait"></div>
+          </div>
+
+          <div class="m-sec" style="max-width:64%;">
+            <div class="m-label">Location</div>
+            <div class="m-heading">Accra holds<br>everything.</div>
+            <div class="m-line full"></div><div class="m-line med"></div>
+          </div>
+          <div class="m-sec" style="max-width:64%;">
+            <div class="m-label">Philosophy</div>
+            <div class="m-heading">The pause<br>is the work.</div>
+            <div class="m-line full"></div><div class="m-line med"></div>
+          </div>
+          <div class="m-sec" style="max-width:64%;">
+            <div class="m-label">Practice</div>
+            <div class="m-heading">The street doesn't<br>ask permission.</div>
+            <div class="m-line full"></div><div class="m-line med"></div>
+          </div>
+
+          <div class="m-cta">
+            <div style="max-width:60%;">
+              <div class="m-heading" style="margin-bottom:4px;">Want to see the work?</div>
+              <div class="m-line med"></div>
+            </div>
+            <div class="m-cta-btns"><span class="m-pill dark">View portfolio</span><span class="m-pill outline">Get in touch</span></div>
+          </div>
+
+          <div class="m-strip">
+            <div style="flex:1;"><div class="m-line short" style="margin-bottom:6px;"></div><div class="m-line med"></div></div>
+            <span class="m-pill" style="background:#fff;color:#111;">Shop prints</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="note"><span class="note-dot fix"></span><p>Hero stays exactly as it is. Nothing added here, this is about what comes after.</p></div>
+      <div class="note"><span class="note-dot fix"></span><p>Location, Philosophy, and Practice now share one shape: full width, same label and heading treatment, body text held to a readable column instead of stretching edge to edge. It's the shape Practice already uses, just applied to all three instead of one.</p></div>
+      <div class="note"><span class="note-dot fix"></span><p>Reading down the page now feels like one statement instead of three layouts glued together, purely from proportion. No photography, no new visual device, nothing added.</p></div>
+      <div class="note"><span class="note-dot fix"></span><p>Worth trimming Philosophy's opening line where it repeats what Practice says, that's a words fix, not a layout one.</p></div>
+
+      <div class="result">
+        <b>Result</b>
+        One panel shape, used three times &middot; zero new elements &middot; same photography, same white space
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    This is a wireframe, not a finished design. The grey bars stand in for your actual sentences, scaled down so the <em>shape</em> of the page is easy to see at a glance. Nothing here is final; it's meant to make the conversation concrete rather than abstract.
+  </div>
+
+</div>
+</body>
+</html>
