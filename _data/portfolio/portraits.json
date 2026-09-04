@@ -17,12 +17,14 @@
     {
       "title": "Blinded by the Spotlight",
       "loc": "Accra, Ghana",
-      "date": "2026.01",
-      "img": "/images/portfolio/portraits/pt-blinded-by-the-spotlight.webp",
+      "date": "Sep 2022",
       "desc": "When the light is too much and not enough at the same time.",
-      "device": "iPhone",
+      "img": "/images/portfolio/portraits/pt-blinded-by-the-spotlight.webp",
+      "device": "iPhone XR",
       "format": "ProRAW",
-      "edited_in": "Lightroom Mobile"
+      "edited_in": "Lightroom Mobile",
+      "hidden": false,
+      "status": "live"
     },
     {
       "title": "Chaos of Desires",
