@@ -3592,8 +3592,14 @@ var COUNTRIES=[
       }
     })
     .catch(function(){
-      // On error, default: show toggle(s) (assumes Ghana)
-      showAllToggles();
+      // On error (Jeff's call, 2026-09-04): default to international and
+      // lock to USD instead of assuming Ghana. This keeps the "buyers
+      // outside Ghana always see USD" guarantee intact even on the rare
+      // occasion the IP lookup itself fails, at the cost of occasionally
+      // hiding the toggle from a real Ghana visitor when that happens --
+      // a safer trade-off than showing GHS prices to an international one.
+      IS_GHANA = false;
+      setCurrency('USD');
     });
 })();
 // Wire up WhatsApp float button with default inquiry message
