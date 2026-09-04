@@ -183,6 +183,7 @@ html.darkroom .field-input::placeholder,html.darkroom .field-textarea::placehold
 html.darkroom #series-intro .si-inner{background:var(--warm);}
 html.darkroom .potw{background:#0d0d0d;border-color:#242220;}
 html.darkroom .about-cols{border-color:#242220;}
+html.darkroom .about-practice{border-color:#242220;}
 html.darkroom .about-cta{border-color:#242220;}
 /* dark room — elements that use var(--ink) as a background (turns beige in dark mode) */
 html.darkroom .site-footer{background:#111008;}
@@ -268,7 +269,10 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 .about-bio p{font-size:13px;color:rgba(17,17,17,.65);line-height:1.95;margin-bottom:1rem;max-width:440px;}
 .about-photo-ph{width:100%;aspect-ratio:3/4;background:var(--warm);display:flex;align-items:center;justify-content:center;}
 .about-caption{font-size:11px;color:var(--muted);margin-top:.6rem;font-style:italic;font-weight:300;}
-.about-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2.6rem;padding:5rem var(--pad);border-top:1px solid var(--rule);}
+.about-cols{display:grid;grid-template-columns:1fr 1fr;gap:4rem;padding:5rem var(--pad);border-top:1px solid var(--rule);}
+.about-practice{display:flex;gap:3rem;padding:4rem var(--pad);border-top:1px solid var(--rule);align-items:flex-start;}
+.about-practice-label{flex:0 0 auto;width:340px;}
+.about-practice-body{flex:1;max-width:760px;}
 .about-col-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
 .about-col-heading{font-family:var(--title);font-size:clamp(1.6rem,3vw,2.3rem);font-weight:600;letter-spacing:-.02em;line-height:1.05;margin-bottom:1.4rem;}
 .about-col-body p{font-size:13px;color:rgba(17,17,17,.6);line-height:1.95;margin-bottom:.9rem;}
@@ -423,6 +427,8 @@ html.darkroom .nav-util-btn.active{background:#c8c0b4;color:#0d0d0d;border-color
 @media(max-width:900px){
   .photo-grid{grid-template-columns:repeat(3,1fr);}
   .about-hero,.about-cols,.contact-body{grid-template-columns:1fr;}
+  .about-practice{flex-direction:column;gap:1.2rem;}
+  .about-practice-label{width:auto;}
   .shop-list{grid-template-columns:repeat(3,1fr);}
   .footer-grid{grid-template-columns:1fr 1fr;}
   .about-cta{flex-direction:column;align-items:flex-start;}
@@ -1283,13 +1289,15 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
         <p id="aboutPhilP1">Most people walk past things. I am interested in the half-second before that, the moment something registers but has not yet been named. I use a phone because it closes the gap between noticing and capturing: no setup, no signal to the subject that something is being recorded, just attention. I edit the same way, intentional, entirely on the phone, finishing the sentence the moment started rather than manipulating it into something else.</p>
       </div>
     </div>
-    <div>
+  </div>
+  <div class="about-practice">
+    <div class="about-practice-label">
       <div class="about-col-label">Practice</div>
-      <h2 class="about-col-heading" id="aboutStreetHeading">The street doesn't<br>ask permission.</h2>
-      <div class="about-col-body">
-        <p id="aboutStreetP1">Much of my street and documentary work happens without asking first. A market stall, a corner, a face caught mid-thought: the moment exists because no one was told to hold still for it. I photograph with care, I don't chase people into situations that could embarrass or endanger them, and a photograph earns its place here because it holds something true on its own, never because of who happens to be in the frame.</p>
-        <p id="aboutStreetP2">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
-      </div>
+      <h2 class="about-col-heading" id="aboutStreetHeading">The street doesn't ask permission.</h2>
+    </div>
+    <div class="about-practice-body about-col-body">
+      <p id="aboutStreetP1">Much of my street and documentary work happens without asking first. A market stall, a corner, a face caught mid-thought: the moment exists because no one was told to hold still for it. I photograph with care, I don't chase people into situations that could embarrass or endanger them, and a photograph earns its place here because it holds something true on its own, never because of who happens to be in the frame.</p>
+      <p id="aboutStreetP2">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
     </div>
   </div>
   <div class="about-cta">
