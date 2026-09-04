@@ -1271,23 +1271,21 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <p class="about-caption" id="aboutCaption">Jeffery Asare, Accra, 2026.</p>
     </div>
   </div>
-  <div class="about-cols">
-    <div>
+  <div class="about-street">
+    <div class="about-street-inner">
       <div class="about-col-label">Location</div>
       <h2 class="about-col-heading" id="aboutLocHeading">Accra holds<br>everything.</h2>
       <div class="about-col-body">
-        <p id="aboutLocP1">Ghana does not ask to be photographed. It simply exists, loud and textured and completely indifferent to the lens. That is what makes it worth photographing.</p>
-        <p id="aboutLocP2">The light in Accra is specific. Generous and golden in the early morning, then sharp and exposing by noon, then soft in the evening in a way that forgives everything. I have been shooting here for years and I am still learning what this city looks like.</p>
-        <p id="aboutLocP3">I do not travel to exotic locations looking for striking images. The ordinary streets here contain more than I have managed to photograph. That is enough for a lifetime.</p>
+        <p id="aboutLocP1">Ghana does not ask to be photographed. It simply exists, loud and textured and indifferent to the lens, generous light in the morning, sharp by noon, forgiving by evening. I do not travel to exotic locations looking for striking images. The ordinary streets here contain more than I have managed to photograph in years of trying, and that is enough for a lifetime.</p>
       </div>
     </div>
-    <div>
+  </div>
+  <div class="about-street">
+    <div class="about-street-inner">
       <div class="about-col-label">Philosophy</div>
       <h2 class="about-col-heading" id="aboutPhilHeading">The pause<br>is the work.</h2>
       <div class="about-col-body">
-        <p id="aboutPhilP1">Most people walk past things. I am interested in the moment just before that, the half-second where something registers but has not yet been named. That is where I try to make photographs. I use a phone because it removes the gap between noticing and capturing. There is no setup, no adjustment, no signal to the subject that something is being recorded. The tool disappears and what remains is just attention. This is not a workaround. I work professionally with full equipment. I choose the phone because I believe in what it makes possible: a closeness, an honesty, an invisibility that a camera bag cannot buy.</p>
-        <p id="aboutPhilP2">I edit intentionally, and entirely on my phone. Some images are lightly retouched, a small correction, nothing more. Others are taken somewhere else entirely: colours shifted, mood reconstructed, the scene reimagined into something truer to how it felt than how it looked. I do not think of this as manipulation. I think of it as finishing the sentence the moment started. The entire process, from capture to final image, never leaves my hands.</p>
-        <p id="aboutPhilP3">I shoot mostly in Ghana, in Accra, along the coast, in the north, in the markets and the side streets and the places that do not make it onto anyone's itinerary. Not because the rest of the world is less interesting, but because there is still so much here that has not been looked at slowly enough. That is the work. Looking slowly. Looking again. Trusting that the ordinary is never just ordinary. It is only under-observed.</p>
+        <p id="aboutPhilP1">Most people walk past things. I am interested in the half-second before that, the moment something registers but has not yet been named. I use a phone because it closes the gap between noticing and capturing: no setup, no signal to the subject that something is being recorded, just attention. I edit the same way, intentional, entirely on the phone, finishing the sentence the moment started rather than manipulating it into something else.</p>
       </div>
     </div>
   </div>
@@ -1296,9 +1294,8 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="about-col-label">Practice</div>
       <h2 class="about-col-heading" id="aboutStreetHeading">The street doesn't<br>ask permission.</h2>
       <div class="about-col-body">
-        <p id="aboutStreetP1">Much of my street and documentary work happens without asking first. A market stall, a corner, a face caught mid-thought: the moment exists because no one was told to hold still for it. Asking first would have made a different, lesser photograph. This isn't carelessness. It's a discipline with its own history, the same one behind a century of documentary work that now hangs in galleries.</p>
-        <p id="aboutStreetP2">I photograph with care. I don't chase people into situations that could embarrass or endanger them, and a photograph earns its place in this body of work because it holds something true on its own, never because of who happens to be in the frame.</p>
-        <p id="aboutStreetP3">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
+        <p id="aboutStreetP1">Much of my street and documentary work happens without asking first. A market stall, a corner, a face caught mid-thought: the moment exists because no one was told to hold still for it. I photograph with care, I don't chase people into situations that could embarrass or endanger them, and a photograph earns its place here because it holds something true on its own, never because of who happens to be in the frame.</p>
+        <p id="aboutStreetP2">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
       </div>
     </div>
   </div>
@@ -4824,11 +4821,11 @@ fetch('/_data/settings/about-page.json')
   .then(function(s){
     var map={aboutBio1:'about_bio1',aboutBio2:'about_bio2',aboutBio3:'about_bio3',aboutBio4:'about_bio4',aboutBio5:'about_bio5',
       aboutCaption:'about_caption',aboutLocHeading:'about_loc_heading',
-      aboutLocP1:'about_loc_p1',aboutLocP2:'about_loc_p2',aboutLocP3:'about_loc_p3',
+      aboutLocP1:'about_loc_p1',
       aboutPhilHeading:'about_phil_heading',
-      aboutPhilP1:'about_phil_p1',aboutPhilP2:'about_phil_p2',aboutPhilP3:'about_phil_p3',
+      aboutPhilP1:'about_phil_p1',
       aboutStreetHeading:'about_street_heading',
-      aboutStreetP1:'about_street_p1',aboutStreetP2:'about_street_p2',aboutStreetP3:'about_street_p3'};
+      aboutStreetP1:'about_street_p1',aboutStreetP2:'about_street_p2'};
     Object.keys(map).forEach(function(id){
       var val=s[map[id]]; if(val){ var el=document.getElementById(id); if(el) el.textContent=val; }
     });
