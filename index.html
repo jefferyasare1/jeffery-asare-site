@@ -5102,6 +5102,11 @@ _loadPrintsFromCMS();
     function _dismissSplash(){
       splash.style.display='none';
       splash.style.pointerEvents='none';
+      // Also clear the shutter-strip curtain here as a second safety net —
+      // if _startSplash() never ran (e.g. the visibilitychange fallback
+      // below also somehow never fired), the strips would otherwise stay
+      // stuck fully opaque over the whole page forever.
+      if(strips[0]) strips.forEach(function(s){s.style.display='none';});
     }
     // Failsafe set up FIRST, before anything that depends on GSAP having
     // loaded. If the GSAP CDN script is slow/blocked on a given load (real
@@ -5151,6 +5156,15 @@ _loadPrintsFromCMS();
         }
       };
       document.addEventListener('visibilitychange',_splashVH);
+      // Failsafe: on some Chrome loads the page briefly reports as not
+      // "visible" during the very first paint, then never fires another
+      // visibilitychange event because nothing actually changes from the
+      // browser's point of view. Without this, _startSplash() would never
+      // run and the black curtain strips would stay on screen forever.
+      setTimeout(function(){
+        document.removeEventListener('visibilitychange',_splashVH);
+        _startSplash();
+      },200);
     }
   }
 
