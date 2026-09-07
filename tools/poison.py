@@ -145,7 +145,7 @@ def load_model(device):
 
 def img_to_tensor(arr, device):
     """HxWxC float32 [0,1] -> 1xCxHxW tensor."""
-    return torch.from_numpy(arr).permute(2, 0, 1).unsqueeze(0).float().to(device)
+    return torch.from_numpy(arr).permute(2, 0, 1).unsqueeze(0).float().contiguous().to(device)
 
 
 def tensor_to_img(t):
@@ -231,7 +231,12 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
             p_in  = adv[:, :, py:py+patch,      px:px+patch]
             p_tgt = t  [:, :, py*4:(py+patch)*4, px*4:(px+patch)*4]
 
-            p_out = model(p_in)
+            # p_in is a slice of adv, not a full copy, so PyTorch
+            # sees it as non-contiguous memory. Some ops inside the
+            # model (and PyTorch's own GPU/Metal backend on Mac)
+            # can throw "view size is not compatible..." on a
+            # non-contiguous input, so make a clean copy first.
+            p_out = model(p_in.contiguous())
             patch_loss = F.mse_loss(p_out, p_tgt) / n_patches_per_step
             patch_loss.backward()
             total_loss_value += patch_loss.item()

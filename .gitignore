@@ -34,3 +34,7 @@ commit_helper.html
 # never meant to be committed, just kept getting swept in by "commit all"
 _to_delete/
 _to-delete/
+
+# Python bytecode cache (from running tools/poison*.py)
+__pycache__/
+*.pyc
