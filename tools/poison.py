@@ -271,9 +271,17 @@ def main():
                     help='Patch size for gradient computation (default 256)')
     args = ap.parse_args()
 
-    device = 'cuda' if (args.gpu and torch.cuda.is_available()) else 'cpu'
+    if args.gpu and torch.cuda.is_available():
+        device = 'cuda'
+    elif args.gpu and torch.backends.mps.is_available():
+        # Apple Silicon Macs have no CUDA GPU, but PyTorch can use the
+        # built-in Metal (MPS) GPU instead - much faster than CPU for
+        # this kind of per-image optimization.
+        device = 'mps'
+    else:
+        device = 'cpu'
     if args.gpu and device == 'cpu':
-        print("Note: GPU requested but CUDA not available. Running on CPU (slower).")
+        print(f"Note: GPU requested but no CUDA/MPS GPU available. Running on {device} (slower).")
 
     print(f"\nDevice   : {device}")
     print(f"Photo    : {args.photo}")
