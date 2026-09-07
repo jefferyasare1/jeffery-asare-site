@@ -53,13 +53,21 @@ IMG_DIRS  = [
 def find_images():
     images = []
     for d in IMG_DIRS:
-        for ext in ('*.jpg', '*.jpeg', '*.JPG', '*.JPEG', '*.png', '*.PNG'):
+        for ext in ('*.jpg', '*.jpeg', '*.JPG', '*.JPEG',
+                    '*.png', '*.PNG', '*.webp', '*.WEBP'):
             images += glob.glob(os.path.join(d, '**', ext), recursive=True)
     # Exclude UI and room images
     images = [p for p in images if
               'ui' + os.sep not in p and
               'rooms' + os.sep not in p]
-    return sorted(set(images))
+    images = sorted(set(images))
+    # .webp is what the live site actually serves to visitors (the .jpg
+    # copies sitting next to them aren't linked from any page) - so if a
+    # run gets interrupted partway, make sure the copies people actually
+    # see get protected first, not whichever happens to sort first
+    # alphabetically.
+    images.sort(key=lambda p: 0 if p.lower().endswith('.webp') else 1)
+    return images
 
 
 def load_log():
@@ -164,7 +172,10 @@ def main():
             )
             # Save back to the same path (in place)
             ext = os.path.splitext(path)[1].lower()
-            if ext in ('.jpg', '.jpeg'):
+            if ext in ('.jpg', '.jpeg', '.webp'):
+                # quality=95 for both - webp defaults to a lower lossy
+                # quality otherwise, which isn't necessary here and just
+                # adds extra compression on top of the poisoning.
                 Image.fromarray(poisoned).save(path, quality=95)
             else:
                 Image.fromarray(poisoned).save(path)
