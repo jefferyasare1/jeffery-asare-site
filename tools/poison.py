@@ -213,7 +213,16 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
         opt.zero_grad()
         adv = (x + delta).clamp(0, 1)
 
-        total_loss = torch.tensor(0.0, device=device)
+        # Run + backward ONE patch at a time instead of building all
+        # n_patches_per_step forward graphs before a single backward() -
+        # the old way kept every patch's activations (a full pass through
+        # a 23-block model) in memory simultaneously, which is what was
+        # causing the process to be killed by the OS for using too much
+        # RAM before finishing even a single image. Calling backward()
+        # per patch and letting the optimizer accumulate the averaged
+        # gradient gives the identical result with roughly 1/n_patches
+        # the peak memory.
+        total_loss_value = 0.0
 
         for _ in range(n_patches_per_step):
             # Random patch on the low-res input
@@ -223,10 +232,15 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
             p_tgt = t  [:, :, py*4:(py+patch)*4, px*4:(px+patch)*4]
 
             p_out = model(p_in)
-            total_loss = total_loss + F.mse_loss(p_out, p_tgt)
+            patch_loss = F.mse_loss(p_out, p_tgt) / n_patches_per_step
+            patch_loss.backward()
+            total_loss_value += patch_loss.item()
 
-        total_loss = total_loss / n_patches_per_step
-        total_loss.backward()
+            # adv shares a graph with the previous patch's loss, and that
+            # graph was just freed by backward() above - recompute it fresh
+            # so the next patch's backward() has its own graph to walk.
+            adv = (x + delta).clamp(0, 1)
+
         opt.step()
 
         with torch.no_grad():
@@ -237,7 +251,7 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
             pct = (step + 1) * 100 // steps
             dmax = delta.abs().max().item() * 255
             print(f"  [{pct:3d}%] step {step+1:4d}/{steps}  "
-                  f"loss={total_loss.item():.5f}  "
+                  f"loss={total_loss_value:.5f}  "
                   f"max_delta={dmax:.1f}/255")
 
     poisoned = (x + delta.detach()).clamp(0, 1)
