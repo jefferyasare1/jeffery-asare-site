@@ -190,6 +190,9 @@ def main():
             save_log(log)
             print(f"  Done in {elapsed:.0f}s  ->  saved in place")
 
+            if device == 'mps':
+                torch.mps.empty_cache()
+
         except KeyboardInterrupt:
             print("\n\nInterrupted. Progress saved to tools/poison_all.log.")
             print("Run again to resume from where you left off.")
@@ -199,6 +202,10 @@ def main():
             log[path] = f'error: {e}'
             failed.append(rel)
             save_log(log)
+            if device == 'mps':
+                # Clear out whatever this failed attempt left cached so
+                # it doesn't drag the next photo down with it too.
+                torch.mps.empty_cache()
 
     print(f"\n{'='*60}")
     print(f"  Batch complete")

@@ -248,6 +248,15 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
 
         opt.step()
 
+        if device == 'mps':
+            # Apple's Metal backend keeps freed memory in its own cache
+            # for reuse rather than handing it back right away. Over
+            # hundreds of steps that cache keeps growing instead of
+            # settling down, which is what was hitting the 9GB ceiling
+            # and crashing on the very first photo. This tells it to
+            # actually release what it isn't using, every step.
+            torch.mps.empty_cache()
+
         with torch.no_grad():
             delta.data.clamp_(-epsilon, epsilon)
             delta.data = (x + delta.data).clamp(0, 1) - x
