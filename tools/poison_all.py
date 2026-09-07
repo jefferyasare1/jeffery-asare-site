@@ -92,7 +92,12 @@ def main():
                     help='Optimization steps per image (default 200)')
     ap.add_argument('--lr',       type=float, default=0.002,
                     help='Learning rate (default 0.002)')
-    ap.add_argument('--max-size', type=int,   default=1024,
+    # Every photo already on the site is bigger than 1024px on its long
+    # side (some up to 4000px) - the old default of 1024 would have quietly
+    # shrunk every single one down before saving the "protected" version
+    # back in place. 4096 covers everything currently on the site with
+    # headroom, so nothing gets downsized unless it's genuinely huge.
+    ap.add_argument('--max-size', type=int,   default=4096,
                     help='Max input resolution (default 1024)')
     ap.add_argument('--patch',    type=int,   default=256,
                     help='Patch size (default 256)')

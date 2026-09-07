@@ -22,8 +22,8 @@ USAGE
   --coverage 0.8    Logo covers 80% of image short side (default)
   --epsilon  8      Max pixel shift per channel, 0-255 scale (default 8, invisible)
   --steps    200    Optimization iterations (more = stronger effect, slower)
-  --max-size 1024   Resize photo to this max dimension before processing
-  --gpu             Use CUDA GPU if available (10x faster)
+  --max-size 4096   Resize photo to this max dimension before processing
+  --gpu             Use GPU if available (CUDA, or a Mac's own Metal/MPS GPU)
 
 WORKFLOW
   1. Run this script on each photo you want protected before uploading to the site.
@@ -282,7 +282,12 @@ def main():
                     help='Optimization steps (default 200; more = stronger effect)')
     ap.add_argument('--lr',       type=float, default=0.002,
                     help='Adam learning rate for delta (default 0.002)')
-    ap.add_argument('--max-size', type=int,   default=1024,
+    # Every photo already on the site is bigger than 1024px on its long
+    # side (some up to 4000px) - the old default of 1024 would have quietly
+    # shrunk every single one down before saving the "protected" version
+    # back in place. 4096 covers everything currently on the site with
+    # headroom, so nothing gets downsized unless it's genuinely huge.
+    ap.add_argument('--max-size', type=int,   default=4096,
                     help='Resize photo to this max dimension (default 1024)')
     ap.add_argument('--gpu',      action='store_true',
                     help='Use CUDA GPU (10x faster)')
