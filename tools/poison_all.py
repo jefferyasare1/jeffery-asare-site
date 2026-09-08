@@ -99,8 +99,12 @@ def main():
     # headroom, so nothing gets downsized unless it's genuinely huge.
     ap.add_argument('--max-size', type=int,   default=4096,
                     help='Max input resolution (default 1024)')
-    ap.add_argument('--patch',    type=int,   default=256,
-                    help='Patch size (default 256)')
+    # 256px patches through the 23-block model can use several GB of GPU
+    # memory on a single forward+backward pass on some Macs - 128 is a
+    # safer default (poison() also auto-shrinks this further on its own
+    # if a photo still runs out of memory at 128).
+    ap.add_argument('--patch',    type=int,   default=128,
+                    help='Patch size (default 128)')
     ap.add_argument('--gpu',      action='store_true',
                     help='Use CUDA GPU (strongly recommended)')
     ap.add_argument('--reset',    action='store_true',

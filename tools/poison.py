@@ -190,25 +190,20 @@ def make_target_upscaled(photo_np, logo_path, coverage, scale=4):
 # PGD targeted attack (patch-based for memory efficiency)
 # ---------------------------------------------------------------------------
 
-def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
-           patch=256, n_patches_per_step=4):
+def _run_poison_steps(model, x, t, h, w, epsilon, steps, lr, device,
+                       patch, n_patches_per_step):
     """
-    Finds delta such that upscaler(photo + delta) ≈ upscale(photo + logo).
-    Returns poisoned photo as HxWxC uint8.
+    Runs the actual optimization loop at a fixed patch size. Split out
+    from poison() below so that poison() can retry this same work with
+    a smaller patch size if the GPU runs out of memory partway through,
+    without duplicating the whole loop.
     """
-    print("Building 4x target composite ...")
-    target_big = make_target_upscaled(photo_np, logo_path, coverage)
-
-    x = img_to_tensor(photo_np, device)        # 1x3xHxW
-    t = img_to_tensor(target_big, device)      # 1x3x(4H)x(4W)
-
-    h, w = photo_np.shape[:2]
-
     delta = torch.zeros_like(x, requires_grad=False)
     delta.requires_grad_(True)
     opt = torch.optim.Adam([delta], lr=lr)
 
-    print(f"Poisoning ({steps} steps, epsilon={epsilon*255:.0f}/255, device={device}) ...")
+    print(f"Poisoning ({steps} steps, epsilon={epsilon*255:.0f}/255, "
+          f"device={device}, patch={patch}px) ...")
     for step in range(steps):
         opt.zero_grad()
         adv = (x + delta).clamp(0, 1)
@@ -246,6 +241,15 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
             # so the next patch's backward() has its own graph to walk.
             adv = (x + delta).clamp(0, 1)
 
+            if device == 'mps':
+                # This 23-block model is deep enough that even a single
+                # patch's forward+backward pass can leave several hundred
+                # MB to a few GB cached by Metal's allocator. Clearing
+                # after every patch (not just once per step, further
+                # down) gives it the best chance to actually let that go
+                # before the next patch needs fresh memory.
+                torch.mps.empty_cache()
+
         opt.step()
 
         if device == 'mps':
@@ -270,6 +274,50 @@ def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
 
     poisoned = (x + delta.detach()).clamp(0, 1)
     return tensor_to_img(poisoned)
+
+
+def poison(model, photo_np, logo_path, coverage, epsilon, steps, lr, device,
+           patch=128, n_patches_per_step=4):
+    """
+    Finds delta such that upscaler(photo + delta) ≈ upscale(photo + logo).
+    Returns poisoned photo as HxWxC uint8.
+
+    Some Macs don't have enough spare GPU memory for a single patch's
+    forward+backward pass through this 23-block model at the requested
+    patch size (this is what was crashing every photo with an "MPS
+    backend out of memory" error, even on modestly-sized photos). If
+    that happens, this automatically retries the same photo with a
+    smaller patch size - halving it each time, up to 3 tries - instead
+    of giving up on the photo entirely.
+    """
+    print("Building 4x target composite ...")
+    target_big = make_target_upscaled(photo_np, logo_path, coverage)
+
+    x = img_to_tensor(photo_np, device)        # 1x3xHxW
+    t = img_to_tensor(target_big, device)      # 1x3x(4H)x(4W)
+
+    h, w = photo_np.shape[:2]
+
+    current_patch = max(32, min(patch, h, w))
+    attempt = 0
+    max_attempts = 3
+    while True:
+        try:
+            return _run_poison_steps(
+                model, x, t, h, w, epsilon, steps, lr, device,
+                current_patch, n_patches_per_step,
+            )
+        except RuntimeError as e:
+            is_oom = 'out of memory' in str(e).lower()
+            if not is_oom or attempt >= max_attempts or current_patch <= 32:
+                raise
+            attempt += 1
+            current_patch = max(32, current_patch // 2)
+            if device == 'mps':
+                torch.mps.empty_cache()
+            print(f"  Ran out of GPU memory - retrying this photo with a "
+                  f"smaller patch size ({current_patch}px) instead of "
+                  f"skipping it (attempt {attempt}/{max_attempts}) ...")
 
 
 # ---------------------------------------------------------------------------
@@ -297,11 +345,15 @@ def main():
     # back in place. 4096 covers everything currently on the site with
     # headroom, so nothing gets downsized unless it's genuinely huge.
     ap.add_argument('--max-size', type=int,   default=4096,
-                    help='Resize photo to this max dimension (default 1024)')
+                    help='Resize photo to this max dimension (default 4096)')
     ap.add_argument('--gpu',      action='store_true',
                     help='Use CUDA GPU (10x faster)')
-    ap.add_argument('--patch',    type=int,   default=256,
-                    help='Patch size for gradient computation (default 256)')
+    # 256px patches through this 23-block model can use several GB of
+    # GPU memory on a single forward+backward pass on some Macs - 128 is
+    # a safer default that still gives a strong result (poison() will
+    # also automatically shrink this further on its own if needed).
+    ap.add_argument('--patch',    type=int,   default=128,
+                    help='Patch size for gradient computation (default 128)')
     args = ap.parse_args()
 
     if args.gpu and torch.cuda.is_available():
