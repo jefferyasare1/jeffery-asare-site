@@ -1,4 +1,43 @@
 User-agent: *
 Allow: /
 
+# The rules below block bots that crawl sites specifically to collect
+# training data for AI models. Regular search engines (Google, Bing, Apple)
+# and AI tools that just cite or link to pages in real-time answers are
+# left alone, since blocking those would hurt how easily people can find
+# this site.
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
 Sitemap: https://jefferyasare.com/sitemap.xml
