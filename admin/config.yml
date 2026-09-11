@@ -83,7 +83,6 @@ collections:
           - {label: "Hero Image 3", name: "hero3", widget: "image"}
           - {label: "Hero Image 4", name: "hero4", widget: "image"}
           - {label: "Hero Image 5", name: "hero5", widget: "image"}
-          - {label: "About Portrait Photo", name: "about_photo", widget: "image"}
           - {label: "Contact Page Photo", name: "contact_photo", widget: "image"}
 
       - label: "Portfolio Page"
@@ -96,6 +95,7 @@ collections:
         name: "about-page"
         file: "_data/settings/about-page.json"
         fields:
+          - {label: "About Portrait Photo", name: "about_photo", widget: "image"}
           - {label: "Bio: Paragraph 1", name: "about_bio1", widget: "text"}
           - {label: "Bio: Paragraph 2", name: "about_bio2", widget: "text"}
           - {label: "Bio: Paragraph 3", name: "about_bio3", widget: "text"}

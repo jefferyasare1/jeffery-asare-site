@@ -4782,11 +4782,6 @@ fetch('/_data/settings/general.json')
         }
       }
     });
-    if(s.about_photo){
-      var img=document.getElementById('aboutPortraitImg');
-      if(img){ img.src=s.about_photo; img.style.display='block'; }
-      var ph=document.getElementById('aboutPortraitPh'); if(ph) ph.style.display='none';
-    }
     if(s.contact_photo){
       var img=document.getElementById('contactPhotoImg');
       if(img){ img.src=s.contact_photo; img.style.display='block'; }
@@ -4825,6 +4820,11 @@ fetch('/_data/settings/about-page.json')
     Object.keys(map).forEach(function(id){
       var val=s[map[id]]; if(val){ var el=document.getElementById(id); if(el) el.textContent=val; }
     });
+    if(s.about_photo){
+      var img=document.getElementById('aboutPortraitImg');
+      if(img){ img.src=s.about_photo; img.style.display='block'; }
+      var ph=document.getElementById('aboutPortraitPh'); if(ph) ph.style.display='none';
+    }
   }).catch(function(){});
 
 // Load shop page text
