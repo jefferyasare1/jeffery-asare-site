@@ -923,6 +923,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .pd-related{padding:3rem var(--pad) 4rem;border-top:1px solid var(--rule);}
 .pd-related-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;}
 .pd-related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+@media(min-width:901px){.pd-related-grid{max-width:30%;}}
 .pd-related-card{cursor:pointer;}
 .pd-related-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--warm);margin-bottom:.7rem;transition:opacity .2s,transform .35s;}
 .pd-related-card:hover .pd-related-img{opacity:.88;transform:scale(1.02);}
@@ -3107,7 +3108,8 @@ function openPrintDetail(print){
       {label:'A4', w:210, h:297, dims:'21 × 29.7 cm', use:'Desk, shelf'},
       {label:'A3', w:297, h:420, dims:'29.7 × 42 cm', use:'Hallway, gallery wall'},
       {label:'A2', w:420, h:594, dims:'42 × 59.4 cm', use:'Above a desk or console'},
-      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm', use:'Statement wall piece'}
+      {label:'A1', w:594, h:841, dims:'59.4 × 84.1 cm', use:'Statement wall piece'},
+      {label:'A0', w:841, h:1189, dims:'84.1 × 118.9 cm', use:'Grand gallery statement'}
     ];
     var scale = 0.18; // mm &rarr; px for display
 
@@ -3253,7 +3255,7 @@ var _roomCurrent='living', _roomSize='a3';
 // dashboard.html) — reverted here, public site unchanged since. The two
 // are NOT kept in sync on size percentages anymore; everything else
 // (frame styling, colors, positioning) still is.
-var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30};
+var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30,a0:39};
 // walnut updated to charcoal (#2a2725) 2026-08-23 per Jeff's approval — the
 // only material actually in use in _data/prints.json today, so this is the
 // only swatch changed; black/white/oak left as-is since they weren't part
