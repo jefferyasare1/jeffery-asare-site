@@ -53,6 +53,33 @@
         }
       ],
       "frame": "walnut"
+    },
+    {
+      "id": "s1789249869871",
+      "title": "The Purple Market",
+      "series": "RANDOM-STORIES",
+      "edition": "20",
+      "desc": "I had gone to Dome market for fish, and a few other things for the week. Nothing about the afternoon was unusual. I got what I needed and was on my way out when these two women walked past me, quickly, the way people move when they are already thinking about the next job.\n\nThey are 'Kayayei'. Women who carry other people's loads for a living, moving through markets like these ones, offering their backs to whoever needs help getting home. I have seen them for years and never stopped to really look. This time I did. There is an art in how they carry themselves. Not effortless. Nothing about that work is effortless, but practiced. Purposeful. Unbothered. Like the weight is just something they made peace with a long time ago. You see it in the posture, in the pace, in how little of it shows on the face.\n\nThe light was doing something specific that afternoon, low and warm, catching them from the side in a way I could not have arranged if I had tried. I lifted my phone before I could think about it. That is usually when the photograph works.\n\nThe load carried without complaint. The body as a record of what has been asked of it.",
+      "img": "/images/portfolio/random-stories/rs-the-purple-market.webp",
+      "sizes": [
+        {
+          "label": "A3",
+          "price": 2060
+        },
+        {
+          "label": "A2",
+          "price": 3540
+        },
+        {
+          "label": "A1",
+          "price": 7070
+        },
+        {
+          "label": "A0",
+          "price": 14140
+        }
+      ],
+      "frame": "walnut"
     }
   ]
 }
