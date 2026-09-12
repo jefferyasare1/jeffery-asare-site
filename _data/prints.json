@@ -26,6 +26,33 @@
           "price": 13200
         }
       ]
+    },
+    {
+      "id": "s1789178591823",
+      "title": "Reach",
+      "series": "RANDOM-STORIES",
+      "edition": "20",
+      "desc": "I know this girl. Her name is Abena, and she's always been curious about everything. I'd photographed her once before, so when I saw her again on a Sunday afternoon while walking home from church, I took my phone out and started taking pictures. She was used to it by then and didn't mind.\n\nWhen I finished, she reached for the phone. She wanted to see the photos I'd just taken of her. That's it, really. That's the whole moment. But it stuck with me. A young girl wanting to see herself, wanting to know what I saw when I photographed her. It felt like more than curiosity. It felt like she was asking to be included, not just photographed.\n\nThis photo is that reach. Nothing posed, nothing staged. Just Abena, wanting to see.",
+      "img": "/images/portfolio/random-stories/rs-reach.webp",
+      "sizes": [
+        {
+          "label": "A3",
+          "price": 2030
+        },
+        {
+          "label": "A2",
+          "price": 4670
+        },
+        {
+          "label": "A1",
+          "price": 9330
+        },
+        {
+          "label": "A0",
+          "price": 18670
+        }
+      ],
+      "frame": "walnut"
     }
   ]
 }
