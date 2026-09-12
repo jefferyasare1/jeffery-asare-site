@@ -1323,7 +1323,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   </div>
   <div class="page-header">
     <h1 id="shopTitle">Fine Art Prints</h1>
-    <p id="shopDesc">Limited edition archival prints on premium paper. Signed and numbered. Ships worldwide from Accra.</p>
+    <p id="shopDesc">Every print here is made in a small, numbered edition on archival paper, chosen for how gently it ages and how much detail it holds onto over the years. I sign and number each one by hand, and it comes with its own certificate of authenticity, a small record of where it's been. My hope is that these become part of your everyday life, not something tucked away, but a piece you actually live with and return to. Ships worldwide from Accra, wherever you are.</p>
   </div>
   <div class="shop-controls"><div class="currency-toggle"><button id="btnGHS" class="cur-active" data-currency="GHS" onclick="setCurrency('GHS')">GH₵</button><button id="btnUSD" data-currency="USD" onclick="setCurrency('USD')">USD</button></div></div>
   <div id="shopSocialProof" style="display:none;"></div>
@@ -3245,17 +3245,20 @@ function openPrintDetail(print){
 // revisit real compositing later, but it's dead code as of this change.
 var _roomCurrent='living', _roomSize='a3';
 
-// On-wall width as a % of the (square) room viewport, per print size —
-// illustrative scaling only, never physically calibrated. Frame colors
-// approximate the walnut/black/white/oak options a print can have.
-// 2026-08-23: sized down 20% at Jeff's request (was a4:16,a3:22,a2:29,a1:37
-// -> a4:13,a3:18,a2:23,a1:30). Briefly bumped back up 20% the same day on
-// a "make the previews 20% larger" request, but that turned out to mean
-// the dashboard's admin preview tool only (see CMS_ROOM_SIZE_PCT in
-// dashboard.html) — reverted here, public site unchanged since. The two
-// are NOT kept in sync on size percentages anymore; everything else
-// (frame styling, colors, positioning) still is.
-var ROOM_FALLBACK_SIZE_PCT={a4:13,a3:18,a2:23,a1:30,a0:39};
+// On-wall width as a % of the (square) room viewport, per print size.
+// 2026-09-12: recalibrated to true physical scale at Jeff's request —
+// he felt the old "illustrative only" values (a4:13,a3:18,a2:23,a1:30,
+// a0:39) looked oversized next to the sofa in living.jpg. Measured the
+// sofa in that photo (~77% of frame width) against a typical 3-seat sofa
+// (~205cm) to get an implied wall width of ~266cm, then set each size to
+// its real A-series width (21/29.7/42/59.4/84.1cm) as a % of that: a4=8,
+// a3=11, a2=16, a1=22, a0=32. Verified by overlaying rectangles at these
+// widths on living.jpg before committing — reads as genuinely true-to-
+// life now. Frame colors approximate the walnut/black/white/oak options
+// a print can have. Kept +25% larger in the dashboard's own preview tool
+// (CMS_ROOM_SIZE_PCT in dashboard.html) as before — that gap is
+// deliberate, not a leftover; see the comment there.
+var ROOM_FALLBACK_SIZE_PCT={a4:8,a3:11,a2:16,a1:22,a0:32};
 // walnut updated to charcoal (#2a2725) 2026-08-23 per Jeff's approval — the
 // only material actually in use in _data/prints.json today, so this is the
 // only swatch changed; black/white/oak left as-is since they weren't part
