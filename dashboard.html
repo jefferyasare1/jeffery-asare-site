@@ -5780,7 +5780,7 @@ function cmsMoveJournal(idx,dir){
 
 function cmsOpenJournalEdit(idx){
   var isNew=(idx===null);
-  var post=isNew?{id:'j'+Date.now(),title:'',date:new Date().toISOString().slice(0,10),series:'Field Notes',excerpt:'',body:'',img:''}:(_cmsData.journal.posts[idx]||{});
+  var post=isNew?{id:'j'+Date.now(),title:'',date:new Date().toISOString().slice(0,10),series:'Field Notes',where:'',shotOn:'',excerpt:'',body:'',img:''}:(_cmsData.journal.posts[idx]||{});
   // Series dropdown: built from every series name already used across existing
   // posts, so it grows on its own as new series get added, no code change
   // needed. "+ Add new series..." reveals a text box for a genuinely new name.
@@ -5800,7 +5800,13 @@ function cmsOpenJournalEdit(idx){
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><select id="cms-j-series" class="client-sel" onchange="document.getElementById(\'cms-j-series-custom\').style.display=(this.value===\'__custom__\')?\'block\':\'none\'">'+seriesOptionsHtml+'</select>'
     +'<input type="text" id="cms-j-series-custom" placeholder="New series name" style="margin-top:8px;display:none"></div></div>'
+    +'<div class="cms-grid2" style="margin-top:16px"><div class="cms-field" style="margin-bottom:0"><label>Where <span class="opt">(optional)</span></label><input type="text" id="cms-j-where" value="'+escAttr(post.where||'')+'" placeholder="e.g. Dome"></div>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Shot on <span class="opt">(optional)</span></label><input type="text" id="cms-j-shoton" value="'+escAttr(post.shotOn||'')+'" placeholder="e.g. October 4, 2023"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
+    +'<div class="cms-field"><label>Image <span class="opt">(shown on the featured post and its full story)</span></label>'
+      +'<div class="img-upload-row"><input type="text" id="cms-j-img" value="'+escAttr(post.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
+      +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-j-img\',\'cms-j-upload-status\')"></label></div>'
+      +'<div class="cms-status" id="cms-j-upload-status"></div></div>'
     +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
     +'<div class="cms-save-row"><button style="background:none;border:1px solid var(--rule);color:var(--ink);padding:11px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans)" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'draft\')">Save as Draft</button>'
     +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'live\')">Save &amp; Publish</button>'
@@ -5814,7 +5820,9 @@ function cmsSaveJournal(idx,postId,saveStatus){
   var seriesVal=(seriesSel==='__custom__')?document.getElementById('cms-j-series-custom').value.trim():seriesSel;
   var u={id:postId||('j'+Date.now()),title:document.getElementById('cms-j-title').value.trim(),
     date:document.getElementById('cms-j-date').value,series:seriesVal,
-    excerpt:document.getElementById('cms-j-excerpt').value.trim(),body:document.getElementById('cms-j-body').value.trim(),img:''};
+    where:document.getElementById('cms-j-where').value.trim(),shotOn:document.getElementById('cms-j-shoton').value.trim(),
+    excerpt:document.getElementById('cms-j-excerpt').value.trim(),body:document.getElementById('cms-j-body').value.trim(),
+    img:document.getElementById('cms-j-img').value.trim()};
   if(saveStatus) u.status=saveStatus;
   if(!u.title){st.className='cms-status err';st.textContent='Title is required.';return;}
   if(seriesSel==='__custom__' && !seriesVal){st.className='cms-status err';st.textContent='Enter a name for the new series.';return;}
