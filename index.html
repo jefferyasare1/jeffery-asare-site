@@ -2486,7 +2486,7 @@ function closeMobileMenu(){
   document.body.style.overflow="";
   document.querySelectorAll(".ham-btn").forEach(function(b){ b.classList.remove("open"); });
 }
-["homeHamBtn","portHamBtn","aboutHamBtn","shopHamBtn","contactHamBtn","termsHamBtn"].forEach(function(id){
+["homeHamBtn","portHamBtn","aboutHamBtn","shopHamBtn","contactHamBtn","termsHamBtn","privHamBtn","journHamBtn"].forEach(function(id){
   var el=document.getElementById(id);
   if(el) el.addEventListener("click",function(){ mobileMenu && mobileMenu.classList.contains("open")?closeMobileMenu():openMobileMenu(); });
 });
