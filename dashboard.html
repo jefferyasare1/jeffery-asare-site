@@ -5798,7 +5798,7 @@ function cmsOpenJournalEdit(idx){
   document.getElementById('cmsModalBody').innerHTML=
     '<div class="cms-field"><label>Title</label><input type="text" id="cms-j-title" value="'+escAttr(post.title||'')+'"></div>'
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
-    +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><select id="cms-j-series" onchange="document.getElementById(\'cms-j-series-custom\').style.display=(this.value===\'__custom__\')?\'block\':\'none\'">'+seriesOptionsHtml+'</select>'
+    +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><select id="cms-j-series" class="client-sel" onchange="document.getElementById(\'cms-j-series-custom\').style.display=(this.value===\'__custom__\')?\'block\':\'none\'">'+seriesOptionsHtml+'</select>'
     +'<input type="text" id="cms-j-series-custom" placeholder="New series name" style="margin-top:8px;display:none"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
