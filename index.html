@@ -2719,20 +2719,32 @@ function _buildJournalList(posts, seriesFilter){
   }).join('')+'</div>';
   // Filter posts by series
   var filtered=activeSeries==='All'?posts:posts.filter(function(p){return p.series===activeSeries;});
-  var postsHtml=filtered.map(function(p){
+  // The newest post in the current view leads as a feature; the rest follow as a plain list
+  var feature=filtered[0];
+  var rest=filtered.slice(1);
+  var featureHtml='';
+  if(feature){
+    var fd=new Date(feature.date);
+    var fDateStr=fd.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
+    var fRt=_readingTime(feature.body);
+    featureHtml='<div class="journal-feature" data-jid="'+feature.id+'">'
+      +(feature.img?'<img class="journal-feature-img" src="'+feature.img+'" alt="'+feature.title+'" loading="lazy">':'')
+      +'<div class="journal-feature-meta">'+feature.series+' &nbsp;·&nbsp; '+fDateStr+' &nbsp;·&nbsp; '+fRt+'</div>'
+      +'<div class="journal-feature-title">'+feature.title+'</div>'
+      +'<p class="journal-feature-excerpt">'+feature.excerpt+'</p>'
+      +'</div>';
+  }
+  var postsHtml=rest.map(function(p){
     var d=new Date(p.date);
     var dateStr=d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
     var rt=_readingTime(p.body);
     return '<div class="journal-post" data-jid="'+p.id+'">'
-      +'<div class="journal-post-body">'
       +'<div class="journal-post-meta">'+p.series+' &nbsp;·&nbsp; '+dateStr+' &nbsp;·&nbsp; '+rt+'</div>'
       +'<div class="journal-post-title">'+p.title+'</div>'
       +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
-      +'</div>'
-      +(p.img?'<img class="journal-post-thumb" src="'+p.img+'" alt="'+p.title+'" loading="lazy">':'')
       +'</div>';
   }).join('');
-  el.innerHTML=filterHtml+postsHtml;
+  el.innerHTML=filterHtml+featureHtml+postsHtml;
   // Series filter clicks
   el.querySelectorAll('.journal-series-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){
@@ -2740,8 +2752,8 @@ function _buildJournalList(posts, seriesFilter){
       _buildJournalList(posts, btn.dataset.series);
     });
   });
-  // Post clicks
-  el.querySelectorAll('.journal-post').forEach(function(card){
+  // Post clicks (feature card + list rows)
+  el.querySelectorAll('.journal-feature[data-jid], .journal-post[data-jid]').forEach(function(card){
     card.addEventListener('click',function(){
       var id=card.dataset.jid;
       var post=filtered.find(function(p){ return p.id===id; });
