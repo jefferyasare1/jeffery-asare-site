@@ -37,6 +37,9 @@
 }
 </script>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--ink:#111;--bg:#fff;--warm:#f5f2ee;--muted:#666;--rule:#e8e4df;--title:'General Sans',system-ui,sans-serif;--serif:'EB Garamond','Georgia',serif;--sans:'General Sans',system-ui,sans-serif;--pad:clamp(1.5rem,5vw,4rem);}
@@ -396,7 +399,7 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .footer-copy a{color:rgba(255,255,255,.4);text-decoration:underline;cursor:pointer;}
 /* ── Smart features ── */
 .shop-social-proof{font-size:11px;color:var(--muted);letter-spacing:.04em;padding:.5rem var(--pad) .2rem;text-align:center;}
-.journal-suggestions{border-top:1px solid var(--rule);padding:2rem var(--pad) 1rem;max-width:760px;margin:0 auto;}
+.journal-suggestions{border-top:1px solid var(--rule);padding-top:2rem;}
 .journal-suggestions-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
 .journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
 @media(max-width:600px){.journal-suggestions-grid{grid-template-columns:1fr 1fr;}}
@@ -745,7 +748,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .size-guide-table tr.active-size td{background:var(--bg);}
 .size-guide-table tr.active-size .sg-td-size{color:var(--ink);}
 /* JOURNAL */
-.journal-wrap{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.journal-wrap{max-width:880px;margin:0 auto;padding:3rem 1.5rem 5rem;}
 .journal-header{margin-bottom:2.2rem;}
 .journal-header h1{font-family:var(--title);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .6rem;}
 .journal-header p{font-size:14px;color:var(--muted);margin:0;max-width:440px;line-height:1.6;}
@@ -760,25 +763,30 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .journal-feature-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
 .journal-feature-title{font-family:var(--title);font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:700;letter-spacing:-.02em;line-height:1.16;margin:0 0 .8rem;max-width:26ch;}
 .journal-feature:hover .journal-feature-title{text-decoration:underline;}
-.journal-feature-excerpt{font-family:var(--serif);font-style:italic;font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:52ch;}
+.journal-feature-excerpt{font-family:var(--serif);font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:52ch;}
 .journal-post{border-bottom:none;background:var(--warm);padding:1.6rem 1.6rem;margin-bottom:1.1rem;cursor:pointer;display:flex;gap:1.4rem;align-items:flex-start;justify-content:space-between;}
 .journal-post:hover .journal-post-title{text-decoration:underline;}
 .journal-post-body{flex:1;min-width:0;}
 .journal-post-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
 .journal-post-title{font-family:var(--title);font-size:1.2rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .55rem;line-height:1.28;max-width:36ch;}
-.journal-post-excerpt{font-family:var(--serif);font-style:italic;font-size:1rem;color:var(--muted);line-height:1.6;margin:0;max-width:48ch;}
+.journal-post-excerpt{font-family:var(--serif);font-size:1rem;color:var(--muted);line-height:1.6;margin:0;max-width:48ch;}
 .journal-post-thumb{width:88px;height:88px;object-fit:cover;flex-shrink:0;display:block;}
 .journal-post-thumb-fallback{width:88px;height:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);}
 .journal-post-thumb-fallback svg{width:26px;height:26px;}
-.journal-body-wrap{max-width:620px;margin:0 auto;padding:2.4rem 1.5rem 5rem;}
+.journal-body-wrap{max-width:700px;margin:0 auto;padding:2.4rem 1.5rem 5rem;}
 .journal-body-cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;margin-bottom:2.2rem;}
 .journal-body-meta{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
 .journal-body-title{font-family:var(--title);font-size:clamp(2rem,5.5vw,2.8rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:0 0 2rem;}
 .journal-body-text p{font-size:15px;line-height:1.85;color:var(--ink);margin:0 0 1.4em;font-family:var(--sans);}
 .journal-body-pull{font-family:var(--serif);font-style:italic;font-size:1.4rem;line-height:1.5;color:var(--ink);margin:1.8rem 0;max-width:38ch;}
 .journal-body-foot{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2.2rem;padding-top:1.5rem;border-top:1px solid var(--rule);}
-.journal-body-shot{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;text-transform:none;font-size:1rem;color:var(--ink);margin-top:.5rem;}
-.journal-post-nav{display:flex;justify-content:space-between;margin-top:2rem;padding:1.5rem 0;border-top:1px solid var(--rule);gap:1rem;}
+.journal-body-meta-list{margin-top:1rem;display:flex;flex-direction:column;gap:.35rem;}
+.journal-body-meta-row{font-size:12px;letter-spacing:.02em;text-transform:none;font-weight:400;}
+.journal-body-meta-row .lbl{color:var(--muted);}
+.journal-body-meta-row .val{color:var(--ink);}
+#journalPostExtras{background:var(--warm);margin-top:3rem;}
+.journal-extras-inner{max-width:880px;margin:0 auto;padding:2.8rem 1.5rem 4rem;}
+.journal-post-nav{display:flex;justify-content:space-between;padding-bottom:2rem;margin-bottom:2rem;border-bottom:1px solid var(--rule);gap:1rem;}
 .journal-post-nav-item{flex:1;}
 .journal-post-nav-item.next{text-align:right;}
 .journal-post-nav-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
@@ -1470,6 +1478,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <button class="detail-back" id="journPostBackBtn" style="padding-left:0;">&#8592; All Notes</button>
       <div id="journalPostContent"></div>
     </div>
+    <div id="journalPostExtras"></div>
   </div>
   <div id="journal-mini-footer"></div>
 </div>
@@ -2816,9 +2825,21 @@ function _openJournalPost(post, posts){
     +(nextPost?'<div class="journal-post-nav-item next"><div class="journal-post-nav-label">Next &#8594;</div><div class="journal-post-nav-title" data-navid="'+nextPost.id+'">'+nextPost.title+'</div></div>':'<div class="journal-post-nav-item"></div>')
     +'</div>';
   var rt = _readingTime(post.body);
-  var shotLine = (post.where||'') + ((post.where && post.shotOn) ? ', ' : '') + (post.shotOn||'');
+  // A clean vertical list of shoot details, in the order Jeff asked for:
+  // the device it was shot on, the date, then the location. Any field left
+  // blank on a post (e.g. the essay-style entries) simply doesn't get a row.
+  var metaRows = [
+    ['Shot on', post.device],
+    ['Date', post.shotOn],
+    ['Location', post.where]
+  ].filter(function(row){ return row[1]; });
+  var metaListHtml = metaRows.length
+    ? '<div class="journal-body-meta-list">'+metaRows.map(function(row){
+        return '<div class="journal-body-meta-row"><span class="lbl">'+row[0]+': </span><span class="val">'+row[1]+'</span></div>';
+      }).join('')+'</div>'
+    : '';
   var footHtml = '<div class="journal-body-foot">'+dateStr+' &nbsp;\u00b7&nbsp; '+rt
-    +(shotLine?'<div class="journal-body-shot">'+shotLine+'</div>':'')
+    +metaListHtml
     +'</div>';
   if(content){
     content.innerHTML =
@@ -2826,16 +2847,22 @@ function _openJournalPost(post, posts){
       +'<div class="journal-body-meta">'+post.series+'</div>'
       +'<h1 class="journal-body-title">'+post.title+'</h1>'
       +'<div class="journal-body-text">'+bodyHtml+'</div>'
-      +footHtml
-      +navHtml;
-    content.querySelectorAll('.journal-post-nav-title[data-navid]').forEach(function(btn){
+      +footHtml;
+  }
+  // Next/Previous and "You might also enjoy" live in their own section below
+  // the article, set apart with a tinted background, rather than reading as
+  // more of the article itself.
+  var extras = document.getElementById('journalPostExtras');
+  if(extras){
+    extras.innerHTML = '<div class="journal-extras-inner">'+navHtml+'</div>';
+    var extrasInner = extras.querySelector('.journal-extras-inner');
+    extrasInner.querySelectorAll('.journal-post-nav-title[data-navid]').forEach(function(btn){
       btn.addEventListener('click',function(){
         var np=posts.find(function(p){return p.id===btn.dataset.navid;});
         if(np) _openJournalPost(np, posts);
       });
     });
-    // Journal reading suggestions
-    _renderJournalSuggestions(post, posts, content);
+    _renderJournalSuggestions(post, posts, extrasInner);
   }
   window.scrollTo(0,0);
 }

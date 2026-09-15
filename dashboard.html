@@ -394,6 +394,7 @@
     .cms-field textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(17,24,39,.1);}
     .cms-field-note{font-size:11px;color:#9ca3af;margin-top:4px;}
     .cms-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .cms-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
     .cms-save-row{display:flex;align-items:center;gap:12px;margin-top:24px;}
     .cms-status{font-size:12px;min-height:16px;}
     .cms-status.ok{color:var(--green);}
@@ -599,6 +600,7 @@
       .cms-content-area{padding:16px 0 0;}
       /* ── Grids → stack ── */
       .cms-grid2{grid-template-columns:1fr;}
+      .cms-grid3{grid-template-columns:1fr;}
       .nl-compose{grid-template-columns:1fr;}
       .nl-preview-wrap{display:none;}
       .nl-cta-row{grid-template-columns:1fr;}
@@ -713,6 +715,7 @@
       .cms-ext-nav-link{display:none;}
       .cms-content-area{padding:16px 0 0;}
       .cms-grid2{grid-template-columns:1fr;}
+      .cms-grid3{grid-template-columns:1fr;}
       .nl-compose{grid-template-columns:1fr;}
       .nl-preview-wrap{display:none;}
       .nl-cta-row{grid-template-columns:1fr;}
@@ -5780,7 +5783,7 @@ function cmsMoveJournal(idx,dir){
 
 function cmsOpenJournalEdit(idx){
   var isNew=(idx===null);
-  var post=isNew?{id:'j'+Date.now(),title:'',date:new Date().toISOString().slice(0,10),series:'Field Notes',where:'',shotOn:'',excerpt:'',body:'',img:''}:(_cmsData.journal.posts[idx]||{});
+  var post=isNew?{id:'j'+Date.now(),title:'',date:new Date().toISOString().slice(0,10),series:'Field Notes',where:'',shotOn:'',device:'',excerpt:'',body:'',img:''}:(_cmsData.journal.posts[idx]||{});
   // Series dropdown: built from every series name already used across existing
   // posts, so it grows on its own as new series get added, no code change
   // needed. "+ Add new series..." reveals a text box for a genuinely new name.
@@ -5825,8 +5828,11 @@ function cmsOpenJournalEdit(idx){
     +'<div class="cms-grid2"><div class="cms-field" style="margin-bottom:0"><label>Date</label><input type="date" id="cms-j-date" value="'+escAttr(post.date||'')+'"></div>'
     +'<div class="cms-field" style="margin-bottom:0"><label>Series</label><select id="cms-j-series" class="client-sel" onchange="document.getElementById(\'cms-j-series-custom\').style.display=(this.value===\'__custom__\')?\'block\':\'none\'">'+seriesOptionsHtml+'</select>'
     +'<input type="text" id="cms-j-series-custom" placeholder="New series name" style="margin-top:8px;display:none"></div></div>'
-    +'<div class="cms-grid2" style="margin-top:16px"><div class="cms-field" style="margin-bottom:0"><label>Where <span class="opt">(optional)</span></label><input type="text" id="cms-j-where" value="'+escAttr(post.where||'')+'" placeholder="e.g. Dome"></div>'
-    +'<div class="cms-field" style="margin-bottom:0"><label>Shot on <span class="opt">(optional)</span></label><input type="text" id="cms-j-shoton" value="'+escAttr(post.shotOn||'')+'" placeholder="e.g. October 4, 2023"></div></div>'
+    +'<div class="cms-grid3" style="margin-top:16px">'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Shot on <span class="opt">(device, optional)</span></label><input type="text" id="cms-j-device" value="'+escAttr(post.device||'')+'" placeholder="e.g. iPhone XR"></div>'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Date <span class="opt">(optional)</span></label><input type="text" id="cms-j-shoton" value="'+escAttr(post.shotOn||'')+'" placeholder="e.g. October 4, 2023"></div>'
+      +'<div class="cms-field" style="margin-bottom:0"><label>Location <span class="opt">(optional)</span></label><input type="text" id="cms-j-where" value="'+escAttr(post.where||'')+'" placeholder="e.g. Dome"></div>'
+      +'</div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Image <span class="opt">(shown on the featured post and its full story)</span></label>'
       +jPickerRow
@@ -5847,6 +5853,7 @@ function cmsSaveJournal(idx,postId,saveStatus){
   var u={id:postId||('j'+Date.now()),title:document.getElementById('cms-j-title').value.trim(),
     date:document.getElementById('cms-j-date').value,series:seriesVal,
     where:document.getElementById('cms-j-where').value.trim(),shotOn:document.getElementById('cms-j-shoton').value.trim(),
+    device:document.getElementById('cms-j-device').value.trim(),
     excerpt:document.getElementById('cms-j-excerpt').value.trim(),body:document.getElementById('cms-j-body').value.trim(),
     img:document.getElementById('cms-j-img').value.trim()};
   if(saveStatus) u.status=saveStatus;
@@ -6018,6 +6025,7 @@ function cmsApplyJournalPhoto(val){
   var photos=_portfolioData[slug]||[];
   var p=photos[idx]; if(!p) return;
   var imgf=document.getElementById('cms-j-img'); if(imgf) imgf.value=p.img||'';
+  var devf=document.getElementById('cms-j-device'); if(devf && p.device) devf.value=p.device;
   var pick=document.getElementById('cms-j-portfolio-pick'); if(pick) pick.value='';
 }
 
