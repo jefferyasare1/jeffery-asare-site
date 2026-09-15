@@ -5833,7 +5833,7 @@ function cmsOpenJournalEdit(idx){
       +'<div class="img-upload-row" style="margin-top:10px"><input type="text" id="cms-j-img" value="'+escAttr(post.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-j-img\',\'cms-j-upload-status\')"></label></div>'
       +'<div class="cms-status" id="cms-j-upload-status"></div></div>'
-    +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
+    +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs. To pull a sentence out as a styled quote, put it on its own line wrapped in asterisks, like *this*)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
     +'<div class="cms-save-row"><button style="background:none;border:1px solid var(--rule);color:var(--ink);padding:11px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans)" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'draft\')">Save as Draft</button>'
     +'<button class="btn-primary" style="width:auto;padding:11px 28px" onclick="cmsSaveJournal('+JSON.stringify(idx)+',\''+escAttr(post.id||'')+'\',\'live\')">Save &amp; Publish</button>'
     +'<div class="cms-status" id="cms-j-status"></div></div>';

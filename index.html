@@ -769,6 +769,7 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .journal-body-meta{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
 .journal-body-title{font-family:var(--title);font-size:clamp(2rem,5.5vw,2.8rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:0 0 2rem;}
 .journal-body-text p{font-size:15px;line-height:1.85;color:var(--ink);margin:0 0 1.4em;font-family:var(--sans);}
+.journal-body-pull{font-family:var(--serif);font-style:italic;font-size:1.4rem;line-height:1.5;color:var(--ink);margin:1.8rem 0;max-width:38ch;}
 .journal-body-foot{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2.2rem;padding-top:1.5rem;border-top:1px solid var(--rule);}
 .journal-body-shot{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;text-transform:none;font-size:1rem;color:var(--ink);margin-top:.5rem;}
 .journal-post-nav{display:flex;justify-content:space-between;margin-top:2rem;padding:1.5rem 0;border-top:1px solid var(--rule);gap:1rem;}
@@ -2778,6 +2779,11 @@ function _openJournalPost(post, posts){
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   var bodyHtml = post.body.split('\n\n').map(function(para){
+    var trimmed = para.trim();
+    // A paragraph wrapped in *asterisks* on its own becomes a pulled-out quote line
+    if(trimmed.length > 2 && trimmed.charAt(0)==='*' && trimmed.charAt(trimmed.length-1)==='*'){
+      return '<div class="journal-body-pull">'+trimmed.slice(1,-1).replace(/\n/g,'<br>')+'</div>';
+    }
     return '<p>'+para.replace(/\n/g,'<br>')+'</p>';
   }).join('');
   var curIdx=posts.indexOf(post);
