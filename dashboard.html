@@ -5793,6 +5793,31 @@ function cmsOpenJournalEdit(idx){
   var seriesOptionsHtml=seriesList.map(function(s){
     return '<option value="'+escAttr(s)+'"'+(s===curSeries?' selected':'')+'>'+escH(s)+'</option>';
   }).join('')+'<option value="__custom__">+ Add new series...</option>';
+  // Photo picker: same "Fill from portfolio photo" list the print editor uses,
+  // built from whatever portfolio data has already been loaded this session.
+  // Only fills the Image field — a journal post's title/story are written
+  // independently, unlike a print's, which mirrors the portfolio caption.
+  var jPickerOptions='<option value="">-- Select a portfolio photo --</option>';
+  var jAllSlugs=Object.keys(_portfolioData);
+  if(jAllSlugs.length){
+    jAllSlugs.forEach(function(slug){
+      var seriesLabel='';
+      if(_seriesList){ var s=_seriesList.find(function(x){return x.slug===slug;}); if(s) seriesLabel=(s.name||slug).toUpperCase(); }
+      else { seriesLabel=slug.toUpperCase(); }
+      var photos=(_portfolioData[slug]||[]).filter(function(p){return !p.status||p.status==='live';});
+      if(!photos.length) return;
+      jPickerOptions+='<optgroup label="'+escAttr(seriesLabel)+'">';
+      photos.forEach(function(p,i){
+        jPickerOptions+='<option value="'+escAttr(slug+':'+i)+'">'+escH(p.title||'Untitled')+'</option>';
+      });
+      jPickerOptions+='</optgroup>';
+    });
+  }
+  var jPickerRow= jAllSlugs.length
+    ? '<div class="cms-field" style="margin-bottom:0"><label>Or pick an existing photo <span class="opt">(from the portfolio)</span></label>'
+      +'<select id="cms-j-portfolio-pick" class="client-sel" onchange="cmsApplyJournalPhoto(this.value)">'+jPickerOptions+'</select>'
+      +'</div>'
+    : '<div class="cms-field" style="margin-bottom:0"><p style="font-size:12px;color:var(--muted);">Open the Portfolio tab first to enable the "pick an existing photo" list.</p></div>';
   document.getElementById('cmsModalTitle').textContent=isNew?'New Post':'Edit Post';
   document.getElementById('cmsModalSub').textContent=isNew?'Fill in the details below.':'Edit the post details below.';
   document.getElementById('cmsModalBody').innerHTML=
@@ -5804,7 +5829,8 @@ function cmsOpenJournalEdit(idx){
     +'<div class="cms-field" style="margin-bottom:0"><label>Shot on <span class="opt">(optional)</span></label><input type="text" id="cms-j-shoton" value="'+escAttr(post.shotOn||'')+'" placeholder="e.g. October 4, 2023"></div></div>'
     +'<div class="cms-field" style="margin-top:16px"><label>Excerpt <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(1–2 sentences for the list)</span></label><textarea id="cms-j-excerpt" rows="2">'+escH(post.excerpt||'')+'</textarea></div>'
     +'<div class="cms-field"><label>Image <span class="opt">(shown on the featured post and its full story)</span></label>'
-      +'<div class="img-upload-row"><input type="text" id="cms-j-img" value="'+escAttr(post.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
+      +jPickerRow
+      +'<div class="img-upload-row" style="margin-top:10px"><input type="text" id="cms-j-img" value="'+escAttr(post.img||'')+'" placeholder="/filename.jpg or Cloudinary URL">'
       +'<label class="btn-upload">Upload<input type="file" accept="image/*" onchange="cmsUploadImg(this,\'cms-j-img\',\'cms-j-upload-status\')"></label></div>'
       +'<div class="cms-status" id="cms-j-upload-status"></div></div>'
     +'<div class="cms-field"><label>Body <span style="color:#bbb;font-size:9px;letter-spacing:0;text-transform:none">(blank lines become paragraphs)</span></label><textarea id="cms-j-body" rows="10">'+escH(post.body||'')+'</textarea></div>'
@@ -5984,6 +6010,15 @@ function cmsApplyPortfolioPhoto(val){
   var imgf=document.getElementById('cms-p-img'); if(imgf) imgf.value=p.img||'';
   // Reset picker
   var pick=document.getElementById('cms-p-portfolio-pick'); if(pick) pick.value='';
+}
+
+function cmsApplyJournalPhoto(val){
+  if(!val) return;
+  var parts=val.split(':'), slug=parts[0], idx=parseInt(parts[1],10);
+  var photos=_portfolioData[slug]||[];
+  var p=photos[idx]; if(!p) return;
+  var imgf=document.getElementById('cms-j-img'); if(imgf) imgf.value=p.img||'';
+  var pick=document.getElementById('cms-j-portfolio-pick'); if(pick) pick.value='';
 }
 
 function cmsSavePrint(idx,printId){
