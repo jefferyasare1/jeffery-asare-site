@@ -401,8 +401,7 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .shop-social-proof{font-size:11px;color:var(--muted);letter-spacing:.04em;padding:.5rem var(--pad) .2rem;text-align:center;}
 .journal-suggestions{border-top:1px solid var(--rule);padding-top:2rem;}
 .journal-suggestions-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
-.journal-suggestions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
-@media(max-width:600px){.journal-suggestions-grid{grid-template-columns:1fr 1fr;}}
+.journal-suggestions-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
 .journal-suggestion-card{cursor:pointer;}
 .journal-suggestion-img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:4px;background:var(--warm);display:block;margin-bottom:.5rem;}
 .journal-suggestion-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:.2rem;}
@@ -2931,7 +2930,7 @@ function _renderJournalSuggestions(currentPost, allPosts, container){
   var others = allPosts.filter(function(p){ return p.id !== currentPost.id; });
   // Prefer same series, then random
   var sameSeries = others.filter(function(p){ return p.series === currentPost.series; });
-  var picks = sameSeries.length >= 2 ? sameSeries.slice(0,3) : others.slice(0,3);
+  var picks = sameSeries.length >= 2 ? sameSeries.slice(0,2) : others.slice(0,2);
   if(!picks.length) return;
   var heading = 'You might also enjoy';
   var html = '<div class="journal-suggestions">'
