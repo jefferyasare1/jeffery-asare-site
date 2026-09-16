@@ -750,8 +750,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* JOURNAL */
 .journal-wrap{max-width:880px;margin:0 auto;padding:3rem 1.5rem 5rem;}
 .journal-header{margin-bottom:2.2rem;}
-.journal-header h1{font-family:var(--title);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .6rem;}
-.journal-header p{font-size:14px;color:var(--muted);margin:0;max-width:440px;line-height:1.6;}
+.journal-header h1{font-family:var(--sans);font-size:clamp(2.4rem,5.5vw,3.6rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .7rem;}
+.journal-header p{font-family:var(--sans);font-size:14px;color:var(--muted);margin:0;max-width:460px;line-height:1.65;}
 .journal-series-filters{display:flex;gap:1.4rem;flex-wrap:wrap;padding:1.8rem 0 1.6rem;border-bottom:1px solid var(--rule);margin-bottom:0;}
 .journal-series-btn{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:0 0 2px;border:none;border-bottom:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .journal-series-btn:hover{color:var(--ink);}
@@ -763,13 +763,13 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .journal-feature-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
 .journal-feature-title{font-family:var(--title);font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:700;letter-spacing:-.02em;line-height:1.16;margin:0 0 .8rem;max-width:26ch;}
 .journal-feature:hover .journal-feature-title{text-decoration:underline;}
-.journal-feature-excerpt{font-family:var(--serif);font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:52ch;}
+.journal-feature-excerpt{font-family:var(--sans);font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:52ch;}
 .journal-post{border-bottom:none;background:var(--warm);padding:1.6rem 1.6rem;margin-bottom:1.1rem;cursor:pointer;display:flex;gap:1.4rem;align-items:flex-start;justify-content:space-between;}
 .journal-post:hover .journal-post-title{text-decoration:underline;}
 .journal-post-body{flex:1;min-width:0;}
 .journal-post-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
 .journal-post-title{font-family:var(--title);font-size:1.2rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .55rem;line-height:1.28;max-width:36ch;}
-.journal-post-excerpt{font-family:var(--serif);font-size:1rem;color:var(--muted);line-height:1.6;margin:0;max-width:48ch;}
+.journal-post-excerpt{font-family:var(--sans);font-size:1rem;color:var(--muted);line-height:1.6;margin:0;max-width:48ch;}
 .journal-post-thumb{width:88px;height:88px;object-fit:cover;flex-shrink:0;display:block;}
 .journal-post-thumb-fallback{width:88px;height:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);}
 .journal-post-thumb-fallback svg{width:26px;height:26px;}
@@ -778,8 +778,10 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .journal-body-meta{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
 .journal-body-title{font-family:var(--title);font-size:clamp(2rem,5.5vw,2.8rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:0 0 2rem;}
 .journal-body-text p{font-size:15px;line-height:1.85;color:var(--ink);margin:0 0 1.4em;font-family:var(--sans);}
-.journal-body-pull{font-family:var(--serif);font-style:italic;font-size:1.4rem;line-height:1.5;color:var(--ink);margin:1.8rem 0;max-width:38ch;}
-.journal-body-foot{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2.2rem;padding-top:1.5rem;border-top:1px solid var(--rule);}
+.journal-body-text p:first-of-type::first-letter{font-family:var(--sans);font-weight:700;font-size:3.2em;line-height:.78;float:left;padding:.05em .12em 0 0;color:var(--ink);}
+.journal-body-pull{font-family:var(--sans);font-style:italic;font-weight:500;font-size:1.4rem;line-height:1.45;color:var(--ink);margin:2.2rem auto;max-width:32ch;text-align:center;padding:1.2rem 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);position:relative;}
+.journal-body-pull::before{content:'\201C';display:block;font-family:var(--sans);font-style:normal;font-weight:700;font-size:2.8rem;line-height:1;color:var(--ink);margin-bottom:.1rem;}
+.journal-body-foot{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2.4rem;padding-top:1.5rem;border-top:2px solid var(--ink);}
 .journal-body-meta-list{margin-top:1rem;display:flex;flex-direction:column;gap:.35rem;}
 .journal-body-meta-row{font-size:12px;letter-spacing:.02em;text-transform:none;font-weight:400;}
 .journal-body-meta-row .lbl{color:var(--muted);}
@@ -1467,7 +1469,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="journal-header">
         <button class="detail-back" id="journBackBtn" style="padding-left:0;">&#8592; Back</button>
         <h1>Field Notes</h1>
-        <p>Stories from behind the lens.</p>
+        <p>The stories behind the photographs, and a few honest thoughts on making pictures with nothing more than a phone and some patience.</p>
       </div>
       <div id="journalList"></div>
     </div>
