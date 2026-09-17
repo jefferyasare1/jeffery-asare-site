@@ -412,8 +412,9 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .mini-footer-copy a{color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;transition:color .2s;}
 .mini-footer-copy a:hover{color:#fff;}
 .mini-footer-links{display:flex;gap:1.4rem;list-style:none;}
-.mini-footer-links a{font-size:11px;color:rgba(255,255,255,.6);text-decoration:none;cursor:pointer;transition:color .2s;}
+.mini-footer-links a{font-size:11px;color:rgba(255,255,255,.6);text-decoration:none;cursor:pointer;transition:color .2s;white-space:nowrap;}
 .mini-footer-links a:hover{color:#fff;}
+.mini-footer-credit{opacity:.7;}
 @media(max-width:900px){
   .photo-grid{grid-template-columns:repeat(3,1fr);}
   .about-hero,.about-cols,.contact-body{grid-template-columns:1fr;}
@@ -440,10 +441,15 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
   .shop-list{grid-template-columns:1fr 1fr;}
   /* Bottom safe area so content doesn't hide behind home bar */
   .mini-footer{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));}
-  /* On phone, the link row (Instagram/Contact/Terms of Sale/Privacy) always
-     centers on its own full-width line — the copyright text next to it keeps
-     its normal left alignment, it just wraps above instead of sharing the row. */
-  .mini-footer-links{flex:1 1 100%;justify-content:center;}
+  /* On phone the whole footer centers and stacks: copyright line, the
+     (optional) music credit tucked underneath it in a quieter tone, then
+     the link row — each link kept whole (no more "Terms of" / "Sale"
+     breaking mid-phrase) and evenly spaced if it wraps to a second line. */
+  .mini-footer{flex-direction:column;text-align:center;gap:.9rem;padding-top:1.8rem;}
+  .mini-footer-copy{max-width:320px;}
+  .mini-footer-credit{display:block;margin-top:.35rem;}
+  .mini-footer-credit-sep{display:none;}
+  .mini-footer-links{flex:1 1 100%;justify-content:center;row-gap:.6rem;column-gap:1.3rem;}
   /* Page header spacing feels tight on small screens */
   .page-header{padding-top:1.5rem;}
   /* About page: smaller hero font */
@@ -748,31 +754,35 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 .size-guide-table tr.active-size .sg-td-size{color:var(--ink);}
 /* JOURNAL */
 .journal-wrap{max-width:1040px;margin:0 auto;padding:3rem 1.5rem 5rem;}
-.journal-header{margin-bottom:2.2rem;}
-.journal-header h1{font-family:var(--sans);font-size:clamp(2.4rem,5.5vw,3.6rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .4rem;}
-.journal-header-kicker{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 1.1rem;}
-.journal-header p{font-family:var(--sans);font-size:14px;color:var(--muted);margin:0;max-width:460px;line-height:1.65;}
+.journal-backrow{padding:1.4rem var(--pad) 0;}
+/* Full-bleed hero, same treatment as the Portfolio page's Photo of the Week spread */
+.journal-hero{position:relative;width:100%;height:62vh;height:62svh;min-height:340px;overflow:hidden;background:#1a1410;margin-bottom:0;}
+.journal-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 1.4s ease;will-change:transform;}
+.journal-hero-img.is-visible{opacity:.85;}
+.journal-hero-over{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.55) 0%,rgba(0,0,0,.12) 55%,transparent 100%),linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 55%);}
+.journal-hero-body{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--pad);padding-bottom:calc(var(--pad) + .6rem);}
+.journal-hero-title{font-family:var(--title);font-size:clamp(3.4rem,8.5vw,6.2rem);font-weight:700;color:#fff;letter-spacing:-.03em;line-height:.95;margin-bottom:.5rem;}
+.journal-hero-kicker{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.68);margin-bottom:1.1rem;}
+.journal-hero-desc{font-size:14px;color:rgba(255,255,255,.68);line-height:1.7;max-width:460px;}
+@media(max-width:640px){.journal-hero{height:52vh;height:52svh;}.journal-hero-desc{display:none;}}
 .journal-series-filters{display:flex;gap:1.4rem;flex-wrap:wrap;padding:1.8rem 0 1.6rem;border-bottom:1px solid var(--rule);margin-bottom:0;}
 .journal-series-btn{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:0 0 2px;border:none;border-bottom:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .journal-series-btn:hover{color:var(--ink);}
 .journal-series-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
-.journal-feature{padding:2.6rem 0 2.8rem;border-bottom:1px solid var(--rule);cursor:pointer;}
-.journal-feature-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;margin-bottom:1.5rem;background:var(--warm);}
-.journal-feature-thumb-fallback{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;background:var(--warm);color:var(--muted);}
-.journal-feature-thumb-fallback svg{width:44px;height:44px;}
-.journal-feature-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
-.journal-feature-title{font-family:var(--title);font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:700;letter-spacing:-.02em;line-height:1.16;margin:0 0 .8rem;max-width:26ch;}
-.journal-feature:hover .journal-feature-title{text-decoration:underline;}
-.journal-feature-excerpt{font-family:var(--sans);font-size:1.05rem;line-height:1.6;color:var(--muted);margin:0;max-width:52ch;}
-.journal-post{border-bottom:none;background:var(--warm);padding:1.6rem 1.6rem;margin-bottom:1.1rem;cursor:pointer;display:flex;gap:1.4rem;align-items:flex-start;justify-content:space-between;}
-.journal-post:hover .journal-post-title{text-decoration:underline;}
-.journal-post-body{flex:1;min-width:0;}
-.journal-post-meta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
-.journal-post-title{font-family:var(--title);font-size:1.2rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .55rem;line-height:1.28;max-width:36ch;}
-.journal-post-excerpt{font-family:var(--sans);font-size:1rem;color:var(--muted);line-height:1.6;margin:0;max-width:48ch;}
-.journal-post-thumb{width:88px;height:88px;object-fit:cover;flex-shrink:0;display:block;}
-.journal-post-thumb-fallback{width:88px;height:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);}
-.journal-post-thumb-fallback svg{width:26px;height:26px;}
+.journal-index-group{padding:2.6rem 0;border-top:1px solid var(--rule);}
+.journal-index-group:first-of-type{border-top:none;}
+.journal-index-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem;}
+.journal-index-item{cursor:pointer;margin-bottom:1.7rem;}
+.journal-index-item:last-child{margin-bottom:0;}
+.journal-index-item:hover .journal-index-title{text-decoration:underline;}
+.journal-index-title{font-family:var(--title);font-size:1.3rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .3rem;line-height:1.25;max-width:36ch;}
+.journal-index-excerpt{font-family:var(--sans);font-size:.95rem;color:var(--muted);line-height:1.5;margin:0;max-width:52ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:600px){
+  .journal-index-group{padding:2rem 0;}
+  .journal-index-label{margin-bottom:.9rem;}
+  .journal-index-title{font-size:1.12rem;}
+  .journal-index-excerpt{font-size:.88rem;}
+}
 .journal-body-wrap{max-width:760px;margin:0 auto;padding:2.4rem 1.5rem 5rem;}
 .journal-body-cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;margin:.4rem 0 3.4rem;}
 .journal-body-meta{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
@@ -1464,15 +1474,23 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <ul class="nav-links"><li><a id="journAboutBtn">About</a></li><li><a id="journPortBtn">Portfolio</a></li><li><a id="journShopBtn">Shop</a></li><li><a id="journContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="journHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
+  <div class="journal-backrow">
+    <button class="detail-back" id="journBackBtn" style="padding-left:0;">&#8592; Back</button>
+  </div>
+  <!-- Full-bleed hero, same treatment as the Portfolio page's Photo of the Week spread -->
+  <div class="journal-hero" id="journalHero">
+    <img class="journal-hero-img" id="journalHeroImgA" src="" alt="">
+    <img class="journal-hero-img" id="journalHeroImgB" src="" alt="">
+    <div class="journal-hero-over"></div>
+    <div class="journal-hero-body">
+      <h1 class="journal-hero-title">In Plain Sight</h1>
+      <div class="journal-hero-kicker">The Journal</div>
+      <p class="journal-hero-desc">The stories behind the photographs, and a few honest thoughts on making pictures with nothing more than a phone and some patience.</p>
+    </div>
+  </div>
   <!-- Post list view -->
   <div id="journalListWrap">
     <div class="journal-wrap">
-      <div class="journal-header">
-        <button class="detail-back" id="journBackBtn" style="padding-left:0;">&#8592; Back</button>
-        <h1>In Plain Sight</h1>
-        <div class="journal-header-kicker">The Journal</div>
-        <p>The stories behind the photographs, and a few honest thoughts on making pictures with nothing more than a phone and some patience.</p>
-      </div>
       <div id="journalList"></div>
     </div>
   </div>
@@ -1568,7 +1586,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <footer class="site-footer">
     <div class="footer-grid">
       <div class="footer-col-brand"><div class="footer-brand-name"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="footer-logo-img"></div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
-      <div class="footer-col-work"><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">In Plain Sight</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
+      <div class="footer-col-work"><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">The Journal</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
       <div class="footer-col-about"><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
       <div class="footer-col-newsletter"><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
@@ -1794,14 +1812,14 @@ function injectFooters(){
     // ambient-toggle (and therefore this track) can actually be heard on, see
     // CLAUDE.md "Ambient background audio" for the full story.
     var musicCredit=id==="port"
-      ?" &nbsp;&middot;&nbsp; Ambient music: <a href=\"https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/\" target=\"_blank\" rel=\"noopener\">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound"
+      ?"<span class=\"mini-footer-credit\"><span class=\"mini-footer-credit-sep\">&nbsp;&middot;&nbsp;</span>Ambient music: <a href=\"https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/\" target=\"_blank\" rel=\"noopener\">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound</span>"
       :"";
     // Journal link only on the Portfolio mini-footer for now — that's the one
     // page it's been added to on request; not sitewide yet.
     f.innerHTML="<span class=\"mini-footer-copy\">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005."+musicCredit+"</span>"
       +"<ul class=\"mini-footer-links\">"
       +"<li><a id=\""+igId+"\" href=\"https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh\" target=\"_blank\">Instagram</a></li>"
-      +(id==="port" ? "<li><a id=\""+jId+"\">In Plain Sight</a></li>" : "")
+      +(id==="port" ? "<li><a id=\""+jId+"\">The Journal</a></li>" : "")
       +(id!=="contact" ? "<li><a id=\""+cId+"\">Contact</a></li>" : "")
       +"<li><a id=\""+tId+"\">Terms of Sale</a></li>"
       +"<li><a id=\""+prId+"\">Privacy</a></li>"
@@ -2736,14 +2754,71 @@ var JOURNAL_FALLBACK_ICON = '<svg viewBox="0 0 48 48" fill="none" xmlns="http://
   +'<line x1="16" y1="30" x2="26" y2="30" stroke="currentColor" stroke-width="1.5"/>'
   +'</svg>';
 
+// Crossfades the journal hero through every photo used across the journal.
+// Runs once — later calls (e.g. from clicking a series filter) are no-ops,
+// since the hero represents the whole journal and shouldn't restart or change
+// just because the list below it was filtered.
+var _journalHeroStarted=false;
+function _initJournalHeroCarousel(allPosts){
+  if(_journalHeroStarted) return;
+  var images=[];
+  allPosts.forEach(function(p){ if(p.img && images.indexOf(p.img)===-1) images.push(p.img); });
+  var heroEl=document.getElementById('journalHero');
+  var imgA=document.getElementById('journalHeroImgA');
+  var imgB=document.getElementById('journalHeroImgB');
+  if(!heroEl||!imgA||!imgB||!images.length){ if(heroEl) heroEl.style.display='none'; return; }
+  _journalHeroStarted=true;
+  var idx=0, front=imgA, back=imgB;
+  front.src=images[0]; front.classList.add('is-visible');
+  _initJournalHeroParallax(heroEl,[imgA,imgB]);
+  if(images.length<2) return; // nothing to cycle through
+  setInterval(function(){
+    idx=(idx+1)%images.length;
+    back.src=images[idx];
+    front.classList.remove('is-visible');
+    back.classList.add('is-visible');
+    var tmp=front; front=back; back=tmp;
+  }, 5000);
+}
+
+// A gentle parallax on the hero photos: as the page scrolls, the images
+// drift a little slower than the page itself, so the hero feels like it has
+// depth instead of just sitting flat behind the title. Skipped entirely for
+// anyone who has asked their device for reduced motion, and only updates
+// while the hero is actually still on screen so it costs nothing once
+// you've scrolled past it.
+var _journalParallaxBound=false;
+function _initJournalHeroParallax(heroEl, imgs){
+  if(_journalParallaxBound) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  _journalParallaxBound=true;
+  var ticking=false;
+  function apply(){
+    ticking=false;
+    var rect=heroEl.getBoundingClientRect();
+    if(rect.bottom<0 || rect.top>window.innerHeight) return; // off-screen, skip
+    // Clamped, and paired with the scale(1.22) below, so the drift never
+    // outruns the extra image size and shows bare edges on short/mobile heroes.
+    var shift=Math.max(-32,Math.min(32,Math.round(rect.top * -0.15)));
+    imgs.forEach(function(img){ img.style.transform='translateY('+shift+'px) scale(1.22)'; });
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ ticking=true; requestAnimationFrame(apply); }
+  }, {passive:true});
+  apply();
+}
+
 function _buildJournalList(posts, seriesFilter){
   posts = posts.filter(function(p){ return !p.status || p.status === 'live'; });
   var wrap = document.getElementById('journalListWrap');
   var el = document.getElementById('journalList');
   var postWrap = document.getElementById('journalPostWrap');
+  var heroEl = document.getElementById('journalHero');
   if(!el) return;
   if(wrap) wrap.style.display = '';
   if(postWrap) postWrap.style.display = 'none';
+  // Coming back from an article (see _openJournalPost) — bring the hero back.
+  if(heroEl && _journalHeroStarted) heroEl.style.display = '';
   if(!posts.length){
     el.innerHTML='<p style="color:var(--muted);font-size:14px;">Coming soon.</p>';
     return;
@@ -2757,38 +2832,30 @@ function _buildJournalList(posts, seriesFilter){
   }).join('')+'</div>';
   // Filter posts by series
   var filtered=activeSeries==='All'?posts:posts.filter(function(p){return p.series===activeSeries;});
-  // The newest post in the current view leads as a feature; the rest follow as a plain list
-  var feature=filtered[0];
-  var rest=filtered.slice(1);
-  var featureHtml='';
-  if(feature){
-    var fd=new Date(feature.date);
-    var fDateStr=fd.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
-    var fRt=_readingTime(feature.body);
-    featureHtml='<div class="journal-feature" data-jid="'+feature.id+'">'
-      +(feature.img?'<img class="journal-feature-img" src="'+feature.img+'" alt="'+feature.title+'" loading="lazy">':'<div class="journal-feature-thumb-fallback">'+JOURNAL_FALLBACK_ICON+'</div>')
-      +'<div class="journal-feature-meta">'+feature.series+' &nbsp;·&nbsp; '+fDateStr+' &nbsp;·&nbsp; '+fRt+'</div>'
-      +'<div class="journal-feature-title">'+feature.title+'</div>'
-      +'<p class="journal-feature-excerpt">'+feature.excerpt+'</p>'
-      +'</div>';
-  }
-  var postsHtml=rest.map(function(p){
-    var d=new Date(p.date);
-    var dateStr=d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
-    var rt=_readingTime(p.body);
-    var thumbHtml=p.img
-      ? '<img class="journal-post-thumb" src="'+p.img+'" alt="'+p.title+'" loading="lazy">'
-      : '<div class="journal-post-thumb-fallback">'+JOURNAL_FALLBACK_ICON+'</div>';
-    return '<div class="journal-post" data-jid="'+p.id+'">'
-      +'<div class="journal-post-body">'
-      +'<div class="journal-post-meta">'+p.series+' &nbsp;·&nbsp; '+dateStr+' &nbsp;·&nbsp; '+rt+'</div>'
-      +'<div class="journal-post-title">'+p.title+'</div>'
-      +'<p class="journal-post-excerpt">'+p.excerpt+'</p>'
-      +'</div>'
-      +thumbHtml
+  // The hero cycles through every photo in the journal, not just the newest one.
+  // It's set up once (guarded below) and ignores the series filter entirely, since
+  // it represents the whole journal, not whatever's currently selected.
+  _initJournalHeroCarousel(posts);
+  // Group every post by series, in the order each series first appears
+  var groups=[], groupMap={};
+  filtered.forEach(function(p){
+    var key=p.series||'Field Notes';
+    if(!groupMap[key]){ groupMap[key]={series:key,items:[]}; groups.push(groupMap[key]); }
+    groupMap[key].items.push(p);
+  });
+  var postsHtml=groups.map(function(g){
+    var itemsHtml=g.items.map(function(p){
+      return '<div class="journal-index-item" data-jid="'+p.id+'">'
+        +'<div class="journal-index-title">'+p.title+'</div>'
+        +'<p class="journal-index-excerpt">'+p.excerpt+'</p>'
+        +'</div>';
+    }).join('');
+    return '<div class="journal-index-group">'
+      +'<div class="journal-index-label">'+g.series+'</div>'
+      +itemsHtml
       +'</div>';
   }).join('');
-  el.innerHTML=filterHtml+featureHtml+postsHtml;
+  el.innerHTML=filterHtml+postsHtml;
   // Series filter clicks
   el.querySelectorAll('.journal-series-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){
@@ -2796,8 +2863,8 @@ function _buildJournalList(posts, seriesFilter){
       _buildJournalList(posts, btn.dataset.series);
     });
   });
-  // Post clicks (feature card + list rows)
-  el.querySelectorAll('.journal-feature[data-jid], .journal-post[data-jid]').forEach(function(card){
+  // Post clicks
+  el.querySelectorAll('.journal-index-item[data-jid]').forEach(function(card){
     card.addEventListener('click',function(){
       var id=card.dataset.jid;
       var post=filtered.find(function(p){ return p.id===id; });
@@ -2811,8 +2878,13 @@ function _openJournalPost(post, posts){
   var postWrap = document.getElementById('journalPostWrap');
   var content = document.getElementById('journalPostContent');
   var backBtn = document.getElementById('journPostBackBtn');
+  var heroEl = document.getElementById('journalHero');
   if(wrap) wrap.style.display = 'none';
   if(postWrap) postWrap.style.display = '';
+  // The big "In Plain Sight" hero is the index's landing device — it would
+  // just duplicate the page title above every single article, so it steps
+  // aside while you're actually reading one and comes back on the way out.
+  if(heroEl) heroEl.style.display = 'none';
   if(backBtn){
     backBtn.onclick = function(){ _buildJournalList(posts); window.scrollTo(0,0); };
   }
