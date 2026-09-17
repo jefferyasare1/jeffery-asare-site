@@ -1483,8 +1483,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <img class="journal-hero-img" id="journalHeroImgB" src="" alt="">
     <div class="journal-hero-over"></div>
     <div class="journal-hero-body">
-      <h1 class="journal-hero-title">In Plain Sight</h1>
-      <div class="journal-hero-kicker">The Journal</div>
+      <h1 class="journal-hero-title">The Journal</h1>
       <p class="journal-hero-desc">The stories behind the photographs, and a few honest thoughts on making pictures with nothing more than a phone and some patience.</p>
     </div>
   </div>
@@ -2910,9 +2909,9 @@ function _openJournalPost(post, posts){
   var slug=_journalSlug(post);
   var _curJst = history.state;
   if(_curJst && _curJst.journalSlug){
-    history.replaceState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
+    history.replaceState({page:'journal', journalSlug:slug}, post.title+' — The Journal — Jeffery Asare', '/journal/'+slug);
   } else {
-    history.pushState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
+    history.pushState({page:'journal', journalSlug:slug}, post.title+' — The Journal — Jeffery Asare', '/journal/'+slug);
   }
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
@@ -3077,7 +3076,7 @@ function _renderJournalSuggestions(currentPost, allPosts, container){
 // ===========================================================
 // PAGE TITLES
 // ===========================================================
-var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"In Plain Sight - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
+var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"The Journal - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================
