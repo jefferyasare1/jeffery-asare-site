@@ -749,7 +749,8 @@ nav.scrolled{background:rgba(13,12,11,.75);backdrop-filter:blur(14px);-webkit-ba
 /* JOURNAL */
 .journal-wrap{max-width:1040px;margin:0 auto;padding:3rem 1.5rem 5rem;}
 .journal-header{margin-bottom:2.2rem;}
-.journal-header h1{font-family:var(--sans);font-size:clamp(2.4rem,5.5vw,3.6rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .7rem;}
+.journal-header h1{font-family:var(--sans);font-size:clamp(2.4rem,5.5vw,3.6rem);font-weight:700;letter-spacing:-.03em;margin:0 0 .4rem;}
+.journal-header-kicker{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 1.1rem;}
 .journal-header p{font-family:var(--sans);font-size:14px;color:var(--muted);margin:0;max-width:460px;line-height:1.65;}
 .journal-series-filters{display:flex;gap:1.4rem;flex-wrap:wrap;padding:1.8rem 0 1.6rem;border-bottom:1px solid var(--rule);margin-bottom:0;}
 .journal-series-btn{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:0 0 2px;border:none;border-bottom:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
@@ -1468,7 +1469,8 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="journal-wrap">
       <div class="journal-header">
         <button class="detail-back" id="journBackBtn" style="padding-left:0;">&#8592; Back</button>
-        <h1>Field Notes</h1>
+        <h1>In Plain Sight</h1>
+        <div class="journal-header-kicker">The Journal</div>
         <p>The stories behind the photographs, and a few honest thoughts on making pictures with nothing more than a phone and some patience.</p>
       </div>
       <div id="journalList"></div>
@@ -1566,7 +1568,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <footer class="site-footer">
     <div class="footer-grid">
       <div class="footer-col-brand"><div class="footer-brand-name"><img src="/images/ui/logo-name.png" alt="Jeffery Asare" class="footer-logo-img"></div><p class="footer-brand-desc">Fine art phone photography from Accra, Ghana. Quiet images. Intentional framing. Limited-edition prints.</p></div>
-      <div class="footer-col-work"><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">Field Notes</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
+      <div class="footer-col-work"><div class="footer-col-title">Work</div><ul class="footer-links"><li><a data-nav="portfolio">Portfolio</a></li><li><a data-nav="shop">Prints Shop</a></li><li><a data-nav="journal">In Plain Sight</a></li><li><a data-nav="contact">Commissions</a></li></ul></div>
       <div class="footer-col-about"><div class="footer-col-title">About</div><ul class="footer-links"><li><a data-nav="about">My Story</a></li><li><a data-nav="contact">Contact</a></li><li><a data-nav="terms">Terms of Sale</a></li><li><a data-nav="privacy">Privacy Policy</a></li></ul></div>
       <div class="footer-col-newsletter"><div class="footer-col-title">Newsletter</div><p style="font-size:12px;margin-bottom:.8rem;line-height:1.6;">New work and print drops.</p><input class="newsletter-input" type="email" placeholder="Your email"><button class="newsletter-btn">Subscribe</button></div>
     </div>
@@ -1783,25 +1785,29 @@ function injectFooters(){
     // the copyright text keeps its normal left alignment everywhere,
     // including Shop.
     f.className="mini-footer";
-    var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id;
+    var igId="mf-ig-"+id, cId="mf-c-"+id, tId="mf-t-"+id, prId="mf-pr-"+id, jId="mf-j-"+id;
     // Music credit only on the Portfolio mini-footer — that's the one page the
     // ambient-toggle (and therefore this track) can actually be heard on, see
     // CLAUDE.md "Ambient background audio" for the full story.
     var musicCredit=id==="port"
       ?" &nbsp;&middot;&nbsp; Ambient music: <a href=\"https://www.epidemicsound.com/music/tracks/6fa26d41-5766-3bef-a03e-a77eae42e9e9/\" target=\"_blank\" rel=\"noopener\">&ldquo;Summer Memories&rdquo; by Gavin Luke</a>, via Epidemic Sound"
       :"";
+    // Journal link only on the Portfolio mini-footer for now — that's the one
+    // page it's been added to on request; not sitewide yet.
     f.innerHTML="<span class=\"mini-footer-copy\">&#169; 2026 Jeffery Asare. All photographs protected under Ghana Copyright Act 2005."+musicCredit+"</span>"
       +"<ul class=\"mini-footer-links\">"
       +"<li><a id=\""+igId+"\" href=\"https://www.instagram.com/jeffasare?igsh=Nmg0cTNjd2dyNnRh\" target=\"_blank\">Instagram</a></li>"
+      +(id==="port" ? "<li><a id=\""+jId+"\">In Plain Sight</a></li>" : "")
       +(id!=="contact" ? "<li><a id=\""+cId+"\">Contact</a></li>" : "")
       +"<li><a id=\""+tId+"\">Terms of Sale</a></li>"
       +"<li><a id=\""+prId+"\">Privacy</a></li>"
       +"</ul>";
     el.appendChild(f);
-    var ce=document.getElementById(cId), te=document.getElementById(tId), pre=document.getElementById(prId);
+    var ce=document.getElementById(cId), te=document.getElementById(tId), pre=document.getElementById(prId), je=document.getElementById(jId);
     if(ce) ce.addEventListener("click",function(){ navigate("contact"); });
     if(te) te.addEventListener("click",function(){ navigate("terms"); });
     if(pre) pre.addEventListener("click",function(){ navigate("privacy"); });
+    if(je) je.addEventListener("click",function(){ navigate("journal"); });
   });
 }
 
@@ -2808,7 +2814,7 @@ function _openJournalPost(post, posts){
   }
   // Give this post its own URL
   var slug=_journalSlug(post);
-  history.pushState({page:'journal', journalSlug:slug}, post.title+' — Field Notes — Jeffery Asare', '/journal/'+slug);
+  history.pushState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   var bodyHtml = post.body.split('\n\n').map(function(para){
@@ -2972,7 +2978,7 @@ function _renderJournalSuggestions(currentPost, allPosts, container){
 // ===========================================================
 // PAGE TITLES
 // ===========================================================
-var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"Field Notes - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
+var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"In Plain Sight - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================
