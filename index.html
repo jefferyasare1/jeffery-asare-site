@@ -1779,7 +1779,17 @@ bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn
 (function(){
   var tb=document.getElementById("termsBackBtn"); if(tb) tb.addEventListener("click",function(){ goBack("shop"); });
   var pb=document.getElementById("privBackBtn");  if(pb) pb.addEventListener("click",function(){ goBack("home"); });
-  var jb=document.getElementById("journBackBtn"); if(jb) jb.addEventListener("click",function(){ goBack("home"); });
+  var jb=document.getElementById("journBackBtn"); if(jb) jb.addEventListener("click",function(){
+    // If a single post is open, one entry in history is that post (see
+    // _openJournalPost) sitting on top of the entry for the Journal list
+    // itself -- so leaving the Journal entirely from a post takes two steps
+    // back, not one. Without this, this button used to just close the post
+    // and land back on the Journal's own list/hero, which read as "back
+    // takes me to the Journal's main screen" instead of to About/Portfolio.
+    var pw=document.getElementById('journalPostWrap');
+    var postOpen = pw && pw.style.display !== 'none';
+    if(_hasInternalNav && postOpen){ history.go(-2); } else { goBack("home"); }
+  });
 })();
 bind("pdLogoBtn","home");bind("pdPortBtn","portfolio");bind("pdAboutBtn","about");bind("pdShopBtn","shop");bind("pdContactBtn","contact");bind("pdBackBtn","shop");
 
@@ -2886,11 +2896,24 @@ function _openJournalPost(post, posts){
   // aside while you're actually reading one and comes back on the way out.
   if(heroEl) heroEl.style.display = 'none';
   if(backBtn){
-    backBtn.onclick = function(){ _buildJournalList(posts); window.scrollTo(0,0); };
+    // Go through real browser history (not a direct re-render) so the top
+    // "<- Back" button and this "<- All Notes" button always agree on how
+    // deep into the Journal the visitor currently is. See journBackBtn below.
+    backBtn.onclick = function(){ history.back(); };
   }
-  // Give this post its own URL
+  // Give this post its own URL. Moving list->post adds one history entry
+  // (so the top Back button / physical back button can unwind exactly one
+  // step to the list); moving post->post (Next/Previous/suggestions) swaps
+  // that same entry in place instead of stacking more, so the Journal never
+  // gets more than one level "deep" no matter how many related posts get
+  // read in a row.
   var slug=_journalSlug(post);
-  history.pushState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
+  var _curJst = history.state;
+  if(_curJst && _curJst.journalSlug){
+    history.replaceState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
+  } else {
+    history.pushState({page:'journal', journalSlug:slug}, post.title+' — In Plain Sight — Jeffery Asare', '/journal/'+slug);
+  }
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   var bodyHtml = post.body.split('\n\n').map(function(para){
