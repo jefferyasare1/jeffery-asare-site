@@ -1627,7 +1627,11 @@ function PRH(id){
   ],id+".jpg");
 }
 
-window.PRINTS = PRINTS = [
+// If the real catalog already arrived from the CMS before this point runs
+// (see _onPrintsLoaded / window.__pendingRealPrints further down the page —
+// that fetch can resolve before this DOMContentLoaded block does), use it
+// instead of clobbering it with the placeholder demo list below.
+window.PRINTS = PRINTS = window.__pendingRealPrints || [
   PR("s1","PORTRAITS OF PLACE","Stillness in Jamestown","An intimate portrait from historic Jamestown. The most limited edition in the collection.","Hahnemuhle Photo Rag Baryta 315gsm","Edition of 15",[
     {label:"A3 (29.7 x 42 cm)",price:920},
     {label:"A2 (42 x 59.4 cm)",price:1200},
@@ -4832,6 +4836,23 @@ new MutationObserver(protectImages).observe(document.body,{childList:true,subtre
   window.renderShop = renderShop;
   window.renderPortfolio = renderPortfolio;
 
+  // Real bridge for the CMS catalog fetch (a different <script> block, see
+  // _onPrintsLoaded) to actually replace THIS closure's own PRINTS variable
+  // — the one renderShop/openPrintDetail/etc. really read from. Without
+  // this, that fetch could only ever touch a disconnected window.PRINTS
+  // copy that nothing here looked at, so the real print catalog silently
+  // never appeared and the placeholder demo list (or nothing, once the demo
+  // list's fake image paths get filtered out) showed instead.
+  window.__applyRealPrints = function(newPrints){
+    PRINTS = newPrints;
+    if (typeof renderShop === "function") renderShop(SHOP_PAGE || 0);
+  };
+  // If the real catalog fetch already resolved before we got here, apply it
+  // now instead of leaving the placeholder seed in place.
+  if (window.__pendingRealPrints) {
+    window.__applyRealPrints(window.__pendingRealPrints);
+  }
+
 }); // end DOMContentLoaded
 </script>
 
@@ -5081,7 +5102,7 @@ document.addEventListener('visibilitychange', function(){ if(document.visibility
 function _onPrintsLoaded(d){
     window.__shopDataLoaded = true;
     if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
-    PRINTS = d.prints.map(function(p){
+    var _mappedPrints = d.prints.map(function(p){
       var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('pr'+Math.random().toString(36).slice(2));
       var edTotal = parseInt((p.edition||'').replace(/\D/g,''))||0;
       var sold = parseInt(p.prints_sold)||0;
@@ -5094,8 +5115,19 @@ function _onPrintsLoaded(d){
         editionSize: edTotal, printsSold: sold, remaining: remaining
       };
     });
-    // Always refresh the shop list so data is ready whenever the user navigates there
-    if(typeof window.renderShop === 'function') window.renderShop(0);
+    // Keep this around in case the DOMContentLoaded block (a different
+    // <script> block, further up the page) hasn't finished setting up yet
+    // when this fetch resolves - see window.PRINTS = ... near the top.
+    window.__pendingRealPrints = _mappedPrints;
+    // Real bridge into the closure that actually owns PRINTS/renderShop.
+    // A bare "PRINTS = _mappedPrints" here would only ever set a disconnected
+    // window.PRINTS copy that renderShop never reads from, so the real
+    // catalog would silently never make it onto the page.
+    if(typeof window.__applyRealPrints === 'function'){
+      window.__applyRealPrints(_mappedPrints);
+    } else if(typeof window.renderShop === 'function') {
+      window.renderShop(0);
+    }
     // A direct link/refresh to a specific print (e.g. ?print=the-herdsman)
     // is parsed earlier, synchronously, before this real catalog data has
     // arrived - at that point PRINTS only held the placeholder seed data,
@@ -5112,7 +5144,7 @@ function _onPrintsLoaded(d){
       var _pdTitleEl=document.getElementById('pdTitle');
       var _alreadyOpen=_pdTitleEl && _pdTitleEl.textContent && document.getElementById('page-print-detail') && document.getElementById('page-print-detail').style.display==='block';
       if(_dlPid && !_alreadyOpen && typeof window.openPrintDetail==='function'){
-        var _dlMatch=PRINTS.find(function(p){ return p.id===_dlPid; });
+        var _dlMatch=_mappedPrints.find(function(p){ return p.id===_dlPid; });
         if(_dlMatch && typeof window.navigate==='function'){
           window.navigate('shop');
           setTimeout(function(){ window.openPrintDetail(_dlMatch); },400);
