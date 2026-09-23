@@ -3921,7 +3921,17 @@ function checkoutCart(){
     // all) to an international buyer just adds a confusing, unusable option
     // ahead of Card. Only offer it when the buyer told us they're in Ghana.
     channels:IS_GHANA?['mobile_money','card','bank_transfer']:['card','bank_transfer'],
-    metadata:{custom_fields:CART.map(function(i){return {display_name:i.print.title,variable_name:'print',value:i.size+(i.format==='framed'?' (Framed)':'')+' x'+i.qty};})},
+    // One indexed set of fields per cart item (print_1/size_1/qty_1, print_2/...)
+    // instead of every item sharing the same field name — the webhook (the
+    // backup path that fires if this tab closes before the code below runs)
+    // needs to tell items apart to log each one, not just the first.
+    metadata:{custom_fields:CART.reduce(function(acc,i,idx){
+      var n=idx+1;
+      acc.push({display_name:'Print '+n,variable_name:'print_'+n,value:i.print.title});
+      acc.push({display_name:'Size '+n,variable_name:'size_'+n,value:i.size+(i.format==='framed'?' (Framed)':'')});
+      acc.push({display_name:'Qty '+n,variable_name:'qty_'+n,value:String(i.qty)});
+      return acc;
+    },[])},
     onClose:function(){
       if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made — your cart is still saved, try again anytime.');
     },
@@ -3933,12 +3943,24 @@ function checkoutCart(){
       var paidStr=CURRENCY==='USD'?'$'+Math.round(total*USD_RATE):'GH₵ '+total.toLocaleString();
       var cartBuyerDisplayName = cartBuyerName||email.split('@')[0];
       sendOrderAlert({buyer:email,buyer_name:cartBuyerDisplayName,items:itemSummary,size:'Multiple',qty:String(totalQty),price:paidStr,country:'Ghana',ref:response.reference});
-      // Log to Sheet
-      fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        action:'Order Received',buyer_name:cartBuyerDisplayName,buyer_email:email,
-        print_title:itemSummary,size:'Multiple',country:'Ghana',
-        price:paidStr,qty:String(totalQty),notes:itemSummary,order_ref:response.reference
-      })}).catch(function(err){ console.error('Sheet log error:', err); });
+      // Log to Sheet — one row per cart item, each with its own exact print
+      // title, size and quantity, the same way a single "Buy Now" purchase
+      // already logs itself. Cart checkouts used to squash every item into
+      // one row as a single semicolon-joined summary string, which meant
+      // the exact print title never matched anything and nothing about a
+      // cart sale could be tallied per print (see the live "remaining
+      // pieces" count on the Shop page and product pages).
+      cartItems.forEach(function(i){
+        var itemPrice=i.price||i.print.priceGHC;
+        var itemPriceStr=CURRENCY==='USD'?'$'+(itemPrice*USD_RATE*i.qty).toFixed(0):'GH₵ '+(itemPrice*i.qty).toLocaleString();
+        fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          action:'Order Received',buyer_name:cartBuyerDisplayName,buyer_email:email,
+          print_title:i.print.title,size:i.size+(i.format==='framed'?' (Framed)':''),country:'Ghana',
+          price:itemPriceStr,qty:String(i.qty),
+          notes:'Part of order '+response.reference+(cartItems.length>1?' ('+cartItems.length+' items)':''),
+          order_ref:response.reference
+        })}).catch(function(err){ console.error('Sheet log error:', err); });
+      });
       CART=[];
       updateCartBadge();
       closeCart();
@@ -5282,6 +5304,29 @@ renderTermsOfSale(null); // fallback first, so the page is never blank
 // renderShop() keeps showing "Loading..." instead of a blank grid the
 // entire time this is still retrying.
 window.__shopDataLoaded = false;
+// Live "how many of each print have actually sold" counts, fetched
+// separately from /api/prints-sold (see that file — it tallies verified
+// orders from the same Google Sheet the dashboard uses). This used to be
+// a single number ("Prints Sold") someone had to remember to update by
+// hand in the CMS after every sale, which nothing ever reminded anyone to
+// do, so it just silently stayed wrong. Kept as its own fetch, independent
+// of the prints.json load above, so a slow or failed request here never
+// blocks the shop page itself — if it never arrives, everything simply
+// keeps using the manual CMS number exactly as before.
+window.__livePrintsSold = null;
+window.__lastPrintsJSON = null;
+var _dlHandled = false;
+function _loadLivePrintsSold(){
+  fetch('/api/prints-sold', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('prints-sold HTTP '+r.status)); })
+    .then(function(d){
+      window.__livePrintsSold = (d && d.sold) || {};
+      // Re-render with accurate counts once they arrive, whether that's
+      // before or after prints.json itself has loaded.
+      if(window.__lastPrintsJSON) _onPrintsLoaded(window.__lastPrintsJSON);
+    })
+    .catch(function(){ /* stay on the manual CMS number — no retry storm for a "nice to have" */ });
+}
 function _loadPrintsFromCMS(attempt){
   attempt = attempt || 1;
   fetch('/_data/prints.json', {cache:'no-store'})
@@ -5298,11 +5343,17 @@ window.addEventListener('online', function(){ if(!window.__shopDataLoaded) _load
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible' && !window.__shopDataLoaded) _loadPrintsFromCMS(1); });
 function _onPrintsLoaded(d){
     window.__shopDataLoaded = true;
+    window.__lastPrintsJSON = d;
     if(!d || !Array.isArray(d.prints) || !d.prints.length) return;
     var _mappedPrints = d.prints.map(function(p){
       var id = p.title ? p.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : ('pr'+Math.random().toString(36).slice(2));
       var edTotal = parseInt((p.edition||'').replace(/\D/g,''))||0;
-      var sold = parseInt(p.prints_sold)||0;
+      // A live count (see _loadLivePrintsSold, matched by exact title) wins
+      // once it's arrived; until then, or if it never arrives, fall back to
+      // the manually-typed "Prints Sold" CMS field exactly as before.
+      var liveSold = window.__livePrintsSold && Object.prototype.hasOwnProperty.call(window.__livePrintsSold, p.title)
+        ? parseInt(window.__livePrintsSold[p.title], 10) : NaN;
+      var sold = isNaN(liveSold) ? (parseInt(p.prints_sold)||0) : liveSold;
       var remaining = edTotal>0 ? Math.max(0,edTotal-sold) : null;
       return {
         id: id, series: p.series||'', title: p.title, desc: p.desc||'',
@@ -5331,6 +5382,12 @@ function _onPrintsLoaded(d){
     // so a real print id wouldn't be found and the deep link silently
     // failed, falling back to the homepage. Now that the real catalog is
     // in, retry that same deep link if it still hasn't been opened.
+    // Guarded to run only once: this function can now also be re-invoked
+    // later purely to refresh live sold-counts (see _loadLivePrintsSold),
+    // and without this guard that second call would force-navigate anyone
+    // who'd since clicked elsewhere back to their original deep link.
+    if(_dlHandled) return;
+    _dlHandled = true;
     try{
       var _dlParams=new URLSearchParams(window.location.search);
       var _dlPid=_dlParams.get('print');
@@ -5350,6 +5407,7 @@ function _onPrintsLoaded(d){
     }catch(e){}
 }
 _loadPrintsFromCMS();
+_loadLivePrintsSold();
 </script>
 
 <!-- CART FLOAT -->

@@ -125,11 +125,19 @@ function doPost(e) {
     // backup in case the browser closed too soon — and normally both fire,
     // which used to create two identical rows for every single sale.
     // Skip the second write instead of skipping the safety net entirely.
+    //
+    // Keyed on order_ref + print title (not order_ref alone): a cart
+    // purchase logs one row per print bought, all sharing the same
+    // order_ref, and an order_ref-only key used to treat the second,
+    // third, etc. item of the same order as a "duplicate" of the first and
+    // silently drop it. Matching on the print title too tells a genuine
+    // second item apart from an actual repeat send of the same item.
     if (data.action === 'Order Received' && data.order_ref) {
       var existingRows = sheet.getDataRange().getValues();
       for (var k = 1; k < existingRows.length; k++) {
         if (String(existingRows[k][1]).trim() === 'Order Received' &&
-            String(existingRows[k][10]).trim() === String(data.order_ref).trim()) {
+            String(existingRows[k][10]).trim() === String(data.order_ref).trim() &&
+            String(existingRows[k][4]).trim() === String(data.print_title || '').trim()) {
           return jsonResponse({ status: 'duplicate_skipped', order_ref: data.order_ref, row: k + 1 });
         }
       }

@@ -67,9 +67,25 @@ export async function onRequestPost(context) {
       return f ? String(f.value) : '';
     };
 
-    const printTitle = getField('print');
-    const size       = getField('size');
-    const qty        = getField('qty') || '1';
+    // Two shapes of metadata reach this endpoint: a single-print "Buy Now"
+    // purchase sends plain print/size/qty fields, while a cart checkout
+    // (index.html's checkoutCart) sends one indexed set per item —
+    // print_1/size_1/qty_1, print_2/size_2/qty_2, and so on — since a cart
+    // can hold several different prints in one payment. Build a list of
+    // line items covering either shape, so this backup path (it only runs
+    // if the buyer's own browser closes before it can log the sale itself)
+    // logs every item that was actually bought, not just the first.
+    const lineItems = [];
+    const singlePrint = getField('print');
+    if (singlePrint) {
+      lineItems.push({ title: singlePrint, size: getField('size'), qty: getField('qty') || '1' });
+    } else {
+      for (let n = 1; n <= 50; n++) {
+        const t = getField('print_' + n);
+        if (!t) break;
+        lineItems.push({ title: t, size: getField('size_' + n), qty: getField('qty_' + n) || '1' });
+      }
+    }
     const buyerEmail = customer.email || '';
     const firstName  = customer.first_name || '';
     const lastName   = customer.last_name || '';
@@ -110,25 +126,34 @@ export async function onRequestPost(context) {
 
     // Log to Google Sheets (same action the frontend uses)
     // Note: the frontend also logs on payment, so this acts as a safety net
-    // in case the buyer's browser closed before the callback fired.
+    // in case the buyer's browser closed before the callback fired. One
+    // row per item that was actually bought — a single-print purchase is
+    // one row same as before, a cart purchase is one row per print so each
+    // print's own sold count stays accurate.
+    // Only the single-item case carries an exact price (the whole charged
+    // amount, same as before); a multi-item cart purchase logs the total
+    // against the first row and leaves price blank on the rest, rather
+    // than guessing a per-item split — order lookups elsewhere already key
+    // off order_ref, and Qty/Print Title (what the "remaining pieces"
+    // count depends on) are accurate for every row either way.
     try {
-      await fetch(SHEET_URL, {
+      await Promise.all(lineItems.map((item, idx) => fetch(SHEET_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action:       'Order Received',
           buyer_name:   buyerName,
           buyer_email:  buyerEmail,
-          print_title:  printTitle,
-          size:         size,
+          print_title:  item.title,
+          size:         item.size,
           country:      '',
-          price:        paidStr,
-          qty:          qty,
-          notes:        `[webhook] ${printTitle} | ${size} x${qty}`,
+          price:        idx === 0 ? paidStr : '',
+          qty:          item.qty,
+          notes:        `[webhook] ${item.title} | ${item.size} x${item.qty}`,
           order_ref:    reference
         }),
         redirect: 'follow'
-      });
+      })));
     } catch (e) {
       console.error('Webhook sheet log error:', e);
     }
