@@ -11,6 +11,15 @@
 // "Follow-up Sent" as it moves through its life, and counting those too
 // would make a single sale look like three or four.
 //
+// Also skips any order the dashboard has marked cancelled. Clearing an
+// order there doesn't erase its original row from the Sheet — it adds a
+// separate "Delete Order" row instead, so the log keeps its full history
+// and a cancelled order can't get re-imported by mistake later. The
+// dashboard itself already knows to treat a "Delete Order" row as a
+// tombstone; this does the same match (Order Ref if the order has one,
+// otherwise buyer email + print title) so a cancelled or test order
+// doesn't permanently count against a print's remaining stock.
+//
 // Public and read-only: this returns only a title → quantity-sold map, no
 // buyer names, emails, or prices, so — unlike /api/orders — it needs no
 // admin key and is safe for the storefront to call on every page load.
@@ -33,11 +42,32 @@ export async function onRequestGet(context) {
 
     const sold = {};
     if (Array.isArray(rows)) {
+      // First pass: collect the key of every order the dashboard has
+      // cancelled, so the second pass can skip it. Same key logic the
+      // dashboard itself uses: prefer Order Ref, fall back to
+      // buyer email + print title when an order has no ref.
+      const deletedKeys = new Set();
+      for (const row of rows) {
+        const action = String(row['Action'] || '').trim();
+        if (action !== 'Delete Order') continue;
+        const ref = String(row['Order Ref'] || '').trim();
+        const email = String(row['Buyer Email'] || '').trim();
+        const title = String(row['Print Title'] || '').trim();
+        const key = ref || (email + '||' + title);
+        if (key && key !== '||') deletedKeys.add(key);
+      }
+
       for (const row of rows) {
         const action = String(row['Action'] || '').trim();
         if (action !== 'Order Received') continue;
         const title = String(row['Print Title'] || '').trim();
         if (!title) continue;
+
+        const ref = String(row['Order Ref'] || '').trim();
+        const email = String(row['Buyer Email'] || '').trim();
+        const key = ref || (email + '||' + title);
+        if (key && deletedKeys.has(key)) continue; // cancelled — don't count it
+
         const qty = parseInt(row['Qty'], 10) || 1;
         sold[title] = (sold[title] || 0) + qty;
       }
