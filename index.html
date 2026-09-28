@@ -1324,6 +1324,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <p id="aboutStreetP3">If you recognise yourself in one of these photographs and want to talk about it, whether that's a question or a concern, write to me at hello@jefferyasare.com. I take that seriously.</p>
     </div>
   </div>
+  <div style="padding:0 var(--pad) 1rem;">
+    <p class="about-caption" style="font-size:12px;">Working on a brand project? <a onclick="navigate('collaborations')" style="color:inherit;text-decoration:underline;cursor:pointer;">See how we might work together &#8594;</a></p>
+  </div>
   <div class="about-cta">
     <div class="about-cta-left">
       <h2>Want to see the work?</h2>
@@ -1359,6 +1362,70 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
   <div id="shopSocialProof" style="display:none;"></div>
   <div class="shop-list" id="shopList"></div>
   <div id="shop-mini-footer"></div>
+</div>
+
+<!-- COLLABORATIONS (quiet page: not in main nav/footer, reachable via direct link and a mention on About) -->
+<div id="page-collaborations" class="page">
+  <div class="inner-nav">
+    <span class="nav-logo" id="collabLogoBtn"><img src="/images/ui/logo-mark.png" alt="ja." class="nav-logo-img"></span>
+    <ul class="nav-links"><li><a id="collabAboutBtn">About</a></li><li><a id="collabPortBtn">Portfolio</a></li><li><a id="collabShopBtn">Shop</a></li><li><a id="collabContactBtn">Contact</a></li></ul>
+    <button class="ham-btn" id="collabHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <div class="page-header">
+    <h1>Collaborations</h1>
+    <p>A short introduction for brand and creative teams considering a project together: who I am, how I work, and how to reach me.</p>
+  </div>
+  <div class="about-cols" style="padding-top:0;border-top:none;">
+    <div>
+      <div class="about-col-label">About</div>
+      <h2 class="about-col-heading">Something stops me. Every time.</h2>
+      <div class="about-col-body">
+        <p>My name is Jeffery Asare. I am a photographer based in Accra, Ghana, working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
+        <p>My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I want a photograph to slow someone down, even for a second, and leave them looking twice.</p>
+      </div>
+    </div>
+    <div>
+      <div class="about-col-label">Practice</div>
+      <h2 class="about-col-heading">Built around restraint.</h2>
+      <div class="about-col-body">
+        <p>I shoot on an iPhone and edit entirely on my phone in Lightroom Mobile, by choice, not necessity. I also work with a full professional kit when a project calls for it. The phone removes the gap between noticing and capturing: no setup, no signal to a subject that something is being recorded. What is left is just attention.</p>
+        <p>Editing happens in the same hands that made the photograph, start to finish. Some images get a light correction. Others are taken further: colour shifted, mood reconstructed, closer to how a moment felt than how it looked on a screen.</p>
+      </div>
+    </div>
+  </div>
+  <div class="about-practice">
+    <div class="about-practice-label">
+      <div class="about-col-label">Capabilities</div>
+      <h2 class="about-col-heading">What I bring to a project.</h2>
+    </div>
+    <div class="about-practice-body about-col-body">
+      <p>Documentary-style photography that holds attention rather than announcing itself. Portraiture built on patience rather than direction. A considered eye for light, colour, and the quieter parts of a scene that a faster shoot would miss.</p>
+      <p>The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
+    </div>
+  </div>
+  <div class="about-practice">
+    <div class="about-practice-label">
+      <div class="about-col-label">Selected Series</div>
+      <h2 class="about-col-heading">A few bodies of work.</h2>
+    </div>
+    <div class="about-practice-body about-col-body">
+      <p>Four ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p>
+      <div id="collabSeriesList" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;"></div>
+    </div>
+  </div>
+  <div class="about-cta">
+    <div class="about-cta-left">
+      <h2>How to work with me.</h2>
+      <p>If a project feels right, I would like to hear about it. Tell me what you have in mind and I will get back to you personally within a day or two.</p>
+    </div>
+    <div class="about-cta-btns">
+      <button class="btn-dark" id="collabContactCtaBtn">Start the conversation &#8594;</button>
+    </div>
+  </div>
+  <div style="padding:0 var(--pad) 2rem;">
+    <p class="about-caption" style="font-size:12px;">Prefer email? Write directly to hello@jefferyasare.com.</p>
+  </div>
+  <div id="collab-mini-footer"></div>
 </div>
 
 <!-- CONTACT -->
@@ -1707,7 +1774,7 @@ window.PRINTS = PRINTS = window.__pendingRealPrints || [
 var currentLbPhotos = [], currentLbIdx = 0, currentPhoto = null;
 
 var _navFromHistory = false;
-var _pageUrlMap = {home:'/',portfolio:'/portfolio',shop:'/shop',about:'/about',contact:'/contact',terms:'/terms',privacy:'/privacy',journal:'/journal'};
+var _pageUrlMap = {home:'/',portfolio:'/portfolio',shop:'/shop',about:'/about',contact:'/contact',terms:'/terms',privacy:'/privacy',journal:'/journal',collaborations:'/collaborations'};
 // Set true the first time this page actually pushes a history entry during
 // this browser session — lets goBack() below tell "there's a real in-site
 // page to return to" apart from "visitor landed straight on this URL with
@@ -1740,6 +1807,7 @@ function navigate(page) {
     if (page==="shop") { renderShop(0); renderSocialProof(); }
     if (page==="journal") { renderJournal(); }
     if (page==="contact") { renderReviews(); prefillContactFromUrl(); }
+    if (page==="collaborations") { renderCollabSeries(); }
     setPageTitle(page);
     setTimeout(function() { addRevealClasses(); initReveal(); }, 80);
     if (overlay) { overlay.classList.remove("fade-in"); }
@@ -1775,6 +1843,8 @@ bind("contactLogoBtn","home");bind("contactPortBtn","portfolio");bind("contactAb
 bind("termsLogoBtn","home");bind("termsPortBtn","portfolio");bind("termsAboutBtn","about");bind("termsShopBtn","shop");bind("termsContactBtn","contact");
 bind("privLogoBtn","home");bind("privPortBtn","portfolio");bind("privAboutBtn","about");bind("privShopBtn","shop");bind("privContactBtn","contact");
 bind("journLogoBtn","home");bind("journPortBtn","portfolio");bind("journAboutBtn","about");bind("journShopBtn","shop");bind("journContactBtn","contact");
+bind("collabLogoBtn","home");bind("collabPortBtn","portfolio");bind("collabAboutBtn","about");bind("collabShopBtn","shop");bind("collabContactBtn","contact");
+var _collabCtaBtn=document.getElementById("collabContactCtaBtn"); if(_collabCtaBtn) _collabCtaBtn.addEventListener("click", goToCollabContact);
 // Terms/Privacy/Journal are all reachable from the global footer on every
 // page, so their Back button uses real "wherever you came from" semantics
 // instead of a fixed destination — see goBack(). Fallback only matters for
@@ -1809,7 +1879,7 @@ function injectFooters(){
       a.addEventListener("click",function(){ navigate(a.getAttribute("data-nav")); });
     });
   }
-  ["port","detail","shop","contact","terms","privacy","pd","journal"].forEach(function(id){
+  ["port","detail","shop","contact","terms","privacy","pd","journal","collab"].forEach(function(id){
     var el=document.getElementById(id+"-mini-footer");
     if(!el||el.hasChildNodes()) return;
     var f=document.createElement("footer");
@@ -2561,7 +2631,7 @@ function closeMobileMenu(){
   document.body.style.overflow="";
   document.querySelectorAll(".ham-btn").forEach(function(b){ b.classList.remove("open"); });
 }
-["homeHamBtn","portHamBtn","aboutHamBtn","shopHamBtn","contactHamBtn","termsHamBtn","privHamBtn","journHamBtn"].forEach(function(id){
+["homeHamBtn","portHamBtn","aboutHamBtn","shopHamBtn","contactHamBtn","termsHamBtn","privHamBtn","journHamBtn","collabHamBtn"].forEach(function(id){
   var el=document.getElementById(id);
   if(el) el.addEventListener("click",function(){ mobileMenu && mobileMenu.classList.contains("open")?closeMobileMenu():openMobileMenu(); });
 });
@@ -3023,6 +3093,37 @@ function prefillContactFromUrl(){
   } catch(e){}
 }
 
+// ── Collaborations page (quiet, brand-facing) ───────────────
+function renderCollabSeries(){
+  var el = document.getElementById('collabSeriesList');
+  if(!el) return;
+  el.innerHTML = '';
+  SERIES_LIST.forEach(function(s){
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = s.label;
+    btn.addEventListener('click', function(){ goToPortfolioSeries(s.slug); });
+    el.appendChild(btn);
+  });
+}
+
+function goToPortfolioSeries(slug){
+  navigate('portfolio');
+  setTimeout(function(){
+    var fb = document.getElementById('filterBar');
+    if(fb){ fb.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.filter===slug); }); }
+    renderPortfolio(slug, true);
+  }, 320);
+}
+
+function goToCollabContact(){
+  navigate('contact');
+  setTimeout(function(){
+    var subj = document.getElementById('contactSubject');
+    if(subj){ subj.value = 'Collaboration'; if(typeof contactSubjectChange==='function') contactSubjectChange('Collaboration'); }
+  }, 320);
+}
+
 // ── Social proof bar in shop ─────────────────────────────────
 function renderSocialProof(){
   var el = document.getElementById('shopSocialProof');
@@ -3094,7 +3195,7 @@ function _renderJournalSuggestions(currentPost, allPosts, container){
 // ===========================================================
 // PAGE TITLES
 // ===========================================================
-var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"The Journal - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare"};
+var PAGE_TITLES_MAP = {"home":"Jeffery Asare","portfolio":"Portfolio - Jeffery Asare","about":"About - Jeffery Asare","shop":"Fine Art Prints - Jeffery Asare","contact":"Contact - Jeffery Asare","terms":"Terms of Sale - Jeffery Asare","privacy":"Privacy Policy - Jeffery Asare","journal":"The Journal - Jeffery Asare","detail":"Photo - Jeffery Asare","print-detail":"Print - Jeffery Asare","cert":"Certificate - Jeffery Asare","collaborations":"Collaborations - Jeffery Asare"};
 function setPageTitle(page,extra){document.title=extra||(PAGE_TITLES_MAP[page])||"Jeffery Asare";}
 
 // ===========================================================
@@ -4677,6 +4778,7 @@ fetch('/_data/settings/series.json')
     if(!d || !Array.isArray(d.series) || !d.series.length){ _portfolioCmsLoaded=true; if(_portfolioPageActive()) renderPortfolio('all'); return; }
     SERIES_LIST = d.series;
     buildFilterBar();
+    renderCollabSeries();
     return Promise.all(d.series.map(function(s){
       return fetch('/_data/portfolio/'+s.slug+'.json')
         .then(function(r){ return r.ok ? r.json() : null; })
@@ -4709,7 +4811,7 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
   var pid=params.get('print');
   var pg=params.get('page'); // legacy query-param support
   // Real-path routing: /portfolio &rarr; 'portfolio', /shop &rarr; 'shop', etc.
-  var _pathPageMap={'/portfolio':'portfolio','/shop':'shop','/about':'about','/contact':'contact','/terms':'terms','/privacy':'privacy','/journal':'journal'};
+  var _pathPageMap={'/portfolio':'portfolio','/shop':'shop','/about':'about','/contact':'contact','/terms':'terms','/privacy':'privacy','/journal':'journal','/collaborations':'collaborations'};
   // Deep-link to a specific journal post: /journal/some-slug
   var _journalDeepLink=window.location.pathname.match(/^\/journal\/([a-z0-9][a-z0-9\-]*)$/);
   var pathPg=_journalDeepLink?'journal':_pathPageMap[window.location.pathname];
