@@ -191,7 +191,6 @@ html.darkroom .about-cta{border-color:#242220;}
 /* dark room — elements that use var(--ink) as a background (turns beige in dark mode) */
 html.darkroom .site-footer{background:#111008;}
 html.darkroom .about-shop-strip{background:#111008;}
-html.darkroom .collab-cta-strip{background:#111008;}
 /* dark room — buttons */
 html.darkroom .btn-dark{background:#c8c0b4;color:#0d0d0d;}
 html.darkroom .btn-pill{background:rgba(200,192,180,.9);color:#0d0d0d;}
@@ -304,6 +303,17 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .btn-outline:hover{border-color:#999;}
 /* ===== Collaborations page ===== */
 .collab-hero{padding:4.5rem var(--pad) 2.4rem;}
+.collab-split{display:flex;align-items:flex-start;}
+.collab-sidebar{width:360px;flex-shrink:0;border-right:1px solid var(--rule);padding:3.2rem 2.2rem;position:sticky;top:62px;height:calc(100vh - 62px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;}
+.collab-sidebar .collab-hero-line{font-size:1.7rem;line-height:1.16;max-width:none;margin:.6rem 0 1rem;}
+.collab-sidebar .collab-hero-sub{font-size:13px;max-width:none;margin-bottom:1.8rem;}
+.collab-sidebar .collab-facts{flex-direction:column;flex-wrap:nowrap;gap:1.1rem;padding-top:1.4rem;}
+.collab-sidebar-cta{padding-top:1.8rem;border-top:1px solid var(--rule);margin-top:2rem;}
+.collab-sidebar-cta h2{font-family:var(--title);font-weight:600;font-size:1.2rem;letter-spacing:-.01em;margin:0 0 .5rem;}
+.collab-sidebar-cta p{font-size:12px;color:var(--ink);opacity:.65;line-height:1.6;margin:0 0 1.1rem;}
+.collab-sidebar-email{font-size:11px;color:var(--muted);margin-top:1rem;}
+.collab-main{flex:1;min-width:0;}
+
 .collab-hero-line{font-family:var(--title);font-weight:600;font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.05;letter-spacing:-.03em;margin:.7rem 0 1.3rem;max-width:680px;}
 .collab-hero-sub{font-size:13px;color:var(--ink);opacity:.65;max-width:520px;line-height:1.8;margin-bottom:2.4rem;}
 .collab-facts{display:flex;flex-wrap:wrap;gap:2.6rem;padding-top:1.8rem;border-top:1px solid var(--rule);}
@@ -326,19 +336,15 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .collab-series-row:hover .photo-card img{transform:scale(1.08);}
 .collab-series-row-name{font-size:16px;font-family:var(--title);color:var(--ink);margin-bottom:.25rem;}
 .collab-series-row-caption{font-size:12px;color:var(--muted);line-height:1.5;max-width:520px;}
-.collab-cta-strip{background:var(--ink);padding:3.2rem var(--pad);}
-.collab-cta-strip .collab-num{color:rgba(255,255,255,.45);}
-.collab-cta-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:2.4rem;flex-wrap:wrap;}
-.collab-cta-inner h2{font-family:var(--title);font-weight:600;font-size:clamp(1.8rem,3.5vw,2.6rem);letter-spacing:-.02em;color:#fff;margin:0 0 .6rem;}
-.collab-cta-inner p{font-size:13px;color:rgba(255,255,255,.6);max-width:420px;line-height:1.75;margin:0;}
-.collab-cta-email{margin-top:2rem;padding-top:1.4rem;border-top:1px solid rgba(255,255,255,.14);font-size:12px;color:rgba(255,255,255,.45);}
 @media(max-width:900px){
   .collab-series-row .photo-card{width:56px;height:56px;}
+  .collab-split{flex-direction:column;}
+  .collab-sidebar{width:auto;position:static;height:auto;border-right:none;border-bottom:1px solid var(--rule);overflow-y:visible;}
 }
 @media(max-width:580px){
   .collab-hero{padding:2.5rem var(--pad) 2rem;}
   .collab-facts{gap:1.6rem;}
-  .collab-cta-inner{flex-direction:column;align-items:flex-start;gap:1.6rem;}
+  .collab-sidebar{padding:2.2rem var(--pad);}
 }
 /* Collaborations page reads as a single column at every width, not just
    on mobile (the two-column split used elsewhere, e.g. the About page,
@@ -1417,89 +1423,90 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <ul class="nav-links"><li><a id="collabAboutBtn">About</a></li><li><a id="collabPortBtn">Portfolio</a></li><li><a id="collabShopBtn">Shop</a></li><li><a id="collabContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="collabHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
-  <div class="collab-hero">
-    <div class="about-col-label">Collaborations</div>
-    <h1 class="collab-hero-line">Something stops me.<br>Every time.</h1>
-    <p class="collab-hero-sub">A short introduction for brand and creative teams considering a project together: who I am, how I work, and how to reach me.</p>
-    <div class="collab-facts">
-      <div><span class="collab-fact-label">Based</span><span class="collab-fact-val">Accra, Ghana</span></div>
-      <div><span class="collab-fact-label">Shoots on</span><span class="collab-fact-val">iPhone &amp; full professional kit</span></div>
-      <div><span class="collab-fact-label">Process</span><span class="collab-fact-val">Capture through final edit, one set of hands</span></div>
-    </div>
-  </div>
-  <div class="about-cols">
-    <div class="collab-num">01</div>
-    <div>
-      <div class="about-col-label">About</div>
-      <h2 class="about-col-heading">A photographer, first.</h2>
-      <div class="about-col-body">
-        <p>My name is Jeffery Asare. I am a photographer based in Accra, Ghana, working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
-        <p>My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I want a photograph to slow someone down, even for a second, and leave them looking twice.</p>
-      </div>
-    </div>
-    <div>
-      <div class="about-col-label">Practice</div>
-      <h2 class="about-col-heading">Built around restraint.</h2>
-      <div class="about-col-body">
-        <p>I shoot on an iPhone and edit entirely on my phone in Lightroom Mobile, by choice, not necessity. I also work with a full professional kit when a project calls for it. The phone removes the gap between noticing and capturing: no setup, no signal to a subject that something is being recorded. What is left is just attention.</p>
-        <p>Editing happens in the same hands that made the photograph, start to finish. Some images get a light correction. Others are taken further: colour shifted, mood reconstructed, closer to how a moment felt than how it looked on a screen.</p>
-      </div>
-    </div>
-  </div>
-  <div class="about-practice">
-    <div class="collab-num">02</div>
-    <div class="about-practice-label">
-      <div class="about-col-label">Capabilities</div>
-      <h2 class="about-col-heading">What I bring to a project.</h2>
-    </div>
-    <div class="about-practice-body">
-      <div class="collab-cap-list">
-        <div class="collab-cap-row">
-          <span class="collab-cap-letter">A</span>
-          <div>
-            <h3>Documentary photography</h3>
-            <p>Holds attention rather than announcing itself &mdash; image-making built around real moments, not staged ones.</p>
-          </div>
-        </div>
-        <div class="collab-cap-row">
-          <span class="collab-cap-letter">B</span>
-          <div>
-            <h3>Portraiture</h3>
-            <p>Built on patience rather than direction. I wait for something true rather than asking for a pose.</p>
-          </div>
-        </div>
-        <div class="collab-cap-row">
-          <span class="collab-cap-letter">C</span>
-          <div>
-            <h3>Light &amp; colour</h3>
-            <p>A considered eye for the quieter parts of a scene a faster shoot would miss &mdash; the mood is shaped in the edit as much as in the frame.</p>
-          </div>
-        </div>
-      </div>
-      <p class="collab-cap-note">The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
-    </div>
-  </div>
-  <div class="about-practice">
-    <div class="collab-num">03</div>
-    <div class="about-practice-label">
-      <div class="about-col-label">Selected Series</div>
-      <h2 class="about-col-heading">A few bodies of work.</h2>
-    </div>
-    <div class="about-practice-body">
-      <div class="about-col-body"><p>Ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p></div>
-      <div id="collabSeriesList" class="collab-series-list"></div>
-    </div>
-  </div>
-  <div class="collab-cta-strip">
-    <div class="collab-num">04</div>
-    <div class="collab-cta-inner">
+  <div class="collab-split">
+    <aside class="collab-sidebar">
       <div>
-        <h2>How to work with me.</h2>
-        <p>If a project feels right, I would like to hear about it. Tell me what you have in mind and I will get back to you personally within a day or two.</p>
+        <div class="about-col-label">Collaborations</div>
+        <h1 class="collab-hero-line">Something stops me.<br>Every time.</h1>
+        <p class="collab-hero-sub">A short introduction for brand and creative teams considering a project together: who I am, how I work, and how to reach me.</p>
+        <div class="collab-facts">
+          <div><span class="collab-fact-label">Based</span><span class="collab-fact-val">Accra, Ghana</span></div>
+          <div><span class="collab-fact-label">Shoots on</span><span class="collab-fact-val">iPhone &amp; full professional kit</span></div>
+          <div><span class="collab-fact-label">Process</span><span class="collab-fact-val">Capture through final edit, one set of hands</span></div>
+        </div>
       </div>
-      <button class="btn-white" id="collabContactCtaBtn">Start the conversation &#8594;</button>
+      <div class="collab-sidebar-cta">
+        <h2>How to work with me.</h2>
+        <p>If a project feels right, I would like to hear about it.</p>
+        <button class="btn-dark" id="collabContactCtaBtn">Start the conversation &#8594;</button>
+        <div class="collab-sidebar-email">hello@jefferyasare.com</div>
+      </div>
+    </aside>
+    <div class="collab-main">
+      <div class="about-cols">
+        <div class="collab-num">01</div>
+        <div>
+          <div class="about-col-label">About</div>
+          <h2 class="about-col-heading">A photographer, first.</h2>
+          <div class="about-col-body">
+            <p>My name is Jeffery Asare. I am a photographer based in Accra, Ghana, working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
+            <p>My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I want a photograph to slow someone down, even for a second, and leave them looking twice.</p>
+          </div>
+        </div>
+        <div>
+          <div class="about-col-label">Practice</div>
+          <h2 class="about-col-heading">Built around restraint.</h2>
+          <div class="about-col-body">
+            <p>I shoot on an iPhone and edit entirely on my phone in Lightroom Mobile, by choice, not necessity. I also work with a full professional kit when a project calls for it. The phone removes the gap between noticing and capturing: no setup, no signal to a subject that something is being recorded. What is left is just attention.</p>
+            <p>Editing happens in the same hands that made the photograph, start to finish. Some images get a light correction. Others are taken further: colour shifted, mood reconstructed, closer to how a moment felt than how it looked on a screen.</p>
+          </div>
+        </div>
+      </div>
+      <div class="about-practice">
+        <div class="collab-num">02</div>
+        <div class="about-practice-label">
+          <div class="about-col-label">Capabilities</div>
+          <h2 class="about-col-heading">What I bring to a project.</h2>
+        </div>
+        <div class="about-practice-body">
+          <div class="collab-cap-list">
+            <div class="collab-cap-row">
+              <span class="collab-cap-letter">A</span>
+              <div>
+                <h3>Documentary photography</h3>
+                <p>Holds attention rather than announcing itself &mdash; image-making built around real moments, not staged ones.</p>
+              </div>
+            </div>
+            <div class="collab-cap-row">
+              <span class="collab-cap-letter">B</span>
+              <div>
+                <h3>Portraiture</h3>
+                <p>Built on patience rather than direction. I wait for something true rather than asking for a pose.</p>
+              </div>
+            </div>
+            <div class="collab-cap-row">
+              <span class="collab-cap-letter">C</span>
+              <div>
+                <h3>Light &amp; colour</h3>
+                <p>A considered eye for the quieter parts of a scene a faster shoot would miss &mdash; the mood is shaped in the edit as much as in the frame.</p>
+              </div>
+            </div>
+          </div>
+          <p class="collab-cap-note">The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
+        </div>
+      </div>
+      <div class="about-practice">
+        <div class="collab-num">03</div>
+        <div class="about-practice-label">
+          <div class="about-col-label">Selected Series</div>
+          <h2 class="about-col-heading">A few bodies of work.</h2>
+        </div>
+        <div class="about-practice-body">
+          <div class="about-col-body"><p>Ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p></div>
+          <div id="collabSeriesList" class="collab-series-list"></div>
+        </div>
+      </div>
     </div>
-    <div class="collab-cta-email">Prefer email? Write directly to hello@jefferyasare.com.</div>
   </div>
   <div id="collab-mini-footer"></div>
 </div>
@@ -2686,7 +2693,6 @@ function addRevealClasses() {
   document.querySelectorAll(".collab-facts > div").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+2,6)); });
   document.querySelectorAll(".collab-num").forEach(function(el) { el.classList.add("reveal"); });
   document.querySelectorAll(".collab-cap-row").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+1,6)); });
-  document.querySelectorAll(".collab-cta-inner h2,.collab-cta-inner p").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i,6)); });
 
   // Terms
   document.querySelectorAll(".terms-section").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i%3+1,6)); });
