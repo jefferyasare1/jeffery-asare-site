@@ -328,6 +328,13 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
   .collab-facts{gap:1.6rem;}
   .collab-series-grid{gap:.7rem;}
 }
+/* Collaborations page reads as a single column at every width, not just
+   on mobile (the two-column split used elsewhere, e.g. the About page,
+   is intentionally not used here). */
+#page-collaborations .about-cols{grid-template-columns:1fr;gap:3rem;}
+#page-collaborations .about-practice{flex-direction:column;gap:1.4rem;}
+#page-collaborations .about-practice-label{width:auto;}
+#page-collaborations .about-cta{flex-direction:column;align-items:flex-start;gap:1.6rem;}
 .shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.3rem 1.3rem;}
 /* Keeps the shop page's footer pinned to the bottom of the screen instead
    of riding up to just below the header whenever the print grid is briefly
