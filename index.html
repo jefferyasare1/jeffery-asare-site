@@ -191,6 +191,7 @@ html.darkroom .about-cta{border-color:#242220;}
 /* dark room — elements that use var(--ink) as a background (turns beige in dark mode) */
 html.darkroom .site-footer{background:#111008;}
 html.darkroom .about-shop-strip{background:#111008;}
+html.darkroom .collab-cta-strip{background:#111008;}
 /* dark room — buttons */
 html.darkroom .btn-dark{background:#c8c0b4;color:#0d0d0d;}
 html.darkroom .btn-pill{background:rgba(200,192,180,.9);color:#0d0d0d;}
@@ -309,24 +310,35 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .collab-facts>div{display:flex;flex-direction:column;gap:.35rem;}
 .collab-fact-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
 .collab-fact-val{font-size:13px;color:var(--ink);}
-.collab-cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-bottom:1.8rem;}
-.collab-cap h3{font-family:var(--title);font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:.5rem;color:var(--ink);}
-.collab-cap p{font-size:13px;color:var(--ink);opacity:.65;line-height:1.7;}
+.collab-num{font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:1.6rem;font-family:var(--sans);}
+.collab-cap-list{display:flex;flex-direction:column;max-width:760px;margin-bottom:1.8rem;}
+.collab-cap-row{display:flex;gap:1.3rem;padding:0 0 1.3rem;border-bottom:1px solid var(--rule);margin-bottom:1.3rem;}
+.collab-cap-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.collab-cap-letter{font-size:11px;color:var(--muted);width:18px;flex-shrink:0;padding-top:.15rem;}
+.collab-cap-row h3{font-family:var(--title);font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:.4rem;color:var(--ink);}
+.collab-cap-row p{font-size:13px;color:var(--ink);opacity:.65;line-height:1.7;}
 .collab-cap-note{font-size:13px;color:var(--ink);opacity:.65;line-height:1.95;padding-top:1.7rem;border-top:1px solid var(--rule);max-width:760px;}
-.collab-series-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.7rem;}
-.collab-series-tile{cursor:pointer;}
-.collab-series-tile .photo-card{margin-bottom:.7rem;}
-.collab-series-tile .photo-card img{transition:transform .5s ease;}
-.collab-series-tile:hover .photo-card img{transform:scale(1.045);}
-.collab-series-name{font-size:12px;color:var(--ink);}
+.collab-series-list{display:flex;flex-direction:column;max-width:760px;margin-top:1.7rem;}
+.collab-series-row{display:flex;align-items:center;gap:1.3rem;padding:1.1rem 0;border-bottom:1px solid var(--rule);cursor:pointer;}
+.collab-series-row:last-child{border-bottom:none;}
+.collab-series-row .photo-card{width:64px;height:64px;flex-shrink:0;aspect-ratio:unset;}
+.collab-series-row .photo-card img{transition:transform .5s ease;}
+.collab-series-row:hover .photo-card img{transform:scale(1.08);}
+.collab-series-row-name{font-size:16px;font-family:var(--title);color:var(--ink);margin-bottom:.25rem;}
+.collab-series-row-caption{font-size:12px;color:var(--muted);line-height:1.5;max-width:520px;}
+.collab-cta-strip{background:var(--ink);padding:3.2rem var(--pad);}
+.collab-cta-strip .collab-num{color:rgba(255,255,255,.45);}
+.collab-cta-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:2.4rem;flex-wrap:wrap;}
+.collab-cta-inner h2{font-family:var(--serif);font-weight:400;font-size:clamp(1.9rem,3.6vw,2.6rem);color:#fff;margin:0 0 .6rem;}
+.collab-cta-inner p{font-size:13px;color:rgba(255,255,255,.6);max-width:420px;line-height:1.75;margin:0;}
+.collab-cta-email{margin-top:2rem;padding-top:1.4rem;border-top:1px solid rgba(255,255,255,.14);font-size:12px;color:rgba(255,255,255,.45);}
 @media(max-width:900px){
-  .collab-cap-grid{grid-template-columns:1fr;gap:1.4rem;}
-  .collab-series-grid{grid-template-columns:1fr 1fr;}
+  .collab-series-row .photo-card{width:56px;height:56px;}
 }
 @media(max-width:580px){
   .collab-hero{padding:2.5rem var(--pad) 2rem;}
   .collab-facts{gap:1.6rem;}
-  .collab-series-grid{gap:.7rem;}
+  .collab-cta-inner{flex-direction:column;align-items:flex-start;gap:1.6rem;}
 }
 /* Collaborations page reads as a single column at every width, not just
    on mobile (the two-column split used elsewhere, e.g. the About page,
@@ -1416,6 +1428,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     </div>
   </div>
   <div class="about-cols">
+    <div class="collab-num">01</div>
     <div>
       <div class="about-col-label">About</div>
       <h2 class="about-col-heading">A photographer, first.</h2>
@@ -1434,49 +1447,59 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     </div>
   </div>
   <div class="about-practice">
+    <div class="collab-num">02</div>
     <div class="about-practice-label">
       <div class="about-col-label">Capabilities</div>
       <h2 class="about-col-heading">What I bring to a project.</h2>
     </div>
     <div class="about-practice-body">
-      <div class="collab-cap-grid">
-        <div class="collab-cap">
-          <h3>Documentary photography</h3>
-          <p>Holds attention rather than announcing itself.</p>
+      <div class="collab-cap-list">
+        <div class="collab-cap-row">
+          <span class="collab-cap-letter">A</span>
+          <div>
+            <h3>Documentary photography</h3>
+            <p>Holds attention rather than announcing itself &mdash; image-making built around real moments, not staged ones.</p>
+          </div>
         </div>
-        <div class="collab-cap">
-          <h3>Portraiture</h3>
-          <p>Built on patience rather than direction.</p>
+        <div class="collab-cap-row">
+          <span class="collab-cap-letter">B</span>
+          <div>
+            <h3>Portraiture</h3>
+            <p>Built on patience rather than direction. I wait for something true rather than asking for a pose.</p>
+          </div>
         </div>
-        <div class="collab-cap">
-          <h3>Light &amp; colour</h3>
-          <p>A considered eye for the quieter parts of a scene a faster shoot would miss.</p>
+        <div class="collab-cap-row">
+          <span class="collab-cap-letter">C</span>
+          <div>
+            <h3>Light &amp; colour</h3>
+            <p>A considered eye for the quieter parts of a scene a faster shoot would miss &mdash; the mood is shaped in the edit as much as in the frame.</p>
+          </div>
         </div>
       </div>
       <p class="collab-cap-note">The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
     </div>
   </div>
   <div class="about-practice">
+    <div class="collab-num">03</div>
     <div class="about-practice-label">
       <div class="about-col-label">Selected Series</div>
       <h2 class="about-col-heading">A few bodies of work.</h2>
     </div>
     <div class="about-practice-body">
-      <div class="about-col-body"><p>Four ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p></div>
-      <div id="collabSeriesList" class="collab-series-grid"></div>
+      <div class="about-col-body"><p>Ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p></div>
+      <div id="collabSeriesList" class="collab-series-list"></div>
     </div>
   </div>
-  <div class="about-cta">
-    <div class="about-cta-left">
-      <h2>How to work with me.</h2>
-      <p>If a project feels right, I would like to hear about it. Tell me what you have in mind and I will get back to you personally within a day or two.</p>
+  <div class="collab-cta-strip">
+    <div class="collab-num">04</div>
+    <div class="collab-cta-inner">
+      <div>
+        <h2>How to work with me.</h2>
+        <p>If a project feels right, I would like to hear about it. Tell me what you have in mind and I will get back to you personally within a day or two.</p>
+      </div>
+      <button class="btn-white" id="collabContactCtaBtn">Start the conversation &#8594;</button>
     </div>
-    <div class="about-cta-btns">
-      <button class="btn-dark" id="collabContactCtaBtn">Start the conversation &#8594;</button>
-    </div>
-  </div>
-  <div style="padding:0 var(--pad) 2rem;">
-    <p class="about-caption" style="font-size:12px;">Prefer email? Write directly to hello@jefferyasare.com.</p>
+    <div class="collab-cta-email">Prefer email? Write directly to hello@jefferyasare.com.</div>
   </div>
   <div id="collab-mini-footer"></div>
 </div>
@@ -2661,7 +2684,9 @@ function addRevealClasses() {
   document.querySelectorAll(".collab-hero-line").forEach(function(el) { el.classList.add("reveal"); });
   document.querySelectorAll(".collab-hero-sub").forEach(function(el) { el.classList.add("reveal","delay-1"); });
   document.querySelectorAll(".collab-facts > div").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+2,6)); });
-  document.querySelectorAll(".collab-cap").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+1,6)); });
+  document.querySelectorAll(".collab-num").forEach(function(el) { el.classList.add("reveal"); });
+  document.querySelectorAll(".collab-cap-row").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+1,6)); });
+  document.querySelectorAll(".collab-cta-inner h2,.collab-cta-inner p").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i,6)); });
 
   // Terms
   document.querySelectorAll(".terms-section").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i%3+1,6)); });
@@ -3160,8 +3185,8 @@ function renderCollabSeries(){
   SERIES_LIST.forEach(function(s, idx){
     var cover = null;
     for(var i=0;i<PHOTOS.length;i++){ if(PHOTOS[i].series===s.slug){ cover=PHOTOS[i]; break; } }
-    var tile = document.createElement('div');
-    tile.className = 'collab-series-tile reveal delay-'+Math.min(idx+1,6);
+    var row = document.createElement('div');
+    row.className = 'collab-series-row reveal delay-'+Math.min(idx+1,6);
     var card = document.createElement('div');
     card.className = 'photo-card';
     if(cover && cover.img){
@@ -3173,17 +3198,25 @@ function renderCollabSeries(){
       card.style.display = 'flex';
       card.style.alignItems = 'center';
       card.style.justifyContent = 'center';
-      card.style.fontSize = '11px';
+      card.style.fontSize = '9px';
       card.style.color = 'var(--muted)';
       card.textContent = s.label;
     }
+    var text = document.createElement('div');
     var name = document.createElement('div');
-    name.className = 'collab-series-name';
+    name.className = 'collab-series-row-name';
     name.textContent = s.label;
-    tile.appendChild(card);
-    tile.appendChild(name);
-    tile.addEventListener('click', function(){ goToPortfolioSeries(s.slug); });
-    el.appendChild(tile);
+    text.appendChild(name);
+    if(cover && cover.desc){
+      var cap = document.createElement('div');
+      cap.className = 'collab-series-row-caption';
+      cap.textContent = cover.desc;
+      text.appendChild(cap);
+    }
+    row.appendChild(card);
+    row.appendChild(text);
+    row.addEventListener('click', function(){ goToPortfolioSeries(s.slug); });
+    el.appendChild(row);
   });
   initReveal();
 }
