@@ -301,6 +301,33 @@ html.darkroom .nav-hint-bubble::before{border-bottom-color:rgba(232,226,216,.94)
 .btn-dark:hover{opacity:.8;}
 .btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:.7rem 1.5rem;font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;transition:border-color .2s;}
 .btn-outline:hover{border-color:#999;}
+/* ===== Collaborations page ===== */
+.collab-hero{padding:4.5rem var(--pad) 2.4rem;}
+.collab-hero-line{font-family:var(--serif);font-weight:400;font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.12;letter-spacing:-.005em;margin:.7rem 0 1.3rem;max-width:680px;}
+.collab-hero-sub{font-size:13px;color:var(--ink);opacity:.65;max-width:520px;line-height:1.8;margin-bottom:2.4rem;}
+.collab-facts{display:flex;flex-wrap:wrap;gap:2.6rem;padding-top:1.8rem;border-top:1px solid var(--rule);}
+.collab-facts>div{display:flex;flex-direction:column;gap:.35rem;}
+.collab-fact-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+.collab-fact-val{font-size:13px;color:var(--ink);}
+.collab-cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-bottom:1.8rem;}
+.collab-cap h3{font-family:var(--title);font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:.5rem;color:var(--ink);}
+.collab-cap p{font-size:13px;color:var(--ink);opacity:.65;line-height:1.7;}
+.collab-cap-note{font-size:13px;color:var(--ink);opacity:.65;line-height:1.95;padding-top:1.7rem;border-top:1px solid var(--rule);max-width:760px;}
+.collab-series-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.7rem;}
+.collab-series-tile{cursor:pointer;}
+.collab-series-tile .photo-card{margin-bottom:.7rem;}
+.collab-series-tile .photo-card img{transition:transform .5s ease;}
+.collab-series-tile:hover .photo-card img{transform:scale(1.045);}
+.collab-series-name{font-size:12px;color:var(--ink);}
+@media(max-width:900px){
+  .collab-cap-grid{grid-template-columns:1fr;gap:1.4rem;}
+  .collab-series-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:580px){
+  .collab-hero{padding:2.5rem var(--pad) 2rem;}
+  .collab-facts{gap:1.6rem;}
+  .collab-series-grid{gap:.7rem;}
+}
 .shop-list{padding:0 var(--pad) 5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.3rem 1.3rem;}
 /* Keeps the shop page's footer pinned to the bottom of the screen instead
    of riding up to just below the header whenever the print grid is briefly
@@ -1325,7 +1352,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     </div>
   </div>
   <div style="padding:0 var(--pad) 1rem;">
-    <p class="about-caption" style="font-size:12px;">Working on a brand project? <a onclick="navigate('collaborations')" style="color:inherit;text-decoration:underline;cursor:pointer;">See how we might work together &#8594;</a></p>
+    <p class="about-caption" style="font-size:12px;">Working with a brand or creative team? <a onclick="navigate('collaborations')" style="color:inherit;text-decoration:underline;cursor:pointer;font-weight:600;">Visit my Collaborations page &#8594;</a></p>
   </div>
   <div class="about-cta">
     <div class="about-cta-left">
@@ -1371,14 +1398,20 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <ul class="nav-links"><li><a id="collabAboutBtn">About</a></li><li><a id="collabPortBtn">Portfolio</a></li><li><a id="collabShopBtn">Shop</a></li><li><a id="collabContactBtn">Contact</a></li></ul>
     <button class="ham-btn" id="collabHamBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
-  <div class="page-header">
-    <h1>Collaborations</h1>
-    <p>A short introduction for brand and creative teams considering a project together: who I am, how I work, and how to reach me.</p>
+  <div class="collab-hero">
+    <div class="about-col-label">Collaborations</div>
+    <h1 class="collab-hero-line">Something stops me.<br>Every time.</h1>
+    <p class="collab-hero-sub">A short introduction for brand and creative teams considering a project together: who I am, how I work, and how to reach me.</p>
+    <div class="collab-facts">
+      <div><span class="collab-fact-label">Based</span><span class="collab-fact-val">Accra, Ghana</span></div>
+      <div><span class="collab-fact-label">Shoots on</span><span class="collab-fact-val">iPhone &amp; full professional kit</span></div>
+      <div><span class="collab-fact-label">Process</span><span class="collab-fact-val">Capture through final edit, one set of hands</span></div>
+    </div>
   </div>
-  <div class="about-cols" style="padding-top:0;border-top:none;">
+  <div class="about-cols">
     <div>
       <div class="about-col-label">About</div>
-      <h2 class="about-col-heading">Something stops me. Every time.</h2>
+      <h2 class="about-col-heading">A photographer, first.</h2>
       <div class="about-col-body">
         <p>My name is Jeffery Asare. I am a photographer based in Accra, Ghana, working professionally with a full kit, and personally with nothing more than an iPhone and a quiet obsession with the way light behaves when no one is paying attention to it.</p>
         <p>My work lives at the intersection of the ordinary and the overlooked. I am drawn to portraits that hold something back, to compositions that ask more than they answer, and to the kind of beauty that does not announce itself. I want a photograph to slow someone down, even for a second, and leave them looking twice.</p>
@@ -1398,9 +1431,22 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="about-col-label">Capabilities</div>
       <h2 class="about-col-heading">What I bring to a project.</h2>
     </div>
-    <div class="about-practice-body about-col-body">
-      <p>Documentary-style photography that holds attention rather than announcing itself. Portraiture built on patience rather than direction. A considered eye for light, colour, and the quieter parts of a scene that a faster shoot would miss.</p>
-      <p>The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
+    <div class="about-practice-body">
+      <div class="collab-cap-grid">
+        <div class="collab-cap">
+          <h3>Documentary photography</h3>
+          <p>Holds attention rather than announcing itself.</p>
+        </div>
+        <div class="collab-cap">
+          <h3>Portraiture</h3>
+          <p>Built on patience rather than direction.</p>
+        </div>
+        <div class="collab-cap">
+          <h3>Light &amp; colour</h3>
+          <p>A considered eye for the quieter parts of a scene a faster shoot would miss.</p>
+        </div>
+      </div>
+      <p class="collab-cap-note">The process stays in one set of hands throughout, from capture through to final edit, so the tone of an image does not get diluted somewhere between the camera and the finished file.</p>
     </div>
   </div>
   <div class="about-practice">
@@ -1408,9 +1454,9 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <div class="about-col-label">Selected Series</div>
       <h2 class="about-col-heading">A few bodies of work.</h2>
     </div>
-    <div class="about-practice-body about-col-body">
-      <p>Four ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p>
-      <div id="collabSeriesList" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;"></div>
+    <div class="about-practice-body">
+      <div class="about-col-body"><p>Four ongoing series, each built the same way: something stops me, and I stay with it until it becomes what I needed it to be.</p></div>
+      <div id="collabSeriesList" class="collab-series-grid"></div>
     </div>
   </div>
   <div class="about-cta">
@@ -2604,6 +2650,12 @@ function addRevealClasses() {
   document.querySelectorAll(".about-cta-left h2,.about-cta-left p").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+1,6)); });
   document.querySelectorAll(".about-cta-btns").forEach(function(el) { el.classList.add("reveal","delay-3"); });
 
+  // Collaborations page
+  document.querySelectorAll(".collab-hero-line").forEach(function(el) { el.classList.add("reveal"); });
+  document.querySelectorAll(".collab-hero-sub").forEach(function(el) { el.classList.add("reveal","delay-1"); });
+  document.querySelectorAll(".collab-facts > div").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+2,6)); });
+  document.querySelectorAll(".collab-cap").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i+1,6)); });
+
   // Terms
   document.querySelectorAll(".terms-section").forEach(function(el, i) { el.classList.add("reveal"); el.classList.add("delay-"+Math.min(i%3+1,6)); });
 
@@ -3098,13 +3150,35 @@ function renderCollabSeries(){
   var el = document.getElementById('collabSeriesList');
   if(!el) return;
   el.innerHTML = '';
-  SERIES_LIST.forEach(function(s){
-    var btn = document.createElement('button');
-    btn.className = 'filter-btn';
-    btn.textContent = s.label;
-    btn.addEventListener('click', function(){ goToPortfolioSeries(s.slug); });
-    el.appendChild(btn);
+  SERIES_LIST.forEach(function(s, idx){
+    var cover = null;
+    for(var i=0;i<PHOTOS.length;i++){ if(PHOTOS[i].series===s.slug){ cover=PHOTOS[i]; break; } }
+    var tile = document.createElement('div');
+    tile.className = 'collab-series-tile reveal delay-'+Math.min(idx+1,6);
+    var card = document.createElement('div');
+    card.className = 'photo-card';
+    if(cover && cover.img){
+      var img = document.createElement('img');
+      img.src = cover.img;
+      img.alt = s.label;
+      card.appendChild(img);
+    } else {
+      card.style.display = 'flex';
+      card.style.alignItems = 'center';
+      card.style.justifyContent = 'center';
+      card.style.fontSize = '11px';
+      card.style.color = 'var(--muted)';
+      card.textContent = s.label;
+    }
+    var name = document.createElement('div');
+    name.className = 'collab-series-name';
+    name.textContent = s.label;
+    tile.appendChild(card);
+    tile.appendChild(name);
+    tile.addEventListener('click', function(){ goToPortfolioSeries(s.slug); });
+    el.appendChild(tile);
   });
+  initReveal();
 }
 
 function goToPortfolioSeries(slug){
@@ -4798,6 +4872,7 @@ fetch('/_data/settings/series.json')
         tech:[["Device",p.device||''],["Format",p.format||'ProRAW'],["Edited in",p.edited_in||'Lightroom Mobile']]};
     });
     if(flat.length) PHOTOS=flat;
+    renderCollabSeries();
     _portfolioCmsLoaded=true;
     if(_portfolioPageActive()) renderPortfolio('all');
     renderPhotoOfWeek();
