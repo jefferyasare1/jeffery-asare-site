@@ -7,7 +7,16 @@
     "message": "Hi Jeffery, I came across your work and I’m interested in purchasing a print. Could you tell me more about the available sizes, paper options, and pricing?",
     "timestamp": "2026-09-30T13:29:32.406Z",
     "read": true,
-    "replied": false
+    "replied": true,
+    "repliedAt": "2026-09-30T13:55:52.465Z",
+    "replyText": "My work is available in limited edition archival prints, signed and numbered, shipped worldwide from Accra. Sizes range from A3 to A2, and papers are cotton rag or Baryta, depending on the piece. Prices vary, but expect around GHS 1,500 - 5,000 or USD 250 - 800 for a single print.",
+    "replies": [
+      {
+        "from": "jeff",
+        "text": "My work is available in limited edition archival prints, signed and numbered, shipped worldwide from Accra. Sizes range from A3 to A2, and papers are cotton rag or Baryta, depending on the piece. Prices vary, but expect around GHS 1,500 - 5,000 or USD 250 - 800 for a single print.",
+        "at": "2026-09-30T13:55:52.465Z"
+      }
+    ]
   },
   {
     "id": "1790734268880",
