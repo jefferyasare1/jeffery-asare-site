@@ -1227,7 +1227,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="port-title-row">
       <h1>Portfolio</h1>
     </div>
-    <p id="portfolioDesc">I shoot on a phone. Not because it's all I have — because it's always there, and moments aren't. Some of these happened in a second — a turn of light, someone moving through a frame. Others I returned to, stayed with, waited on until they became what I needed them to be. All of them started with something that stopped me long enough to reach for my pocket.</p>
+    <p id="portfolioDesc">I shoot on a phone. Not because it's all I have, but because it's always there, and moments aren't. Some of these happened in a second: a turn of light, someone moving through a frame. Others I returned to, stayed with, waited on until they became what I needed them to be. All of them started with something that stopped me long enough to reach for my pocket.</p>
   </div>
   <div class="filter-bar" id="filterBar">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -1392,6 +1392,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
             <option value="">Select a topic</option>
             <option>Print inquiry</option><option>Commission</option><option>Exhibition</option><option>Collaboration</option><option>Other</option>
           </select>
+          <input class="field-input" type="text" id="contactSubjectOther" maxlength="100" placeholder="What would you like to discuss?" style="display:none;margin-top:.6rem;">
         </div>
         <div>
           <label class="field-label">Message</label>
@@ -1421,7 +1422,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
     <div class="review-cards" id="reviewCardsList"></div>
     <div class="review-form-wrap">
       <h2>Share your experience</h2>
-      <p>Bought a print, worked on a commission, collaborated — or just love the work? Leave a note.</p>
+      <p>Bought a print, worked on a commission, collaborated, or just love the work? Leave a note.</p>
       <input type="text" id="reviewHoneypot" name="website" style="display:none;position:absolute;left:-9999px;" tabindex="-1" autocomplete="off">
       <div class="review-field">
         <label>Your rating</label>
@@ -2001,7 +2002,7 @@ function renderPhotoOfWeek(){
   document.getElementById("potwLoc").textContent=photo.loc||"";
   document.getElementById("potwNote").textContent=photo.desc&&photo.desc.trim().length>10
     ?photo.desc
-    :"A quiet frame — chosen this week for the way it holds still.";
+    :"A quiet frame, chosen this week for the way it holds still.";
   var img=document.getElementById("potwEditorialImg");
   if(img){ img.src=photo.img; img.alt=photo.title||""; }
   function goToPhoto(){
@@ -2257,10 +2258,15 @@ if(cForm){
     var err=document.getElementById("contactErr");
     if(btn){ btn.textContent="Sending…"; btn.disabled=true; }
     if(err) err.style.display="none";
+    var subjectVal=(cForm.querySelector('[name=subject]')||{}).value||'';
+    if(subjectVal==='Other'){
+      var otherTyped=(document.getElementById('contactSubjectOther')||{}).value||'';
+      if(otherTyped.trim()) subjectVal=otherTyped.trim();
+    }
     var data={
       name:(cForm.querySelector('[name=name]')||{}).value||'',
       email:(cForm.querySelector('[name=email]')||{}).value||'',
-      subject:(cForm.querySelector('[name=subject]')||{}).value||'',
+      subject:subjectVal,
       message:(cForm.querySelector('[name=message]')||{}).value||''
     };
     fetch('/api/contact-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
@@ -2269,6 +2275,7 @@ if(cForm){
           if(ok) ok.style.display="block";
           cForm.reset();
           var cc=document.getElementById("charCount"); if(cc) cc.textContent="0";
+          var otherInputReset=document.getElementById('contactSubjectOther'); if(otherInputReset){ otherInputReset.style.display='none'; otherInputReset.value=''; }
           setTimeout(function(){ if(ok) ok.style.display="none"; },6000);
         } else { if(err) err.style.display="block"; }
       })
@@ -2284,10 +2291,16 @@ var _contactSuggestions = {
   'Collaboration': "Hi Jeffery, I\u2019m interested in exploring a collaboration and have some ideas I think you\u2019d find interesting. Would love to connect and hear your thoughts."
 };
 window.contactSubjectChange = function(val){
+  var otherInput = document.getElementById('contactSubjectOther');
+  if(otherInput){
+    if(val === 'Other'){ otherInput.style.display = 'block'; otherInput.focus(); }
+    else { otherInput.style.display = 'none'; otherInput.value = ''; }
+  }
   var area = document.getElementById('msgArea');
   if(!area) return;
   var suggestion = _contactSuggestions[val];
   if(suggestion){ area.value = suggestion; area.dispatchEvent(new Event('input')); }
+  else { area.value = ''; area.dispatchEvent(new Event('input')); }
 };
 
 // ============================================================
@@ -2685,7 +2698,7 @@ function _buildReviewCards(reviews){
   var el = document.getElementById('reviewCardsList');
   if(!el) return;
   if(!reviews.length){
-    el.innerHTML = '<div class="reviews-empty"><p>No reviews yet — be the first to share your experience.</p></div>';
+    el.innerHTML = '<div class="reviews-empty"><p>No reviews yet. Be the first to share your experience.</p></div>';
     return;
   }
   function stars(n){ return '&#9733;'.repeat(n)+'&#9734;'.repeat(5-n); }
@@ -2740,7 +2753,7 @@ function submitReview(){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(d.ok){
-        if(status){ status.className='review-form-status ok'; status.textContent='Received. Every word means something — thank you for taking the time.'; }
+        if(status){ status.className='review-form-status ok'; status.textContent='Received. Every word means something. Thank you for taking the time.'; }
         if(btn){ btn.textContent='Submitted ✓'; }
         document.getElementById('reviewName').value='';
         document.getElementById('reviewMsg').value='';
@@ -2752,7 +2765,7 @@ function submitReview(){
       }
     })
     .catch(function(){
-      if(status){ status.className='review-form-status err'; status.textContent='Network error — please try again.'; }
+      if(status){ status.className='review-form-status err'; status.textContent='Network error. Please try again.'; }
       if(btn){ btn.disabled=false; btn.textContent='Submit review'; }
     });
 }
@@ -2938,9 +2951,9 @@ function _openJournalPost(post, posts){
   var slug=_journalSlug(post);
   var _curJst = history.state;
   if(_curJst && _curJst.journalSlug){
-    history.replaceState({page:'journal', journalSlug:slug}, post.title+' — The Journal — Jeffery Asare', '/journal/'+slug);
+    history.replaceState({page:'journal', journalSlug:slug}, post.title+' - The Journal - Jeffery Asare', '/journal/'+slug);
   } else {
-    history.pushState({page:'journal', journalSlug:slug}, post.title+' — The Journal — Jeffery Asare', '/journal/'+slug);
+    history.pushState({page:'journal', journalSlug:slug}, post.title+' - The Journal - Jeffery Asare', '/journal/'+slug);
   }
   var d = new Date(post.date);
   var dateStr = d.toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
@@ -3286,7 +3299,7 @@ function openPrintDetail(print){
   // Reset room preview for each new print
   var rp=document.getElementById('pdRoomPreview'); if(rp) rp.style.display='none';
   // Give this print its own shareable URL
-  history.pushState({print:print.id}, print.title+' — Jeffery Asare', '?print='+print.id);
+  history.pushState({print:print.id}, print.title+' - Jeffery Asare', '?print='+print.id);
 
   // Render "You might also like" after navigation
   setTimeout(function(){
@@ -3953,7 +3966,7 @@ function checkoutCart(){
       return acc;
     },[])},
     onClose:function(){
-      if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made — your cart is still saved, try again anytime.');
+      if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made. Your cart is still saved, try again anytime.');
     },
     callback:function(response){
       paid=true;
@@ -4097,7 +4110,7 @@ function payWithPaystack(print,email,priceGHC,qty,buyerFullName,format){
       {display_name:"Qty",variable_name:"qty",value:qty}
     ]},
     onClose:function(){
-      if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made — you can try again anytime.');
+      if(!paid) showPurchaseToast('cancelled','Payment not completed','No charge was made. You can try again anytime.');
     },
     callback:function(response){
       paid=true;
@@ -4264,7 +4277,7 @@ function openCert(items, buyerEmail, orderRef, buyerName, meta){
     +'</div>'
     +'<p style="margin-top:1.8rem;font-size:10px;color:#888;line-height:1.7;">Jeffery Asare &middot; Accra, Ghana &middot; hello@jefferyasare.com</p>'
     +'<button class="cert-print-btn" id="certPrintBtn" disabled>Download Certificate</button>'
-    +'<p class="cert-print-hint" id="certPrintHint">Enter your full name above — it will appear on your certificate.</p>';
+    +'<p class="cert-print-hint" id="certPrintHint">Enter your full name above. It will appear on your certificate.</p>';
 
   var modal=document.getElementById('certModal');
   if(!modal) return;
@@ -4736,7 +4749,7 @@ setTimeout(function() { addRevealClasses(); initReveal(); }, 100);
   if(pid){
     var matchPrint=PRINTS.find(function(p){ return p.id===pid; });
     if(matchPrint){
-      history.replaceState({print:matchPrint.id}, matchPrint.title+' — Jeffery Asare', '?print='+matchPrint.id);
+      history.replaceState({print:matchPrint.id}, matchPrint.title+' - Jeffery Asare', '?print='+matchPrint.id);
       navigate('shop'); setTimeout(function(){ openPrintDetail(matchPrint); },400);
     }
   } else if(pathPg){
