@@ -1330,7 +1330,7 @@ html.darkroom .review-field input,html.darkroom .review-field textarea{backgroun
       <p>I collaborate with individual clients and with brands and creative teams on portrait, documentary, and campaign work. If something here feels right for a project you have in mind, I would like to hear about it.</p>
     </div>
     <div class="about-cta-btns">
-      <button class="btn-dark" id="aboutCollabCtaBtn">Get in touch &#8594;</button>
+      <button class="btn-dark" id="aboutCollabCtaBtn">Start the conversation &#8594;</button>
     </div>
   </div>
   <div class="about-cta">
@@ -2222,7 +2222,7 @@ function renderShop(page){
     pag.style.gridColumn="1 / -1";
     var prevBtn=document.createElement("button");
     prevBtn.className="shop-page-btn";
-    prevBtn.textContent="&larr; Previous";
+    prevBtn.textContent="\u2190 Previous";
     prevBtn.disabled=(page===0);
     prevBtn.addEventListener("click",function(){ renderShop(page-1); window.scrollTo(0,0); });
     var info=document.createElement("span");
@@ -2230,7 +2230,7 @@ function renderShop(page){
     info.textContent="Page "+(page+1)+" of "+totalPages;
     var nextBtn=document.createElement("button");
     nextBtn.className="shop-page-btn";
-    nextBtn.textContent="Next &rarr;";
+    nextBtn.textContent="Next \u2192";
     nextBtn.disabled=(page>=totalPages-1);
     nextBtn.addEventListener("click",function(){ renderShop(page+1); window.scrollTo(0,0); });
     pag.appendChild(prevBtn);
@@ -2273,7 +2273,7 @@ if(cForm){
         } else { if(err) err.style.display="block"; }
       })
       .catch(function(){ if(err) err.style.display="block"; })
-      .finally(function(){ if(btn){ btn.textContent="Send message &rarr;"; btn.disabled=false; } });
+      .finally(function(){ if(btn){ btn.textContent="Send message \u2192"; btn.disabled=false; } });
   });
 }
 
