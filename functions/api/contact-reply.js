@@ -64,13 +64,20 @@ function buildReplyHtml(name, replyText, originalMessage, subject) {
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@media (prefers-color-scheme: dark) {
+  .logo-light { display: none !important; }
+  .logo-dark { display: block !important; }
+}
+</style>
 </head>
 <body style="margin:0;padding:0;background:#f9f7f4;font-family:${FONT};">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f7f4;padding:40px 20px;">
   <tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
       <tr><td style="padding-bottom:36px;">
-        <img src="https://jefferyasare.com/images/ui/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;">
+        <img class="logo-light" src="https://jefferyasare.com/images/ui/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;">
+        <img class="logo-dark" src="https://jefferyasare.com/images/ui/logo-name-dark.png" alt="Jeffery Asare" width="80" height="44" style="display:none;border:0;">
       </td></tr>${eyebrowRow}
       <tr><td style="font-family:${FONT};font-size:28px;font-weight:700;letter-spacing:-0.02em;color:#111;line-height:1.2;padding-bottom:20px;">
         Hi ${escapeHtml(firstName)},
