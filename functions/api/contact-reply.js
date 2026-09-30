@@ -62,7 +62,7 @@ function buildReplyHtml(name, replyText, originalMessage) {
   <tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
       <tr><td style="padding-bottom:36px;">
-        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;">
+        <img src="https://jefferyasare.com/images/ui/logo-name.png" alt="Jeffery Asare" width="80" height="44" style="display:block;border:0;">
       </td></tr>
       <tr><td style="font-family:${GS};font-size:28px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">
         Hi ${escapeHtml(firstName)},

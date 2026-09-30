@@ -95,7 +95,7 @@ export async function onRequestPost(context) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;padding:48px 48px 40px;max-width:600px;">
         <tr><td style="padding-bottom:32px;padding-top:8px;border-bottom:1px solid #e8e4df;margin-bottom:36px;">
-          <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
+          <img src="https://jefferyasare.com/images/ui/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
         </td></tr>
         <tr><td style="height:28px;"></td></tr>
         <tr><td style="font-family:'General Sans',system-ui,sans-serif;font-size:26px;font-weight:600;color:#111;line-height:1.2;padding-bottom:20px;">

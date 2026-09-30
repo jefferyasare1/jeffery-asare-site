@@ -42,7 +42,7 @@ function buildHtml(subject, message, ctaText, ctaUrl) {
 
       <!-- Logo header -->
       <tr><td style="background:#ffffff;padding:24px 48px;border-bottom:1px solid #e8e4df;">
-        <img src="https://jefferyasare.com/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
+        <img src="https://jefferyasare.com/images/ui/logo-name.png" alt="Jeffery Asare" width="90" style="display:block;height:auto;max-width:90px;">
       </td></tr>
 
       <!-- Body -->
