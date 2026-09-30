@@ -3512,7 +3512,10 @@ function renderSmartDigest(orders){
   var unreadMsgs = -1, unrepliedMsgs = 0;
   if(_msgData !== null){
     unreadMsgs = _msgData.filter(function(m){ return !m.read; }).length;
-    unrepliedMsgs = _msgData.filter(function(m){ return !m.replied; }).length;
+    // Counted per conversation (msgGroupData), not per raw record — a
+    // conversation counts as replied once its latest message has an
+    // answer, same as the Messages tab and the drawer itself.
+    unrepliedMsgs = msgGroupData(_msgData).filter(function(g){ return !g.replied; }).length;
   }
 
   // Repeat buyers (clients who ordered more than once)
@@ -4137,6 +4140,27 @@ function msgInit(forceRefresh) {
     });
 }
 
+function msgGroupKey(m) {
+  return (m.email || '').trim().toLowerCase() || m.id;
+}
+
+function msgConversationEntries(recs) {
+  // Merges a set of same-contact message records (oldest first) together
+  // with each record's own replies into one chronological timeline, so a
+  // contact's whole back-and-forth reads as a single thread rather than
+  // separate, disconnected form submissions. Shared by msgGroupData (for
+  // the list preview/count) and msgOpen (for the actual thread view), so
+  // the two can never again disagree about what a "conversation" contains.
+  var entries = [];
+  recs.forEach(function(m){
+    entries.push({ from: 'client', text: m.message, at: m.timestamp });
+    var replies = (m.replies && m.replies.length) ? m.replies : ((m.replied && m.replyText) ? [{ from: 'jeff', text: m.replyText, at: m.repliedAt }] : []);
+    replies.forEach(function(r){ entries.push({ from: r.from, text: r.text, at: r.at }); });
+  });
+  entries.sort(function(a,b){ return new Date(a.at) - new Date(b.at); });
+  return entries;
+}
+
 function msgGroupData(msgs) {
   // Groups flat message records into one row per contact (conversation),
   // merging each record's own message + replies into a single chronological
@@ -4145,20 +4169,14 @@ function msgGroupData(msgs) {
   var groups = {};
   var order = [];
   msgs.forEach(function(m){
-    var key = (m.email || '').trim().toLowerCase() || m.id;
+    var key = msgGroupKey(m);
     if (!groups[key]) { groups[key] = { email: m.email, records: [] }; order.push(key); }
     groups[key].records.push(m);
   });
   return order.map(function(key){
     var g = groups[key];
     var recs = g.records.slice().sort(function(a,b){ return new Date(a.timestamp) - new Date(b.timestamp); });
-    var entries = [];
-    recs.forEach(function(m){
-      entries.push({ from: 'client', text: m.message, at: m.timestamp });
-      var replies = (m.replies && m.replies.length) ? m.replies : ((m.replied && m.replyText) ? [{ from: 'jeff', text: m.replyText, at: m.repliedAt }] : []);
-      replies.forEach(function(r){ entries.push({ from: r.from, text: r.text, at: r.at }); });
-    });
-    entries.sort(function(a,b){ return new Date(a.at) - new Date(b.at); });
+    var entries = msgConversationEntries(recs);
     var latestRec = recs[recs.length - 1];
     var lastEntry = entries.length ? entries[entries.length - 1] : null;
     var ids = recs.map(function(m){ return m.id; });
@@ -4171,6 +4189,7 @@ function msgGroupData(msgs) {
       primaryId: latestRec.id,
       unread: unreadCount > 0,
       unreadCount: unreadCount,
+      replied: !!latestRec.replied,
       count: entries.length,
       lastEntry: lastEntry,
       date: lastEntry ? lastEntry.at : latestRec.timestamp
@@ -4323,13 +4342,25 @@ function msgOpen(id) {
   if (!msg) return;
   _msgOpenId = id;
 
-  // Mark as read — locally right away (so the badge updates instantly),
-  // and on the server so it actually sticks. Before this, msg.read was
-  // only ever flipped in the browser's own memory — the next dashboard
-  // reload pulled the message back down still marked unread, which is
-  // why the unread count never seemed to go down for good.
-  if (!msg.read) {
-    msg.read = true;
+  // Pull in every message record from this same contact, not just the one
+  // that was clicked, so the drawer shows the whole back-and-forth. Before
+  // this, clicking a conversation with several messages from the same
+  // person (the list correctly showed a "3" count) only ever displayed the
+  // single latest message — its siblings never appeared anywhere in the
+  // thread.
+  var groupKey = msgGroupKey(msg);
+  var groupRecs = (_msgData||[]).filter(function(m){ return msgGroupKey(m) === groupKey; })
+    .sort(function(a,b){ return new Date(a.timestamp) - new Date(b.timestamp); });
+
+  // Mark every unread record in the conversation as read — locally right
+  // away (so the badge updates instantly), and on the server so it
+  // actually sticks. Before this, only the single message that was clicked
+  // got marked read, so opening a multi-message conversation left its
+  // other messages permanently stuck as unread and, because of the thread
+  // bug above, invisible — there was no way to ever read or reply to them.
+  var newlyRead = groupRecs.filter(function(m){ return !m.read; });
+  if (newlyRead.length) {
+    newlyRead.forEach(function(m){ m.read = true; });
     var unread = _msgData.filter(function(m){ return !m.read; }).length;
     var badge = document.getElementById('sn-messages-badge');
     if (badge) { badge.textContent = unread || ''; badge.style.display = unread ? 'inline-flex' : 'none'; }
@@ -4337,10 +4368,13 @@ function msgOpen(id) {
     // modal kept showing as unread (dot, bold text) until you manually
     // hit Refresh, even though it had actually been marked read.
     msgRender();
-    fetch('/api/mark-read', {
+    // messages-bulk (not mark-read) so every sibling record is saved in one
+    // commit, the same endpoint the Messages tab's own bulk-select toolbar
+    // already uses.
+    fetch('/api/messages-bulk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: DASH_KEY, messageId: id })
+      body: JSON.stringify({ key: DASH_KEY, ids: newlyRead.map(function(m){ return m.id; }), action: 'read' })
     }).catch(function(e){ console.error('mark-read failed:', e); });
   }
 
@@ -4353,12 +4387,7 @@ function msgOpen(id) {
   var drawer = document.getElementById('msg-drawer');
   if (!replyToEl || !threadEl || !bodyEl || !overlay || !drawer) return;
 
-  var _thread = [{ from: 'client', text: msg.message, at: msg.timestamp }];
-  if (msg.replies && msg.replies.length) {
-    _thread = _thread.concat(msg.replies);
-  } else if (msg.replied && msg.replyText) {
-    _thread.push({ from: 'jeff', text: msg.replyText, at: msg.repliedAt });
-  }
+  var _thread = msgConversationEntries(groupRecs);
   // Chat-style bubbles — yours on the right, theirs on the left — in their
   // own scrolling strip, so the drawer stays a fixed size no matter how
   // long the conversation gets.
@@ -7648,7 +7677,8 @@ function refreshReviewsBadge(){
     // Messages sub-context (only if already fetched)
     if(_msgData !== null){
       var unread = _msgData.filter(function(m){ return !m.read; }).length;
-      var unreplied = _msgData.filter(function(m){ return !m.replied; }).length;
+      // Counted per conversation, not per raw record — see msgGroupData().
+      var unreplied = msgGroupData(_msgData).filter(function(g){ return !g.replied; }).length;
       var subMsgs = document.getElementById('mn-sub-messages');
       if(subMsgs){
         var parts = [];
